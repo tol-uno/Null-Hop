@@ -1,0 +1,39 @@
+* { /* from cordova default css file */
+    -webkit-tap-highlight-color: rgba(0,0,0,0); /* make transparent link selection, adjust last value opacity 0 to 1.0 */
+}
+
+html, body {
+    margin: 0;
+    height: 100%;
+    width: 100%;
+    /* height: 100vh; */
+    /* width: 100vw; */
+    overflow: hidden;
+    background: #3f9ba5;
+
+    /* padding: env(safe-area-inset); */
+
+}
+
+body { /* all these are from cordova's default css file*/
+    -webkit-touch-callout: none;                /* prevent callout to copy image, etc when tap to hold */
+    -webkit-text-size-adjust: none;             /* prevent webkit from resizing text to fit */
+    -webkit-user-select: none;                  /* prevent copy paste, to allow, change 'none' to 'text' */
+
+     /* Padding to avoid the "unsafe" areas behind notches in the screen */
+     /* padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px); */
+}
+
+canvas {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    display: block;
+
+    background: #3f9ba5;
+
+    max-width: 100%;
+    max-height: 100%;
+}

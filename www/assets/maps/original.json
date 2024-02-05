@@ -1,0 +1,101 @@
+{
+    "playerStart": {
+        "x": 340,
+        "y": 1200,
+        "angle": -90
+    },
+
+    "checkpoints": [],
+
+    "style":{
+        "platformTopColor": "rgba(158,177,87,1)",
+        "platformSideColor": "rgba(164,116,68,1)",
+        "endZoneTopColor": "rgba(255,218,98,1)",
+        "endZoneSideColor": "rgba(255,218,98,1)",
+        "backgroundColor": "#627962",
+        "shadowColor": "#07070a25",
+        "playerColor": "rgba(226,206,235,1)",
+
+        "platformHeight": 10,
+
+        "lightAngle": 45,
+        "shadowContrastLight": -0.005,
+        "shadowContrastDark": -0.2,
+        "shadowLength": 20
+    },
+
+    "platforms": [
+        {
+            "x": 459,
+            "y": 16,
+            "width": 128,
+            "height": 128,
+            "angle": 0,
+            "endzone": 1
+        },
+
+        {
+            "x": 198,
+            "y": 171,
+            "width": 80,
+            "height": 80,
+            "angle": 0
+        },
+
+        {
+            "x": 157,
+            "y": 373,
+            "width": 160,
+            "height": 64,
+            "angle": 0
+        },
+
+        {
+            "x": 421,
+            "y": 488,
+            "width": 96,
+            "height": 96,
+            "angle": 0
+        },
+
+        {
+            "x": 500,
+            "y": 659,
+            "width": 64,
+            "height": 64,
+            "angle": 0
+        },
+
+        {
+            "x": 336,
+            "y": 736,
+            "width": 80,
+            "height": 128,
+            "angle": 0
+        },
+
+        {
+            "x": 185,
+            "y": 867,
+            "width": 96,
+            "height": 96,
+            "angle": 0
+        },
+
+        {
+            "x": 302,
+            "y": 981,
+            "width": 80,
+            "height": 80,
+            "angle": 0
+        },
+
+        {
+            "x": 316,
+            "y": 1176,
+            "width": 48,
+            "height": 48,
+            "angle": 0
+        }
+    ]
+}

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale = 1, maximum-scale = 1, viewport-fit=cover, user-scalable = no">
+
+        <!-- cordova has: content="viewport-fit=cover" here but it causes scrolling. ADDED BACK IN TO GET RID OF NOTCH PADDING -->
+
+		<title>Null's Voyage</title>
+        <meta name="description" content="Mason Powers' Tribute to Bhop" />
+
+        <link rel="stylesheet" type="text/css" href="css/index.css" />
+
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+		<link rel="icon" type="image/x-icon" href="assets/images/favicon.ico">
+		<!-- <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=DM Sans:400,700"> -->
+
+        <!-- Cordova's default header stuff. I added unsafe-inline to default-src (it's needed for testing Live Server and body's onload) -->
+        <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' data: https://ssl.gstatic.com 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src *; img-src 'self' data: content:;"> -->
+        <meta name="format-detection" content="telephone=no">
+        <meta name="msapplication-tap-highlight" content="no">
+        <meta name="color-scheme" content="light dark">
+
+
+    </head>
+    
+    <body> <!-- remove onload in cordova project-->
+
+        <!-- for copy and paste -->
+        <img id="_button" src="" style="display:none;"/>
+        <img id="_button_pressed" src="" style="display:none;"/>
+
+
+        <img id="title" src="assets/images/title.png" style="display:none;"/>
+        <img id="menu_background" src="assets/images/menu_background.png" style="display:none;"/>
+    
+
+
+        <img id="play_button" src="assets/images/buttons/play_button.png" style="display:none;"/>
+        <img id="play_button_pressed" src="assets/images/buttons/play_button_pressed.png" style="display:none;"/>
+
+        <img id="settings_button" src="assets/images/buttons/settings_button.png" style="display:none;"/>
+        <img id="settings_button_pressed" src="assets/images/buttons/settings_button_pressed.png" style="display:none;"/>
+
+        <img id="map_editor_button" src="assets/images/buttons/map_editor_button.png" style="display:none;"/>
+        <img id="map_editor_button_pressed" src="assets/images/buttons/map_editor_button_pressed.png" style="display:none;"/>
+
+        <img id="checkbox" src="assets/images/buttons/checkbox.png" style="display:none;"/>
+        <img id="checkbox_pressed" src="assets/images/buttons/checkbox_pressed.png" style="display:none;"/>
+
+
+        <img id="custom_maps_button" src="assets/images/buttons/custom_maps_button.png" style="display:none;"/>
+        <img id="custom_maps_button_pressed" src="assets/images/buttons/custom_maps_button_pressed.png" style="display:none;"/>
+
+
+        <img id="back_button" src="assets/images/buttons/back_button.png" style="display:none;"/>
+        <img id="back_button_pressed" src="assets/images/buttons/back_button_pressed.png" style="display:none;"/>
+
+        <img id="restart_button" src="assets/images/buttons/restart_button.png" style="display:none;"/>
+        <img id="restart_button_pressed" src="assets/images/buttons/restart_button_pressed.png" style="display:none;"/>
+
+        <img id="jump_button" src="assets/images/buttons/jump_button.png" style="display:none;"/>
+        <img id="jump_button_pressed" src="assets/images/buttons/jump_button_pressed.png" style="display:none;"/>
+
+
+
+        <!-- MAP EDITOR BUTTONS -->
+        <img id="x_button" src="assets/images/buttons/x_button.png" style="display:none;"/>
+        <img id="x_button_pressed" src="assets/images/buttons/x_button_pressed.png" style="display:none;"/>
+
+        <img id="map_colors_button" src="assets/images/buttons/map_colors_button.png" style="display:none;"/>
+        <img id="map_colors_button_pressed" src="assets/images/buttons/map_colors_button_pressed.png" style="display:none;"/>
+
+        <img id="map_settings_button" src="assets/images/buttons/map_settings_button.png" style="display:none;"/>
+        <img id="map_settings_button_pressed" src="assets/images/buttons/map_settings_button_pressed.png" style="display:none;"/>
+
+        <img id="platform_button" src="assets/images/buttons/platform_button.png" style="display:none;"/>
+        <img id="platform_button_pressed" src="assets/images/buttons/platform_button_pressed.png" style="display:none;"/>
+        
+        <img id="cp_button" src="assets/images/buttons/cp_button.png" style="display:none;"/>
+        <img id="cp_button_pressed" src="assets/images/buttons/cp_button_pressed.png" style="display:none;"/>
+
+        <img id="delete_button" src="assets/images/buttons/delete_button.png" style="display:none;"/>
+        <img id="delete_button_pressed" src="assets/images/buttons/delete_button_pressed.png" style="display:none;"/>
+
+        <img id="translate_button" src="assets/images/buttons/translate_button.png" style="display:none;"/>
+        <img id="translate_button_pressed" src="assets/images/buttons/translate_button_pressed.png" style="display:none;"/>
+
+        <img id="set_button" src="assets/images/buttons/set_button.png" style="display:none;"/>
+        <img id="set_button_pressed" src="assets/images/buttons/set_button_pressed.png" style="display:none;"/>
+        
+
+
+        <audio id="successAudio"><source src="assets/audio/success.ogg" type="audio/ogg"></audio>
+        <audio id="jumpAudio"><source src="assets/audio/jump.ogg" type="audio/ogg"></audio>
+        <audio id="splashAudio"><source src="assets/audio/splash.ogg" type="audio/ogg"></audio>
+
+        <!-- remove onload in cordova project ^^ -->
+        <!-- CHANGE URL FOR MAPS TO GITHUB -->
+        <!-- UNCOMMENT BELOW FOR CORDOVA BUILD -->
+        <script src="cordova.js"></script> 
+        <script src="js/index.js"></script>
+
+    </body>
+</html>

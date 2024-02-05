@@ -1,0 +1,60 @@
+{
+    "playerStart": {
+        "x": 325,
+        "y": 2025,
+        "angle": -100
+    },
+
+    "checkpoints": [],
+
+    "style":{
+        "platformTopColor": "rgba(138,148,149,1)",
+        "platformSideColor": "rgba(124,135,141,1)",
+        "endZoneTopColor": "rgba(204,181,83,1)",
+        "endZoneSideColor": "rgba(204,181,83,1)",
+        "backgroundColor": "#131b25",
+        "shadowColor": "#00000040",
+        "playerColor": "rgba(233,247,255,1)",
+        "platformHeight": 80,
+        "lightAngle": -25,
+        "shadowContrastLight": -0.01,
+        "shadowContrastDark": -0.9,
+        "shadowLength": 100
+    },
+
+    "platforms": [
+        {
+            "x": 300,
+            "y": 1400,
+            "width": 50,
+            "height": 50,
+            "angle": -10,
+            "endzone": 1
+        },
+
+        {
+            "x": 300,
+            "y": 1610,
+            "width": 50,
+            "height": 50,
+            "angle": 20
+        },
+
+        {
+            "x": 300,
+            "y": 1810,
+            "width": 50,
+            "height": 50,
+            "angle": 10
+        },
+
+        {
+            "x": 300,
+            "y": 2000,
+            "width": 50,
+            "height": 50,
+            "angle":-10
+        }
+
+    ]
+}
