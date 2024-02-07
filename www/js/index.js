@@ -2911,8 +2911,12 @@ class Map {
                     return 0;
                 }
 
-                // platform.corners stays the same for use later is extending the sides. order: BL BR TR TL
-                platform.cornersSorted = platform.corners.toSorted(sortCornersX)
+                // platform.corners stays the same(counterclockwise order) for use later is extending the sides. order: BL BR TR TL
+                // Line below used toSorted which isnt supported by old safari i guess?..
+                // platform.cornersSorted = platform.corners.toSorted(sortCornersX)
+                platform.cornersSorted = platform.corners
+                platform.cornersSorted.sort(sortCornersX)
+
 
                 // Create slopes
                 platform.horizontalSlope = (platform.corners[2][1] - platform.corners[3][1])/(platform.corners[2][0] - platform.corners[3][0])
