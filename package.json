@@ -15,7 +15,8 @@
   "devDependencies": {
     "cordova-browser": "^7.0.0",
     "cordova-ios": "^7.0.1",
-    "cordova-plugin-device": "^2.1.0"
+    "cordova-plugin-device": "^2.1.0",
+    "cordova-plugin-file": "^8.0.1"
   },
   "cordova": {
     "platforms": [
@@ -23,7 +24,8 @@
       "browser"
     ],
     "plugins": {
-      "cordova-plugin-device": {}
+      "cordova-plugin-device": {},
+      "cordova-plugin-file": {}
     }
   }
 }

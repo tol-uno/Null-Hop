@@ -1,7 +1,7 @@
 document.addEventListener("deviceready", onDeviceReady, false);
 
-const airAcceleration = 4; // the sharpness your allowed to turn at
-const maxVelocity = 1.12; // basically the rate at which speed is gained / lost. wishDir is scaled to this magnitude
+const airAcceleration = 6; // the sharpness your allowed to turn at
+const maxVelocity = 1.15; // basically the rate at which speed is gained / lost. wishDir is scaled to this magnitude
 const gravity = 0.05;
 let prevDateNow;
 let dt = 1;
@@ -10,6 +10,10 @@ let midX = 0;
 let midY = 0;
 
 function onDeviceReady() { // Called on page load in HMTL
+    // testing file plugin
+    console.log(cordova.file)
+    
+
     document.querySelector("body").onresize = function() {canvasArea.resize()};
 
     window.addEventListener("orientationchange", e => {
@@ -217,6 +221,7 @@ const UserInterface = {
     gamestate : 1,
     // 1: main menu
     // 2: level select
+    // 2.5: custom level browser
     // 3: settings
     // 4: store
     // 5: loading map page
@@ -897,55 +902,183 @@ const UserInterface = {
 
         // MAP SELECT Buttons
         btn_custom_maps = new Button("canvasArea.canvas.width - 225", 50, 175, "custom_maps_button", "custom_maps_button_pressed", 0, function() { 
+            // UserInterface.gamestate = 2.5;
+            // UserInterface.renderedButtons = [btn_mainMenu];
+            // btn_mainMenu.resize()
+
+
+            // CREATE TEST MAPS FOR VIEWING
+            function writeFile(name, dataObj) {
+
+                // create directory and empty file
+                window.resolveLocalFileSystemURL(cordova.file.dataDirectory, (directoryEntry) => {
+                    directoryEntry.getFile(name + ".json", {create: true}, (logFileEntry) => {
+                        // addding to the empty file
+                        logFileEntry.createWriter(function(writer) {
+                            writer.onwriteend = function() {
+                                console.log("Success!");
+                            };
+                    
+                            writer.onerror = function(e) {
+                                console.log("Error :(", e);
+                            };
+                    
+                            writer.write(dataObj);
+                        });
+                    });
+                }, error => {console.log(error)});
+            }
+
+            const obj = {
+                "playerStart": {
+                    "x": 350,
+                    "y": 250,
+                    "angle": 0
+                },
+                "checkpoints": [],
+                "style": {
+                    "backgroundColor": "rgba(163,213,225,1)",
+                    "playerColor": "rgba(239,238,236,1)",
+                    "platformTopColor": "rgba(209,70,63,1)",
+                    "platformSideColor": "rgba(209,70,63,1)",
+                    "wallTopColor": "rgba(125, 94, 49, 1)",
+                    "wallSideColor": "rgba(125, 94, 49, 1)",
+                    "endZoneTopColor": "rgba(255,218,98,1)",
+                    "endZoneSideColor": "rgba(255,218,98,1)",
+                    "shadowColor": "rgba(7,7,10,0.25)",
+                    "platformHeight": 25,
+                    "wallHeight": 50,
+                    "lightAngle": 45,
+                    "shadowContrastLight": -0.005,
+                    "shadowContrastDark": -0.4,
+                    "shadowLength": 25
+                },
+                "platforms": [
+                    {
+                        "x": 300,
+                        "y": 10,
+                        "width": 100,
+                        "height": 100,
+                        "angle": 0,
+                        "endzone": 1,
+                        "wall": 0
+                    },
+                    {
+                        "x": 300,
+                        "y": 200,
+                        "width": 100,
+                        "height": 100,
+                        "angle": 45,
+                        "endzone": 0,
+                        "wall": 0
+                    }
+                ]
+            }
+
+            const blob1 = new Blob([JSON.stringify(obj, null, 2)], { type: "application/json" });
+            const blob2 = new Blob([JSON.stringify(obj, null, 2)], { type: "application/json" });
+
+
+            writeFile("blobber1", blob1)
+            writeFile("blobber2", blob2)
+
+
+
+
+            // TODO Dynamically create buttons based on what maps are in app storage
             
-            
+            // Lists files in dataDirectory
+            function listDir(path){
+                window.resolveLocalFileSystemURL(path, function (fileSystem) {
+                    var reader = fileSystem.createReader();
+                    reader.readEntries(function (entries) {
+                        console.log(entries);
+                    }, (error) => { console.log(error) });
+                }, (error) => { console.log(error) });
+
+                window.resolveLocalFileSystemURL(cordova.file.dataDirectory, fileSystem => {
+                    fileSystem.getFile("blobber1.json", {create: false, exclusive: false}, (fileEntry) => {
+                        fileEntry.file( (file) => {
+                            console.log(file)
+                            const reader = new FileReader();
+                            reader.onload = (e) => {
+                                console.log(e.target.result)
+                                console.log(JSON.parse(e.target.result))
+                            };
+                            reader.onerror = (e) => alert(e.target.error.name);
+                
+                            reader.readAsText(file)
+                        })
+                    })
+                }, error => { console.log(error) });
+            }
+
+
+
+            listDir(cordova.file.dataDirectory);
+        })
+
+
+
+        /*
+        btn_custom_maps = new Button("canvasArea.canvas.width - 225", 50, 175, "custom_maps_button", "custom_maps_button_pressed", 0, function() { 
+            let map; // here so it's in a higher scope
+
             const input = document.createElement("input");
             input.type = "file";
             input.accept = ".json";
             document.body.appendChild(input);
             input.click();
             
-            input.addEventListener('change', function () {
+            input.addEventListener('change', () => {
                 const file = input.files[0]
                 
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     const mapObject = JSON.parse(e.target.result);
                     mapObject.name = String(input.files[0].name.split(".")[0]) // for getting the name of a custom map
-                    map = new Map(mapObject);
-                    UserInterface.gamestate = 5;
-                    UserInterface.renderedButtons = [btn_mainMenu];
-                    btn_mainMenu.resize()
-
+                    // UserInterface.gamestate = 5;
+                    // UserInterface.renderedButtons = [btn_mainMenu];
+                    // btn_mainMenu.resize()
+                    // map = new Map(mapObject);
+                    initMap(mapObject);
                 };
-                reader.onerror = (e) => alert(e.target.error.name);
-
+                
                 reader.readAsText(file)
             })
 
+            function initMap(mapObject) {
+                UserInterface.gamestate = 5;
+                UserInterface.renderedButtons = [btn_mainMenu];
+                btn_mainMenu.resize()
+                map = new Map(mapObject);
+            }
+
             input.remove();
 
+            map = new Map(mapObject)
         })
+        */
 
         btn_level_original = new Button(200, 100, 100, 80, "Original", 0, function() { 
-            map = new Map("original");
             UserInterface.gamestate = 5;
             UserInterface.renderedButtons = [btn_mainMenu];
             btn_mainMenu.resize()
+            map = new Map("original");
         })
 
         btn_level_noob = new Button(320, 100, 100, 80, "Noob", 0, function() { 
-            map = new Map("noob");
             UserInterface.gamestate = 5;
             UserInterface.renderedButtons = [btn_mainMenu];
             btn_mainMenu.resize()
+            map = new Map("noob");
         })
 
         btn_level_hellscape = new Button(440, 100, 100, 80, "Hellscape", 0, function() { 
-            map = new Map("hellscape");
             UserInterface.gamestate = 5;
             UserInterface.renderedButtons = [btn_mainMenu];
             btn_mainMenu.resize()
+            map = new Map("hellscape");
         })
 
 
@@ -2646,13 +2779,13 @@ const AudioHandler = {
 
 
 class Map {
-    platforms = [];
+    // platforms = [];
     walls = [];
-    mapData = [];
+    // mapData = [];
     renderedPlatforms = [];
     renderQueue = [];
     wallsToCheck = [];
-    checkpoints = [];
+    // checkpoints = [];
     endZoneIsRendered = false;
     name;
     record;
@@ -2662,284 +2795,305 @@ class Map {
 
 
     constructor(name) {
-        // this.name = name;
+        this.platforms = [];
+        this.playerStart;
+        this.style;
+        this.checkpoints;
+        
+
 
         if (typeof name  === "string"){ // distinguishing between loading a normal map (string) OR a custom map (object)
             this.name = name;
-        } else {
-            this.name = name.name;
-        }
+            console.log("logging this below (in constructor if statement): ") 
+            console.log(this);
+            // getJsonData();
+            
+            // GET MAP DIRECTLY THROUGH CORDOVA LOCAL STORAGE            
+            const mapURL = cordova.file.applicationDirectory + "www/assets/maps/"
+            
+            window.resolveLocalFileSystemURL(mapURL, (dirEntry) => {
+
+                dirEntry.getFile(name + ".json", {create: false, exclusive: false}, (fileEntry) => {
+                    console.log("fileEntry:")
+                    console.log(fileEntry)
+
+                    fileEntry.file( (file) => {
+
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            this.parseMapData(JSON.parse(e.target.result))
+                        };
+                        reader.onerror = (e) => alert(e.target.error.name);
+            
+                        reader.readAsText(file)
+                    })
+                })
+            })
         
-
-        // PARSE JSON DATA. FUNCTION USED BY parseMapData()
-        async function getJsonData() { // Taken from: https://www.javascripttutorial.net/javascript-fetch-api/
-
-
-            // const map = import("/assets/maps/" + name + ".json")
-            // return map;
-
-
-            const mapURL = "https://cdn.jsdelivr.net/gh/tol-uno/Pocket-Hop@main/assets/maps/" + name + ".json"
             
-            // OLD LOCAL STORAGE
-            // const mapURL = "assets/maps/" + name + ".json";
-            // could eventually be "pockethop.com/maps/original.json"
-
-            try {
-                const response = await fetch(mapURL);
-                return await response.json();
-            } catch (error) {
-                console.log(error);
-            }
-
+        } else { // is an object
+            this.name = name.name;
+            console.log("passed an object. CUSTOM MAP below: ")
+            console.log(name)
+            this.parseMapData(name)
         }
 
-
-        // LOOP THROUGH JSON DATA AND ADD NEW PLATFORM OBJECTS
-        async function parseMapData() {
+        // PARSE JSON DATA. FUNCTION calls parseMapData()
+        // KILL KILL KILL
+        function getJsonData() {
+            // console.log("logging this below (in getJsonData): ") 
+            // console.log(this)
+            // // GET DIRECTLY FROM LOCAL STORAGE            
+            // const mapURL = cordova.file.applicationDirectory + "www/assets/maps/"
             
-            let jsonData
+            // window.resolveLocalFileSystemURL(mapURL, (dirEntry) => {
 
-            if (typeof name  === "string"){ // distinguishing between loading a normal map OR a custom map
-                jsonData = await getJsonData(); // SEE ABOVE ^^
-            } else {
-                jsonData = name
-            }
+            //     dirEntry.getFile(name + ".json", {create: false, exclusive: false}, (fileEntry) => {
+            //         console.log("fileEntry:")
+            //         console.log(fileEntry)
 
+            //         fileEntry.file( (file) => {
 
-            const playerStart = jsonData.playerStart; // 3 temporary lets that get combined into mapData and pushed out of async function
-            const platforms = [];
-            const style = jsonData.style;
-            const checkpoints = jsonData.checkpoints; // returns an object
-
-
-            jsonData.platforms.forEach(platform => { // LOOP THROUGH DATA AND ADD EACH PLATFORM TO AN ARRAY
-                platforms.push(platform);
-            });
-
-            const mapData = [playerStart, platforms, style, checkpoints]; // all the data to be sent out from this async function (platforms, player start, end zone)
-
-            return mapData;
+            //             const reader = new FileReader();
+            //             reader.onload = (e) => {
+            //                 parseMapData(JSON.parse(e.target.result))
+            //             };
+            //             reader.onerror = (e) => alert(e.target.error.name);
+            
+            //             reader.readAsText(file)
+            //         })
+            //     })
+            // })
         }
+    }
 
+    // Big ol function that parses the map data, sets up lighting, shadows, clips, etc
+    // Called within getJsonData Function to maintain corect order of events
+    parseMapData(jsonData) {
+        
+        console.log("jsonData passed as param to parseMapData: ")
+        console.log(jsonData)
 
-        parseMapData().then(mapData => { // WAITS FOR ASYNC FUNCTION. Big function that handles setting up the map and pre rendering calculations
-            this.playerStart = mapData[0];
-            this.platforms = mapData[1];
-            this.style = mapData[2];
-            this.checkpoints = mapData[3];
+        this.playerStart = jsonData.playerStart;
+        this.style = jsonData.style;
+        this.checkpoints = jsonData.checkpoints; // returns an object
 
-
-            // Calculate lighting and shadows for each platform and the endzone
-            this.style.lightAngleVector =  new Vector(Math.cos(this.style.lightAngle * (Math.PI/180)), Math.sin(this.style.lightAngle * (Math.PI/180)))
-            const shadowX = this.style.lightAngleVector.x * this.style.shadowLength;
-            const shadowY = this.style.lightAngleVector.y * this.style.shadowLength;
-
-            let platformIndex = 0 // set this so that it is z-order
-            this.platforms.forEach(platform => { // CALCULATE PLATFORMS COLORS and SHADOW POLYGON
-
-                // Setting the colors for platforms, endzones, and walls
-                let colorToUse = this.style.platformSideColor;
-                if(platform.endzone) {
-                    colorToUse = this.style.endZoneSideColor;
-                    this.endZone = platform;
-                }
-                if(platform.wall) {
-                    colorToUse = this.style.wallSideColor;
-                    this.walls.push(platform);
-                }
-
-                platform.index = platformIndex; // asigns an index to each platform for debugging
-                platformIndex ++;
-
-                // COLORS
-                platform.side1Vec = new Vector(-1,0).rotate(platform.angle) // !! DONT need to be properties of platform. only made properties for debug
-                platform.side2Vec = new Vector(0,1).rotate(platform.angle)
-                platform.side3Vec = new Vector(1,0).rotate(platform.angle)
-
-                platform.sideColor1 = canvasArea.calculateShadedColor(platform.side1Vec, colorToUse) // COULD OPTIMIZE. Some sides arent visible at certain platform rotations. Those sides dont need to be calculated
-                platform.sideColor2 = canvasArea.calculateShadedColor(platform.side2Vec, colorToUse)
-                platform.sideColor3 = canvasArea.calculateShadedColor(platform.side3Vec, colorToUse)
-
-                // SHADOW POLYGON
-                const angleRad = platform.angle * (Math.PI/180);
-                const wallShadowMultiplier = platform.wall ? (this.style.wallHeight + this.style.platformHeight) / this.style.platformHeight : 1 // makes sure shadows are longer for taller walls
-
-                platform.shadowPoints = [ // ALL THE POSSIBLE POINTS TO INPUT IN CONVEX HULL FUNCTION
-                
-                    // bot left corner
-                    [
-                    -((platform.width / 2) * Math.cos(angleRad)) - ((platform.height / 2) * Math.sin(angleRad)),
-                    -((platform.width / 2) * Math.sin(angleRad)) + ((platform.height / 2) * Math.cos(angleRad)) + this.style.platformHeight
-                    ],
-
-                    // bot right corner
-                    [
-                    ((platform.width / 2) * Math.cos(angleRad)) - ((platform.height / 2) * Math.sin(angleRad)),
-                    ((platform.width / 2) * Math.sin(angleRad)) + ((platform.height / 2) * Math.cos(angleRad)) + this.style.platformHeight
-                    ],
-
-                    // top right corner
-                    [
-                    ((platform.width / 2) * Math.cos(angleRad)) + ((platform.height / 2) * Math.sin(angleRad)),
-                    ((platform.width / 2) * Math.sin(angleRad)) - ((platform.height / 2) * Math.cos(angleRad)) + this.style.platformHeight
-                    ],
-                
-                    // top left corner
-                    [
-                    -((platform.width / 2) * Math.cos(angleRad)) + ((platform.height / 2) * Math.sin(angleRad)),
-                    -((platform.width / 2) * Math.sin(angleRad)) - ((platform.height / 2) * Math.cos(angleRad)) + this.style.platformHeight
-                    ],
-                
-                    // bot left SHADOW
-                    [
-                    -((platform.width / 2) * Math.cos(angleRad)) - ((platform.height / 2) * Math.sin(angleRad)) + shadowX * wallShadowMultiplier,
-                    -((platform.width / 2) * Math.sin(angleRad)) + ((platform.height / 2) * Math.cos(angleRad)) + this.style.platformHeight + shadowY * wallShadowMultiplier
-                    ],
-
-                    // bot right SHADOW
-                    [
-                    ((platform.width / 2) * Math.cos(angleRad)) - ((platform.height / 2) * Math.sin(angleRad)) + shadowX * wallShadowMultiplier,
-                    ((platform.width / 2) * Math.sin(angleRad)) + ((platform.height / 2) * Math.cos(angleRad)) + this.style.platformHeight + shadowY * wallShadowMultiplier
-                    ],
-                    
-                    // top right SHADOW
-                    [
-                    ((platform.width / 2) * Math.cos(angleRad)) + ((platform.height / 2) * Math.sin(angleRad)) + shadowX * wallShadowMultiplier,
-                    ((platform.width / 2) * Math.sin(angleRad)) - ((platform.height / 2) * Math.cos(angleRad)) + this.style.platformHeight + shadowY * wallShadowMultiplier
-                    ],
-
-                    // top left SHADOW
-                    [
-                        -((platform.width / 2) * Math.cos(angleRad)) + ((platform.height / 2) * Math.sin(angleRad)) + shadowX * wallShadowMultiplier,
-                        -((platform.width / 2) * Math.sin(angleRad)) - ((platform.height / 2) * Math.cos(angleRad)) + this.style.platformHeight + shadowY * wallShadowMultiplier
-                    ],
-                
-            ]; // end of shadowPoints array
-            
-            
-            
-            platform.corners = [] // save the first 4 corner coordinates before its modified
-            for(let i=0; i < 4; i++) { // taking the first 4
-                platform.corners.push([platform.shadowPoints[i][0], platform.shadowPoints[i][1] - this.style.platformHeight]) // take away platformHeight
-            }
-
-
-            if (platform.wall) // add wall's shape to behindWallClip (for drawing player outline behind walls)
-            {
-                    // corners + wall height points need to be "concated" as serperate letiable otherwise they dont stay as points
-                    const upperCorners = [
-                        [
-                            platform.corners[0][0],
-                            platform.corners[0][1] - this.style.wallHeight
-                        ],
-                        [
-                            platform.corners[1][0],
-                            platform.corners[1][1] - this.style.wallHeight
-                        ],
-                        [
-                            platform.corners[2][0],
-                            platform.corners[2][1] - this.style.wallHeight
-                        ],
-                        [
-                            platform.corners[3][0],
-                            platform.corners[3][1] - this.style.wallHeight
-                        ],
-                    ] 
-
-                    let behindWallClipPoints = platform.corners.concat(upperCorners)
-            
-                    behindWallClipPoints = canvasArea.convexHull(behindWallClipPoints)
-
-                    // ADD TO CLIP SHAPE FOR AREAS BEHIND WALLS
-                    // the behindWallClip array can have different lengths so it must dynamicly go through the array of points
-                    for (let i = 0; i < behindWallClipPoints.length; i++) {
-                        if (i == 0) { // first point in array so use moveTo
-                            this.behindWallClip.moveTo(
-                                platform.x + platform.width/2 + behindWallClipPoints[i][0], // x
-                                platform.y + platform.height/2 + behindWallClipPoints[i][1] // y
-                            )
-                        } else { // its not the first point in the hull so use lineTo
-                            this.behindWallClip.lineTo(
-                                platform.x + platform.width/2 + behindWallClipPoints[i][0], // x
-                                platform.y + platform.height/2 + behindWallClipPoints[i][1] // y
-                            )
-                        }
-                    }
-
-                    this.behindWallClip.closePath()
-                }
-
-
-
-
-                platform.shadowPoints = canvasArea.convexHull(platform.shadowPoints)
-
-
-
-                // SHADOW CLIP FOR UPPER PLAYER SHADOW
-                this.upperShadowClip.moveTo( // bot left
-                    platform.x + platform.width/2 + platform.corners[0][0], // x
-                    platform.y + platform.height/2 + platform.corners[0][1] // y
-                    )
-                
-                this.upperShadowClip.lineTo( // bot right
-                    platform.x + platform.width/2 + platform.corners[1][0],
-                    platform.y + platform.height/2 + platform.corners[1][1]
-                )
-
-                this.upperShadowClip.lineTo( // top right
-                    platform.x + platform.width/2 + platform.corners[2][0],
-                    platform.y + platform.height/2 + platform.corners[2][1]
-                )
-
-                this.upperShadowClip.lineTo( // top left
-                    platform.x + platform.width/2 + platform.corners[3][0],
-                    platform.y + platform.height/2 + platform.corners[3][1]
-                )
-
-                this.upperShadowClip.closePath()
-
-
-                // SORT CORNERS AFTER CREATING SHADOW and behindWall CLIP. called bellow
-                function sortCornersX(a, b) {
-                    // if return is negative ... a comes first 
-                    // if return is positive ... b comes first
-                    // return is 0... nothing is changed
-                    if (a[0] < b[0]) {return -1;}
-                    if (a[0] > b[0]) {return 1;}
-                    return 0;
-                }
-
-                // platform.corners stays the same(counterclockwise order) for use later is extending the sides. order: BL BR TR TL
-                // Line below used toSorted which isnt supported by old safari i guess?..
-                // platform.cornersSorted = platform.corners.toSorted(sortCornersX)
-                platform.cornersSorted = platform.corners
-                platform.cornersSorted.sort(sortCornersX)
-
-
-                // Create slopes
-                platform.horizontalSlope = (platform.corners[2][1] - platform.corners[3][1])/(platform.corners[2][0] - platform.corners[3][0])
-                platform.verticalSlope = (platform.corners[2][1] - platform.corners[1][1])/(platform.corners[2][0] - platform.corners[1][0])
-
-                // incase divided by zero and got infinity slope
-                if (platform.angle == 0) {platform.verticalSlope = 999999}
-                if (Math.abs(platform.angle) == 90) {platform.horizontalSlope = 999999}
-                // if (!isFinite(platform.horizontalSlope)) {platform.horizontalSlope > 0 ? platform.horizontalSlope = 999999 : platform.horizontalSlope = -999999}
-                // if (!isFinite(platform.verticalSlope)) {platform.verticalSlope > 0 ? platform.verticalSlope = 999999 : platform.verticalSlope = -999999}
-
-
-            });
-
-            canvasArea.canvas.style.backgroundColor = this.style.backgroundColor;
-            document.body.style.backgroundColor = this.style.backgroundColor;
-            player = new Player(this.playerStart.x, this.playerStart.y, this.playerStart.angle);
-
-            // Get map record from local storage
-            this.record = window.localStorage.getItem("record_" + map.name)
-
-            UserInterface.mapLoaded(); // moves onto gamestate 6
+        jsonData.platforms.forEach(platform => { // LOOP THROUGH DATA AND ADD EACH PLATFORM TO AN ARRAY
+            this.platforms.push(platform);
         });
+
+
+
+        // Calculate lighting and shadows for each platform and the endzone
+        this.style.lightAngleVector =  new Vector(Math.cos(this.style.lightAngle * (Math.PI/180)), Math.sin(this.style.lightAngle * (Math.PI/180)))
+        const shadowX = this.style.lightAngleVector.x * this.style.shadowLength;
+        const shadowY = this.style.lightAngleVector.y * this.style.shadowLength;
+
+        let platformIndex = 0 // set this so that it is z-order
+        this.platforms.forEach(platform => { // CALCULATE PLATFORMS COLORS and SHADOW POLYGON
+
+            // Setting the colors for platforms, endzones, and walls
+            let colorToUse = this.style.platformSideColor;
+            if(platform.endzone) {
+                colorToUse = this.style.endZoneSideColor;
+                this.endZone = platform;
+            }
+            if(platform.wall) {
+                colorToUse = this.style.wallSideColor;
+                this.walls.push(platform);
+            }
+
+            platform.index = platformIndex; // asigns an index to each platform for debugging
+            platformIndex ++;
+
+            // COLORS
+            platform.side1Vec = new Vector(-1,0).rotate(platform.angle) // !! DONT need to be properties of platform. only made properties for debug
+            platform.side2Vec = new Vector(0,1).rotate(platform.angle)
+            platform.side3Vec = new Vector(1,0).rotate(platform.angle)
+
+            platform.sideColor1 = canvasArea.calculateShadedColor(platform.side1Vec, colorToUse) // COULD OPTIMIZE. Some sides arent visible at certain platform rotations. Those sides dont need to be calculated
+            platform.sideColor2 = canvasArea.calculateShadedColor(platform.side2Vec, colorToUse)
+            platform.sideColor3 = canvasArea.calculateShadedColor(platform.side3Vec, colorToUse)
+
+            // SHADOW POLYGON
+            const angleRad = platform.angle * (Math.PI/180);
+            const wallShadowMultiplier = platform.wall ? (this.style.wallHeight + this.style.platformHeight) / this.style.platformHeight : 1 // makes sure shadows are longer for taller walls
+
+            platform.shadowPoints = [ // ALL THE POSSIBLE POINTS TO INPUT IN CONVEX HULL FUNCTION
+            
+                // bot left corner
+                [
+                -((platform.width / 2) * Math.cos(angleRad)) - ((platform.height / 2) * Math.sin(angleRad)),
+                -((platform.width / 2) * Math.sin(angleRad)) + ((platform.height / 2) * Math.cos(angleRad)) + this.style.platformHeight
+                ],
+
+                // bot right corner
+                [
+                ((platform.width / 2) * Math.cos(angleRad)) - ((platform.height / 2) * Math.sin(angleRad)),
+                ((platform.width / 2) * Math.sin(angleRad)) + ((platform.height / 2) * Math.cos(angleRad)) + this.style.platformHeight
+                ],
+
+                // top right corner
+                [
+                ((platform.width / 2) * Math.cos(angleRad)) + ((platform.height / 2) * Math.sin(angleRad)),
+                ((platform.width / 2) * Math.sin(angleRad)) - ((platform.height / 2) * Math.cos(angleRad)) + this.style.platformHeight
+                ],
+            
+                // top left corner
+                [
+                -((platform.width / 2) * Math.cos(angleRad)) + ((platform.height / 2) * Math.sin(angleRad)),
+                -((platform.width / 2) * Math.sin(angleRad)) - ((platform.height / 2) * Math.cos(angleRad)) + this.style.platformHeight
+                ],
+            
+                // bot left SHADOW
+                [
+                -((platform.width / 2) * Math.cos(angleRad)) - ((platform.height / 2) * Math.sin(angleRad)) + shadowX * wallShadowMultiplier,
+                -((platform.width / 2) * Math.sin(angleRad)) + ((platform.height / 2) * Math.cos(angleRad)) + this.style.platformHeight + shadowY * wallShadowMultiplier
+                ],
+
+                // bot right SHADOW
+                [
+                ((platform.width / 2) * Math.cos(angleRad)) - ((platform.height / 2) * Math.sin(angleRad)) + shadowX * wallShadowMultiplier,
+                ((platform.width / 2) * Math.sin(angleRad)) + ((platform.height / 2) * Math.cos(angleRad)) + this.style.platformHeight + shadowY * wallShadowMultiplier
+                ],
+                
+                // top right SHADOW
+                [
+                ((platform.width / 2) * Math.cos(angleRad)) + ((platform.height / 2) * Math.sin(angleRad)) + shadowX * wallShadowMultiplier,
+                ((platform.width / 2) * Math.sin(angleRad)) - ((platform.height / 2) * Math.cos(angleRad)) + this.style.platformHeight + shadowY * wallShadowMultiplier
+                ],
+
+                // top left SHADOW
+                [
+                    -((platform.width / 2) * Math.cos(angleRad)) + ((platform.height / 2) * Math.sin(angleRad)) + shadowX * wallShadowMultiplier,
+                    -((platform.width / 2) * Math.sin(angleRad)) - ((platform.height / 2) * Math.cos(angleRad)) + this.style.platformHeight + shadowY * wallShadowMultiplier
+                ],
+            
+        ]; // end of shadowPoints array
+        
+        
+        
+        platform.corners = [] // save the first 4 corner coordinates before its modified
+        for(let i=0; i < 4; i++) { // taking the first 4
+            platform.corners.push([platform.shadowPoints[i][0], platform.shadowPoints[i][1] - this.style.platformHeight]) // take away platformHeight
+        }
+
+
+        if (platform.wall) // add wall's shape to behindWallClip (for drawing player outline behind walls)
+        {
+                // corners + wall height points need to be "concated" as serperate letiable otherwise they dont stay as points
+                const upperCorners = [
+                    [
+                        platform.corners[0][0],
+                        platform.corners[0][1] - this.style.wallHeight
+                    ],
+                    [
+                        platform.corners[1][0],
+                        platform.corners[1][1] - this.style.wallHeight
+                    ],
+                    [
+                        platform.corners[2][0],
+                        platform.corners[2][1] - this.style.wallHeight
+                    ],
+                    [
+                        platform.corners[3][0],
+                        platform.corners[3][1] - this.style.wallHeight
+                    ],
+                ] 
+
+                let behindWallClipPoints = platform.corners.concat(upperCorners)
+        
+                behindWallClipPoints = canvasArea.convexHull(behindWallClipPoints)
+
+                // ADD TO CLIP SHAPE FOR AREAS BEHIND WALLS
+                // the behindWallClip array can have different lengths so it must dynamicly go through the array of points
+                for (let i = 0; i < behindWallClipPoints.length; i++) {
+                    if (i == 0) { // first point in array so use moveTo
+                        this.behindWallClip.moveTo(
+                            platform.x + platform.width/2 + behindWallClipPoints[i][0], // x
+                            platform.y + platform.height/2 + behindWallClipPoints[i][1] // y
+                        )
+                    } else { // its not the first point in the hull so use lineTo
+                        this.behindWallClip.lineTo(
+                            platform.x + platform.width/2 + behindWallClipPoints[i][0], // x
+                            platform.y + platform.height/2 + behindWallClipPoints[i][1] // y
+                        )
+                    }
+                }
+
+                this.behindWallClip.closePath()
+            }
+
+
+
+
+            platform.shadowPoints = canvasArea.convexHull(platform.shadowPoints)
+
+
+
+            // SHADOW CLIP FOR UPPER PLAYER SHADOW
+            this.upperShadowClip.moveTo( // bot left
+                platform.x + platform.width/2 + platform.corners[0][0], // x
+                platform.y + platform.height/2 + platform.corners[0][1] // y
+                )
+            
+            this.upperShadowClip.lineTo( // bot right
+                platform.x + platform.width/2 + platform.corners[1][0],
+                platform.y + platform.height/2 + platform.corners[1][1]
+            )
+
+            this.upperShadowClip.lineTo( // top right
+                platform.x + platform.width/2 + platform.corners[2][0],
+                platform.y + platform.height/2 + platform.corners[2][1]
+            )
+
+            this.upperShadowClip.lineTo( // top left
+                platform.x + platform.width/2 + platform.corners[3][0],
+                platform.y + platform.height/2 + platform.corners[3][1]
+            )
+
+            this.upperShadowClip.closePath()
+
+
+            // SORT CORNERS AFTER CREATING SHADOW and behindWall CLIP. called bellow
+            function sortCornersX(a, b) {
+                // if return is negative ... a comes first 
+                // if return is positive ... b comes first
+                // return is 0... nothing is changed
+                if (a[0] < b[0]) {return -1;}
+                if (a[0] > b[0]) {return 1;}
+                return 0;
+            }
+
+            // platform.corners stays the same(counterclockwise order) for use later is extending the sides. order: BL BR TR TL
+            // Line below used toSorted which isnt supported by old safari i guess?..
+            // platform.cornersSorted = platform.corners.toSorted(sortCornersX)
+            platform.cornersSorted = platform.corners
+            platform.cornersSorted.sort(sortCornersX)
+
+
+            // Create slopes
+            platform.horizontalSlope = (platform.corners[2][1] - platform.corners[3][1])/(platform.corners[2][0] - platform.corners[3][0])
+            platform.verticalSlope = (platform.corners[2][1] - platform.corners[1][1])/(platform.corners[2][0] - platform.corners[1][0])
+
+            // incase divided by zero and got infinity slope
+            if (platform.angle == 0) {platform.verticalSlope = 999999}
+            if (Math.abs(platform.angle) == 90) {platform.horizontalSlope = 999999}
+            // if (!isFinite(platform.horizontalSlope)) {platform.horizontalSlope > 0 ? platform.horizontalSlope = 999999 : platform.horizontalSlope = -999999}
+            // if (!isFinite(platform.verticalSlope)) {platform.verticalSlope > 0 ? platform.verticalSlope = 999999 : platform.verticalSlope = -999999}
+
+
+        });
+
+        canvasArea.canvas.style.backgroundColor = this.style.backgroundColor;
+        document.body.style.backgroundColor = this.style.backgroundColor;
+        player = new Player(this.playerStart.x, this.playerStart.y, this.playerStart.angle);
+
+        // Get map record from local storage
+        this.record = window.localStorage.getItem("record_" + this.name)
+
+        UserInterface.mapLoaded(); // moves onto gamestate 6
+        
     }
 
     update() {  // Figure out which platforms are in view + renderQueue
