@@ -902,12 +902,13 @@ const UserInterface = {
 
         // MAP SELECT Buttons
         btn_custom_maps = new Button("canvasArea.canvas.width - 225", 50, 175, "custom_maps_button", "custom_maps_button_pressed", 0, function() { 
-            // UserInterface.gamestate = 2.5;
-            // UserInterface.renderedButtons = [btn_mainMenu];
-            // btn_mainMenu.resize()
+            UserInterface.gamestate = 2.5;
+            UserInterface.renderedButtons = [btn_mainMenu];
+            btn_mainMenu.resize()
 
 
-            // CREATE TEST MAPS FOR VIEWING
+            // CREATE TEST MAPS FOR VIEWING. MOVE TO THE CUSTOM MAP SAVING IN MAP EDITOR
+            /*
             function writeFile(name, dataObj) {
 
                 // create directory and empty file
@@ -981,21 +982,74 @@ const UserInterface = {
 
             writeFile("blobber1", blob1)
             writeFile("blobber2", blob2)
+            */
 
 
 
-
-            // TODO Dynamically create buttons based on what maps are in app storage
             
-            // Lists files in dataDirectory
+
+
+            // Returns an array of all fileEntries in path parameter
             function listDir(path){
+
+                // lists all the entries
                 window.resolveLocalFileSystemURL(path, function (fileSystem) {
                     var reader = fileSystem.createReader();
-                    reader.readEntries(function (entries) {
+                    // Loop through all custom map entries
+                    reader.readEntries((entries) => {
+
+
+                        let mapNumber = 0
+                        entries.forEach((mapEntry) => {
+
+                            let mapData = null;
+
+                            // set mapData by pulling from file
+                            fileSystem.getFile(mapEntry.name, {create: false, exclusive: false}, (fileEntry) => {
+                                fileEntry.file( (file) => {
+                                    console.log(file)
+                                    const reader = new FileReader();
+                                    reader.onload = (e) => {
+
+
+
+                                        mapData = JSON.parse(e.target.result)
+                                        console.log(mapData)
+
+
+                                    };
+                                    reader.onerror = (e) => alert(e.target.error.name);
+                        
+                                    reader.readAsText(file)
+                                })
+                            })
+
+
+
+                            let button = new Button(200, 50 + (70 * mapNumber), 100, "custom_maps_button", "custom_maps_button_pressed", 0, function() {
+                                console.log(mapEntry)
+
+                                UserInterface.gamestate = 5;
+                                UserInterface.renderedButtons = [btn_mainMenu];
+                                btn_mainMenu.resize()
+                                map = new Map(mapData);
+                            })
+            
+                            UserInterface.renderedButtons.push(button)
+                            mapNumber ++
+                        })
                         console.log(entries);
+                        
+
+
                     }, (error) => { console.log(error) });
                 }, (error) => { console.log(error) });
 
+
+
+
+                // this gets a specific entry and reads it. WILL MOVE ELSEWHERE
+                /*
                 window.resolveLocalFileSystemURL(cordova.file.dataDirectory, fileSystem => {
                     fileSystem.getFile("blobber1.json", {create: false, exclusive: false}, (fileEntry) => {
                         fileEntry.file( (file) => {
@@ -1011,11 +1065,15 @@ const UserInterface = {
                         })
                     })
                 }, error => { console.log(error) });
+                */
+
             }
 
 
 
+            // Create buttons for each custom map
             listDir(cordova.file.dataDirectory);
+
         })
 
 
@@ -1090,6 +1148,9 @@ const UserInterface = {
                 UserInterface.renderedButtons = [btn_exit_edit, btn_add_platform, btn_map_colors, btn_map_settings, btn_add_checkpoint, btn_snappingSlider]
                 MapEditor.editorState = 1 // might need to do more here - like deselect platforms and shit
 
+            } else if (UserInterface.gamestate == 2.5) { // in custom maps selector page. Need to go back to main map selector page
+                UserInterface.gamestate = 2;
+                UserInterface.renderedButtons = [btn_mainMenu, btn_custom_maps, btn_level_original, btn_level_noob, btn_level_hellscape]
             } else {
                 
                 UserInterface.gamestate = 1;
@@ -1197,10 +1258,13 @@ const UserInterface = {
                     x >= button.x && x <= button.x + button.width &&
                     y >= button.y && y <= button.y + button.height
                 ) {
+                    clickedSidePanel = true;
                     button.released();
                 }
 
                 button.isPressed = false
+            } else { // button is a Slider
+                // could add released on slider logic here (for the snapping slider)
             }
             
         });
@@ -2779,13 +2843,10 @@ const AudioHandler = {
 
 
 class Map {
-    // platforms = [];
     walls = [];
-    // mapData = [];
     renderedPlatforms = [];
     renderQueue = [];
     wallsToCheck = [];
-    // checkpoints = [];
     endZoneIsRendered = false;
     name;
     record;
@@ -2804,9 +2865,9 @@ class Map {
 
         if (typeof name  === "string"){ // distinguishing between loading a normal map (string) OR a custom map (object)
             this.name = name;
-            console.log("logging this below (in constructor if statement): ") 
-            console.log(this);
-            // getJsonData();
+            // console.log("logging this below (in constructor if statement): ") 
+            // console.log(this);
+
             
             // GET MAP DIRECTLY THROUGH CORDOVA LOCAL STORAGE            
             const mapURL = cordova.file.applicationDirectory + "www/assets/maps/"
@@ -2837,42 +2898,14 @@ class Map {
             console.log(name)
             this.parseMapData(name)
         }
-
-        // PARSE JSON DATA. FUNCTION calls parseMapData()
-        // KILL KILL KILL
-        function getJsonData() {
-            // console.log("logging this below (in getJsonData): ") 
-            // console.log(this)
-            // // GET DIRECTLY FROM LOCAL STORAGE            
-            // const mapURL = cordova.file.applicationDirectory + "www/assets/maps/"
-            
-            // window.resolveLocalFileSystemURL(mapURL, (dirEntry) => {
-
-            //     dirEntry.getFile(name + ".json", {create: false, exclusive: false}, (fileEntry) => {
-            //         console.log("fileEntry:")
-            //         console.log(fileEntry)
-
-            //         fileEntry.file( (file) => {
-
-            //             const reader = new FileReader();
-            //             reader.onload = (e) => {
-            //                 parseMapData(JSON.parse(e.target.result))
-            //             };
-            //             reader.onerror = (e) => alert(e.target.error.name);
-            
-            //             reader.readAsText(file)
-            //         })
-            //     })
-            // })
-        }
     }
 
-    // Big ol function that parses the map data, sets up lighting, shadows, clips, etc
+    // Big function that parses the map data, sets up lighting, shadows, shadow clips, etc
     // Called within getJsonData Function to maintain corect order of events
     parseMapData(jsonData) {
         
-        console.log("jsonData passed as param to parseMapData: ")
-        console.log(jsonData)
+        // console.log("jsonData passed as param to parseMapData: ")
+        // console.log(jsonData)
 
         this.playerStart = jsonData.playerStart;
         this.style = jsonData.style;
