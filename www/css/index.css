@@ -10,6 +10,7 @@ html, body {
     /* width: 100vw; */
     overflow: hidden;
     background: #3f9ba5;
+    background: red;
 
     /* padding: env(safe-area-inset); */
 

@@ -1,11 +1,15 @@
 <?xml version='1.0' encoding='utf-8'?>
 <widget id="com.masonpowers.www" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
-    <name>Pocket-Hop</name>
+    <name>Null-Hop</name>
     <description>Sample Apache Cordova App</description>
-    <author email="dev@cordova.apache.org" href="https://cordova.apache.org">
-        Apache Cordova Team
+    <author email="masonpowers46@gmail.com" href="https://masonpowers.com">
+        Mason Powers
     </author>
     <content src="index.html" />
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
 </widget>
+
+<platform name="ios">
+    <preference name="orientation" value="landscape" />
+</platform>

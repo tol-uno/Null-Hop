@@ -16,7 +16,8 @@
     "cordova-browser": "^7.0.0",
     "cordova-ios": "^7.0.1",
     "cordova-plugin-device": "^2.1.0",
-    "cordova-plugin-file": "^8.0.1"
+    "cordova-plugin-file": "^8.0.1",
+    "cordova-plugin-screen-orientation": "^3.0.4"
   },
   "cordova": {
     "platforms": [
@@ -25,7 +26,8 @@
     ],
     "plugins": {
       "cordova-plugin-device": {},
-      "cordova-plugin-file": {}
+      "cordova-plugin-file": {},
+      "cordova-plugin-screen-orientation": {}
     }
   }
 }
