@@ -11,32 +11,11 @@ let midX = 0;
 let midY = 0;
 
 function onDeviceReady() { // Called on page load in HMTL
-    // testing file plugin
-    // console.log(cordova.file)
 
-    screen.orientation.lock('landscape');
-
-
-
-    // document.querySelector("body").onresize = function() {canvasArea.resize()};
-
-
-    /*
-    window.addEventListener("orientationchange", e => {
-        canvasArea.resize()
-    })
-    // console.log(screen.orientation)
-    if (screen.orientation){
-        screen.orientation.addEventListener("change", event => {
-            canvasArea.resize();
-        });
-    }
-    */
-
+    touchHandler = new InputHandler; // MAKE THIS A VAR NOT A CLASS
     canvasArea.start(); // userInterface.start() called here
-    AudioHandler.setVolumes();
-    touchHandler = new InputHandler;
-    player = null; // Needs to be created by map
+    AudioHandler.init();
+    player = null; // Needs to be created by map    
 
 }
 
@@ -47,8 +26,8 @@ const canvasArea = { //Canvas Object
     start : function() { // called in deviceReady
         this.canvas = document.createElement("canvas"),
 
-        this.canvas.width = window.innerWidth;
-        this.canvas.height = window.innerHeight;
+        this.canvas.width = window.outerWidth;
+        this.canvas.height = window.outerHeight;
 
         midX = canvasArea.canvas.width / 2;
         midY = canvasArea.canvas.height / 2;
@@ -297,7 +276,7 @@ const UserInterface = {
         btn_mapEditor = new Button("midX - 122", 310, 244, "map_editor_button", "map_editor_button_pressed", 0, "", function() {
             UserInterface.gamestate = 7;
             MapEditor.editorState = 0;
-            UserInterface.renderedButtons = [btn_mainMenu, btn_new_map, btn_load_map, btn_import_map]
+            UserInterface.renderedButtons = [btn_mainMenu, btn_new_map, btn_load_map, btn_import_map, btn_import_map_text]
             UserInterface.renderedButtons.forEach(button => {
                 button.resize();
             });
@@ -434,17 +413,23 @@ const UserInterface = {
 
         btn_load_map = new Button("200", "140", 400, "", "", 0, "Load A Map", function() {
             UserInterface.gamestate = 2;
-            UserInterface.renderedButtons = [btn_mainMenu, btn_loadMap, btn_deleteMap];
+            UserInterface.renderedButtons = [btn_mainMenu, btn_editMap, btn_deleteMap, btn_shareMap];
+
+
+            // ADDING DIV OVERLAY FOR SHARE BUTTON
+            btn_shareMap.func(true) // runs the createDiv function of the button
+
+
             MapBrowser.state = 2
             MapBrowser.init()
         })
 
-        btn_import_map = new Button("200", "240", 400, "", "", 0, "Import Map", function() {
+        btn_import_map = new Button("200", "240", 400, "", "", 0, "Import Map From File Browser", function() {
            
             // LOAD FROM LOCAL FILE SYSTEM 
             const input = document.createElement("input");
             input.type = "file";
-            input.accept = ".json";
+            input.accept = ".text";
             document.body.appendChild(input);
             input.click();
             
@@ -464,6 +449,14 @@ const UserInterface = {
             
         })
 
+        btn_import_map_text = new Button("200", "340", 400, "", "", 0, "Import Map From Copy Paste", function() {
+           
+            let mapPaste = prompt("Paste Map Data:");
+            if (mapPaste) {
+                MapEditor.loadedMap = JSON.parse(mapPaste)
+            }
+            
+        })
 
         // MAP EDITOR BUTTONS
         btn_exit_edit = new Button("20", "20", 75, "back_button", "back_button_pressed", 0, "", function() {
@@ -572,7 +565,7 @@ const UserInterface = {
             MapEditor.scrollX_vel = 0, // for smooth scrolling 
             MapEditor.scrollY_vel = 0,
             MapEditor.renderedPlatforms = [], // dont actually need to reset all this shit
-            UserInterface.renderedButtons = [btn_mainMenu, btn_new_map, btn_load_map, btn_import_map]
+            UserInterface.renderedButtons = [btn_mainMenu, btn_new_map, btn_load_map, btn_import_map, btn_import_map_text]
             MapEditor.selectedPlatformIndex = -1;
             
         })
@@ -961,7 +954,7 @@ const UserInterface = {
             MapBrowser.init()
         })
 
-        btn_playMap = new Button("canvasArea.canvas.width - 225", "canvasArea.canvas.height - 110", 200, "play_button", "play_button_pressed", 0, "", function() {
+        btn_playMap = new Button("canvasArea.canvas.width - 250", "canvasArea.canvas.height - 110", 200, "play_button", "play_button_pressed", 0, "", function() {
             
             UserInterface.gamestate = 5;
             UserInterface.renderedButtons = [btn_mainMenu];
@@ -1002,7 +995,7 @@ const UserInterface = {
             }
         })
 
-        btn_loadMap = new Button("canvasArea.canvas.width - 250", "canvasArea.canvas.height - 110", 200, "", "", 0, "Edit Map", function() {
+        btn_editMap = new Button("canvasArea.canvas.width - 250", "canvasArea.canvas.height - 110", 200, "", "", 0, "Edit Map", function() {
             
             let mapData = null;
             window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function (fileSystem) {
@@ -1054,41 +1047,222 @@ const UserInterface = {
                     });
                 });                                
             }
-
-            /*
-            const deleteMap = confirm("Delete Map?");
-            if (deleteMap) {
-
-                window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function (fileSystem) {
-                    var reader = fileSystem.createReader();
-                    reader.readEntries((entries) => {
-                        fileSystem.getFile(entries[MapBrowser.selectedMapIndex].name, {create: false, exclusive: false}, (fileEntry) => {
-                            fileEntry.file( (file) => {
-                                console.log(file)
-                                const reader = new FileReader();
-                                reader.onload = (e) => {
-    
-                                    
-                                    mapData = JSON.parse(e.target.result)
-                                    mapData.name = String(fileEntry.name.split(".")[0]) // for getting the name of a custom map
-                                    console.log(mapData)
-                                    Map.initMap(mapData);
-    
-                                };
-                                reader.onerror = (e) => alert(e.target.error.name);
-                
-                                reader.readAsText(file)
-                            })
-                        })
-                    }, (error) => { console.log(error) });
-                }, (error) => { console.log(error) });    
-            }
-            */
         })
 
-        btn_shareMap = new Button("canvasArea.canvas.width - 225", "canvasArea.canvas.height - 290", 200, "", "", 0, "Share Map", function() {
+        btn_shareMap = new Button("canvasArea.canvas.width - 250", "canvasArea.canvas.height - 290", 200, "", "", 0, "Share Map", function(createDiv) {
+            // The shareDiv does all the work for this button.
+            // shareDiv is created by btn_load_map
+            // shareDiv is removed by btn_mainMenu and btn_editMap (not yet doing this)
+
             
+            if (createDiv) { // called with this tag by btn_load_map
+                const shareDiv = document.createElement('div');
+                shareDiv.setAttribute("id", "shareDiv");
+                shareDiv.style.cssText = `
+                    position: absolute; 
+                    left: ${btn_shareMap.x}px;
+                    top: ${btn_shareMap.y}px;
+                    width: ${btn_shareMap.width}px;
+                    height: ${btn_shareMap.height}px;
+                    border: solid 2px blue;
+                `
+    
+                shareDiv.addEventListener("click", async () => {
+                    
+
+                    let mapData = null;
+                    window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function (fileSystem) {
+                        var reader = fileSystem.createReader();
+                        reader.readEntries((entries) => {
+                            fileSystem.getFile(entries[MapBrowser.selectedMapIndex].name, {create: false, exclusive: false}, (fileEntry) => {
+                                fileEntry.file( (file) => {
+                                    console.log(file)
+                                    const reader = new FileReader();
+                                    reader.onload = async(e) => {
+    
+                                        mapData = JSON.parse(e.target.result)
+                                        mapData.name = String(fileEntry.name.split(".")[0]) // for getting the name of a custom map
+                                        console.log(mapData)
+                                        mapData = JSON.stringify(mapData)
+
+                                        const share_data = {
+                                            title: mapData.name, // doesnt do anything on IOS
+                                            text: mapData,
+                                        }
+                                        
+                                        try {
+                                            await navigator.share(share_data);
+                                        } catch (err) {
+                                            console.log(err)
+                                        }
+        
+                                    };
+                                    reader.onerror = (e) => alert(e.target.error.name);
+                    
+                                    reader.readAsText(file)
+                                })
+                            })
+                        }, (error) => { console.log(error) });
+                    }, (error) => { console.log(error) });    
+
+
+
+
+                    /*
+                    console.log("Sharing In Progress...")
+    
+                    const share_data = {
+                        // title: "Map Name",
+                        text: "{platform : 'hello', beep : 29}",
+                        // url: "https://developer.mozilla.org",
+                        // files: [],
+                    }
+
+                    // if (navigator.canShare(map_data)) {console.log("this file can be shared!")} else {console.log("cant share this file")}
+
+                    try {
+                        await navigator.share(share_data);
+                    } catch (err) {
+                        console.log(err)
+                    }
+                    */
+
+                    
+
+
+                    /*
+                    // const blob = await fetch('https://cdn.glitch.com/f96f78ec-d35d-447b-acf4-86f2b3658491%2Fchuck.png?v=1618311092497').then(r=>r.blob())
+                    
+                    const array = ["name"]; // an array consisting of a single string
+                    const blob = new Blob(array); // the blob
+
+                    const share = async (title, text, blob) => {
+                        const data = {
+                            files: [
+                                new File([blob], 'test.txt', {
+                                    type: "text/plain",
+                                }),
+                            ],
+                            title: title,
+                            text: text,
+                        };
+                        try {
+                            if (!(navigator.canShare(data))) {
+                                throw new Error('Can\'t share data.', data);
+                            };
+                            await navigator.share(data);
+                        } catch (err) {
+                            console.error(err.name, err.message);
+                        }
+                    };
+
+                    share("test title", "poopy poopy", blob)
+                    */
+
+
+
+                    // const file = new Blob(["blah blah"], { type: 'text/plain' });
+                    // let file = new Blob(["Welcome to W3Docs"], {type: 'text/plain'});
+                    // const fileArray = [file]
+                    // const fileArray = []
+
+                    // const map_data = {
+                    //     title: "Map",
+                    //     files: fileArray,
+                    //     url: "https://www.google.com",
+                    //     text: "please work",
+                    // };
+
+
+                    /*
+                    const name = "noob";
             
+                    // GET MAP DIRECTLY THROUGH CORDOVA LOCAL STORAGE  (NORMAL MAP)          
+                    const mapURL = cordova.file.applicationDirectory + "www/assets/maps/"
+                    
+                    window.resolveLocalFileSystemURL(mapURL, (dirEntry) => {
+        
+                        dirEntry.getFile(name + ".json", {create: false, exclusive: false}, (fileEntry) => {
+                            console.log("fileEntry:")
+                            console.log(fileEntry)
+        
+                            fileEntry.file( async (file) => {
+        
+
+                                const filesArray = [file];
+                                const map_data = {
+                                    title: "Map Pull",
+                                    files: filesArray,
+                                };
+
+                                console.log(filesArray)
+
+                                if (navigator.canShare(map_data)) {console.log("this file can be shared!")} else {console.log("cant share this file")}
+
+                                try {
+                                    await navigator.share(map_data);
+                                } catch (err) {
+                                    console.log(err)
+                                }
+
+                                // const reader = new FileReader();
+                                // reader.onload = (e) => {
+                                //     this.parseMapData(JSON.parse(e.target.result))
+                                // };
+                                // reader.onerror = (e) => alert(e.target.error.name);
+                    
+                                // reader.readAsText(file)
+                            })
+                        })
+                    })
+                    */
+
+
+                    // console.log(map_data)
+                    // if (navigator.canShare(link)) {console.log("this LINK can be shared!")} else {console.log("cant share this LINK")}
+
+
+                    
+                });
+
+                document.body.appendChild(shareDiv);
+                // document.getElementById("shareDiv").remove()     
+    
+            }
+            
+
+            /*
+
+            function downloadObjectAsJson(exportObj, exportName) { // https://stackoverflow.com/questions/19721439/download-json-object-as-a-file-from-browser
+                exportName = prompt("Enter Map Name");
+                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj));
+                const downloadAnchorNode = document.createElement('a');
+                downloadAnchorNode.setAttribute("href", dataStr);
+                downloadAnchorNode.setAttribute("download", exportName + ".json");
+                document.body.appendChild(downloadAnchorNode); // required for firefox
+                downloadAnchorNode.click();
+                downloadAnchorNode.remove();
+            }
+
+              
+              var dataUri = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(JSONData));
+              var downloadAnchorNode = document.createElement('a');
+              
+              downloadAnchorNode.setAttribute("href", dataUri);
+              downloadAnchorNode.setAttribute("download", "CarData.json");
+              document.body.appendChild(downloadAnchorNode);
+              
+              downloadAnchorNode.click();
+
+
+            const mapObj = {
+                pile : "yes",
+                test : 0,
+                boop : "beep"
+            }
+
+            downloadObjectAsJson(mapObj, "test")
+            */
         })
 
 
@@ -3023,17 +3197,55 @@ const MapEditor = {
 
 
 const AudioHandler = {
-    successAudio : document.getElementById("successAudio"),
-    splashAudio : document.getElementById("splashAudio"),
-    jumpAudio : document.getElementById("jumpAudio"),
-    setVolumes : function() {
-        this.successAudio.volume = 0.5 * UserInterface.volume;
-        this.splashAudio.volume = 0.4 * UserInterface.volume;
-        this.jumpAudio.volume = 0.5 * UserInterface.volume;
+
+    
+    init : function() {
+
+        // FROM: https://github.com/apache/cordova-plugin-media/issues/182
+        // Need to unescape if path have '%20' component
+        var menuMusic_path = decodeURI(cordova.file.applicationDirectory) + "www/assets/audio/menuMusic.wav";
+        var successAudio_path = decodeURI(cordova.file.applicationDirectory) + "www/assets/audio/success.mp3";
+        var jumpAudio_path = decodeURI(cordova.file.applicationDirectory) + "www/assets/audio/jump.mp3";
+
+        // iOS need to remove file://
+        // could use a for loop here. Just throw all the sounds into an array?
+        if (device.platform.toLowerCase() == "ios") {
+            menuMusic_path = menuMusic_path.replace("file://", "");
+            successAudio_path = successAudio_path.replace("file://", "");
+            jumpAudio_path = jumpAudio_path.replace("file://", "")
+        }
+
+
+        // setRate(1) in onSuccess callbacks to counter caching workaround which sets Rate(9999) to play the audio silently at the start of game.
+        this.menuMusic = new Media(menuMusic_path, null, (error) => {console.log(error);});
+        this.successAudio = new Media(successAudio_path, function(){AudioHandler.successAudio.setRate(1)}, (error) => {console.log(error);});
+        this.jumpAudio = new Media (jumpAudio_path, function(){AudioHandler.jumpAudio.setRate(1)}, (error) => {console.log(error);})
+
+
+        // PLAY ALL SOUNDS REALLY QUICKLY TO CACHE THEM
+        this.jumpAudio.setRate(9999)
+        this.jumpAudio.play()
+
+        this.successAudio.setRate(9999)
+        this.successAudio.play()
+
+        
+        // SET CORRECT VOLUMES
+        this.setVolumes();
+        this.menuMusic.play()
     },
-    success : function() {this.successAudio.play()},
-    splash : function() {this.splashAudio.play()},
-    jump : function() {this.jumpAudio.play()},
+
+
+
+    setVolumes : function() {
+        // this.successAudio.volume = 0.5 * UserInterface.volume;
+        // this.splashAudio.volume = 0.4 * UserInterface.volume;
+        // this.jumpAudio.volume = 0.5 * UserInterface.volume;
+
+        this.menuMusic.setVolume(UserInterface.volume);
+        this.successAudio.setVolume(UserInterface.volume);
+        this.jumpAudio.setVolume(UserInterface.volume);
+    },
 }
 
 
@@ -3061,7 +3273,7 @@ const Map = {
         if (typeof name  === "string"){ // distinguishing between loading a normal map (string) OR a custom map (object)
             this.name = name;
             
-            // GET MAP DIRECTLY THROUGH CORDOVA LOCAL STORAGE            
+            // GET MAP DIRECTLY THROUGH CORDOVA LOCAL STORAGE  (NORMAL MAP)          
             const mapURL = cordova.file.applicationDirectory + "www/assets/maps/"
             
             window.resolveLocalFileSystemURL(mapURL, (dirEntry) => {
@@ -3084,7 +3296,7 @@ const Map = {
             })
         
             
-        } else { // is an object
+        } else { // is an object (CUSTOM MAP)
             this.name = name.name;
             console.log("passed an object. CUSTOM MAP below: ")
             console.log(name)
@@ -4085,9 +4297,9 @@ class Player {
             if (this.jumpValue < 0) { 
                 this.jumpValue = 0;
                 this.jumpVelocity = 2;
-                AudioHandler.jump();
+                AudioHandler.jumpAudio.play();
                 if (!this.checkCollision(Map.renderedPlatforms)) {
-                    AudioHandler.splash();
+                    AudioHandler.splashAudio.play();
                     this.teleport();
                 }
             } else {
@@ -4098,7 +4310,7 @@ class Player {
 
             // CHECK IF COLLIDING WITH WALLS
             if (this.checkCollision(Map.wallsToCheck)) {
-                AudioHandler.splash();
+                AudioHandler.splashAudio.play();
                 this.teleport();
             }
     
@@ -4153,7 +4365,7 @@ class Player {
             // CHECK IF COLLIDING WITH ENDZONE
             if (Map.endZoneIsRendered) { 
                 if (this.checkCollision([Map.endZone])) {
-                    AudioHandler.success();
+                    AudioHandler.successAudio.play();
                     UserInterface.handleRecord();
                     UserInterface.levelState = 3;
                 }

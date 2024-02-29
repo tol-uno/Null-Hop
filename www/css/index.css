@@ -6,15 +6,20 @@ html, body {
     margin: 0;
     height: 100%;
     width: 100%;
-    /* height: 100vh; */
-    /* width: 100vw; */
     overflow: hidden;
-    background: #3f9ba5;
-    background: red;
-
+    /* background: red; */
     /* padding: env(safe-area-inset); */
-
 }
+
+/* TESTING */
+/* #shareDiv {
+    position: absolute;
+    left: 20px;
+    top: 20px;
+    width: 100px;
+    height: 50px;
+    border: solid 2px blue;
+} */
 
 body { /* all these are from cordova's default css file*/
     -webkit-touch-callout: none;                /* prevent callout to copy image, etc when tap to hold */
@@ -27,14 +32,5 @@ body { /* all these are from cordova's default css file*/
 
 canvas {
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-
-    display: block;
-
-    background: #3f9ba5;
-
-    max-width: 100%;
-    max-height: 100%;
+    /* background: purple; */
 }

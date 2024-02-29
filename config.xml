@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <widget id="com.masonpowers.www" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
-    <name>Null-Hop</name>
+    <name>Pocket-Hop</name>
     <description>Sample Apache Cordova App</description>
     <author email="masonpowers46@gmail.com" href="https://masonpowers.com">
         Mason Powers
@@ -8,8 +8,25 @@
     <content src="index.html" />
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
+
+    <platform name="android">
+        <preference name="DisallowOverscroll" value="true"/>
+        <preference name="Fullscreen" value="true" />
+        <preference name="BackgroundColor" value="0xff0000ff"/>
+        <preference name="Orientation" value="landscape" />
+    </platform>
+
+    <platform name="ios">
+        <preference name="DisallowOverscroll" value="true"/>
+        <preference name="Fullscreen" value="true" />
+        <preference name="BackgroundColor" value="0xff0000ff"/>
+        <preference name="Orientation" value="landscape" />
+
+        <preference name="SuppressesLongPressGesture" value="true" />
+        <preference name="Suppresses3DTouchGesture" value="true" />
+        <preference name="Allow3DTouchLinkPreview" value="false" />
+        
+    </platform>
+
 </widget>
 
-<platform name="ios">
-    <preference name="orientation" value="landscape" />
-</platform>
