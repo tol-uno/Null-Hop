@@ -2,24 +2,23 @@
     -webkit-tap-highlight-color: rgba(0,0,0,0); /* make transparent link selection, adjust last value opacity 0 to 1.0 */
 }
 
+:root {
+    --icon-fill: green;
+  }
+  
+
+html, body, canvas {
+    touch-action: none;
+    touch-action-delay: none;
+    user-select: none;
+}
+
 html, body {
     margin: 0;
-    height: 100%;
-    width: 100%;
     overflow: hidden;
     /* background: red; */
     /* padding: env(safe-area-inset); */
 }
-
-/* TESTING */
-/* #shareDiv {
-    position: absolute;
-    left: 20px;
-    top: 20px;
-    width: 100px;
-    height: 50px;
-    border: solid 2px blue;
-} */
 
 body { /* all these are from cordova's default css file*/
     -webkit-touch-callout: none;                /* prevent callout to copy image, etc when tap to hold */

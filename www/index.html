@@ -15,7 +15,7 @@
 		<link rel="icon" type="image/x-icon" href="assets/images/favicon.ico">
 
         <!-- Cordova's default header stuff. -->
-        <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: https://ssl.gstatic.com 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src *; img-src 'self' data: content:;">
+        <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: https://ssl.gstatic.com 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src *; img-src 'self' blob: data: content:;">
         <meta name="format-detection" content="telephone=no">
         <meta name="msapplication-tap-highlight" content="no">
         <meta name="color-scheme" content="light dark">
@@ -56,9 +56,12 @@
 
         <img id="restart_button" src="assets/images/buttons/restart_button.png" style="display:none;"/>
         <img id="restart_button_pressed" src="assets/images/buttons/restart_button_pressed.png" style="display:none;"/>
-
-        <img id="jump_button" src="assets/images/buttons/jump_button.png" style="display:none;"/>
+        
+        
+        <img id="jump_button" src="assets/images/buttons/btn_jump.svg" style="display:none;"/>
+        <!-- <img id="jump_button" src="assets/images/buttons/jump_button.png" style="display:none;"/> -->
         <img id="jump_button_pressed" src="assets/images/buttons/jump_button_pressed.png" style="display:none;"/>
+
 
 
 
@@ -87,11 +90,6 @@
         <img id="set_button" src="assets/images/buttons/set_button.png" style="display:none;"/>
         <img id="set_button_pressed" src="assets/images/buttons/set_button_pressed.png" style="display:none;"/>
         
-
-         <!-- SHOULD BE ABLE TO REMOVE THESE WITH THE NEW MEDIA PLUGIN -->
-        <!-- <audio id="successAudio"><source src="assets/audio/success.ogg" type="audio/ogg"></audio>
-        <audio id="jumpAudio"><source src="assets/audio/jump.ogg" type="audio/ogg"></audio>
-        <audio id="splashAudio"><source src="assets/audio/splash.ogg" type="audio/ogg"></audio> -->
 
         <script src="cordova.js"></script> 
         <script src="js/index.js"></script>

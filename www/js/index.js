@@ -12,6 +12,7 @@ let midY = 0;
 
 function onDeviceReady() { // Called on page load in HMTL
 
+    
     touchHandler = new InputHandler; // MAKE THIS A VAR NOT A CLASS
     canvasArea.start(); // userInterface.start() called here
     AudioHandler.init();
@@ -24,10 +25,23 @@ const canvasArea = { //Canvas Object
     
 
     start : function() { // called in deviceReady
-        this.canvas = document.createElement("canvas"),
+        this.canvas = document.createElement("canvas")
 
-        this.canvas.width = window.outerWidth;
-        this.canvas.height = window.outerHeight;
+        this.scale = 1.3
+
+        this.canvas.width = window.outerWidth * this.scale;
+        this.canvas.height = window.outerHeight * this.scale;
+
+        // this.canvas.width = document.documentElement.clientWidth
+        // this.canvas.height = document.documentElement.clientHeight
+
+        // const deviceAspectRation = (window.outerWidth / window.outerHeight);
+
+        // this.canvas.width = 1920;
+        // this.canvas.height = 1920 / deviceAspectRation;
+
+        this.canvas.style.width = window.outerWidth + "px";
+        this.canvas.style.height = window.outerHeight + "px";
 
         midX = canvasArea.canvas.width / 2;
         midY = canvasArea.canvas.height / 2;
@@ -40,6 +54,7 @@ const canvasArea = { //Canvas Object
         this.interval = setInterval(updateGameArea, 10); // Number sets the taget frame rate. 1000/# = FPS
 
         UserInterface.start(); // need to be ran after canvas is resized in canvasArea.start()
+
     },
 
     clear : function() { // CLEARS WHOLE CANVAS
@@ -77,20 +92,15 @@ const canvasArea = { //Canvas Object
     },
 
 
-    resize : function() {
+    resize : function() { // SHOULDNT REALLY EVER BE CALLED 
         console.log("resized :)");
 
-        // this.canvas.width = window.screen.availWidth;
-        // this.canvas.height = window.screen.availHeight;
-        this.canvas.width = window.innerWidth;
-        this.canvas.height = window.innerHeight;
+        this.canvas.width = window.outerWidth;
+        this.canvas.height = window.outerHeight;
 
         midX = this.canvas.width / 2;
         midY = this.canvas.height / 2;
 
-        UserInterface.renderedButtons.forEach(button => {
-            button.resize();
-        });
     },
 
 
@@ -224,6 +234,13 @@ const UserInterface = {
     timerStart : null, // set by jump button
     levelState : 1, // 1 = pre-start, 2 = playing level, 3 = in endzone
 
+    darkMode : false,
+    lightColor_1 : "#f0f0f1", // lighter
+    lightColor_2 : "#dcd8d6", // darker
+    darkColor_1 : "#36393d",
+    darkColor_2 : "#292d30",
+
+
     start : function() { // where all buttons are created
 
         // Retreaving settings from local storage OR setting them
@@ -259,27 +276,22 @@ const UserInterface = {
         // Main Menu BUTTONS
         btn_play = new Button("midX - 90", 130, 180, "play_button", "play_button_pressed", 0, "", function() { 
             UserInterface.gamestate = 2;
-            UserInterface.renderedButtons = [btn_mainMenu, btn_custom_maps, btn_level_original, btn_level_noob, btn_level_hellscape]
-            UserInterface.renderedButtons.forEach(button => {
-                button.resize();
-            });
+            MapBrowser.state = 1;
+            // MapBrowser.init()
+            
+            UserInterface.renderedButtons = UserInterface.btnGroup_standardMapBrowser
+
         })
 
         btn_settings = new Button("midX - 106", 220, 212, "settings_button", "settings_button_pressed", 0, "", function() {
             UserInterface.gamestate = 3;
-            UserInterface.renderedButtons = [btn_mainMenu, btn_sensitivitySlider, btn_volumeSlider, btn_debugText, btn_strafeHUD, btn_reset_settings] // debugText and strafeHud shouldnt be this accessible
-            UserInterface.renderedButtons.forEach(button => {
-                button.resize();
-            });
+            UserInterface.renderedButtons = UserInterface.btnGroup_settings
         })
 
         btn_mapEditor = new Button("midX - 122", 310, 244, "map_editor_button", "map_editor_button_pressed", 0, "", function() {
             UserInterface.gamestate = 7;
             MapEditor.editorState = 0;
-            UserInterface.renderedButtons = [btn_mainMenu, btn_new_map, btn_load_map, btn_import_map, btn_import_map_text]
-            UserInterface.renderedButtons.forEach(button => {
-                button.resize();
-            });
+            UserInterface.renderedButtons = UserInterface.btnGroup_mapEditorMenu;
         })
 
 
@@ -412,8 +424,11 @@ const UserInterface = {
         })
 
         btn_load_map = new Button("200", "140", 400, "", "", 0, "Load A Map", function() {
+            MapEditor.editorState = 5;
+            
             UserInterface.gamestate = 2;
-            UserInterface.renderedButtons = [btn_mainMenu, btn_editMap, btn_deleteMap, btn_shareMap];
+
+            UserInterface.renderedButtons = UserInterface.btnGroup_editMapBrowser;
 
 
             // ADDING DIV OVERLAY FOR SHARE BUTTON
@@ -565,7 +580,7 @@ const UserInterface = {
             MapEditor.scrollX_vel = 0, // for smooth scrolling 
             MapEditor.scrollY_vel = 0,
             MapEditor.renderedPlatforms = [], // dont actually need to reset all this shit
-            UserInterface.renderedButtons = [btn_mainMenu, btn_new_map, btn_load_map, btn_import_map, btn_import_map_text]
+            UserInterface.renderedButtons = UserInterface.btnGroup_mapEditorMenu
             MapEditor.selectedPlatformIndex = -1;
             
         })
@@ -585,7 +600,7 @@ const UserInterface = {
 
             MapEditor.loadedMap.platforms.push(newPlatform);
             MapEditor.selectedPlatformIndex = MapEditor.loadedMap.platforms.length - 1;
-            UserInterface.renderedButtons = [btn_exit_edit, btn_unselect, btn_delete_platform, btn_translate, btn_resize, btn_angleSlider, btn_wall, btn_snappingSlider]
+            UserInterface.renderedButtons = UserInterface.btnGroup_editPlatform
             
             // SYNC ALL BUTTONS AND SLIDERS
             btn_translate.func() // intially syncs the buttons position to the selected platform. Called whenever screen is scrolled too. not really needed here but avoids a 1 frame flash 
@@ -618,26 +633,7 @@ const UserInterface = {
             PreviewWindow.update(PreviewWindow.platform)
 
 
-            UserInterface.renderedButtons = [
-                btn_mainMenu, 
-                btn_setFromHex,
-                btn_hueSlider, 
-                btn_saturationSlider, 
-                btn_lightnessSlider, 
-                btn_alphaSlider, 
-                
-                btn_backgroundColor,
-                btn_playerColor,
-                btn_platformTopColor,
-                btn_platformSideColor,
-                btn_wallTopColor,
-                btn_wallSideColor,
-                btn_endZoneTopColor,
-                btn_endZoneSideColor,
-                btn_shadowColor,
-
-            ];
-            // btn_mainMenu.resize()
+            UserInterface.renderedButtons = UserInterface.btnGroup_mapColor
         })
 
         btn_map_settings = new Button("canvasArea.canvas.width - 550", "20", 125, "map_settings_button", "map_settings_button_pressed", 0, "", function() {
@@ -654,15 +650,7 @@ const UserInterface = {
             btn_shadowContrastDarkSlider.updateState(MapEditor.loadedMap.style.shadowContrastDark)
             btn_shadowLengthSlider.updateState(MapEditor.loadedMap.style.shadowLength)
 
-            UserInterface.renderedButtons = [
-                btn_mainMenu, 
-                btn_platformHeightSlider,
-                btn_wallHeightSlider,
-                btn_lightAngleSlider,
-                btn_shadowContrastLightSlider,
-                btn_shadowContrastDarkSlider,
-                btn_shadowLengthSlider
-            ];
+            UserInterface.renderedButtons = UserInterface.btnGroup_mapSettings
         })
 
         btn_snappingSlider = new SliderUI("50", "canvasArea.canvas.height - 50", 170, 0, 50, 0.2, "Snapping", "white", MapEditor.loadedMap ? MapEditor.snapAmount : 0, function() {
@@ -673,7 +661,7 @@ const UserInterface = {
             
             MapEditor.selectedPlatformIndex = -1; // No selected platform
             MapEditor.selectedCheckpointIndex = [-1,1]; // No selected checkpoint
-            UserInterface.renderedButtons = [btn_exit_edit, btn_add_platform, btn_add_checkpoint, btn_map_colors, btn_map_settings, btn_snappingSlider]
+            UserInterface.renderedButtons = UserInterface.btnGroup_mapEditorInterface
         })
 
         btn_translate = new Button(0, 0, 45, "translate_button", "translate_button_pressed", 0, "", function() {
@@ -819,7 +807,7 @@ const UserInterface = {
                 MapEditor.selectedCheckpointIndex = [-1, 1]; // No selected checkpoints
             }
             
-            UserInterface.renderedButtons = [btn_exit_edit, btn_add_platform, btn_add_checkpoint, btn_map_settings, btn_map_colors, btn_snappingSlider]
+            UserInterface.renderedButtons = UserInterface.btnGroup_mapEditorInterface
             
         })
 
@@ -877,7 +865,7 @@ const UserInterface = {
 
 
         // COLOR PICKER BUTTONS AND SLIDERS
-        btn_setFromHex = new Button("ColorPicker.x + 262", "ColorPicker.y + 32", 50, "set_button", "set_button_pressed", 0, "", function() {
+        btn_setFromHex = new Button("ColorPicker.x + 160", "ColorPicker.y + 32", 150, "", "", 0, "Set From Hex", function() {
             ColorPicker.setFromHex()
         })
 
@@ -904,42 +892,45 @@ const UserInterface = {
 
 
         // SET COLOR BUTTONS
-        btn_backgroundColor = new Button("canvasArea.canvas.width - 75", "20", 50, "set_button", "set_button_pressed", 0, "", function() {
-            MapEditor.loadedMap.style.backgroundColor = ColorPicker.getColor()
+        btn_backgroundColor = new Button("canvasArea.canvas.width - 400", "20", 150, "", "", 0, "Background", function() {
+            canvasArea.canvas.style.backgroundColor = MapEditor.loadedMap.style.backgroundColor = ColorPicker.getColor()
+            // set ColorPicker.partIndex = 1
+            // ColorPicker.setColor(MapEditor.loadedMap.style.backgroundColor)
+            // UserInterface.backgroundUpdated
         })
 
-        btn_playerColor = new Button("canvasArea.canvas.width - 75", "60", 50, "set_button", "set_button_pressed", 0, "", function() {
+        btn_playerColor = new Button("canvasArea.canvas.width - 200", "20", 150, "", "", 0, "Player", function() {
             MapEditor.loadedMap.style.playerColor = ColorPicker.getColor()
         })
 
-        btn_platformTopColor = new Button("canvasArea.canvas.width - 75", "100", 50, "set_button", "set_button_pressed", 0, "", function() {
+        btn_platformTopColor = new Button("canvasArea.canvas.width - 400", "120", 150, "", "", 0, "Platform Top", function() {
             MapEditor.loadedMap.style.platformTopColor = ColorPicker.getColor()
         })
 
-        btn_platformSideColor = new Button("canvasArea.canvas.width - 75", "140", 50, "set_button", "set_button_pressed", 0, "", function() {
+        btn_platformSideColor = new Button("canvasArea.canvas.width - 200", "120", 150, "", "", 0, "Platform Side", function() {
             MapEditor.loadedMap.style.platformSideColor = ColorPicker.getColor()
             PreviewWindow.update(PreviewWindow.platform)
         })
 
-        btn_wallTopColor = new Button("canvasArea.canvas.width - 75", "180", 50, "set_button", "set_button_pressed", 0, "", function() {
+        btn_wallTopColor = new Button("canvasArea.canvas.width - 75", "180", 50, "set_button", "set_button_pressed", 0, "Wall Top", function() {
             MapEditor.loadedMap.style.wallTopColor = ColorPicker.getColor()
         })
 
-        btn_wallSideColor = new Button("canvasArea.canvas.width - 75", "220", 50, "set_button", "set_button_pressed", 0, "", function() {
+        btn_wallSideColor = new Button("canvasArea.canvas.width - 75", "220", 50, "set_button", "set_button_pressed", 0, "Wall Side", function() {
             MapEditor.loadedMap.style.wallSideColor = ColorPicker.getColor()
             PreviewWindow.update(PreviewWindow.wall)
         })
 
-        btn_endZoneTopColor = new Button("canvasArea.canvas.width - 75", "260", 50, "set_button", "set_button_pressed", 0, "", function() {
+        btn_endZoneTopColor = new Button("canvasArea.canvas.width - 75", "260", 50, "set_button", "set_button_pressed", 0, "End Zone Top", function() {
             MapEditor.loadedMap.style.endZoneTopColor = ColorPicker.getColor()
         })
 
-        btn_endZoneSideColor = new Button("canvasArea.canvas.width - 75", "300", 50, "set_button", "set_button_pressed", 0, "", function() {
+        btn_endZoneSideColor = new Button("canvasArea.canvas.width - 75", "300", 50, "set_button", "set_button_pressed", 0, "End Zone Side", function() {
             MapEditor.loadedMap.style.endZoneSideColor = ColorPicker.getColor()
             PreviewWindow.update(PreviewWindow.endzone)
         })
 
-        btn_shadowColor = new Button("canvasArea.canvas.width - 75", "340", 50, "set_button", "set_button_pressed", 0, "", function() {
+        btn_shadowColor = new Button("canvasArea.canvas.width - 75", "340", 50, "set_button", "set_button_pressed", 0, "Shadow", function() {
             MapEditor.loadedMap.style.shadowColor = ColorPicker.getColor()
         })
 
@@ -949,7 +940,7 @@ const UserInterface = {
         // MAP BROWSER BUTTONS
         btn_custom_maps = new Button("canvasArea.canvas.width - 200", 50, 175, "custom_maps_button", "custom_maps_button_pressed", 0, "", function() { 
             UserInterface.gamestate = 2;
-            UserInterface.renderedButtons = [btn_mainMenu, btn_playMap];
+            UserInterface.renderedButtons = UserInterface.btnGroup_customMapBrowser
             MapBrowser.state = 2
             MapBrowser.init()
         })
@@ -1007,6 +998,9 @@ const UserInterface = {
                             const reader = new FileReader();
                             reader.onload = (e) => {
 
+                                // delete shareDiv when leaving browser page
+                                document.getElementById("shareDiv").remove()
+
                                 MapBrowser.scrollVel = 0;
                                 MapBrowser.scrollY = 0;
 
@@ -1036,8 +1030,11 @@ const UserInterface = {
                         fileSystem.getFile(entries[MapBrowser.selectedMapIndex].name, {create: false}, (fileEntry) => {
                             fileEntry.remove((file) => {
                                 alert("Map Deleted");
-                                // reload browser by pressing custom maps button again
-                                btn_custom_maps.released(true)
+                                // delete shareDiv (its created again by btn_load_map)
+                                document.getElementById("shareDiv").remove()
+
+                                // reload browser by pressing btn_load_map again
+                                btn_load_map.released(true)
                             }, function (error) {
                                 alert("error occurred: " + error.code);
                             }, function () {
@@ -1052,7 +1049,8 @@ const UserInterface = {
         btn_shareMap = new Button("canvasArea.canvas.width - 250", "canvasArea.canvas.height - 290", 200, "", "", 0, "Share Map", function(createDiv) {
             // The shareDiv does all the work for this button.
             // shareDiv is created by btn_load_map
-            // shareDiv is removed by btn_mainMenu and btn_editMap (not yet doing this)
+            // shareDiv is removed by btn_mainMenu, btn_editMap and btn_deleteMap? (not yet doing this)
+            // document.getElementById("shareDiv").remove()
 
             
             if (createDiv) { // called with this tag by btn_load_map
@@ -1064,12 +1062,11 @@ const UserInterface = {
                     top: ${btn_shareMap.y}px;
                     width: ${btn_shareMap.width}px;
                     height: ${btn_shareMap.height}px;
-                    border: solid 2px blue;
+                    // border: solid 2px blue;
                 `
-    
+
                 shareDiv.addEventListener("click", async () => {
                     
-
                     let mapData = null;
                     window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function (fileSystem) {
                         var reader = fileSystem.createReader();
@@ -1103,187 +1100,32 @@ const UserInterface = {
                                 })
                             })
                         }, (error) => { console.log(error) });
-                    }, (error) => { console.log(error) });    
-
-
-
-
-                    /*
-                    console.log("Sharing In Progress...")
-    
-                    const share_data = {
-                        // title: "Map Name",
-                        text: "{platform : 'hello', beep : 29}",
-                        // url: "https://developer.mozilla.org",
-                        // files: [],
-                    }
-
-                    // if (navigator.canShare(map_data)) {console.log("this file can be shared!")} else {console.log("cant share this file")}
-
-                    try {
-                        await navigator.share(share_data);
-                    } catch (err) {
-                        console.log(err)
-                    }
-                    */
-
-                    
-
-
-                    /*
-                    // const blob = await fetch('https://cdn.glitch.com/f96f78ec-d35d-447b-acf4-86f2b3658491%2Fchuck.png?v=1618311092497').then(r=>r.blob())
-                    
-                    const array = ["name"]; // an array consisting of a single string
-                    const blob = new Blob(array); // the blob
-
-                    const share = async (title, text, blob) => {
-                        const data = {
-                            files: [
-                                new File([blob], 'test.txt', {
-                                    type: "text/plain",
-                                }),
-                            ],
-                            title: title,
-                            text: text,
-                        };
-                        try {
-                            if (!(navigator.canShare(data))) {
-                                throw new Error('Can\'t share data.', data);
-                            };
-                            await navigator.share(data);
-                        } catch (err) {
-                            console.error(err.name, err.message);
-                        }
-                    };
-
-                    share("test title", "poopy poopy", blob)
-                    */
-
-
-
-                    // const file = new Blob(["blah blah"], { type: 'text/plain' });
-                    // let file = new Blob(["Welcome to W3Docs"], {type: 'text/plain'});
-                    // const fileArray = [file]
-                    // const fileArray = []
-
-                    // const map_data = {
-                    //     title: "Map",
-                    //     files: fileArray,
-                    //     url: "https://www.google.com",
-                    //     text: "please work",
-                    // };
-
-
-                    /*
-                    const name = "noob";
-            
-                    // GET MAP DIRECTLY THROUGH CORDOVA LOCAL STORAGE  (NORMAL MAP)          
-                    const mapURL = cordova.file.applicationDirectory + "www/assets/maps/"
-                    
-                    window.resolveLocalFileSystemURL(mapURL, (dirEntry) => {
-        
-                        dirEntry.getFile(name + ".json", {create: false, exclusive: false}, (fileEntry) => {
-                            console.log("fileEntry:")
-                            console.log(fileEntry)
-        
-                            fileEntry.file( async (file) => {
-        
-
-                                const filesArray = [file];
-                                const map_data = {
-                                    title: "Map Pull",
-                                    files: filesArray,
-                                };
-
-                                console.log(filesArray)
-
-                                if (navigator.canShare(map_data)) {console.log("this file can be shared!")} else {console.log("cant share this file")}
-
-                                try {
-                                    await navigator.share(map_data);
-                                } catch (err) {
-                                    console.log(err)
-                                }
-
-                                // const reader = new FileReader();
-                                // reader.onload = (e) => {
-                                //     this.parseMapData(JSON.parse(e.target.result))
-                                // };
-                                // reader.onerror = (e) => alert(e.target.error.name);
-                    
-                                // reader.readAsText(file)
-                            })
-                        })
-                    })
-                    */
-
-
-                    // console.log(map_data)
-                    // if (navigator.canShare(link)) {console.log("this LINK can be shared!")} else {console.log("cant share this LINK")}
-
-
-                    
+                    }, (error) => { console.log(error) });                        
                 });
 
                 document.body.appendChild(shareDiv);
-                // document.getElementById("shareDiv").remove()     
     
             }
             
 
-            /*
-
-            function downloadObjectAsJson(exportObj, exportName) { // https://stackoverflow.com/questions/19721439/download-json-object-as-a-file-from-browser
-                exportName = prompt("Enter Map Name");
-                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj));
-                const downloadAnchorNode = document.createElement('a');
-                downloadAnchorNode.setAttribute("href", dataStr);
-                downloadAnchorNode.setAttribute("download", exportName + ".json");
-                document.body.appendChild(downloadAnchorNode); // required for firefox
-                downloadAnchorNode.click();
-                downloadAnchorNode.remove();
-            }
-
-              
-              var dataUri = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(JSONData));
-              var downloadAnchorNode = document.createElement('a');
-              
-              downloadAnchorNode.setAttribute("href", dataUri);
-              downloadAnchorNode.setAttribute("download", "CarData.json");
-              document.body.appendChild(downloadAnchorNode);
-              
-              downloadAnchorNode.click();
-
-
-            const mapObj = {
-                pile : "yes",
-                test : 0,
-                boop : "beep"
-            }
-
-            downloadObjectAsJson(mapObj, "test")
-            */
         })
 
 
         btn_level_original = new Button(200, 100, 110, "map_original_button", "map_original_button", 0, "Original", function() { 
             UserInterface.gamestate = 5;
             UserInterface.renderedButtons = [btn_mainMenu];
-            btn_mainMenu.resize()
             Map.initMap("original");
         })
 
         btn_level_noob = new Button(320, 100, 90, "map_noob_button", "map_noob_button", 0, "Noob", function() { 
             UserInterface.gamestate = 5;
             UserInterface.renderedButtons = [btn_mainMenu];
-            btn_mainMenu.resize()
             Map.initMap("noob");
         })
 
         btn_level_hellscape = new Button(410, 100, 140, "map_hellscape_button", "map_hellscape_button", 0, "Hellscape", function() { 
             UserInterface.gamestate = 5;
             UserInterface.renderedButtons = [btn_mainMenu];
-            btn_mainMenu.resize()
             Map.initMap("hellscape");
         })
 
@@ -1294,59 +1136,108 @@ const UserInterface = {
             
             // UserInterface.gamestate
             // 1: main menu
-            // 2: level select
-            // 2.5: custom level browser (out of date. not used)
+            // 2: level select (MapBrowser)
             // 3: settings
             // 4: store
             // 5: loading map page
             // 6: in level
             // 7: in map editor
+
+            // UserInterface.levelState
+            // 1 = pre-start
+            // 2 = playing level
+            // 3 = in endzone
     
             // MapEditor.editorState
-            // 0 = map select screen
-            // 0.5 = custom map browser screen
+            // 0 = map new/import/load screen. mapeditor's main menu
             // 1 = main map edit screen
             // 2 = platform edit menu
             // 3 = map color page
             // 4 = map settings page
+            // 5 = MapEditor MapBrowser screen
 
+            // MapBrowser.state
+            // 0 = disabled
+            // 1 = standard map browser
+            // 2 = custom map browser
 
-            if (UserInterface.gamestate == 5 || UserInterface.gamestate == 6) { // in custom maps selector page OR loading map OR in map. Need to go back to main map selector page
-                UserInterface.timer = 0;
-                UserInterface.levelState = 1;
-                player = null;
-                // go back to map selector screen (gamestate 2) instead of this?
-                btn_play.released(true)
-                return
-            }
-            
-            if (UserInterface.gamestate == 7) { // IN MAP EDITOR
-                if (MapEditor.editorState == 0) {
-                    UserInterface.gamestate = 1;
-                    UserInterface.renderedButtons = [btn_mapEditor, btn_play, btn_settings];
+            if (UserInterface.gamestate == 2) { // in MapBrowser
+                if (MapEditor.editorState == 5) { // in MapEditor's MapBrowser
+
+                    // goto MapEditor's main menu
+                    // Could also just call btn_map_editor.released(true) it does the same thing. 
+                    MapBrowser.state = 0;
+                    UserInterface.gamestate = 7;
+                    MapEditor.editorState = 0;
+                    UserInterface.renderedButtons = UserInterface.btnGroup_mapEditorMenu
+    
+                    document.getElementById("shareDiv").remove()
+    
                     return
                 }
 
-                if (MapEditor.editorState == 0.5) { // in custom map browser
-                    btn_mapEditor.released(true)
+                if (MapBrowser.state == 1) { // in play standard map browser
+                    // goto main menu
+                    MapBrowser.state = 0;
+                    UserInterface.gamestate = 1
+                    UserInterface.renderedButtons = UserInterface.btnGroup_mainMenu;
+                    return
+                }
+
+                if (MapBrowser.state == 2) { // in play custom map browser
+                    // goto play standard map browser
+                    MapBrowser.state = 1;
+                    UserInterface.renderedButtons = UserInterface.btnGroup_standardMapBrowser
+                    return
+                }
+            }
+
+            if (UserInterface.gamestate == 3) { // in Settings page
+                // goto main menu
+                UserInterface.gamestate = 1
+                UserInterface.renderedButtons = UserInterface.btnGroup_mainMenu;
+                return
+            }
+
+            if (UserInterface.gamestate == 5) { // in Loading Map page
+                // goto standard map browser
+                UserInterface.gamestate = 2;
+                MapBrowser.state = 1;
+                UserInterface.renderedButtons = UserInterface.btnGroup_standardMapBrowser;
+
+                return
+            }
+
+            if (UserInterface.gamestate == 6) { // in Map
+                // goto standard map browser
+                UserInterface.timer = 0;
+                UserInterface.levelState = 1;
+                player = null; // needed?
+
+                UserInterface.gamestate = 2;
+                MapBrowser.state = 1;
+                UserInterface.renderedButtons = UserInterface.btnGroup_standardMapBrowser;
+                return
+            }
+            
+            if (UserInterface.gamestate == 7) { // in MapEditor
+                
+                if (MapEditor.editorState == 0) { // MapEditor main menu
+                    // goto main menu
+                    UserInterface.gamestate = 1;
+                    UserInterface.renderedButtons = UserInterface.btnGroup_mainMenu;
                     return
                 }
 
                 if (MapEditor.editorState == 3 || MapEditor.editorState == 4) { // in map settings or map color pages 
-                    UserInterface.renderedButtons = [btn_exit_edit, btn_add_platform, btn_map_colors, btn_map_settings, btn_add_checkpoint, btn_snappingSlider]
-                    MapEditor.editorState = 1 // might need to do more here - like deselect platforms and shit?
+                    // goto MapEditor main edit screen
+                    UserInterface.renderedButtons = UserInterface.btnGroup_mapEditorInterface
+                    MapEditor.editorState = 1;
                     return
                 }
             }
             
-            if (UserInterface.gamestate == 2 || UserInterface.gamestate == 3) { // in level selector or settings page
-                UserInterface.gamestate = 1
-                UserInterface.renderedButtons = [btn_mapEditor, btn_play, btn_settings];
-                UserInterface.renderedButtons.forEach(button => {
-                    button.resize();
-                });
-                return
-            }
+
         })
 
         btn_restart = new Button(40, "canvasArea.canvas.height - 220", 80, "restart_button", "restart_button_pressed", 0, "", function() { 
@@ -1356,7 +1247,7 @@ const UserInterface = {
             player.restart();
         })
 
-        btn_jump = new Button(40, "canvasArea.canvas.height - 120", 80, "jump_button", "jump_button_pressed", 0, "", function() { 
+        btn_jump = new Button(40, "canvasArea.canvas.height - 140", 100, "jump_button", "jump_button_pressed", 0, "", function() { 
             if (UserInterface.levelState == 1) {
                 UserInterface.timerStart = Date.now();
                 UserInterface.levelState = 2;
@@ -1364,7 +1255,75 @@ const UserInterface = {
             }
         })
 
-        this.renderedButtons = [btn_mapEditor, btn_play, btn_settings]; 
+
+        // GROUPS OF BUTTONS TO RENDER ON DIFFERENT PAGES
+        this.btnGroup_mainMenu = [btn_play, btn_settings, btn_mapEditor]
+        this.btnGroup_settings = [btn_mainMenu, btn_sensitivitySlider, btn_volumeSlider, btn_debugText, btn_strafeHUD, btn_reset_settings]
+        this.btnGroup_standardMapBrowser = [btn_mainMenu, btn_custom_maps, btn_level_original, btn_level_noob, btn_level_hellscape] // should remove level buttons once browser is real
+        this.btnGroup_customMapBrowser = [btn_mainMenu, btn_playMap]
+        this.btnGroup_editMapBrowser = [btn_mainMenu, btn_editMap, btn_deleteMap, btn_shareMap]
+        this.btnGroup_mapEditorMenu = [btn_mainMenu, btn_new_map, btn_load_map, btn_import_map, btn_import_map_text]
+        this.btnGroup_mapEditorInterface = [btn_exit_edit, btn_add_platform, btn_map_colors, btn_map_settings, btn_add_checkpoint, btn_snappingSlider]
+        this.btnGroup_inLevel = [btn_mainMenu, btn_restart, btn_jump];
+        this.btnGroup_mapColor = [
+            btn_mainMenu, 
+            btn_setFromHex,
+            btn_hueSlider, 
+            btn_saturationSlider, 
+            btn_lightnessSlider, 
+            btn_alphaSlider, 
+            
+            btn_backgroundColor,
+            btn_playerColor,
+            btn_platformTopColor,
+            btn_platformSideColor,
+            btn_wallTopColor,
+            btn_wallSideColor,
+            btn_endZoneTopColor,
+            btn_endZoneSideColor,
+            btn_shadowColor,
+        ];
+        this.btnGroup_mapSettings = [
+            btn_mainMenu, 
+            btn_platformHeightSlider,
+            btn_wallHeightSlider,
+            btn_lightAngleSlider,
+            btn_shadowContrastLightSlider,
+            btn_shadowContrastDarkSlider,
+            btn_shadowLengthSlider
+        ];
+        this.btnGroup_editPlatform = [
+            btn_exit_edit,
+            btn_unselect,
+            
+            btn_translate,
+            btn_resize,
+            btn_angleSlider,
+            btn_wall,
+
+            btn_delete_platform,
+            btn_snappingSlider
+        ]
+        this.btnGroup_editPlayerStart = [
+            btn_exit_edit, 
+            btn_unselect, 
+            
+            btn_translate,
+            btn_playerAngleSlider,
+            btn_snappingSlider
+        ]
+        this.btnGroup_editCheckPoint = [
+            btn_exit_edit,
+            btn_unselect,
+            
+            btn_translate,
+
+            btn_delete_platform,
+            btn_snappingSlider
+        ]
+
+
+        this.renderedButtons = this.btnGroup_mainMenu; 
 
     },
 
@@ -1385,10 +1344,7 @@ const UserInterface = {
 
     mapLoaded : function() { // called at the end of Map.parseMapData()
         UserInterface.gamestate = 6;
-        UserInterface.renderedButtons = [btn_mainMenu, btn_restart, btn_jump];
-        UserInterface.renderedButtons.forEach(button => {
-            button.resize();
-        });
+        UserInterface.renderedButtons = this.btnGroup_inLevel;
     },
 
     handleRecord : function() {
@@ -1478,18 +1434,7 @@ const UserInterface = {
                     MapEditor.selectedPlatformIndex = MapEditor.loadedMap.platforms.indexOf(platform)
                     MapEditor.selectedCheckpointIndex = [-1,1]
 
-                    this.renderedButtons = [
-                        btn_exit_edit, 
-                        btn_unselect, 
-                        
-                        btn_translate,
-                        btn_resize,
-                        btn_angleSlider,
-                        btn_wall,
-
-                        btn_delete_platform,
-                        btn_snappingSlider
-                    ]
+                    this.renderedButtons = this.btnGroup_editPlatform;
                     
                     // SYNC ALL BUTTONS AND SLIDERS
                     btn_translate.func() // intially syncs the buttons position to the selected platform. Called whenever screen is scrolled too. not really needed here but avoids a 1 frame flash 
@@ -1506,14 +1451,7 @@ const UserInterface = {
                 MapEditor.selectedPlatformIndex = -2 // -2 means player is selected. Maybe change this to be its own variable
                 MapEditor.selectedCheckpointIndex = [-1,1]
 
-                this.renderedButtons = [
-                    btn_exit_edit, 
-                    btn_unselect, 
-                    
-                    btn_translate,
-                    btn_playerAngleSlider,
-                    btn_snappingSlider
-                ]
+                this.renderedButtons = this.btnGroup_editPlayerStart
 
                 // SYNC ALL BUTTONS AND SLIDERS
                 btn_translate.func() // intially syncs the buttons position to the selected platform. Called whenever screen is scrolled too. not really needed here but avoids a 1 frame flash 
@@ -1555,15 +1493,7 @@ const UserInterface = {
                     MapEditor.selectedCheckpointIndex[0] = MapEditor.loadedMap.checkpoints.indexOf(checkpoint)
                     MapEditor.selectedPlatformIndex = -1
 
-                    this.renderedButtons = [
-                        btn_exit_edit,
-                        btn_unselect,
-                        
-                        btn_translate,
-
-                        btn_delete_platform,
-                        btn_snappingSlider
-                    ]
+                    this.renderedButtons =  this.btnGroup_editCheckPoint;
 
                     if (clickedPlayerRestart) {
                         this.renderedButtons.push(btn_checkpointAngleSlider)
@@ -1887,6 +1817,7 @@ const MapBrowser = { // should set back to 0 at some points??
 }
 
 
+
 class Button {
     constructor(x, y, width, image, image_pressed, togglable, label, func) {
         this.x = eval(x);
@@ -1894,12 +1825,82 @@ class Button {
         this.savedX = x;
         this.savedY = y;
 
-        this.image = document.getElementById(image)
-        this.image_pressed = document.getElementById(image_pressed)
-        this.width = width;
-        if (this.image != null) {
-            this.height = this.width * (this.image.height / this.image.width)
-        } else {this.height = 75} // incase missing image
+        // GET IMAGE
+        // this.image = document.getElementById(image)
+        // this.image_pressed = document.getElementById(image_pressed)
+
+
+        // GET ICON DIRECTLY THROUGH CORDOVA LOCAL STORAGE   
+        const buttonURL = cordova.file.applicationDirectory + "www/assets/images/buttons/"
+        
+        window.resolveLocalFileSystemURL(buttonURL, (dirEntry) => {
+
+            dirEntry.getFile(image + ".svg", {create: false, exclusive: false}, (fileEntry) => {
+
+                fileEntry.file( (file) => {
+
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+
+                        // create SVG elements documents
+                        const lightSVG = new DOMParser().parseFromString(e.target.result, "image/svg+xml").documentElement;
+                        const darkSVG = new DOMParser().parseFromString(e.target.result, "image/svg+xml").documentElement;
+                        
+
+                        // edit fills to to be light/dark modes
+                        lightSVG.getElementById("bg").style.fill = UserInterface.lightColor_1
+                        lightSVG.getElementById("icon").style.fill = UserInterface.darkColor_1
+                        darkSVG.getElementById("bg").style.fill = UserInterface.darkColor_1
+                        darkSVG.getElementById("icon").style.fill= UserInterface.lightColor_1
+
+
+                        // converts svg element to string
+                        const lightSVG_string = new XMLSerializer().serializeToString(lightSVG);
+                        const darkSVG_string = new XMLSerializer().serializeToString(darkSVG);
+
+
+                        // Converting SVG text string to blob for image source
+                        // https://medium.com/@benjamin.black/using-blob-from-svg-text-as-image-source-2a8947af7a8e
+
+                        const lightSVG_blob = new Blob([lightSVG_string], {type: 'image/svg+xml'});
+                        const darkSVG_blob = new Blob([darkSVG_string], {type: 'image/svg+xml'});
+
+
+                        // create links for adding to source of img
+                        const lightSVG_url = URL.createObjectURL(lightSVG_blob);
+                        const darkSVG_url = URL.createObjectURL(darkSVG_blob);
+
+
+                        // add these svg links as src to two images
+                        this.lightIcon = new Image()
+                        this.darkIcon = new Image()
+
+                        this.lightIcon.addEventListener("load", () => {URL.revokeObjectURL(lightSVG_url)}, {once: true});
+                        this.darkIcon.addEventListener("load", () => {URL.revokeObjectURL(darkSVG_url)}, {once: true});
+                        
+                        // Waits till after the images are loaded to get their aspect ratios
+                        this.lightIcon.addEventListener("load", () => {
+                            this.image = this.lightIcon
+                            this.width = width
+                            this.height = this.width * (this.image.height / this.image.width)
+                        }, {once: true});
+
+                        this.lightIcon.src = lightSVG_url
+                        this.darkIcon.src = darkSVG_url
+
+
+                    };
+                    reader.onerror = (e) => alert(e.target.error.name);
+        
+                    reader.readAsText(file)
+                })
+            }, () => {
+                // console.log(image + ": no svg for this button. set height to 75");
+                this.width = width;
+                this.height = 75
+            });
+        })
+        
 
         this.isPressed = false
         this.func = func;
@@ -1916,50 +1917,65 @@ class Button {
     render() {
 
         canvasArea.ctx.save()
-        canvasArea.ctx.shadowColor = "#44444444"
-        canvasArea.ctx.shadowOffsetX = 3
-        canvasArea.ctx.shadowOffsetY = 3
+        // canvasArea.ctx.shadowColor = "#44444444"
+        // canvasArea.ctx.shadowOffsetX = 3
+        // canvasArea.ctx.shadowOffsetY = 3
 
         
-        if (this.image == null) { // should remove once all images are added
+        if (this.image == null) { // dynamically draw button (no icon). Should kill this. have svg for every button -- even blanks
 
-            if (this.toggle == 1 || this.isPressed) {
-                canvasArea.ctx.fillStyle = "#DDDDDD";
+            // if (this.toggle == 1 || this.isPressed) {
+            //     canvasArea.ctx.fillStyle = "#DDDDDD";
+            // } else {
+            //     canvasArea.ctx.fillStyle = "#FFFFFF"
+            // }
+
+            if (UserInterface.darkMode == false) {
+                canvasArea.ctx.fillStyle = UserInterface.lightColor_1
             } else {
-                canvasArea.ctx.fillStyle = "#FFFFFF"
+                canvasArea.ctx.fillStyle = UserInterface.darkColor_1
             }
-            // canvasArea.ctx.fillRect(this.x, this.y, this.width, this.height);
+
             const radius = this.height/2
             canvasArea.ctx.beginPath()
             canvasArea.ctx.moveTo(this.x + radius, this.y) // top line
             canvasArea.ctx.lineTo(this.x + this.width - radius, this.y)
             canvasArea.ctx.arc(this.x + this.width - radius, this.y + radius, radius, 1.5*Math.PI, 0.5*Math.PI) // right arc
-            // canvasArea.ctx.moveTo(this.x + this.width - radius, this.y + this.height)
             canvasArea.ctx.lineTo(this.x + radius, this.y + this.height)
             canvasArea.ctx.arc(this.x + radius, this.y + radius, radius, 0.5*Math.PI, 1.5*Math.PI)
 
             canvasArea.ctx.fill()
 
-        } else {
+        } else { // draw image normally
 
-            if (this.toggle == 1 || this.isPressed) {
-                canvasArea.ctx.drawImage(this.image_pressed, this.x, this.y, this.width, this.width * (this.image.height / this.image.width)); // end part here maintains aspect ratio
+            if (UserInterface.darkMode == false) {
+                canvasArea.ctx.drawImage(this.lightIcon, this.x, this.y, this.width, this.height);
             } else {
-                canvasArea.ctx.drawImage(this.image, this.x, this.y, this.width, this.width * (this.image.height / this.image.width)); // end part here maintains aspect ratio
+                canvasArea.ctx.drawImage(this.darkIcon, this.x, this.y, this.width, this.height);
             }
+
+            // if (this.toggle == 1 || this.isPressed) {
+            //     canvasArea.ctx.drawImage(this.image_pressed, this.x, this.y, this.width, this.width * (this.image.height / this.image.width)); // end part here maintains aspect ratio
+            // } else {
+            //     canvasArea.ctx.drawImage(this.image, this.x, this.y, this.width, this.width * (this.image.height / this.image.width)); // end part here maintains aspect ratio
+            // }
         }
 
         canvasArea.ctx.restore() // resets to no shadows
 
         if (this.label != "") {
-            // add clip in shape of button here
-            canvasArea.ctx.font = "20px sans-serif";
-            canvasArea.ctx.fillStyle = "black";
-            canvasArea.ctx.fillText(this.label, this.x + 18, this.y + (this.height/2) + 8) // 10 is half the height of font
+            // add clip in shape of button here OR
+            // get length of label and truncate it to fit in button with a ... at end
+            canvasArea.ctx.font = "22px sans-serif";
+
+            if (UserInterface.darkMode == false) {
+                canvasArea.ctx.fillStyle = UserInterface.darkColor_1;
+            } else {
+                canvasArea.ctx.fillStyle = UserInterface.lightColor_1;
+            }
+
+            canvasArea.ctx.fillText(this.label, this.x + 20, this.y + (this.height/2) + 8) // 10 is half the height of font
         }
-
-
-
      
     }
 
@@ -1972,12 +1988,7 @@ class Button {
         if (override) {this.func()}
         if (this.isPressed) {this.func()}
     }
-    resize() {
-        this.x = eval(this.savedX)
-        this.y = eval(this.savedY)
-        // console.log("evalled: " + this.savedX)
-        // console.log("button position re-evaluated")
-    }
+
 }
 
 
@@ -2064,8 +2075,6 @@ class SliderUI {
             }
         }
     }
-
-    resize() {}
 }
 
 
@@ -2440,6 +2449,7 @@ const PreviewWindow = {
             ctx.closePath();
             ctx.fill();
         }
+        ctx.restore();
     }
 }
 
@@ -2614,12 +2624,12 @@ const ColorPicker = {
 const MapEditor = {
     
     editorState : 0,
-    // 0 = map select screen
-    // 0.5 = custom map browser screen
+    // 0 = map new/import/load screen
     // 1 = main map edit screen
     // 2 = platform edit menu
     // 3 = map color page
     // 4 = map settings page
+    // 5 = custom map browser screen
 
     loadedMap : null,
     scrollX_vel : 0, // for smooth scrolling 
@@ -2907,13 +2917,13 @@ const MapEditor = {
     update : function() {
         
         // when map is loaded for editing
-        if (this.editorState == 0) { // 0 == map select screen
+        if (this.editorState == 0 || this.editorState == 5) { // 0 == new/load map screen OR map browser screen
             if (this.loadedMap !== null) { // if map is loaded then switch to Main Map Edit screen
                 
                 canvasArea.canvas.style.backgroundColor = this.loadedMap.style.backgroundColor; // set bg color here so it only triggers once not every render frame
                 document.body.style.backgroundColor = this.loadedMap.style.backgroundColor;
 
-                UserInterface.renderedButtons = [btn_exit_edit, btn_add_platform, btn_map_colors, btn_map_settings, btn_add_checkpoint, btn_snappingSlider]
+                UserInterface.renderedButtons = UserInterface.btnGroup_mapEditorInterface;
 
                 this.screenX = -this.loadedMap.playerStart.x + canvasArea.canvas.width/2;
                 this.screenY = -this.loadedMap.playerStart.y + canvasArea.canvas.height/2;
@@ -3206,6 +3216,7 @@ const AudioHandler = {
         var menuMusic_path = decodeURI(cordova.file.applicationDirectory) + "www/assets/audio/menuMusic.wav";
         var successAudio_path = decodeURI(cordova.file.applicationDirectory) + "www/assets/audio/success.mp3";
         var jumpAudio_path = decodeURI(cordova.file.applicationDirectory) + "www/assets/audio/jump.mp3";
+        var splashAudio_path = decodeURI(cordova.file.applicationDirectory) + "www/assets/audio/splash.mp3";
 
         // iOS need to remove file://
         // could use a for loop here. Just throw all the sounds into an array?
@@ -3213,6 +3224,7 @@ const AudioHandler = {
             menuMusic_path = menuMusic_path.replace("file://", "");
             successAudio_path = successAudio_path.replace("file://", "");
             jumpAudio_path = jumpAudio_path.replace("file://", "")
+            splashAudio_path = splashAudio_path.replace("file://", "")
         }
 
 
@@ -3220,6 +3232,7 @@ const AudioHandler = {
         this.menuMusic = new Media(menuMusic_path, null, (error) => {console.log(error);});
         this.successAudio = new Media(successAudio_path, function(){AudioHandler.successAudio.setRate(1)}, (error) => {console.log(error);});
         this.jumpAudio = new Media (jumpAudio_path, function(){AudioHandler.jumpAudio.setRate(1)}, (error) => {console.log(error);})
+        this.splashAudio = new Media (splashAudio_path, function(){AudioHandler.splashAudio.setRate(1)}, (error) => {console.log(error);})
 
 
         // PLAY ALL SOUNDS REALLY QUICKLY TO CACHE THEM
@@ -3229,6 +3242,8 @@ const AudioHandler = {
         this.successAudio.setRate(9999)
         this.successAudio.play()
 
+        this.splashAudio.setRate(9999)
+        this.splashAudio.play()
         
         // SET CORRECT VOLUMES
         this.setVolumes();
@@ -3245,6 +3260,7 @@ const AudioHandler = {
         this.menuMusic.setVolume(UserInterface.volume);
         this.successAudio.setVolume(UserInterface.volume);
         this.jumpAudio.setVolume(UserInterface.volume);
+        this.splashAudio.setVolume(UserInterface.volume);
     },
 }
 
@@ -3957,18 +3973,14 @@ class InputHandler {
     touchX = 0;
     touchY = 0;
     dragging = false;
-    pinching = false;
-    pinchAmount = 0;
     currentDragID = null;
 
 
     constructor(){
 
         window.addEventListener("touchstart", e => {
+            // e.preventDefault() // attempt to suppress highlighting magnifing glass (didnt work on old ios)
 
-            if (e.touches.length === 2) {
-                this.pinching = true;
-            }
             
             for (let i = 0; i < e.changedTouches.length; i++){ // for loop needed incase multiple touches are sent in the same frame
 
@@ -3976,13 +3988,13 @@ class InputHandler {
                     this.currentDragID = e.changedTouches[i].identifier;
                     this.dragging = true;
 
-                    this.touchX = e.changedTouches[i].pageX;
-                    this.touchY = e.changedTouches[i].pageY;
-                    this.previousX = e.changedTouches[i].pageX;
-                    this.previousY = e.changedTouches[i].pageY;
+                    this.touchX = e.changedTouches[i].pageX * canvasArea.scale;
+                    this.touchY = e.changedTouches[i].pageY * canvasArea.scale;
+                    this.previousX = e.changedTouches[i].pageX * canvasArea.scale;
+                    this.previousY = e.changedTouches[i].pageY * canvasArea.scale;
                 }
 
-                UserInterface.touchStarted(e.changedTouches[i].pageX, e.changedTouches[i].pageY); // sends touchStarted for every touchStart
+                UserInterface.touchStarted(e.changedTouches[i].pageX * canvasArea.scale, e.changedTouches[i].pageY * canvasArea.scale); // sends touchStarted for every touchStart
 
             }
         });
@@ -3992,18 +4004,14 @@ class InputHandler {
             for (let i = 0; i < e.changedTouches.length; i++){ // for loop needed incase multiple touches are sent in the same frame
 
                 if (e.changedTouches[i].identifier == this.currentDragID) { // if this touch is the dragging touch
-                    this.touchX = e.changedTouches[i].pageX;
-                    this.touchY = e.changedTouches[i].pageY;
+                    this.touchX = e.changedTouches[i].pageX * canvasArea.scale;
+                    this.touchY = e.changedTouches[i].pageY * canvasArea.scale;
                 }
 
                 if (this.dragging == false) { // if main drag is released but theres another to jump to
                     this.currentDragID = e.changedTouches[i].identifier;
                 }
 
-                if (this.pinching) {
-                    // calculatePinchAmount
-                    // OKAY MAYBE KILL THE PINCH IDEA
-                }
             }
         });
 
@@ -4011,7 +4019,6 @@ class InputHandler {
         window.addEventListener("touchcancel", e => { // Fixes tripple tap bugs by reseting everything
             this.currentDragID = null;
             this.dragging = false;
-            this.pinching = false;
         });
 
         window.addEventListener("touchend", e => {
@@ -4030,19 +4037,18 @@ class InputHandler {
                         this.previousX = 0;
                         this.previousY = 0;
                         this.dragging = false;
-                        this.pinching = false;
 
 
                     } else {
                         this.currentDragID = e.touches[0].identifier
-                        this.touchX = e.touches[0].pageX;
-                        this.touchY = e.touches[0].pageY;
-                        this.previousX = e.touches[0].pageX;
-                        this.previousY = e.touches[0].pageY;
+                        this.touchX = e.touches[0].pageX * canvasArea.scale;
+                        this.touchY = e.touches[0].pageY * canvasArea.scale;
+                        this.previousX = e.touches[0].pageX * canvasArea.scale;
+                        this.previousY = e.touches[0].pageY * canvasArea.scale;
                     }
                 }
 
-                UserInterface.touchReleased(e.changedTouches[i].pageX, e.changedTouches[i].pageY); // sends touchRealease for every release
+                UserInterface.touchReleased(e.changedTouches[i].pageX * canvasArea.scale, e.changedTouches[i].pageY * canvasArea.scale); // sends touchRealease for every release
 
             }
         });
