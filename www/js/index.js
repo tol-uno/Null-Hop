@@ -892,22 +892,22 @@ const UserInterface = {
 
 
         // SET COLOR BUTTONS
-        btn_backgroundColor = new Button("canvasArea.canvas.width - 400", "20", 150, "", "", 0, "Background", function() {
+        btn_backgroundColor = new Button("canvasArea.canvas.width - 400", "20", 175, "", "", 0, "Background", function() {
             canvasArea.canvas.style.backgroundColor = MapEditor.loadedMap.style.backgroundColor = ColorPicker.getColor()
             // set ColorPicker.partIndex = 1
             // ColorPicker.setColor(MapEditor.loadedMap.style.backgroundColor)
             // UserInterface.backgroundUpdated
         })
 
-        btn_playerColor = new Button("canvasArea.canvas.width - 200", "20", 150, "", "", 0, "Player", function() {
+        btn_playerColor = new Button("canvasArea.canvas.width - 200", "20", 175, "", "", 0, "Player", function() {
             MapEditor.loadedMap.style.playerColor = ColorPicker.getColor()
         })
 
-        btn_platformTopColor = new Button("canvasArea.canvas.width - 400", "120", 150, "", "", 0, "Platform Top", function() {
+        btn_platformTopColor = new Button("canvasArea.canvas.width - 400", "120", 175, "", "", 0, "Platform Top", function() {
             MapEditor.loadedMap.style.platformTopColor = ColorPicker.getColor()
         })
 
-        btn_platformSideColor = new Button("canvasArea.canvas.width - 200", "120", 150, "", "", 0, "Platform Side", function() {
+        btn_platformSideColor = new Button("canvasArea.canvas.width - 200", "120", 175, "", "", 0, "Platform Side", function() {
             MapEditor.loadedMap.style.platformSideColor = ColorPicker.getColor()
             PreviewWindow.update(PreviewWindow.platform)
         })
