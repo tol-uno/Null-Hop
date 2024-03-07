@@ -210,6 +210,22 @@ const canvasArea = { //Canvas Object
         return RGB_Linear_Shade(darkness, color)
     },
 
+    roundedRect : function (x, y, width, height, radius) {
+        const ctx = canvasArea.ctx
+
+        ctx.beginPath();
+        ctx.moveTo(x + radius, y);
+        ctx.lineTo(x + width - radius, y);
+        ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+        ctx.lineTo(x + width, y + height - radius);
+        ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+        ctx.lineTo(x + radius, y + height);
+        ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+        ctx.lineTo(x, y + radius);
+        ctx.quadraticCurveTo(x, y, x + radius, y);
+        ctx.closePath();
+    },
+
 }
 
 
@@ -235,10 +251,22 @@ const UserInterface = {
     levelState : 1, // 1 = pre-start, 2 = playing level, 3 = in endzone
 
     darkMode : false,
-    lightColor_1 : "#f0f0f1", // lighter
-    lightColor_2 : "#dcd8d6", // darker
-    darkColor_1 : "#36393d",
-    darkColor_2 : "#292d30",
+
+    lightColor_1 : "#fff8ea", // lighter
+    lightColor_2 : "#f7f1e4", // darker
+    darkColor_1 : "#503c4b",
+    darkColor_2 : "#412b3a",
+
+    
+    // lightColor_1 : "rgb(244,243,240)", // lighter
+    // lightColor_2 : "rgb(231,230,223)", // darker
+    // darkColor_1 : "rgb(39,39,37)",
+    // darkColor_2 : "rgb(34,34,32)",
+
+    // lightColor_1 : "#f0f0f1", // lighter
+    // lightColor_2 : "#dcd8d6", // darker
+    // darkColor_1 : "#36393d",
+    // darkColor_2 : "#292d30",
 
 
     start : function() { // where all buttons are created
@@ -274,7 +302,7 @@ const UserInterface = {
         // CREATING THE BUTTONS []  []  [] 
 
         // Main Menu BUTTONS
-        btn_play = new Button("midX - 90", 130, 180, "play_button", "play_button_pressed", 0, "", function() { 
+        btn_play = new Button("midX - 90", 180, 180, "play_button", "play_button_pressed", 0, "", function() { 
             UserInterface.gamestate = 2;
             MapBrowser.state = 1;
             // MapBrowser.init()
@@ -283,12 +311,12 @@ const UserInterface = {
 
         })
 
-        btn_settings = new Button("midX - 106", 220, 212, "settings_button", "settings_button_pressed", 0, "", function() {
+        btn_settings = new Button("midX - 116.5", 280, 233, "settings_button", "settings_button_pressed", 0, "", function() {
             UserInterface.gamestate = 3;
             UserInterface.renderedButtons = UserInterface.btnGroup_settings
         })
 
-        btn_mapEditor = new Button("midX - 122", 310, 244, "map_editor_button", "map_editor_button_pressed", 0, "", function() {
+        btn_mapEditor = new Button("midX - 143", 380, 286, "map_editor_button", "map_editor_button_pressed", 0, "", function() {
             UserInterface.gamestate = 7;
             MapEditor.editorState = 0;
             UserInterface.renderedButtons = UserInterface.btnGroup_mapEditorMenu;
@@ -865,7 +893,7 @@ const UserInterface = {
 
 
         // COLOR PICKER BUTTONS AND SLIDERS
-        btn_setFromHex = new Button("ColorPicker.x + 160", "ColorPicker.y + 32", 150, "", "", 0, "Set From Hex", function() {
+        btn_setFromHex = new Button("ColorPicker.x + 160", "ColorPicker.y + 25", 140, "", "", 0, "Use Hex #", function() {
             ColorPicker.setFromHex()
         })
 
@@ -896,7 +924,7 @@ const UserInterface = {
             canvasArea.canvas.style.backgroundColor = MapEditor.loadedMap.style.backgroundColor = ColorPicker.getColor()
             // set ColorPicker.partIndex = 1
             // ColorPicker.setColor(MapEditor.loadedMap.style.backgroundColor)
-            // UserInterface.backgroundUpdated
+            UserInterface.determineButtonColor()
         })
 
         btn_playerColor = new Button("canvasArea.canvas.width - 200", "20", 175, "", "", 0, "Player", function() {
@@ -912,25 +940,25 @@ const UserInterface = {
             PreviewWindow.update(PreviewWindow.platform)
         })
 
-        btn_wallTopColor = new Button("canvasArea.canvas.width - 75", "180", 50, "set_button", "set_button_pressed", 0, "Wall Top", function() {
+        btn_wallTopColor = new Button("canvasArea.canvas.width - 400", "220", 175, "", "", 0, "Wall Top", function() {
             MapEditor.loadedMap.style.wallTopColor = ColorPicker.getColor()
         })
 
-        btn_wallSideColor = new Button("canvasArea.canvas.width - 75", "220", 50, "set_button", "set_button_pressed", 0, "Wall Side", function() {
+        btn_wallSideColor = new Button("canvasArea.canvas.width - 200", "220", 175, "", "", 0, "Wall Side", function() {
             MapEditor.loadedMap.style.wallSideColor = ColorPicker.getColor()
             PreviewWindow.update(PreviewWindow.wall)
         })
 
-        btn_endZoneTopColor = new Button("canvasArea.canvas.width - 75", "260", 50, "set_button", "set_button_pressed", 0, "End Zone Top", function() {
+        btn_endZoneTopColor = new Button("canvasArea.canvas.width - 400", "320", 175, "", "", 0, "End Zone Top", function() {
             MapEditor.loadedMap.style.endZoneTopColor = ColorPicker.getColor()
         })
 
-        btn_endZoneSideColor = new Button("canvasArea.canvas.width - 75", "300", 50, "set_button", "set_button_pressed", 0, "End Zone Side", function() {
+        btn_endZoneSideColor = new Button("canvasArea.canvas.width - 200", "320", 175, "", "", 0, "End Zone Side", function() {
             MapEditor.loadedMap.style.endZoneSideColor = ColorPicker.getColor()
             PreviewWindow.update(PreviewWindow.endzone)
         })
 
-        btn_shadowColor = new Button("canvasArea.canvas.width - 75", "340", 50, "set_button", "set_button_pressed", 0, "Shadow", function() {
+        btn_shadowColor = new Button("canvasArea.canvas.width - 400", "420", 175, "", "", 0, "Shadow", function() {
             MapEditor.loadedMap.style.shadowColor = ColorPicker.getColor()
         })
 
@@ -1048,9 +1076,8 @@ const UserInterface = {
 
         btn_shareMap = new Button("canvasArea.canvas.width - 250", "canvasArea.canvas.height - 290", 200, "", "", 0, "Share Map", function(createDiv) {
             // The shareDiv does all the work for this button.
-            // shareDiv is created by btn_load_map
-            // shareDiv is removed by btn_mainMenu, btn_editMap and btn_deleteMap? (not yet doing this)
-            // document.getElementById("shareDiv").remove()
+            // createDiv is called by btn_load_map
+            // shareDiv is removed by btn_mainMenu, btn_editMap and btn_deleteMap
 
             
             if (createDiv) { // called with this tag by btn_load_map
@@ -1058,10 +1085,10 @@ const UserInterface = {
                 shareDiv.setAttribute("id", "shareDiv");
                 shareDiv.style.cssText = `
                     position: absolute; 
-                    left: ${btn_shareMap.x}px;
-                    top: ${btn_shareMap.y}px;
-                    width: ${btn_shareMap.width}px;
-                    height: ${btn_shareMap.height}px;
+                    left: ${btn_shareMap.x / canvasArea.scale}px;
+                    top: ${btn_shareMap.y / canvasArea.scale}px;
+                    width: ${btn_shareMap.width / canvasArea.scale}px;
+                    height: ${btn_shareMap.height / canvasArea.scale}px;
                     // border: solid 2px blue;
                 `
 
@@ -1132,7 +1159,7 @@ const UserInterface = {
 
 
         // IN LEVEL Buttons
-        btn_mainMenu = new Button(40, 40, 80, "back_button", "back_button_pressed", 0, "", function() { 
+        btn_mainMenu = new Button(40, 40, 100, "back_button", "back_button_pressed", 0, "", function() { 
             
             // UserInterface.gamestate
             // 1: main menu
@@ -1240,7 +1267,7 @@ const UserInterface = {
 
         })
 
-        btn_restart = new Button(40, "canvasArea.canvas.height - 220", 80, "restart_button", "restart_button_pressed", 0, "", function() { 
+        btn_restart = new Button(40, "canvasArea.canvas.height - 280", 100, "restart_button", "restart_button_pressed", 0, "", function() { 
             UserInterface.timer = 0;
             UserInterface.levelState = 1;
             player.checkpointIndex = -1;
@@ -1357,6 +1384,21 @@ const UserInterface = {
             window.localStorage.setItem("record_" + Map.name, UserInterface.timer)
             Map.record = UserInterface.timer
         }
+    },
+
+    determineButtonColor : function() {
+        let bgColor = canvasArea.canvas.style.backgroundColor // returns rgba string
+        
+        bgColor = bgColor.replace(/[^\d,.]/g, '').split(',')
+        
+        console.log(bgColor)
+
+        const luminance = (0.299 * bgColor[0] + 0.587 * bgColor[1] + 0.114 * bgColor[2])/255
+        // luminance = (0.299 * R + 0.587 * G + 0.114 * B)/255
+        // console.log("luminance: " + luminance)
+
+        this.darkMode = (luminance > 0.7) ? true : false;
+
     },
 
     secondsToMinutes : function(milliseconds) {
@@ -1518,7 +1560,7 @@ const UserInterface = {
             document.body.style.backgroundColor = "#a3d5e1";
   
             const title = document.getElementById("title")
-            canvasArea.ctx.drawImage(title, canvasArea.canvas.width/2 - 150, 30, 300, (title.height / title.width) * 300)
+            canvasArea.ctx.drawImage(title, canvasArea.canvas.width/2 - 250, 30, 500, 500 * (title.height / title.width))
 
             const menu_background = document.getElementById("menu_background")
             canvasArea.ctx.drawImage(menu_background, -30, 15, canvasArea.canvas.width + 60, (menu_background.height / menu_background.width) * canvasArea.canvas.width + 60)
@@ -1526,8 +1568,8 @@ const UserInterface = {
         }
 
         if (this.gamestate == 3) { // In Settings
-            canvasArea.ctx.font = "20px sans-serif";
-            canvasArea.ctx.fillStyle = "white";
+            canvasArea.ctx.font = "20px BAHNSCHRIFT";
+            canvasArea.ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1: UserInterface.lightColor_1;
             canvasArea.ctx.fillText("Debug Text", 180, 270)
             canvasArea.ctx.fillText("Strafe Info", 180, 330)
 
@@ -1535,16 +1577,16 @@ const UserInterface = {
 
         if (this.gamestate == 6) { // In Level
 
-            canvasArea.ctx.font = "25px sans-serif";
-            canvasArea.ctx.fillStyle = "white";
+            canvasArea.ctx.font = "25px BAHNSCHRIFT";
+            canvasArea.ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1: UserInterface.lightColor_1;
             canvasArea.ctx.fillText("Time: " + UserInterface.secondsToMinutes(this.timer), canvasArea.canvas.width - 230, 60)
             canvasArea.ctx.fillText("Record: " + UserInterface.secondsToMinutes(Map.record), canvasArea.canvas.width - 230, 90);
 
 
             if (this.debugText == 1) { // DRAWING DEBUG TEXT
                 const textX = canvasArea.canvas.width * 0.18; 
-                canvasArea.ctx.font = "15px sans-serif";
-                canvasArea.ctx.fillStyle = "#FFFFFF"; // WHITE
+                canvasArea.ctx.font = "15px BAHNSCHRIFT";
+                canvasArea.ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1: UserInterface.lightColor_1;
     
                 canvasArea.ctx.fillText("dragAmountX: " + touchHandler.dragAmountX, textX, 60);
                 canvasArea.ctx.fillText("fps: " + Math.round(100/dt), textX, 80);
@@ -1574,8 +1616,8 @@ const UserInterface = {
 
                 // little text for strafeHelper
                 canvasArea.ctx.save()
-                canvasArea.ctx.font = "12px sans-serif";
-                canvasArea.ctx.fillStyle = "black"; 
+                canvasArea.ctx.font = "12px BAHNSCHRIFT";
+                canvasArea.ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1: UserInterface.lightColor_1;
                 canvasArea.ctx.translate(midX - 17, midY + 28)
                 canvasArea.ctx.rotate(90 * Math.PI / 180)
                 canvasArea.ctx.fillText("dragAmountX", 0, 0)
@@ -1618,29 +1660,23 @@ const UserInterface = {
             if (player.endSlow == 0) { // level name, your time, best time, strafe efficiency
 
                 // END SCREEN BOX
-                canvasArea.ctx.strokeStyle = "#BBBBBB";
-                canvasArea.ctx.lineWidth = 6;
-                canvasArea.ctx.fillStyle = "#FFFFFF";
-                canvasArea.ctx.beginPath();
+                canvasArea.ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
 
-                // canvasArea.ctx.roundRect(midX - 150, midY - 100, 300, 200, 10); // DOESNT WORK ON IOS
-                // https://stackoverflow.com/questions/1255512/how-to-draw-a-rounded-rectangle-using-html-canvas
-                // ^ alternative way to do rounded rectangles
+                canvasArea.roundedRect(midX - 150, midY - 100, 300, 200, 25)
 
-                canvasArea.ctx.rect(midX - 150, midY - 100, 300, 200)
-
-                canvasArea.ctx.save();
+                canvasArea.ctx.save(); // save 3
+                
                 canvasArea.ctx.shadowColor = "rgba(0, 0, 0, 0.5)"; 
                 canvasArea.ctx.shadowBlur = 20;
                 canvasArea.ctx.fill();
-                canvasArea.ctx.restore();
+
+                canvasArea.ctx.restore(); // restore 3
                 
-                canvasArea.ctx.stroke();
 
                 // END SCREEN TEXT
-                canvasArea.ctx.font = "25px sans-serif";
+                canvasArea.ctx.font = "25px BAHNSCHRIFT";
 
-                canvasArea.ctx.fillStyle = "#555555"; // GRAY
+                canvasArea.ctx.fillStyle = (!UserInterface.darkMode) ? UserInterface.darkColor_1 : UserInterface.lightColor_1; // GRAY
 
                 canvasArea.ctx.fillText("Level: " + Map.name, midX - 120, midY - 50);
                 canvasArea.ctx.fillText("Time: " + UserInterface.secondsToMinutes(UserInterface.timer), midX - 120, midY - 0);
@@ -1792,8 +1828,8 @@ const MapBrowser = { // should set back to 0 at some points??
         // desription of maps
         const ctx = canvasArea.ctx;
 
-        ctx.font = "15px sans-serif";
-        ctx.fillStyle = "black"
+        ctx.font = "15px BAHNSCHRIFT";
+        ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1: UserInterface.lightColor_1;
         ctx.fillText("selectedMapIndex: " + this.selectedMapIndex, 10, 200)
         ctx.fillText("scrollY: " + this.scrollY, 10, 220)
 
@@ -1843,50 +1879,77 @@ class Button {
                     reader.onload = (e) => {
 
                         // create SVG elements documents
+                        // CAN COMBINE ALL INITs HERE
                         const lightSVG = new DOMParser().parseFromString(e.target.result, "image/svg+xml").documentElement;
+                        const lightSVG_p = new DOMParser().parseFromString(e.target.result, "image/svg+xml").documentElement;
+                        
                         const darkSVG = new DOMParser().parseFromString(e.target.result, "image/svg+xml").documentElement;
+                        const darkSVG_p = new DOMParser().parseFromString(e.target.result, "image/svg+xml").documentElement;
                         
 
                         // edit fills to to be light/dark modes
                         lightSVG.getElementById("bg").style.fill = UserInterface.lightColor_1
                         lightSVG.getElementById("icon").style.fill = UserInterface.darkColor_1
+                        lightSVG_p.getElementById("bg").style.fill = UserInterface.lightColor_2
+                        lightSVG_p.getElementById("icon").style.fill = UserInterface.darkColor_2
+
                         darkSVG.getElementById("bg").style.fill = UserInterface.darkColor_1
                         darkSVG.getElementById("icon").style.fill= UserInterface.lightColor_1
+                        darkSVG_p.getElementById("bg").style.fill = UserInterface.darkColor_2
+                        darkSVG_p.getElementById("icon").style.fill= UserInterface.lightColor_2
 
-
+                        
                         // converts svg element to string
                         const lightSVG_string = new XMLSerializer().serializeToString(lightSVG);
+                        const lightSVG_p_string = new XMLSerializer().serializeToString(lightSVG_p);
+
                         const darkSVG_string = new XMLSerializer().serializeToString(darkSVG);
+                        const darkSVG_p_string = new XMLSerializer().serializeToString(darkSVG_p);
 
 
                         // Converting SVG text string to blob for image source
                         // https://medium.com/@benjamin.black/using-blob-from-svg-text-as-image-source-2a8947af7a8e
-
                         const lightSVG_blob = new Blob([lightSVG_string], {type: 'image/svg+xml'});
+                        const lightSVG_p_blob = new Blob([lightSVG_p_string], {type: 'image/svg+xml'});
+
                         const darkSVG_blob = new Blob([darkSVG_string], {type: 'image/svg+xml'});
+                        const darkSVG_p_blob = new Blob([darkSVG_p_string], {type: 'image/svg+xml'});
 
 
                         // create links for adding to source of img
                         const lightSVG_url = URL.createObjectURL(lightSVG_blob);
+                        const lightSVG_p_url = URL.createObjectURL(lightSVG_p_blob);
+
                         const darkSVG_url = URL.createObjectURL(darkSVG_blob);
+                        const darkSVG_p_url = URL.createObjectURL(darkSVG_p_blob);
 
 
                         // add these svg links as src to two images
                         this.lightIcon = new Image()
+                        this.lightIcon_p = new Image()
+
                         this.darkIcon = new Image()
+                        this.darkIcon_p = new Image()
 
                         this.lightIcon.addEventListener("load", () => {URL.revokeObjectURL(lightSVG_url)}, {once: true});
+                        this.lightIcon_p.addEventListener("load", () => {URL.revokeObjectURL(lightSVG_p_url)}, {once: true});
+
                         this.darkIcon.addEventListener("load", () => {URL.revokeObjectURL(darkSVG_url)}, {once: true});
-                        
+                        this.darkIcon_p.addEventListener("load", () => {URL.revokeObjectURL(darkSVG_p_url)}, {once: true});
+
                         // Waits till after the images are loaded to get their aspect ratios
-                        this.lightIcon.addEventListener("load", () => {
+                        // COULD MOVE TO A FUNCTION ELSEWERE THAT IS JUST CALLED
+                        this.lightIcon.addEventListener("load", () => { // just uses another random event listener... yuck
                             this.image = this.lightIcon
                             this.width = width
                             this.height = this.width * (this.image.height / this.image.width)
                         }, {once: true});
 
                         this.lightIcon.src = lightSVG_url
+                        this.lightIcon_p.src = lightSVG_p_url
+
                         this.darkIcon.src = darkSVG_url
+                        this.darkIcon_p.src = darkSVG_p_url
 
 
                     };
@@ -1897,7 +1960,7 @@ class Button {
             }, () => {
                 // console.log(image + ": no svg for this button. set height to 75");
                 this.width = width;
-                this.height = 75
+                this.height = this.width > 75 ? 75 : this.width
             });
         })
         
@@ -1921,44 +1984,65 @@ class Button {
         // canvasArea.ctx.shadowOffsetX = 3
         // canvasArea.ctx.shadowOffsetY = 3
 
-        
-        if (this.image == null) { // dynamically draw button (no icon). Should kill this. have svg for every button -- even blanks
+        const shrinkFactor = 0.95
 
-            // if (this.toggle == 1 || this.isPressed) {
-            //     canvasArea.ctx.fillStyle = "#DDDDDD";
-            // } else {
-            //     canvasArea.ctx.fillStyle = "#FFFFFF"
-            // }
+        if (this.image == null) { // dynamically draw button (no icon). Should KILL this. have svg for every button -- even blanks
+
+            let x, y, w, h
 
             if (UserInterface.darkMode == false) {
-                canvasArea.ctx.fillStyle = UserInterface.lightColor_1
+                canvasArea.ctx.fillStyle = (this.toggle == 1 || this.isPressed) ? UserInterface.lightColor_2 : UserInterface.lightColor_1;
             } else {
-                canvasArea.ctx.fillStyle = UserInterface.darkColor_1
+                canvasArea.ctx.fillStyle = (this.toggle == 1 || this.isPressed) ? UserInterface.darkColor_2 : UserInterface.darkColor_1;
             }
 
-            const radius = this.height/2
+            if (this.toggle == 1 || this.isPressed) {
+                w = this.width * shrinkFactor
+                h = this.height * shrinkFactor
+                x = this.x + ((this.width - w) / 2)
+                y = this.y + ((this.height - h) / 2)
+            } else {
+                w = this.width;
+                h = this.height;
+                x = this.x;
+                y = this.y;
+            }
+
+            const radius = h/2
             canvasArea.ctx.beginPath()
-            canvasArea.ctx.moveTo(this.x + radius, this.y) // top line
-            canvasArea.ctx.lineTo(this.x + this.width - radius, this.y)
-            canvasArea.ctx.arc(this.x + this.width - radius, this.y + radius, radius, 1.5*Math.PI, 0.5*Math.PI) // right arc
-            canvasArea.ctx.lineTo(this.x + radius, this.y + this.height)
-            canvasArea.ctx.arc(this.x + radius, this.y + radius, radius, 0.5*Math.PI, 1.5*Math.PI)
+            canvasArea.ctx.moveTo(x + radius, y) // top line
+            canvasArea.ctx.lineTo(x + w - radius, y)
+            canvasArea.ctx.arc(x + w - radius, y + radius, radius, 1.5*Math.PI, 0.5*Math.PI) // right arc
+            canvasArea.ctx.lineTo(x + radius, y + h)
+            canvasArea.ctx.arc(x + radius, y + radius, radius, 0.5*Math.PI, 1.5*Math.PI)
 
             canvasArea.ctx.fill()
 
         } else { // draw image normally
 
+            let icon, x, y, w, h
+
             if (UserInterface.darkMode == false) {
-                canvasArea.ctx.drawImage(this.lightIcon, this.x, this.y, this.width, this.height);
+                icon = (this.toggle == 1 || this.isPressed) ? this.lightIcon_p : this.lightIcon;
             } else {
-                canvasArea.ctx.drawImage(this.darkIcon, this.x, this.y, this.width, this.height);
+                icon = (this.toggle == 1 || this.isPressed) ? this.darkIcon_p : this.darkIcon;
             }
 
-            // if (this.toggle == 1 || this.isPressed) {
-            //     canvasArea.ctx.drawImage(this.image_pressed, this.x, this.y, this.width, this.width * (this.image.height / this.image.width)); // end part here maintains aspect ratio
-            // } else {
-            //     canvasArea.ctx.drawImage(this.image, this.x, this.y, this.width, this.width * (this.image.height / this.image.width)); // end part here maintains aspect ratio
-            // }
+            if (this.toggle == 1 || this.isPressed) {
+                w = this.width * shrinkFactor
+                h = this.height * shrinkFactor
+                x = this.x + ((this.width - w) / 2)
+                y = this.y + ((this.height - h) / 2)
+            } else {
+                w = this.width;
+                h = this.height;
+                x = this.x;
+                y = this.y;
+            }
+
+            // draws whatever icon with whatever pressed state were set above
+            canvasArea.ctx.drawImage(icon, x, y, w, h)
+
         }
 
         canvasArea.ctx.restore() // resets to no shadows
@@ -1966,13 +2050,9 @@ class Button {
         if (this.label != "") {
             // add clip in shape of button here OR
             // get length of label and truncate it to fit in button with a ... at end
-            canvasArea.ctx.font = "22px sans-serif";
+            canvasArea.ctx.font = "22px BAHNSCHRIFT";
+            canvasArea.ctx.fillStyle = (!UserInterface.darkMode) ? UserInterface.darkColor_1: UserInterface.lightColor_1;
 
-            if (UserInterface.darkMode == false) {
-                canvasArea.ctx.fillStyle = UserInterface.darkColor_1;
-            } else {
-                canvasArea.ctx.fillStyle = UserInterface.lightColor_1;
-            }
 
             canvasArea.ctx.fillText(this.label, this.x + 20, this.y + (this.height/2) + 8) // 10 is half the height of font
         }
@@ -1994,6 +2074,7 @@ class Button {
 
 class SliderUI {
 //    const confirmed = true;
+// KILL labelColor
 
     constructor(x, y, width, min, max, decimalDetail, label, labelColor, variable, func) {
         this.x = eval(x);
@@ -2020,11 +2101,12 @@ class SliderUI {
 
 
     render() {
-        canvasArea.ctx.strokeStyle = "#BBBBBB";
+        // canvasArea.ctx.strokeStyle = "#BBBBBB";
         canvasArea.ctx.lineWidth = 8;
         canvasArea.ctx.lineCap = "round"
-        // canvasArea.ctx.fillStyle = "#FFFFFF";
-        canvasArea.ctx.fillStyle = this.labelColor;
+        // canvasArea.ctx.fillStyle = this.labelColor;
+        canvasArea.ctx.fillStyle = canvasArea.ctx.strokeStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1: UserInterface.lightColor_1;
+
         
         canvasArea.ctx.beginPath(); // Slider Line
         canvasArea.ctx.moveTo(this.x, this.y)
@@ -2035,8 +2117,7 @@ class SliderUI {
         canvasArea.ctx.arc(this.sliderX, this.y, 15, 0, 2 * Math.PI);
         canvasArea.ctx.fill();
 
-        canvasArea.ctx.font = "20px sans-serif";
-        canvasArea.ctx.fillStyle = this.labelColor;
+        canvasArea.ctx.font = "20px BAHNSCHRIFT";
         canvasArea.ctx.fillText(this.label + ": " + this.value, this.x, this.y - 30)
     }
 
@@ -2553,20 +2634,24 @@ const ColorPicker = {
 
     render : function() {
         const ctx = canvasArea.ctx;
-        
-        ctx.fillStyle = "white"
-        ctx.strokeStyle = "black"
-        ctx.lineWidth = 1
-        ctx.fillRect(this.x-20, this.y-20, this.width + 40, 385)
-        ctx.strokeRect(this.x-20, this.y-20, this.width + 40, 385)
+
+        ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.lightColor_1 : UserInterface.darkColor_1;
+
+        ctx.strokeStyle = (!UserInterface.darkMode) ? UserInterface.lightColor_1 : UserInterface.darkColor_1
+        ctx.lineWidth = 4
+
+        canvasArea.roundedRect(this.x-20, this.y-20, this.width + 40, 385, 25)
+        ctx.fill()
+        ctx.stroke()
 
         ctx.fillStyle = "hsla(" + this.h + ", " + this.s + "%, " + this.l + "%, " + this.a + ")"
-        ctx.fillRect(this.x, this.y, this.width/2, 80)
-        ctx.strokeRect(this.x, this.y, this.width/2, 80)
 
-        ctx.fillStyle = "black"
+        canvasArea.roundedRect(this.x, this.y, this.width/2, 80, 10)
+        ctx.fill()
+        ctx.stroke()
+
+        ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
         ctx.fillText(this.rgbaValue, this.x + 160, this.y + 10)
-        ctx.fillText("Use Hex Color", this.x + 160, this.y + 50)
 
         ctx.fillStyle = this.hueGradient
         ctx.fillRect(this.x, this.y + 105, this.width, this.height)
@@ -2675,11 +2760,11 @@ const MapEditor = {
 
 
                 if (platform == this.loadedMap.platforms[this.selectedPlatformIndex]) { // DRAWING THE BORDER AROUND THE SELECTED PLATFORM
-                    ctx.strokeStyle = "#000000"
+                    ctx.strokeStyle = UserInterface.lightColor_1
                     ctx.lineWidth = 6
                     ctx.strokeRect(-platform.width/2 + 3, -platform.height/2 + 3, platform.width - 6, platform.height - 6);
                     
-                    ctx.strokeStyle = "#FFFFFF"
+                    ctx.strokeStyle = UserInterface.darkColor_1
                     ctx.lineWidth = 2
                     ctx.strokeRect(-platform.width/2 + 3, -platform.height/2 + 3, platform.width - 6, platform.height - 6);
                 }
@@ -2698,8 +2783,7 @@ const MapEditor = {
 
             // RENDER CHECKPOINTS
             MapEditor.loadedMap.checkpoints.forEach(checkpoint => {
-                ctx.strokeStyle = "white"
-                ctx.fillStyle = "white"
+                ctx.strokeStyle = ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1 : UserInterface.lightColor_1; 
                 ctx.lineWidth = 5
                 ctx.beginPath();
                 ctx.moveTo(checkpoint.triggerX1, checkpoint.triggerY1);
@@ -2734,7 +2818,7 @@ const MapEditor = {
                 // draw lines conecting to the playerRestart
                 ctx.beginPath();
                 ctx.setLineDash([6, 12]);
-                ctx.strokeStyle = "#FFFFFF88"
+                // ctx.strokeStyle = "#FFFFFF88"
                 ctx.moveTo(checkpoint.triggerX1, checkpoint.triggerY1);
                 ctx.lineTo(checkpoint.x, checkpoint.y);
                 ctx.lineTo(checkpoint.triggerX2, checkpoint.triggerY2);
@@ -2746,13 +2830,13 @@ const MapEditor = {
                     
                     
                     if (this.selectedCheckpointIndex[1] == 1) { // trigger 1
-                        ctx.strokeStyle = "#000000"
+                        ctx.strokeStyle = UserInterface.darkColor_1
                         ctx.lineWidth = 6
                         ctx.beginPath();
                         ctx.arc(checkpoint.triggerX1, checkpoint.triggerY1, 20, 0, 2 * Math.PI);
                         ctx.stroke();
     
-                        ctx.strokeStyle = "#FFFFFF"
+                        ctx.strokeStyle = UserInterface.lightColor_1
                         ctx.lineWidth = 2
                         ctx.beginPath();
                         ctx.arc(checkpoint.triggerX1, checkpoint.triggerY1, 20, 0, 2 * Math.PI);
@@ -2760,13 +2844,13 @@ const MapEditor = {
                     }
 
                     if (this.selectedCheckpointIndex[1] == 2) { // trigger 2
-                        ctx.strokeStyle = "#000000"
+                        ctx.strokeStyle = UserInterface.darkColor_1
                         ctx.lineWidth = 6
                         ctx.beginPath();
                         ctx.arc(checkpoint.triggerX2, checkpoint.triggerY2, 20, 0, 2 * Math.PI);
                         ctx.stroke();
     
-                        ctx.strokeStyle = "#FFFFFF"
+                        ctx.strokeStyle = UserInterface.lightColor_1
                         ctx.lineWidth = 2
                         ctx.beginPath();
                         ctx.arc(checkpoint.triggerX2, checkpoint.triggerY2, 20, 0, 2 * Math.PI);
@@ -2780,11 +2864,11 @@ const MapEditor = {
                         ctx.translate(checkpoint.x, checkpoint.y)
                         ctx.rotate(checkpoint.angle * Math.PI/180);
             
-                        ctx.strokeStyle = "#000000"
+                        ctx.strokeStyle = UserInterface.darkColor_1
                         ctx.lineWidth = 6
                         ctx.strokeRect(-16, -16, 32, 32);
                         
-                        ctx.strokeStyle = "#FFFFFF"
+                        ctx.strokeStyle = UserInterface.lightColor_1
                         ctx.lineWidth = 2
                         ctx.strokeRect(-16, -16, 32, 32);
                         ctx.restore()
@@ -2815,11 +2899,11 @@ const MapEditor = {
             ctx.stroke();
 
             if (this.selectedPlatformIndex == -2) { // DRAWING SELECTION BORDER AROUND PLAYER
-                ctx.strokeStyle = "#000000"
+                ctx.strokeStyle = UserInterface.darkColor_1
                 ctx.lineWidth = 6
                 ctx.strokeRect(-13, -13, 26, 26);
                 
-                ctx.strokeStyle = "#FFFFFF"
+                ctx.strokeStyle = UserInterface.lightColor_1
                 ctx.lineWidth = 2
                 ctx.strokeRect(-13, -13, 26, 26);
             }
@@ -2830,28 +2914,27 @@ const MapEditor = {
 
 
             // MAP EDITOR UI
-            ctx.font = "15px sans-serif";
+            ctx.font = "15px BAHNSCHRIFT";
 
 
             if (this.editorState == 2) { // DRAWING SIDE PANEL
             
                 // SIDE PANEL
-                ctx.fillStyle = "#FFFFFF"
-                ctx.fillRect(canvasArea.canvas.width - 220, 20, 200, 260) // If these change also change the values in UserInterface.touchReleased()
+                ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.lightColor_1 : UserInterface.darkColor_1;
+                canvasArea.roundedRect(canvasArea.canvas.width - 220, 20, 200, 260, 25) // If these change also change the values in UserInterface.touchReleased()
+                ctx.fill()
 
+                ctx.fillStyle = UserInterface.darkColor_1; // for text
 
                 if (this.selectedPlatformIndex == -2) { // player is selected
                     
-                    ctx.fillStyle = "#000000"
                     ctx.fillText("Player Start", canvasArea.canvas.width - 200, 100);
                     ctx.fillText("Position: " + this.loadedMap.playerStart.x + ", " + this.loadedMap.playerStart.y, canvasArea.canvas.width - 200, 120);
 
-                    
                 }
                 
                 if (this.selectedPlatformIndex >= 0){ // platform is selected
                     
-                    ctx.fillStyle = "#000000"
                     ctx.fillText("Platform", canvasArea.canvas.width - 200, 100);
                     ctx.fillText("Position: " + this.loadedMap.platforms[this.selectedPlatformIndex].x + ", " + this.loadedMap.platforms[this.selectedPlatformIndex].y, canvasArea.canvas.width - 200, 120);
                     ctx.fillText("Size: " + this.loadedMap.platforms[this.selectedPlatformIndex].width + ", " + this.loadedMap.platforms[this.selectedPlatformIndex].height, canvasArea.canvas.width - 200, 140);
@@ -2860,8 +2943,7 @@ const MapEditor = {
                 }
 
                 if (this.selectedCheckpointIndex[0] >= 0){ // checkpoint is selected
-                    
-                    ctx.fillStyle = "#000000"
+        
                     ctx.fillText("Checkpoint", canvasArea.canvas.width - 200, 100);
                     ctx.fillText("Trigger 1: " + this.loadedMap.checkpoints[this.selectedCheckpointIndex[0]].triggerX1 + ", " + this.loadedMap.checkpoints[this.selectedCheckpointIndex[0]].triggerY1, canvasArea.canvas.width - 200, 120);
                     ctx.fillText("Trigger 2: " + this.loadedMap.checkpoints[this.selectedCheckpointIndex[0]].triggerX2 + ", " + this.loadedMap.checkpoints[this.selectedCheckpointIndex[0]].triggerY2, canvasArea.canvas.width - 200, 140);
@@ -2875,17 +2957,6 @@ const MapEditor = {
                 PreviewWindow.render()
                 ColorPicker.render()
                 // PreviewWindow update is called by buttons
-
-                canvasArea.ctx.fillStyle = "black"
-                canvasArea.ctx.fillText("Background",canvasArea.canvas.width-200, 40)
-                canvasArea.ctx.fillText("Player",canvasArea.canvas.width-200, 80)
-                canvasArea.ctx.fillText("Platform Top",canvasArea.canvas.width-200, 120)
-                canvasArea.ctx.fillText("Platform Side",canvasArea.canvas.width-200, 160)
-                canvasArea.ctx.fillText("Wall Top",canvasArea.canvas.width-200, 200)
-                canvasArea.ctx.fillText("Wall Side",canvasArea.canvas.width-200, 240)
-                canvasArea.ctx.fillText("End Zone Top",canvasArea.canvas.width-200, 280)
-                canvasArea.ctx.fillText("End Zone Side",canvasArea.canvas.width-200, 320)
-                canvasArea.ctx.fillText("Shadow",canvasArea.canvas.width-200, 360)
             }
 
 
@@ -2899,7 +2970,7 @@ const MapEditor = {
                 
                 // GENERAL MAP EDITOR DEBUG TEXT
                 const textX = 150;
-                ctx.fillStyle = "#FFFFFF";
+                ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1 :  UserInterface.lightColor_1;
                 ctx.fillText("screenX: " + this.screenX, textX, 60);
                 ctx.fillText("touchX: " + Math.round(touchHandler.touchX - this.screenX), textX, 80);
                 ctx.fillText("touchY: " + Math.round(touchHandler.touchY - this.screenY), textX, 100);
@@ -2924,6 +2995,7 @@ const MapEditor = {
                 document.body.style.backgroundColor = this.loadedMap.style.backgroundColor;
 
                 UserInterface.renderedButtons = UserInterface.btnGroup_mapEditorInterface;
+                UserInterface.determineButtonColor()
 
                 this.screenX = -this.loadedMap.playerStart.x + canvasArea.canvas.width/2;
                 this.screenY = -this.loadedMap.playerStart.y + canvasArea.canvas.height/2;
@@ -3546,6 +3618,7 @@ const Map = {
         // Get map record from local storage
         this.record = window.localStorage.getItem("record_" + this.name)
 
+        UserInterface.determineButtonColor();
         UserInterface.mapLoaded(); // moves onto gamestate 6
         
     },
@@ -3865,8 +3938,8 @@ const Map = {
         }
 
         // PLAFORM RENDERING DEBUG TEXT
-        ctx.fillStyle = "#FFFFFF";
-        ctx.font = "12px sans-serif"
+        ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1 :  UserInterface.lightColor_1;
+        ctx.font = "12px BAHNSCHRIFT"
         // ctx.fillText("index: " + platform.index, 0, 0);
         // ctx.fillText("renderIndex: " + this.renderedPlatforms.indexOf(platform), 0, 0)
         // ctx.fillText("angle: " + platform.angle, 0, 20);
