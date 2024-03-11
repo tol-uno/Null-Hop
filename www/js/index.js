@@ -983,7 +983,9 @@ const UserInterface = {
 
             if (MapBrowser.state == 1) { // in normal maps browser
 
-                // Pull code from the btn_original and btn_noob code. will still need to do indexing and stuff though.
+                UserInterface.gamestate = 5;
+                UserInterface.renderedButtons = [btn_mainMenu];
+                Map.initMap(MapBrowser.selectedMapIndex);
 
             } else { // in custom maps browser
 
@@ -1139,23 +1141,61 @@ const UserInterface = {
         })
 
 
-        btn_level_original = new Button(200, 100, 110, "", "", 0, "Original", function() { 
-            UserInterface.gamestate = 5;
-            UserInterface.renderedButtons = [btn_mainMenu];
-            Map.initMap("original");
+        // LEVEL BUTTONS
+        btn_level_pitfall = new Button(250, 50, 175, "", "", 0, "Pitfall", function() {
+            if (this.toggle) {
+            
+                this.toggle = 0;
+                MapBrowser.selectedMapIndex = -1
+            
+            } else {
+
+                // loop through each button and untoggle it
+                UserInterface.renderedButtons.forEach(button => {
+                    if (button.toggle == 1) {button.toggle = 0}
+                })
+
+                this.toggle = 1;
+                MapBrowser.selectedMapIndex = "original"
+            }
         })
 
-        btn_level_noob = new Button(320, 100, 90, "", "", 0, "Noob", function() { 
-            UserInterface.gamestate = 5;
-            UserInterface.renderedButtons = [btn_mainMenu];
-            Map.initMap("noob");
+        btn_level_below = new Button(250, 150, 175, "", "", 0, "Below", function() {
+            if (this.toggle) {
+            
+                this.toggle = 0;
+                MapBrowser.selectedMapIndex = -1
+            
+            } else {
+
+                // loop through each button and untoggle it
+                UserInterface.renderedButtons.forEach(button => {
+                    if (button.toggle == 1) {button.toggle = 0}
+                })
+
+                this.toggle = 1;
+                MapBrowser.selectedMapIndex = "hellscape"
+            }
         })
 
-        btn_level_hellscape = new Button(410, 100, 140, "", "", 0, "Hellscape", function() { 
-            UserInterface.gamestate = 5;
-            UserInterface.renderedButtons = [btn_mainMenu];
-            Map.initMap("hellscape");
+        btn_level_turmoil = new Button(250, 250, 175, "", "", 0, "Turmoil", function() {
+            if (this.toggle) {
+            
+                this.toggle = 0;
+                MapBrowser.selectedMapIndex = -1
+
+            } else {
+
+                // loop through each button and untoggle it
+                UserInterface.renderedButtons.forEach(button => {
+                    if (button.toggle == 1) {button.toggle = 0}
+                })
+
+                this.toggle = 1;
+                MapBrowser.selectedMapIndex = "noob"
+            }
         })
+
 
 
 
@@ -1215,6 +1255,8 @@ const UserInterface = {
                 if (MapBrowser.state == 2) { // in play custom map browser
                     // goto play standard map browser
                     MapBrowser.state = 1;
+                    MapBrowser.scrollY = 0;
+                    MapBrowser.selectedMapIndex = -1;
                     UserInterface.renderedButtons = UserInterface.btnGroup_standardMapBrowser
                     return
                 }
@@ -1287,7 +1329,13 @@ const UserInterface = {
         // GROUPS OF BUTTONS TO RENDER ON DIFFERENT PAGES
         this.btnGroup_mainMenu = [btn_play, btn_settings, btn_mapEditor]
         this.btnGroup_settings = [btn_mainMenu, btn_sensitivitySlider, btn_volumeSlider, btn_debugText, btn_strafeHUD, btn_reset_settings]
-        this.btnGroup_standardMapBrowser = [btn_mainMenu, btn_custom_maps, btn_level_original, btn_level_noob, btn_level_hellscape] // should remove level buttons once browser is real
+        this.btnGroup_standardMapBrowser = [
+            btn_mainMenu, btn_custom_maps, btn_playMap,
+            btn_level_pitfall,
+            btn_level_below, 
+
+            btn_level_turmoil,
+        ]
         this.btnGroup_customMapBrowser = [btn_mainMenu, btn_playMap]
         this.btnGroup_editMapBrowser = [btn_mainMenu, btn_editMap, btn_deleteMap, btn_shareMap]
         this.btnGroup_mapEditorMenu = [btn_mainMenu, btn_new_map, btn_load_map, btn_import_map, btn_import_map_text]
@@ -1696,7 +1744,6 @@ const MapBrowser = { // should set back to 0 at some points??
     scrollY: 0,
     scrollVel: 0,
     selectedMapIndex: -1, // -1 == no map selected
-    arrayOfMaps: [],
 
     init : function() {
 
@@ -1706,11 +1753,21 @@ const MapBrowser = { // should set back to 0 at some points??
         // also gamestate being set to 2 should be done elsewhere
 
         if (this.state == 1) { // Normal map browser
-            // read all files in www/maps
+            
+            this.scrollY = 0
+            this.scrollVel = 0
+            this.selectedMapIndex = -1
+        
         }
 
-        if (this.state == 2 || this.state == 3) { // Custom map browser
+        // CUSTOM MAP BROWSER
+        if (this.state == 2 || this.state == 3) {
             
+            this.scrollY = 0
+            this.scrollVel = 0
+            this.selectedMapIndex = -1
+            console.log(UserInterface.renderedButtons)
+
             // access file system and set up all nessasary map buttons for the browser type
             // a horrible nested mess but it keeps everything firing in the right sequence
             function initCustomMapBrowser(path){
@@ -1719,7 +1776,6 @@ const MapBrowser = { // should set back to 0 at some points??
                     var reader = fileSystem.createReader();
                     reader.readEntries((entries) => { // entries is an array of all the maps
                         
-                        MapBrowser.arrayOfMaps = entries
 
                         // LOOP THROUGH EACH CUSTOM MAP
                         let mapNumber = 0
@@ -1748,7 +1804,7 @@ const MapBrowser = { // should set back to 0 at some points??
                             // create toggle buttons for each map. These can be selected to preview map info. seperate play button will play them 
 
                             // create these with blank button icons. render() adds text ontop . ALSO CHANGE THE CHECK IN RENDER FUNC
-                            let button = new Button(200, 50 + (100 * mapNumber), 175, "", "", 1, String(mapEntry.name.split(".")[0]), function(sync) {
+                            let button = new Button(250, 50 + (100 * mapNumber), 175, "", "", 1, String(mapEntry.name.split(".")[0]), function(sync) {
                                 // has access to mapEntry and .name
                                 
                                 // Use the buttons initial Y value to determine its index within all the maps. Silly but works
@@ -1762,6 +1818,8 @@ const MapBrowser = { // should set back to 0 at some points??
                                 } else {
                                     if (this.toggle) { // toggle off
                                         this.toggle = 0;
+                                        MapBrowser.selectedMapIndex = -1
+
                                     } else { // toggle on
 
                                         // loop through each button and untoggle it
@@ -1776,7 +1834,7 @@ const MapBrowser = { // should set back to 0 at some points??
 
                             })
                             
-                            UserInterface.renderedButtons.push(button)
+                            UserInterface.renderedButtons = UserInterface.renderedButtons.concat([button])
                             mapNumber ++
                         })                        
                     }, (error) => { console.log(error) });
@@ -1836,18 +1894,6 @@ const MapBrowser = { // should set back to 0 at some points??
 
         const maxScroll = 50 + ((UserInterface.renderedButtons.length - 2) * 100)
         ctx.fillText("maxScroll: " + maxScroll, 10, 240)
-
-        
-        let mapButtonIndex = 0
-        UserInterface.renderedButtons.forEach(button => {
-            // if (button.image == document.getElementById("play_button")) { // CHANGE TO BE BLANK BUTTON IMAGE . Only runs on map buttons not static ones
-            if (button.x == 400) {   
-                let name = String(this.arrayOfMaps[mapButtonIndex].name.split(".")[0])
-
-                ctx.fillText(name, button.x - 50, button.y + (button.height/2))
-                mapButtonIndex ++
-            }
-        })
 
     }
 
@@ -1959,6 +2005,18 @@ class Button {
                 // console.log(image + ": no svg for this button. set height to 75");
                 this.width = width;
                 this.height = this.width > 75 ? 75 : this.width
+
+                // TRUNCATE AND SET LABEL
+                canvasArea.ctx.font = "22px BAHNSCHRIFT"; // for measuring text
+
+                if (canvasArea.ctx.measureText(label).width > this.width - 30) { // if needs to be truncated
+                    while (canvasArea.ctx.measureText(label + "...").width > this.width - 30) {
+                        label = label.slice(0, -1) // slice off last character
+                    }
+                    this.shortLabel = label + "..."
+                }
+
+                
             });
 
 
@@ -2009,14 +2067,7 @@ class Button {
                             this.lightIcon_toggled.addEventListener("load", () => {URL.revokeObjectURL(lightSVG_url)}, {once: true});    
                             this.darkIcon_toggled.addEventListener("load", () => {URL.revokeObjectURL(darkSVG_url)}, {once: true});
     
-                            // Waits till after the images are loaded to get their aspect ratios
-                            // COULD MOVE TO A FUNCTION ELSEWERE THAT IS JUST CALLED
-                            // this.lightIcon_p.addEventListener("load", () => { // just uses another random event listener... yuck
-                            //     // this.image_pressed = this.lightIcon_p
-                            //     this.width = width
-                            //     this.height = this.width * (this.lightIcon_p.height / this.lightIcon_p.width)
-                            // }, {once: true});
-    
+
                             this.lightIcon_toggled.src = lightSVG_url    
                             this.darkIcon_toggled.src = darkSVG_url
 
@@ -2042,7 +2093,9 @@ class Button {
             this.func(true) // runs the released function with the "sync" tag to sync button's toggle state
         }
 
-        this.label = label;
+
+        // shortLabel set in asych function above ^
+        this.label = label
 
     }
 
@@ -2050,9 +2103,9 @@ class Button {
 
         canvasArea.ctx.save()
 
-        const shrinkFactor = 0.95
+        const shrinkFactor = (this.hasToggleImage) ? 1 : 0.95 // doesnt need to be calculated every frame
 
-        if (this.image == null) { // dynamically draw button (no icon). Should KILL this. have svg for every button -- even blanks
+        if (this.image == null) { // dynamically draw button (no icon). Should KILL this. have svg for every button -- even blanks FALSE BAD BAD 
 
             let x, y, w, h
 
@@ -2122,13 +2175,15 @@ class Button {
         canvasArea.ctx.restore() // resets to no shadows
 
         if (this.label != "") {
-            // add clip in shape of button here OR
-            // get length of label and truncate it to fit in button with a ... at end
+
             canvasArea.ctx.font = "22px BAHNSCHRIFT";
             canvasArea.ctx.fillStyle = (!UserInterface.darkMode) ? UserInterface.darkColor_1: UserInterface.lightColor_1;
 
-
-            canvasArea.ctx.fillText(this.label, this.x + 20, this.y + (this.height/2) + 8) // 10 is half the height of font
+            if (this.shortLabel != null) {
+                canvasArea.ctx.fillText(this.shortLabel, this.x + (this.width - canvasArea.ctx.measureText(this.shortLabel).width)/2, this.y + (this.height/2) + 7)
+            } else {
+                canvasArea.ctx.fillText(this.label, this.x + (this.width - canvasArea.ctx.measureText(this.label).width)/2, this.y + (this.height/2) + 7)
+            }
         }
      
     }
@@ -2147,7 +2202,6 @@ class Button {
 
 
 class SliderUI {
-//    const confirmed = true;
 // KILL labelColor
 
     constructor(x, y, width, min, max, decimalDetail, label, labelColor, variable, func) {
@@ -2158,7 +2212,7 @@ class SliderUI {
         this.max = max;
         this.decimalDetail = decimalDetail // 1 = whole numbers, 10 = 10ths place, 100 = 100ths place
         this.label = label;
-        this.labelColor = labelColor;
+        // this.labelColor = labelColor;
         this.value = variable;
         this.variableToControl = String(variable);
         this.func = func;
@@ -2185,12 +2239,18 @@ class SliderUI {
         canvasArea.ctx.lineTo(this.x + this.width, this.y)
         canvasArea.ctx.stroke();
 
+        canvasArea.ctx.font = "20px BAHNSCHRIFT"; // Label
+        canvasArea.ctx.fillText(this.label + ": " + this.value, this.x, this.y - 30)
+
         canvasArea.ctx.beginPath(); // Slider Handle
         canvasArea.ctx.arc(this.sliderX, this.y, 15, 0, 2 * Math.PI);
         canvasArea.ctx.fill();
 
-        canvasArea.ctx.font = "20px BAHNSCHRIFT";
-        canvasArea.ctx.fillText(this.label + ": " + this.value, this.x, this.y - 30)
+        // draw highlight color in slider handle
+        canvasArea.ctx.fillStyle = (!UserInterface.darkMode) ? UserInterface.darkColor_1: UserInterface.lightColor_1;
+        canvasArea.ctx.beginPath();
+        canvasArea.ctx.arc(this.sliderX, this.y, 10, 0, 2 * Math.PI);
+        canvasArea.ctx.fill();
     }
 
     update() {
@@ -3387,13 +3447,13 @@ const AudioHandler = {
 
 
         // PLAY ALL SOUNDS REALLY QUICKLY TO CACHE THEM
-        this.jumpAudio.setRate(9999)
+        this.jumpAudio.setRate(999)
         this.jumpAudio.play()
 
-        this.successAudio.setRate(9999)
+        this.successAudio.setRate(999)
         this.successAudio.play()
 
-        this.splashAudio.setRate(9999)
+        this.splashAudio.setRate(999)
         this.splashAudio.play()
         
         // SET CORRECT VOLUMES
