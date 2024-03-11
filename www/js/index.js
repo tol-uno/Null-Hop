@@ -302,7 +302,7 @@ const UserInterface = {
         // CREATING THE BUTTONS []  []  [] 
 
         // Main Menu BUTTONS
-        btn_play = new Button("midX - 90", 180, 180, "play_button", "play_button_pressed", 0, "", function() { 
+        btn_play = new Button("midX - 90", 180, 180, "play_button", "", 0, "", function() { 
             UserInterface.gamestate = 2;
             MapBrowser.state = 1;
             // MapBrowser.init()
@@ -311,12 +311,12 @@ const UserInterface = {
 
         })
 
-        btn_settings = new Button("midX - 116.5", 280, 233, "settings_button", "settings_button_pressed", 0, "", function() {
+        btn_settings = new Button("midX - 116.5", 280, 233, "settings_button", "", 0, "", function() {
             UserInterface.gamestate = 3;
             UserInterface.renderedButtons = UserInterface.btnGroup_settings
         })
 
-        btn_mapEditor = new Button("midX - 143", 380, 286, "map_editor_button", "map_editor_button_pressed", 0, "", function() {
+        btn_mapEditor = new Button("midX - 143", 380, 286, "map_editor_button", "", 0, "", function() {
             UserInterface.gamestate = 7;
             MapEditor.editorState = 0;
             UserInterface.renderedButtons = UserInterface.btnGroup_mapEditorMenu;
@@ -325,7 +325,7 @@ const UserInterface = {
 
 
         // SETTINGS Buttons 
-        btn_reset_settings = new Button("canvasArea.canvas.width - 200", "canvasArea.canvas.height - 100", 120, "", "", 0, "Erase Data", function() {
+        btn_reset_settings = new Button("canvasArea.canvas.width - 300", "canvasArea.canvas.height - 100", 200, "", "", 0, "Erase Data", function() {
             
             const reset = confirm("Reset All Settings and Records?");
             if (reset) {
@@ -366,7 +366,7 @@ const UserInterface = {
             AudioHandler.setVolumes();
         })
 
-        btn_debugText = new Button(310, 240, 80, "checkbox", "checkbox_pressed", 1, "", function(sync) {
+        btn_debugText = new Button(310, 240, 80, "toggle_button", "toggle_button_pressed", 1, "", function(sync) {
             if (sync) {
                     this.toggle = UserInterface.debugText;
             } else {
@@ -382,7 +382,7 @@ const UserInterface = {
             }
         })
 
-        btn_strafeHUD = new Button(310, 300, 80, "checkbox", "checkbox_pressed", 1, "", function(sync) {
+        btn_strafeHUD = new Button(310, 300, 80, "toggle_button", "toggle_button_pressed", 1, "", function(sync) {
             if (sync) {
                 this.toggle = UserInterface.strafeHUD;
             } else {
@@ -501,8 +501,9 @@ const UserInterface = {
             
         })
 
+
         // MAP EDITOR BUTTONS
-        btn_exit_edit = new Button("20", "20", 75, "back_button", "back_button_pressed", 0, "", function() {
+        btn_exit_edit = new Button("25", "25", 100, "back_button", "back_button_pressed", 0, "", function() {
 
             // DONT REALLY NEED TO DO ALL THIS STUFF BELOW UNLESS USER CONFIRMS THEY WANT TO SAVE MAP. SHOULD MOVE TO BE WITHIN CONFIRMATION
             const map = MapEditor.loadedMap;
@@ -613,7 +614,7 @@ const UserInterface = {
             
         })
         
-        btn_add_platform = new Button("canvasArea.canvas.width - 240", "20", 200, "platform_button", "platform_button_pressed", 0, "", function() {
+        btn_add_platform = new Button("canvasArea.canvas.width - 240", "25", 204, "platform_button", "", 0, "", function() {
             
             const newPlatform = {
                 "x": Math.round(-MapEditor.screenX + canvasArea.canvas.width/2),
@@ -637,7 +638,7 @@ const UserInterface = {
             btn_wall.func(true) // syncs the wall button's toggle state
         })
 
-        btn_add_checkpoint = new Button("canvasArea.canvas.width - 290", "120", 250, "cp_button", "cp_button_pressed", 0, "", function() {
+        btn_add_checkpoint = new Button("canvasArea.canvas.width - 300", "120", 250, "cp_button", "", 0, "", function() {
             const middleX = Math.round(-MapEditor.screenX + canvasArea.canvas.width/2)
             const middleY = Math.round(-MapEditor.screenY + canvasArea.canvas.height/2)
             const newCheckPoint = {
@@ -653,7 +654,7 @@ const UserInterface = {
             MapEditor.loadedMap.checkpoints.push(newCheckPoint);
         })
 
-        btn_map_colors = new Button("canvasArea.canvas.width - 400", "20", 125, "map_colors_button", "map_colors_button_pressed", 0, "", function() {
+        btn_map_colors = new Button("canvasArea.canvas.width -388", "25", 126, "map_colors_button", "", 0, "", function() {
             MapEditor.editorState = 3 // map colors
             
             PreviewWindow.update(PreviewWindow.wall)
@@ -664,7 +665,7 @@ const UserInterface = {
             UserInterface.renderedButtons = UserInterface.btnGroup_mapColor
         })
 
-        btn_map_settings = new Button("canvasArea.canvas.width - 550", "20", 125, "map_settings_button", "map_settings_button_pressed", 0, "", function() {
+        btn_map_settings = new Button("canvasArea.canvas.width - 550", "25", 141, "map_settings_button", "", 0, "", function() {
             MapEditor.editorState = 4 // map settings
             
             PreviewWindow.update(PreviewWindow.wall)
@@ -681,18 +682,18 @@ const UserInterface = {
             UserInterface.renderedButtons = UserInterface.btnGroup_mapSettings
         })
 
-        btn_snappingSlider = new SliderUI("50", "canvasArea.canvas.height - 50", 170, 0, 50, 0.2, "Snapping", "white", MapEditor.loadedMap ? MapEditor.snapAmount : 0, function() {
+        btn_snappingSlider = new SliderUI("60", "canvasArea.canvas.height - 60", 170, 0, 50, 0.2, "Snapping", "white", MapEditor.loadedMap ? MapEditor.snapAmount : 0, function() {
             MapEditor.snapAmount = this.value
         })
 
-        btn_unselect = new Button("canvasArea.canvas.width - 210", "25", 60, "x_button", "x_button_pressed", 0, "", function() {
+        btn_unselect = new Button("canvasArea.canvas.width - 260", "30", 60, "x_button", "", 0, "", function() {
             
             MapEditor.selectedPlatformIndex = -1; // No selected platform
             MapEditor.selectedCheckpointIndex = [-1,1]; // No selected checkpoint
             UserInterface.renderedButtons = UserInterface.btnGroup_mapEditorInterface
         })
 
-        btn_translate = new Button(0, 0, 45, "translate_button", "translate_button_pressed", 0, "", function() {
+        btn_translate = new Button(0, 0, 50, "translate_button", "", 0, "", function() {
             
             if (MapEditor.selectedPlatformIndex != -1) { // platform selected
                 let platform;
@@ -761,7 +762,7 @@ const UserInterface = {
             }
         })
 
-        btn_resize = new Button(0, 0, 35, "translate_button", "translate_button_pressed", 0, "", function() {
+        btn_resize = new Button(0, 0, 50, "scale_button", "", 0, "", function() {
 
             let platform = MapEditor.loadedMap.platforms[MapEditor.selectedPlatformIndex]
 
@@ -792,23 +793,23 @@ const UserInterface = {
             
         })
 
-        btn_angleSlider = new SliderUI("canvasArea.canvas.width - 205", "205", 170, -50, 50, 1, "Angle", "black", MapEditor.loadedMap ? MapEditor.loadedMap.platforms[MapEditor.selectedPlatformIndex] : 0, function() {
+        btn_angleSlider = new SliderUI("canvasArea.canvas.width - 250", "250", 170, -50, 50, 1, "Angle", "black", MapEditor.loadedMap ? MapEditor.loadedMap.platforms[MapEditor.selectedPlatformIndex] : 0, function() {
             if (MapEditor.snapAmount > 0) {this.updateState(Math.round(this.value / MapEditor.snapAmount) * MapEditor.snapAmount)}
             MapEditor.loadedMap.platforms[MapEditor.selectedPlatformIndex].angle = this.value
         })
 
-        btn_playerAngleSlider = new SliderUI("canvasArea.canvas.width - 205", "205", 170, 0, 360, 1, "Angle", "black", MapEditor.loadedMap ? MapEditor.loadedMap.playerStart : 0, function() {
+        btn_playerAngleSlider = new SliderUI("canvasArea.canvas.width - 250", "250", 170, 0, 360, 1, "Angle", "black", MapEditor.loadedMap ? MapEditor.loadedMap.playerStart : 0, function() {
             if (MapEditor.snapAmount > 0) {this.updateState(Math.round(this.value / MapEditor.snapAmount) * MapEditor.snapAmount)}
             MapEditor.loadedMap.playerStart.angle = this.value
             
         })
 
-        btn_checkpointAngleSlider = new SliderUI("canvasArea.canvas.width - 205", "220", 170, 0, 360, 1, "Angle", "black", MapEditor.loadedMap ? MapEditor.loadedMap.checkpoints[MapEditor.selectedCheckpointIndex[0]] : 0, function() {
+        btn_checkpointAngleSlider = new SliderUI("canvasArea.canvas.width - 250", "280", 170, 0, 360, 1, "Angle", "black", MapEditor.loadedMap ? MapEditor.loadedMap.checkpoints[MapEditor.selectedCheckpointIndex[0]] : 0, function() {
             if (MapEditor.snapAmount > 0) {this.updateState(Math.round(this.value / MapEditor.snapAmount) * MapEditor.snapAmount)}
             MapEditor.loadedMap.checkpoints[MapEditor.selectedCheckpointIndex[0]].angle = this.value
         })
 
-        btn_wall = new Button("canvasArea.canvas.width - 90", "225", 40, "checkbox", "checkbox_pressed", 1, "", function(sync) { 
+        btn_wall = new Button("canvasArea.canvas.width - 170", "280", 60, "toggle_button", "toggle_button_pressed", 1, "", function(sync) { 
             if (MapEditor.loadedMap) { // throws an error otherwise
                 if (sync) {
                     this.toggle = MapEditor.loadedMap.platforms[MapEditor.selectedPlatformIndex].wall?1:0; // gets initial value of toggle
@@ -824,7 +825,7 @@ const UserInterface = {
             }    
         })
 
-        btn_delete_platform = new Button("canvasArea.canvas.width - 200", "300", 150, "delete_button", "delete_button_pressed", 0, "", function() {
+        btn_delete_platform = new Button("canvasArea.canvas.width - 220", "350", 150, "delete_button", "", 0, "", function() {
             if (MapEditor.selectedPlatformIndex != -1) { // platform being deleted
                 MapEditor.loadedMap.platforms.splice(MapEditor.selectedPlatformIndex, 1)
                 MapEditor.selectedPlatformIndex = -1; // No selected platform
@@ -842,7 +843,7 @@ const UserInterface = {
 
 
         // MAP SETTINGS SLIDERS
-        btn_platformHeightSlider = new SliderUI("160", "70", 300, 0, 150, 1, "Platform Height", "white", MapEditor.loadedMap ? MapEditor.loadedMap.style.platformHeight : 0, function() { 
+        btn_platformHeightSlider = new SliderUI("170", "70", 300, 0, 150, 1, "Platform Height", "white", MapEditor.loadedMap ? MapEditor.loadedMap.style.platformHeight : 0, function() { 
             MapEditor.loadedMap.style.platformHeight = this.value
 
             PreviewWindow.update(PreviewWindow.wall)
@@ -850,7 +851,7 @@ const UserInterface = {
             PreviewWindow.update(PreviewWindow.platform)
         })
 
-        btn_wallHeightSlider = new SliderUI("160", "150", 300, 0, 150, 1, "Wall Height", "white", MapEditor.loadedMap ? MapEditor.loadedMap.style.wallHeight : 0, function() { 
+        btn_wallHeightSlider = new SliderUI("170", "150", 300, 0, 150, 1, "Wall Height", "white", MapEditor.loadedMap ? MapEditor.loadedMap.style.wallHeight : 0, function() { 
             MapEditor.loadedMap.style.wallHeight = this.value
 
             PreviewWindow.update(PreviewWindow.wall)
@@ -858,7 +859,7 @@ const UserInterface = {
             PreviewWindow.update(PreviewWindow.platform)
         })
 
-        btn_lightAngleSlider = new SliderUI("canvasArea.canvas.width - 400", "70", 360, 0, 360, 1, "Light Angle", "white", MapEditor.loadedMap ? MapEditor.loadedMap.style.lightAngle : 0, function() { 
+        btn_lightAngleSlider = new SliderUI("canvasArea.canvas.width - 550", "70", 360, 0, 360, 1, "Light Angle", "white", MapEditor.loadedMap ? MapEditor.loadedMap.style.lightAngle : 0, function() { 
             MapEditor.loadedMap.style.lightAngle = this.value
 
             PreviewWindow.update(PreviewWindow.wall)
@@ -866,7 +867,7 @@ const UserInterface = {
             PreviewWindow.update(PreviewWindow.platform)
         })
 
-        btn_shadowContrastLightSlider = new SliderUI("canvasArea.canvas.width - 400", "150", 360, -1, 0, 1000, "Shadow Contrast Light", "white", MapEditor.loadedMap ? MapEditor.loadedMap.style.shadowContrastLight : 0, function() { 
+        btn_shadowContrastLightSlider = new SliderUI("canvasArea.canvas.width - 550", "150", 360, -1, 0, 1000, "Shadow Contrast Light", "white", MapEditor.loadedMap ? MapEditor.loadedMap.style.shadowContrastLight : 0, function() { 
             MapEditor.loadedMap.style.shadowContrastLight = this.value
 
             PreviewWindow.update(PreviewWindow.wall)
@@ -874,7 +875,7 @@ const UserInterface = {
             PreviewWindow.update(PreviewWindow.platform)
         })
 
-        btn_shadowContrastDarkSlider = new SliderUI("canvasArea.canvas.width - 400", "220", 360, -1, 0, 1000, "Shadow Contrast Dark", "white", MapEditor.loadedMap ? MapEditor.loadedMap.style.shadowContrastDark : 0, function() { 
+        btn_shadowContrastDarkSlider = new SliderUI("canvasArea.canvas.width - 550", "220", 360, -1, 0, 1000, "Shadow Contrast Dark", "white", MapEditor.loadedMap ? MapEditor.loadedMap.style.shadowContrastDark : 0, function() { 
             MapEditor.loadedMap.style.shadowContrastDark = this.value
 
             PreviewWindow.update(PreviewWindow.wall)
@@ -882,7 +883,7 @@ const UserInterface = {
             PreviewWindow.update(PreviewWindow.platform)
         })
 
-        btn_shadowLengthSlider = new SliderUI("canvasArea.canvas.width - 400", "290", 360, 0, 150, 1, "Shadow Length", "white", MapEditor.loadedMap ? MapEditor.loadedMap.style.shadowLength : 0, function() { 
+        btn_shadowLengthSlider = new SliderUI("canvasArea.canvas.width - 550", "290", 360, 0, 150, 1, "Shadow Length", "white", MapEditor.loadedMap ? MapEditor.loadedMap.style.shadowLength : 0, function() { 
             MapEditor.loadedMap.style.shadowLength = this.value
 
             PreviewWindow.update(PreviewWindow.wall)
@@ -893,7 +894,7 @@ const UserInterface = {
 
 
         // COLOR PICKER BUTTONS AND SLIDERS
-        btn_setFromHex = new Button("ColorPicker.x + 160", "ColorPicker.y + 25", 140, "", "", 0, "Use Hex #", function() {
+        btn_setFromHex = new Button("ColorPicker.x + 160", "ColorPicker.y + 25", 130, "", "", 0, "Use Hex #", function() {
             ColorPicker.setFromHex()
         })
 
@@ -920,45 +921,45 @@ const UserInterface = {
 
 
         // SET COLOR BUTTONS
-        btn_backgroundColor = new Button("canvasArea.canvas.width - 400", "20", 175, "", "", 0, "Background", function() {
+        btn_backgroundColor = new Button("canvasArea.canvas.width - 410", "20", 175, "", "", 0, "Background", function() {
             canvasArea.canvas.style.backgroundColor = MapEditor.loadedMap.style.backgroundColor = ColorPicker.getColor()
             // set ColorPicker.partIndex = 1
             // ColorPicker.setColor(MapEditor.loadedMap.style.backgroundColor)
             UserInterface.determineButtonColor()
         })
 
-        btn_playerColor = new Button("canvasArea.canvas.width - 200", "20", 175, "", "", 0, "Player", function() {
+        btn_playerColor = new Button("canvasArea.canvas.width - 225", "20", 175, "", "", 0, "Player", function() {
             MapEditor.loadedMap.style.playerColor = ColorPicker.getColor()
         })
 
-        btn_platformTopColor = new Button("canvasArea.canvas.width - 400", "120", 175, "", "", 0, "Platform Top", function() {
+        btn_platformTopColor = new Button("canvasArea.canvas.width - 410", "120", 175, "", "", 0, "Platform Top", function() {
             MapEditor.loadedMap.style.platformTopColor = ColorPicker.getColor()
         })
 
-        btn_platformSideColor = new Button("canvasArea.canvas.width - 200", "120", 175, "", "", 0, "Platform Side", function() {
+        btn_platformSideColor = new Button("canvasArea.canvas.width - 225", "120", 175, "", "", 0, "Platform Side", function() {
             MapEditor.loadedMap.style.platformSideColor = ColorPicker.getColor()
             PreviewWindow.update(PreviewWindow.platform)
         })
 
-        btn_wallTopColor = new Button("canvasArea.canvas.width - 400", "220", 175, "", "", 0, "Wall Top", function() {
+        btn_wallTopColor = new Button("canvasArea.canvas.width - 410", "220", 175, "", "", 0, "Wall Top", function() {
             MapEditor.loadedMap.style.wallTopColor = ColorPicker.getColor()
         })
 
-        btn_wallSideColor = new Button("canvasArea.canvas.width - 200", "220", 175, "", "", 0, "Wall Side", function() {
+        btn_wallSideColor = new Button("canvasArea.canvas.width - 225", "220", 175, "", "", 0, "Wall Side", function() {
             MapEditor.loadedMap.style.wallSideColor = ColorPicker.getColor()
             PreviewWindow.update(PreviewWindow.wall)
         })
 
-        btn_endZoneTopColor = new Button("canvasArea.canvas.width - 400", "320", 175, "", "", 0, "End Zone Top", function() {
+        btn_endZoneTopColor = new Button("canvasArea.canvas.width - 410", "320", 175, "", "", 0, "End Zone Top", function() {
             MapEditor.loadedMap.style.endZoneTopColor = ColorPicker.getColor()
         })
 
-        btn_endZoneSideColor = new Button("canvasArea.canvas.width - 200", "320", 175, "", "", 0, "End Zone Side", function() {
+        btn_endZoneSideColor = new Button("canvasArea.canvas.width - 225", "320", 175, "", "", 0, "End Zone Side", function() {
             MapEditor.loadedMap.style.endZoneSideColor = ColorPicker.getColor()
             PreviewWindow.update(PreviewWindow.endzone)
         })
 
-        btn_shadowColor = new Button("canvasArea.canvas.width - 400", "420", 175, "", "", 0, "Shadow", function() {
+        btn_shadowColor = new Button("canvasArea.canvas.width - 410", "420", 175, "", "", 0, "Shadow", function() {
             MapEditor.loadedMap.style.shadowColor = ColorPicker.getColor()
         })
 
@@ -966,14 +967,14 @@ const UserInterface = {
         
 
         // MAP BROWSER BUTTONS
-        btn_custom_maps = new Button("canvasArea.canvas.width - 200", 50, 175, "custom_maps_button", "custom_maps_button_pressed", 0, "", function() { 
+        btn_custom_maps = new Button(40, "canvasArea.canvas.height - 150", 175, "custom_maps_button", "", 0, "", function() { 
             UserInterface.gamestate = 2;
             UserInterface.renderedButtons = UserInterface.btnGroup_customMapBrowser
             MapBrowser.state = 2
             MapBrowser.init()
         })
 
-        btn_playMap = new Button("canvasArea.canvas.width - 250", "canvasArea.canvas.height - 110", 200, "play_button", "play_button_pressed", 0, "", function() {
+        btn_playMap = new Button("canvasArea.canvas.width - 250", "canvasArea.canvas.height - 110", 200, "play_button", "", 0, "", function() {
             
             UserInterface.gamestate = 5;
             UserInterface.renderedButtons = [btn_mainMenu];
@@ -1138,19 +1139,19 @@ const UserInterface = {
         })
 
 
-        btn_level_original = new Button(200, 100, 110, "map_original_button", "map_original_button", 0, "Original", function() { 
+        btn_level_original = new Button(200, 100, 110, "", "", 0, "Original", function() { 
             UserInterface.gamestate = 5;
             UserInterface.renderedButtons = [btn_mainMenu];
             Map.initMap("original");
         })
 
-        btn_level_noob = new Button(320, 100, 90, "map_noob_button", "map_noob_button", 0, "Noob", function() { 
+        btn_level_noob = new Button(320, 100, 90, "", "", 0, "Noob", function() { 
             UserInterface.gamestate = 5;
             UserInterface.renderedButtons = [btn_mainMenu];
             Map.initMap("noob");
         })
 
-        btn_level_hellscape = new Button(410, 100, 140, "map_hellscape_button", "map_hellscape_button", 0, "Hellscape", function() { 
+        btn_level_hellscape = new Button(410, 100, 140, "", "", 0, "Hellscape", function() { 
             UserInterface.gamestate = 5;
             UserInterface.renderedButtons = [btn_mainMenu];
             Map.initMap("hellscape");
@@ -1159,7 +1160,7 @@ const UserInterface = {
 
 
         // IN LEVEL Buttons
-        btn_mainMenu = new Button(40, 40, 100, "back_button", "back_button_pressed", 0, "", function() { 
+        btn_mainMenu = new Button(40, 40, 100, "back_button", "", 0, "", function() { 
             
             // UserInterface.gamestate
             // 1: main menu
@@ -1267,14 +1268,14 @@ const UserInterface = {
 
         })
 
-        btn_restart = new Button(40, "canvasArea.canvas.height - 280", 100, "restart_button", "restart_button_pressed", 0, "", function() { 
+        btn_restart = new Button(40, "canvasArea.canvas.height - 280", 100, "restart_button", "", 0, "", function() { 
             UserInterface.timer = 0;
             UserInterface.levelState = 1;
             player.checkpointIndex = -1;
             player.restart();
         })
 
-        btn_jump = new Button(40, "canvasArea.canvas.height - 140", 100, "jump_button", "jump_button_pressed", 0, "", function() { 
+        btn_jump = new Button(40, "canvasArea.canvas.height - 140", 100, "jump_button", "", 0, "", function() { 
             if (UserInterface.levelState == 1) {
                 UserInterface.timerStart = Date.now();
                 UserInterface.levelState = 2;
@@ -1853,7 +1854,6 @@ const MapBrowser = { // should set back to 0 at some points??
 }
 
 
-
 class Button {
     constructor(x, y, width, image, image_pressed, togglable, label, func) {
         this.x = eval(x);
@@ -1861,21 +1861,19 @@ class Button {
         this.savedX = x;
         this.savedY = y;
 
-        // GET IMAGE
-        // this.image = document.getElementById(image)
-        // this.image_pressed = document.getElementById(image_pressed)
-
 
         // GET ICON DIRECTLY THROUGH CORDOVA LOCAL STORAGE   
         const buttonURL = cordova.file.applicationDirectory + "www/assets/images/buttons/"
         
         window.resolveLocalFileSystemURL(buttonURL, (dirEntry) => {
 
+            // GETTING ICONS FOR IMAGE PARAMETER
             dirEntry.getFile(image + ".svg", {create: false, exclusive: false}, (fileEntry) => {
 
                 fileEntry.file( (file) => {
 
                     const reader = new FileReader();
+                    
                     reader.onload = (e) => {
 
                         // create SVG elements documents
@@ -1962,6 +1960,77 @@ class Button {
                 this.width = width;
                 this.height = this.width > 75 ? 75 : this.width
             });
+
+
+            // GETTING IMAGE_PRESSED. messy to do most of this code twice but... 
+            if (image_pressed != "") {
+                dirEntry.getFile(image_pressed + ".svg", {create: false, exclusive: false}, (fileEntry) => {
+
+                    fileEntry.file( (file) => {
+    
+                        const reader = new FileReader();
+                        
+                        reader.onload = (e) => {
+    
+                            // create SVG elements documents
+                            // CAN COMBINE ALL INITs HERE
+                            const lightSVG = new DOMParser().parseFromString(e.target.result, "image/svg+xml").documentElement;
+                            const darkSVG = new DOMParser().parseFromString(e.target.result, "image/svg+xml").documentElement;
+                            
+    
+                            // edit fills to to be light/dark modes
+                            lightSVG.getElementById("bg").style.fill = UserInterface.lightColor_1
+                            lightSVG.getElementById("icon").style.fill = UserInterface.darkColor_1
+    
+                            darkSVG.getElementById("bg").style.fill = UserInterface.darkColor_1
+                            darkSVG.getElementById("icon").style.fill= UserInterface.lightColor_1
+
+                            
+                            // converts svg element to string
+                            const lightSVG_string = new XMLSerializer().serializeToString(lightSVG);    
+                            const darkSVG_string = new XMLSerializer().serializeToString(darkSVG);
+    
+    
+                            // Converting SVG text string to blob for image source
+                            // https://medium.com/@benjamin.black/using-blob-from-svg-text-as-image-source-2a8947af7a8e
+                            const lightSVG_blob = new Blob([lightSVG_string], {type: 'image/svg+xml'});    
+                            const darkSVG_blob = new Blob([darkSVG_string], {type: 'image/svg+xml'});
+    
+    
+                            // create links for adding to source of img
+                            const lightSVG_url = URL.createObjectURL(lightSVG_blob);
+                            const darkSVG_url = URL.createObjectURL(darkSVG_blob);
+    
+    
+                            // add these svg links as src to two images
+                            this.lightIcon_toggled = new Image()    
+                            this.darkIcon_toggled = new Image()
+    
+                            this.lightIcon_toggled.addEventListener("load", () => {URL.revokeObjectURL(lightSVG_url)}, {once: true});    
+                            this.darkIcon_toggled.addEventListener("load", () => {URL.revokeObjectURL(darkSVG_url)}, {once: true});
+    
+                            // Waits till after the images are loaded to get their aspect ratios
+                            // COULD MOVE TO A FUNCTION ELSEWERE THAT IS JUST CALLED
+                            // this.lightIcon_p.addEventListener("load", () => { // just uses another random event listener... yuck
+                            //     // this.image_pressed = this.lightIcon_p
+                            //     this.width = width
+                            //     this.height = this.width * (this.lightIcon_p.height / this.lightIcon_p.width)
+                            // }, {once: true});
+    
+                            this.lightIcon_toggled.src = lightSVG_url    
+                            this.darkIcon_toggled.src = darkSVG_url
+
+                            this.hasToggleImage = true
+    
+                        };
+                        reader.onerror = (e) => alert(e.target.error.name);
+            
+                        reader.readAsText(file)
+                    })
+                });
+            }
+
+
         })
         
 
@@ -1980,9 +2049,6 @@ class Button {
     render() {
 
         canvasArea.ctx.save()
-        // canvasArea.ctx.shadowColor = "#44444444"
-        // canvasArea.ctx.shadowOffsetX = 3
-        // canvasArea.ctx.shadowOffsetY = 3
 
         const shrinkFactor = 0.95
 
@@ -2022,10 +2088,18 @@ class Button {
 
             let icon, x, y, w, h
 
-            if (UserInterface.darkMode == false) {
-                icon = (this.toggle == 1 || this.isPressed) ? this.lightIcon_p : this.lightIcon;
-            } else {
-                icon = (this.toggle == 1 || this.isPressed) ? this.darkIcon_p : this.darkIcon;
+            if (UserInterface.darkMode == false) { // light mode
+                if (this.hasToggleImage) {
+                    icon = (this.toggle == 1 || this.isPressed) ? this.lightIcon_toggled : this.lightIcon;
+                } else {
+                    icon = (this.toggle == 1 || this.isPressed) ? this.lightIcon_p : this.lightIcon;
+                }
+            } else { // dark mode
+                if (this.hasToggleImage) {
+                    icon = (this.toggle == 1 || this.isPressed) ? this.darkIcon_toggled : this.darkIcon;
+                } else {
+                    icon = (this.toggle == 1 || this.isPressed) ? this.darkIcon_p : this.darkIcon;
+                }
             }
 
             if (this.toggle == 1 || this.isPressed) {
@@ -2101,10 +2175,8 @@ class SliderUI {
 
 
     render() {
-        // canvasArea.ctx.strokeStyle = "#BBBBBB";
         canvasArea.ctx.lineWidth = 8;
         canvasArea.ctx.lineCap = "round"
-        // canvasArea.ctx.fillStyle = this.labelColor;
         canvasArea.ctx.fillStyle = canvasArea.ctx.strokeStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1: UserInterface.lightColor_1;
 
         
@@ -2914,40 +2986,47 @@ const MapEditor = {
 
 
             // MAP EDITOR UI
-            ctx.font = "15px BAHNSCHRIFT";
+            ctx.font = "20px BAHNSCHRIFT";
 
 
             if (this.editorState == 2) { // DRAWING SIDE PANEL
             
+                const sidePanel = {// If these change also change the values in UserInterface.touchReleased()
+                    x : canvasArea.canvas.width - 280,
+                    y : 20,
+                    width : 220,
+                    height : 320
+                }
+
                 // SIDE PANEL
                 ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.lightColor_1 : UserInterface.darkColor_1;
-                canvasArea.roundedRect(canvasArea.canvas.width - 220, 20, 200, 260, 25) // If these change also change the values in UserInterface.touchReleased()
+                canvasArea.roundedRect(sidePanel.x, sidePanel.y, sidePanel.width, sidePanel.height, 25) 
                 ctx.fill()
 
                 ctx.fillStyle = UserInterface.darkColor_1; // for text
 
-                if (this.selectedPlatformIndex == -2) { // player is selected
+                if (this.selectedPlatformIndex == -2) { // player start is selected
                     
-                    ctx.fillText("Player Start", canvasArea.canvas.width - 200, 100);
-                    ctx.fillText("Position: " + this.loadedMap.playerStart.x + ", " + this.loadedMap.playerStart.y, canvasArea.canvas.width - 200, 120);
+                    ctx.fillText("Player Start", sidePanel.x + 25, sidePanel.y + 100);
+                    ctx.fillText("Position: " + this.loadedMap.playerStart.x + ", " + this.loadedMap.playerStart.y, sidePanel.x + 25, sidePanel.y + 130);
 
                 }
                 
                 if (this.selectedPlatformIndex >= 0){ // platform is selected
                     
-                    ctx.fillText("Platform", canvasArea.canvas.width - 200, 100);
-                    ctx.fillText("Position: " + this.loadedMap.platforms[this.selectedPlatformIndex].x + ", " + this.loadedMap.platforms[this.selectedPlatformIndex].y, canvasArea.canvas.width - 200, 120);
-                    ctx.fillText("Size: " + this.loadedMap.platforms[this.selectedPlatformIndex].width + ", " + this.loadedMap.platforms[this.selectedPlatformIndex].height, canvasArea.canvas.width - 200, 140);
-                    ctx.fillText("Wall: " + (this.loadedMap.platforms[this.selectedPlatformIndex].wall?"Yes":"No"), canvasArea.canvas.width - 200, 240)
+                    ctx.fillText("Platform", sidePanel.x + 25, sidePanel.y + 100);
+                    ctx.fillText("Position: " + this.loadedMap.platforms[this.selectedPlatformIndex].x + ", " + this.loadedMap.platforms[this.selectedPlatformIndex].y, sidePanel.x + 25, sidePanel.y + 130);
+                    ctx.fillText("Size: " + this.loadedMap.platforms[this.selectedPlatformIndex].width + ", " + this.loadedMap.platforms[this.selectedPlatformIndex].height, sidePanel.x + 25, sidePanel.y + 160);
+                    ctx.fillText("Wall: " + (this.loadedMap.platforms[this.selectedPlatformIndex].wall?"Yes":"No"), sidePanel.x + 25, sidePanel.y + 280)
   
                 }
 
                 if (this.selectedCheckpointIndex[0] >= 0){ // checkpoint is selected
         
-                    ctx.fillText("Checkpoint", canvasArea.canvas.width - 200, 100);
-                    ctx.fillText("Trigger 1: " + this.loadedMap.checkpoints[this.selectedCheckpointIndex[0]].triggerX1 + ", " + this.loadedMap.checkpoints[this.selectedCheckpointIndex[0]].triggerY1, canvasArea.canvas.width - 200, 120);
-                    ctx.fillText("Trigger 2: " + this.loadedMap.checkpoints[this.selectedCheckpointIndex[0]].triggerX2 + ", " + this.loadedMap.checkpoints[this.selectedCheckpointIndex[0]].triggerY2, canvasArea.canvas.width - 200, 140);
-                    ctx.fillText("Respawn Pos: " + this.loadedMap.checkpoints[this.selectedCheckpointIndex[0]].x + ", " + this.loadedMap.checkpoints[this.selectedCheckpointIndex[0]].y, canvasArea.canvas.width - 200, 160);
+                    ctx.fillText("Checkpoint", sidePanel.x + 25, sidePanel.y + 100);
+                    ctx.fillText("Trigger 1: " + this.loadedMap.checkpoints[this.selectedCheckpointIndex[0]].triggerX1 + ", " + this.loadedMap.checkpoints[this.selectedCheckpointIndex[0]].triggerY1, sidePanel.x + 25, sidePanel.y + 130);
+                    ctx.fillText("Trigger 2: " + this.loadedMap.checkpoints[this.selectedCheckpointIndex[0]].triggerX2 + ", " + this.loadedMap.checkpoints[this.selectedCheckpointIndex[0]].triggerY2, sidePanel.x + 25, sidePanel.y + 160);
+                    ctx.fillText("Respawn Pos: " + this.loadedMap.checkpoints[this.selectedCheckpointIndex[0]].x + ", " + this.loadedMap.checkpoints[this.selectedCheckpointIndex[0]].y, sidePanel.x + 25, sidePanel.y + 190);
   
                 }
                 
