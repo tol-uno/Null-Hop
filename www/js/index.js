@@ -62,36 +62,6 @@ const canvasArea = { //Canvas Object
     },
 
 
-    renderTheQueue : function() {
-        Map.renderQueue.forEach(queueItem => {
-            if (queueItem == player) {
-                player.render()
-            } else {
-                Map.renderPlatform(queueItem)
-            }
-        })
-
-        // draw shadow border if player is behind wall
-        if (Map.renderQueue[Map.renderQueue.length - 1] != player) { // if player is not last in renderQueue
-            canvasArea.ctx.save()
-            
-            canvasArea.ctx.translate(-player.x + midX, -player.y + midY)
-            canvasArea.ctx.clip(Map.behindWallClip);
-            canvasArea.ctx.translate(player.x , player.y);
-        
-            canvasArea.ctx.rotate(player.lookAngle.getAngle() * Math.PI/180)
-
-            canvasArea.ctx.strokeStyle = Map.style.playerColor
-            canvasArea.ctx.lineWidth = 2
-            canvasArea.ctx.beginPath()
-            canvasArea.ctx.strokeRect(-15, -15, 30, 30)
-            canvasArea.ctx.stroke()
-
-            canvasArea.ctx.restore() // clears behindWallClip
-        }
-    },
-
-
     resize : function() { // SHOULDNT REALLY EVER BE CALLED 
         console.log("resized :)");
 
@@ -1247,6 +1217,8 @@ const UserInterface = {
                 if (MapBrowser.state == 1) { // in play standard map browser
                     // goto main menu
                     MapBrowser.state = 0;
+                    MapBrowser.scrollY = 0;
+                    MapBrowser.selectedMapIndex = -1;
                     UserInterface.gamestate = 1
                     UserInterface.renderedButtons = UserInterface.btnGroup_mainMenu;
                     return
@@ -3485,7 +3457,8 @@ const Map = {
     name : null,
     record : null,
     upperShadowClip : new Path2D(),
-    behindWallClip : new Path2D(),
+    behindWallClip : new Path2D(), // depricated kill
+    playerClip : new Path2D(),
     endZone : null,
 
     initMap : function (name) {
@@ -3634,19 +3607,20 @@ const Map = {
                     -((platform.width / 2) * Math.sin(angleRad)) - ((platform.height / 2) * Math.cos(angleRad)) + this.style.platformHeight + shadowY * wallShadowMultiplier
                 ],
             
-        ]; // end of shadowPoints array
+            ]; // end of shadowPoints array
         
         
         
-        platform.corners = [] // save the first 4 corner coordinates before its modified
-        for(let i=0; i < 4; i++) { // taking the first 4
-            platform.corners.push([platform.shadowPoints[i][0], platform.shadowPoints[i][1] - this.style.platformHeight]) // take away platformHeight
-        }
+            platform.corners = [] // save the first 4 corner coordinates before its modified
+            for(let i=0; i < 4; i++) { // taking the first 4
+                platform.corners.push([platform.shadowPoints[i][0], platform.shadowPoints[i][1] - this.style.platformHeight]) // take away platformHeight
+            }
 
 
-        if (platform.wall) // add wall's shape to behindWallClip (for drawing player outline behind walls)
-        {
-                // corners + wall height points need to be "concated" as serperate letiable otherwise they dont stay as points
+            // add a .clipPoints property to each wall for occluding player and drawing players xray
+            if (platform.wall) {
+            
+                // corners + wall height points need to be "concated" as serperate variable otherwise they dont stay as points
                 const upperCorners = [
                     [
                         platform.corners[0][0],
@@ -3668,32 +3642,11 @@ const Map = {
 
                 let behindWallClipPoints = platform.corners.concat(upperCorners)
         
-                behindWallClipPoints = canvasArea.convexHull(behindWallClipPoints)
-
-                // ADD TO CLIP SHAPE FOR AREAS BEHIND WALLS
-                // the behindWallClip array can have different lengths so it must dynamicly go through the array of points
-                for (let i = 0; i < behindWallClipPoints.length; i++) {
-                    if (i == 0) { // first point in array so use moveTo
-                        this.behindWallClip.moveTo(
-                            platform.x + platform.width/2 + behindWallClipPoints[i][0], // x
-                            platform.y + platform.height/2 + behindWallClipPoints[i][1] // y
-                        )
-                    } else { // its not the first point in the hull so use lineTo
-                        this.behindWallClip.lineTo(
-                            platform.x + platform.width/2 + behindWallClipPoints[i][0], // x
-                            platform.y + platform.height/2 + behindWallClipPoints[i][1] // y
-                        )
-                    }
-                }
-
-                this.behindWallClip.closePath()
+                platform.clipPoints = canvasArea.convexHull(behindWallClipPoints)
             }
-
-
-
+        
 
             platform.shadowPoints = canvasArea.convexHull(platform.shadowPoints)
-
 
 
             // SHADOW CLIP FOR UPPER PLAYER SHADOW
@@ -3737,16 +3690,26 @@ const Map = {
             platform.cornersSorted.sort(sortCornersX)
 
 
-            // Create slopes
-            platform.horizontalSlope = (platform.corners[2][1] - platform.corners[3][1])/(platform.corners[2][0] - platform.corners[3][0])
-            platform.verticalSlope = (platform.corners[2][1] - platform.corners[1][1])/(platform.corners[2][0] - platform.corners[1][0])
 
-            // incase divided by zero and got infinity slope
-            if (platform.angle == 0) {platform.verticalSlope = 999999}
-            if (Math.abs(platform.angle) == 90) {platform.horizontalSlope = 999999}
-            // if (!isFinite(platform.horizontalSlope)) {platform.horizontalSlope > 0 ? platform.horizontalSlope = 999999 : platform.horizontalSlope = -999999}
-            // if (!isFinite(platform.verticalSlope)) {platform.verticalSlope > 0 ? platform.verticalSlope = 999999 : platform.verticalSlope = -999999}
+            // GETTING FURTHEST RIGHT/LEFT CORNERS
+            // get platform.corner x for LEFT MOST corner (start of corners array) NOTE: corner array is in local space
+            platform.leftMostPlatformCornerX = platform.cornersSorted[0][0] + platform.x + platform.width/2 // platform corners are relative to the platforms middle
+            platform.leftMostPlatformCornerY = platform.cornersSorted[0][1] + platform.y + platform.height/2
+            
+            // get platform.corner x for RIGHT MOST corner (end of corners array) NOTE: corner array is in local space
+            platform.rightMostPlatformCornerX = platform.cornersSorted[3][0] + platform.x + platform.width/2 // platform corners are relative to the platforms middle
+            platform.rightMostPlatformCornerY = platform.cornersSorted[3][1] + platform.y + platform.height/2
 
+
+            platform.getSplitLineY = function(x) {
+                // y = mx + b
+                // m = rise over run
+                const slope = (this.rightMostPlatformCornerY - this.leftMostPlatformCornerY) / (this.rightMostPlatformCornerX - this.leftMostPlatformCornerX)
+                // b = y - mx
+                const b = this.rightMostPlatformCornerY - (slope * this.rightMostPlatformCornerX) 
+                const y = slope * x + b
+                return y
+            }
 
         });
 
@@ -3762,18 +3725,18 @@ const Map = {
         
     },
 
-    update : function() {  // Figure out which platforms are in view + renderQueue
-                // This is probably were I should check endZoneIsRendered but it's done in render(). Saves an if statement i guess...
-                // ALSO where player is slotted into RenderQueue (z-order is determined)
+
+    update : function() {  // Figure out which platforms are in view. Update Map.playerClip
+        // This is probably were I should check endZoneIsRendered but it's done in render(). Saves an if statement i guess...
 
         this.renderedPlatforms = [];
         this.wallsToCheck = [];
+
 
         this.platforms.forEach(platform => { // Loop through ALL platforms to get renderedPlatforms
             const hypotenuse = Math.sqrt(platform.width * platform.width + platform.height * platform.height)/2
             const adjustedHeight = platform.wall ? this.style.wallHeight : 0 // for adding height to walls
             const wallShadowMultiplier = platform.wall ? (this.style.wallHeight + this.style.platformHeight) / this.style.platformHeight : 1 // makes sure shadows are longer for taller walls
-
 
             if (
                 (platform.x + platform.width/2 + hypotenuse + (this.style.shadowLength * wallShadowMultiplier) > player.x - midX) && // coming into frame on left side
@@ -3784,35 +3747,17 @@ const Map = {
                 this.renderedPlatforms.push(platform); // ADD platform to renderedPlatforms
             }
         }); // end of looping through ALL platforms
-        
 
 
-
-        // sort and index platforms on load of map
-        // platforms only need to be sorted once(given indexes once) and then the player just needs to be slotted in where they belong in the z-order of the render queue which is the map.renderedPlatforms array
-        // not true ^^ platform order can change depending on player position / rotation
-
-
-        const infrontPlayer = []
-        const behindPlayer = []
-        let indexSplitSpot = 9999 // if it stays 9999 all platforms will be rendered behind player. Kinda acts as the index of the player
-
-        
+        this.playerClip = new Path2D() // resets the clip every frame. when it is used there must be an counter clockwise rectangle drawn first to invert clip
 
         this.renderedPlatforms.forEach(platform => { // Loop through RENDERED platforms (will loop through in order of index)
-            
-            
-            // checking if platform is a wall
-            // splitting walls into 2 arrays: infrontPlayer[] and behindPlayer[]. 
-            // Sort rendered platforms/walls that ARENT checked(not close enough to player) into the appropriate array
-            
-            
+                                    
             if (platform.wall) {
 
-                //change to be platform.hypotenuse that is evaled on map load
                 const hypotenuse = Math.sqrt(platform.width * platform.width + platform.height * platform.height)/2
                 
-                if ( // wall is close enough to player that it needs to be checked with player rotation. Could be behind, infront, or colliding with it
+                if ( // if wall is close enough to player that it needs to be checked with player rotation
                     (platform.x + platform.width/2 + hypotenuse > player.x - 25) && // colliding with player from left
                     (platform.x + platform.width/2 - hypotenuse < player.x + 25) && // right side
                     (platform.y + platform.height/2 + hypotenuse > player.y - 73) && // top side
@@ -3824,180 +3769,86 @@ const Map = {
                     // convert player angle and get radian version
                     const angle = player.lookAngle.getAngle();
                     const angleRad = angle * (Math.PI/180);
-                    
 
                     // GET PLAYERS LEFTMOST AND RIGHT MOST CORNERS
-                    // YOU DONT NEED X COORDS BUT I KEPT THEM HERE JUST COMMENTED OUT
-
-                    // player.leftMostPlayerCornerX = null
+                    player.leftMostPlayerCornerX = null
                     player.leftMostPlayerCornerY = null
-                    // player.rightMostPlayerCornerX = null
+                    player.rightMostPlayerCornerX = null
                     player.rightMostPlayerCornerY = null
                     if (0 <= angle && angle < 90) { // leftMost=bot left        rightMost=top right 
-                        // player.leftMostPlayerCornerX = player.x - (16 * Math.cos(angleRad) + (16 * Math.sin(angleRad)))
+                        player.leftMostPlayerCornerX = player.x - (16 * Math.cos(angleRad) + (16 * Math.sin(angleRad)))
                         player.leftMostPlayerCornerY = player.y - (16 * Math.sin(angleRad) - (16 * Math.cos(angleRad)))
-                        // player.rightMostPlayerCornerX = player.x + (16 * Math.cos(angleRad) + (16 * Math.sin(angleRad)))
+                        player.rightMostPlayerCornerX = player.x + (16 * Math.cos(angleRad) + (16 * Math.sin(angleRad)))
                         player.rightMostPlayerCornerY = player.y + (16 * Math.sin(angleRad) - (16 * Math.cos(angleRad)))
                     }
                     if (90 <= angle && angle < 180) { // leftMost=bot right     rightMost=top left
-                        // player.leftMostPlayerCornerX = player.x + (16 * Math.cos(angleRad) - (16 * Math.sin(angleRad)))
+                        player.leftMostPlayerCornerX = player.x + (16 * Math.cos(angleRad) - (16 * Math.sin(angleRad)))
                         player.leftMostPlayerCornerY = player.y + (16 * Math.sin(angleRad) + (16 * Math.cos(angleRad)))
-                        // player.rightMostPlayerCornerX = player.x - (16 * Math.cos(angleRad) - (16 * Math.sin(angleRad)))
+                        player.rightMostPlayerCornerX = player.x - (16 * Math.cos(angleRad) - (16 * Math.sin(angleRad)))
                         player.rightMostPlayerCornerY = player.y - (16 * Math.sin(angleRad) + (16 * Math.cos(angleRad)))
                     }
                     if (180 <= angle && angle < 270) { // leftMost=top right    rightMost=bot left 
-                        // player.leftMostPlayerCornerX = player.x + (16 * Math.cos(angleRad) + (16 * Math.sin(angleRad)))
+                        player.leftMostPlayerCornerX = player.x + (16 * Math.cos(angleRad) + (16 * Math.sin(angleRad)))
                         player.leftMostPlayerCornerY = player.y + (16 * Math.sin(angleRad) - (16 * Math.cos(angleRad)))
-                        // player.rightMostPlayerCornerX = player.x - (16 * Math.cos(angleRad) + (16 * Math.sin(angleRad)))
+                        player.rightMostPlayerCornerX = player.x - (16 * Math.cos(angleRad) + (16 * Math.sin(angleRad)))
                         player.rightMostPlayerCornerY = player.y - (16 * Math.sin(angleRad) - (16 * Math.cos(angleRad)))
                     }
                     if (270 <= angle && angle < 360) { // leftMost=top left     rightMost=bot right
-                        // player.leftMostPlayerCornerX = player.x - (16 * Math.cos(angleRad) - (16 * Math.sin(angleRad)))
+                        player.leftMostPlayerCornerX = player.x - (16 * Math.cos(angleRad) - (16 * Math.sin(angleRad)))
                         player.leftMostPlayerCornerY = player.y - (16 * Math.sin(angleRad) + (16 * Math.cos(angleRad)))
-                        // player.rightMostPlayerCornerX = player.x + (16 * Math.cos(angleRad) - (16 * Math.sin(angleRad)))
+                        player.rightMostPlayerCornerX = player.x + (16 * Math.cos(angleRad) - (16 * Math.sin(angleRad)))
                         player.rightMostPlayerCornerY = player.y + (16 * Math.sin(angleRad) + (16 * Math.cos(angleRad)))
                     }
 
-
-
-                    
-                    // get platform.corner x for LEFT MOST corner (start of corners array) NOTE: corner array is in local space
-                    platform.leftMostPlatformCornerX = platform.cornersSorted[0][0] + platform.x + platform.width/2 // platform corners are relative to the platforms middle
-                    platform.leftMostPlatformCornerY = platform.cornersSorted[0][1] + platform.y + platform.height/2
-                    
-                    // get platform.corner x for RIGHT MOST corner (end of corners array) NOTE: corner array is in local space
-                    platform.rightMostPlatformCornerX = platform.cornersSorted[3][0] + platform.x + platform.width/2 // platform corners are relative to the platforms middle
-                    platform.rightMostPlatformCornerY = platform.cornersSorted[3][1] + platform.y + platform.height/2
-
                     
 
-                    // wall slopes / extensions of axis. Light is horizontal. Dark is vertical
-                    // const horizontalAxisExtensionY = platform.y + platform.height/2 + (platform.horizontalSlope * (player.x - (platform.x + platform.width/2)))
-                    const horizontalAxisExtensionX = platform.x + platform.width/2 + ((player.y - (platform.y + platform.height/2)) / platform.horizontalSlope)
-                    const verticalAxisExtensionX = platform.x + platform.width/2 + ((player.y - (platform.y + platform.height/2)) / platform.verticalSlope)
-                    let axisToUse = null
-                    
-
-                    // figures out which axis is needed to compare check
-                    if (platform.angle >= 0) {
-                        if (platform.leftMostPlatformCornerY >= platform.rightMostPlatformCornerY) { // rightMost corner is higher up
-                            axisToUse = "vertical"
-                        } else { // platforms leftMost corner is higher up
-                            axisToUse = "horizontal"
-                        }
-                    } else { // if platform.angle < 0
-                        if (platform.leftMostPlatformCornerY >= platform.rightMostPlatformCornerY) { // rightMost corner is higher up
-                            axisToUse = "horizontal"
-                        } else { // platforms leftMost corner is higher up
-                            axisToUse = "vertical"
-                        }
+                    // NEW TEST FOR WHETHER OR NOT TO ADD PLATFORM TO CLIP
+                    if (
+                        (player.x <= platform.x && player.rightMostPlayerCornerY < platform.getSplitLineY(player.rightMostPlayerCornerX)) ||  
+                        (player.x > platform.x && player.leftMostPlayerCornerY < platform.getSplitLineY(player.leftMostPlayerCornerX))
+                    ) {
+                        addToPlayerClip()
                     }
 
 
-                    // VERTICAL AXIS TESTS
-                    if (axisToUse == "vertical") {
-                        
-                        if (verticalAxisExtensionX < player.x) { // walls vertical axis is to the left of player. wall is to the left
-    
-                            // check player left corner compared to wall's right corner
-                            if (platform.rightMostPlatformCornerY > player.leftMostPlayerCornerY) { // overlapping 
-                                // render wall in front of player
-                                infrontPlayer.push(platform)
-                                if (platform.index < indexSplitSpot) {indexSplitSpot = platform.index}
-                            } else {
-                                    // render wall behind player
-                                    behindPlayer.push(platform)
-                            }
+                    // ADD TO CLIP SHAPE FOR AREAS BEHIND WALLS
+                    function addToPlayerClip() {
+                        // the clipPoints array can have different lengths so it must dynamicly go through the array of points
+                        for (let i = 0; i < platform.clipPoints.length; i++) {
+                            if (i == 0) { // first point in array so use moveTo
 
-    
-                        } else { // wall is to the right of player
-                            
-                            // check player right corner compared to wall's left corner
-                            if (platform.leftMostPlatformCornerY > player.rightMostPlayerCornerY) { // overlapping.
-                                // render wall in front of player
-                                infrontPlayer.push(platform)
-                                if (platform.index < indexSplitSpot) {indexSplitSpot = platform.index}
-                            } else { 
-                                    // render wall behind player
-                                    behindPlayer.push(platform)
+                                // -player.x + midX, -player.y + midY
+
+                                Map.playerClip.moveTo(
+                                    platform.x + platform.width / 2 + platform.clipPoints[i][0], // x
+                                    platform.y + platform.height / 2 + platform.clipPoints[i][1] // y
+                                )
+                            } else { // its not the first point in the hull so use lineTo
+                                Map.playerClip.lineTo(
+                                    platform.x + platform.width / 2 + platform.clipPoints[i][0], // x
+                                    platform.y + platform.height / 2 + platform.clipPoints[i][1] // y
+                                )
                             }
                         }
+
+                        Map.playerClip.closePath()
                     }
 
-
-
-                    // HORIZONTAL AXIS TESTS
-                    if (axisToUse == "horizontal"){
-
-                        if (horizontalAxisExtensionX < player.x) { // walls horizontal axis is to the left of player. wall is to the left (or player is sorta above the horizontal axis)
-                        
-                            // check player left corner compared to wall's right corner
-                            if (platform.rightMostPlatformCornerY > player.leftMostPlayerCornerY) { // overlapping 
-                                // render wall in front of player
-                                infrontPlayer.push(platform)
-                                if (platform.index < indexSplitSpot) {indexSplitSpot = platform.index}
-                            } else {
-                                // render wall behind player
-                                behindPlayer.push(platform)
-                            }
-    
-                        } else { // wall is to the right of player
-    
-                            // check player right corner compared to wall's left corner
-                            if (platform.leftMostPlatformCornerY > player.rightMostPlayerCornerY) { // overlapping 
-                                // render wall in front of player
-                                infrontPlayer.push(platform)
-                                if (platform.index < indexSplitSpot) {indexSplitSpot = platform.index}
-                            } else {
-                                // render wall behind player
-                                behindPlayer.push(platform)
-                            }
-                        }
-                    }
-
-
-                } else { // is a wall but not close enough to do a precise check. Sort into correct array based of index
-
-                    if (platform.index > indexSplitSpot) { // platform can also be rendered infront of player
-                        infrontPlayer.push(platform)
-                    } else {
-                        behindPlayer.push(platform)
-                    } // will need to sort these
-
-                }
-                
-            } else { // platform is NOT a wall. Sort into correct array based of index
-                
-                if (platform.index > indexSplitSpot) { // platform can also be rendered infront of player
-                    infrontPlayer.push(platform)
-                } else {
-                    behindPlayer.push(platform)
-                } // need to sort these ?? maybe not?
+                }   
             }
-
         }); // end of looping through each rendered platform
-
-
-        this.renderQueue = behindPlayer.concat(player, infrontPlayer) // combine arrays 
-        // console.log(this.renderQueue)
-
-
     },
+
+
+
 
     renderPlatform : function(platform) { // seperate function to render platforms so that it can be called at different times (ex. called after drawing player inorder to render infront)
         
-        const ctx = canvasArea.ctx;
-        ctx.strokeStyle = "#00000000" // for borders. add a 00 at the end to make them transparent
-        ctx.lineJoin = "round"
-        ctx.lineWidth = 1
+        const ctx = canvasArea.ctx;        
         
-        ctx.save();
-        ctx.translate(-player.x + midX, -player.y + midY); // move canvas when drawing platforms then restore. midX is center of canvas width
-
-        const adjustedHeight = platform.wall ? this.style.wallHeight : 0 // for adding height to walls
-
         // DRAW PLATFORM TOP
-        ctx.save(); // ROTATING 
+        ctx.save(); // #17 GO TO PLATFORMs MIDDLE AND ROTATING 
+        const adjustedHeight = platform.wall ? this.style.wallHeight : 0 // for adding height to walls
         ctx.translate(platform.x + platform.width/2, platform.y + platform.height/2 - adjustedHeight);
         ctx.rotate(platform.angle * Math.PI/180);
 
@@ -4007,32 +3858,23 @@ const Map = {
             this.endZoneIsRendered = true;
         } else if (platform.wall) {
             ctx.fillStyle = this.style.wallTopColor;
-            // this.endZoneIsRendered = true;
         } else {
             ctx.fillStyle = this.style.platformTopColor;
         }
         
         ctx.fillRect(-platform.width/2, -platform.height/2, platform.width, platform.height);
 
-
-        ctx.beginPath(); // line border on top
-        ctx.rect(-platform.width/2, -platform.height/2, platform.width, platform.height)
-        ctx.closePath();
-        ctx.stroke();
-
-        ctx.restore(); // restores platform rotation NOT translation
+        ctx.restore(); // #17 restores platform translation and rotation
 
 
         // SIDES OF PLATFORMS
-        ctx.save();
+        ctx.save(); // #18
         ctx.translate(platform.x + platform.width/2, platform.y + platform.height/2);
 
         const angleRad = platform.angle * (Math.PI/180);
         
-
         // platform angles should only be max of 90 and -90 in mapData
         // calculating shading works with any angle but sides arent draw because drawing "if statements" are hardcoded to 90 degrees
-
 
         if (-90 < platform.angle && platform.angle < 90) { // ALMOST ALWAYS RENDER BOTTOM SIDE. side2
             
@@ -4044,7 +3886,6 @@ const Map = {
             ctx.lineTo(platform.width/2 * Math.cos(angleRad) - (platform.height/2 * Math.sin(angleRad)), platform.width/2 * Math.sin(angleRad) + (platform.height/2 * Math.cos(angleRad)) + this.style.platformHeight);
             ctx.closePath();
             ctx.fill();
-            ctx.stroke();
         }
 
 
@@ -4058,8 +3899,6 @@ const Map = {
             ctx.lineTo(platform.width/2 * Math.cos(angleRad) - (platform.height/2 * Math.sin(angleRad)), platform.width/2 * Math.sin(angleRad) + (platform.height/2 * Math.cos(angleRad)) + this.style.platformHeight);
             ctx.closePath();
             ctx.fill();
-            ctx.stroke();
-
         }
 
         if (-90 <= platform.angle && platform.angle < 0) { // side1
@@ -4072,76 +3911,57 @@ const Map = {
             ctx.lineTo(-platform.width/2 * Math.cos(angleRad) - (platform.height/2 * Math.sin(angleRad)), -platform.width/2 * Math.sin(angleRad) + (platform.height/2 * Math.cos(angleRad)) + this.style.platformHeight);
             ctx.closePath();
             ctx.fill();
-            ctx.stroke();
-
         }
 
         // PLAFORM RENDERING DEBUG TEXT
-        ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1 :  UserInterface.lightColor_1;
-        ctx.font = "12px BAHNSCHRIFT"
+        // ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1 :  UserInterface.lightColor_1;
+        // ctx.font = "12px BAHNSCHRIFT"
         // ctx.fillText("index: " + platform.index, 0, 0);
         // ctx.fillText("renderIndex: " + this.renderedPlatforms.indexOf(platform), 0, 0)
         // ctx.fillText("angle: " + platform.angle, 0, 20);
         // ctx.fillText("position: " + platform.x + ", " + platform.y, 0 , 40)
         // ctx.fillText("width / height: " + platform.width + ", " + platform.height, 0 , 40)
-        // ctx.fillText("slope vert: " + platform.verticalSlope, 0, 60)
-        // ctx.fillText("slope horz: " + platform.horizontalSlope, 0, 80)
 
         
-        ctx.restore(); // resets back from platform local space. player view space??
+        ctx.restore(); // #18 back to map origin translation
         
-
-        // Centered Axis
-        // ctx.fillStyle = "lime"
-        // ctx.fillRect(platform.x + platform.width/2 + ((player.y - (platform.y + platform.height/2)) / platform.horizontalSlope), player.y, 5, 5)
-        // ctx.fillStyle = "green"
-        // ctx.fillRect(platform.x + platform.width/2 + ((player.y - (platform.y + platform.height/2)) / platform.verticalSlope), player.y, 5, 5)
+        // Drawing split line for testing
+        // if (platform.wall) {
+        //     ctx.fillStyle = "#00FF00"
+        //     ctx.fillRect(player.x, platform.getSplitLineY(player.x), 5, 5)
+        // }
         
-
-        // DRAWING WALL Z-ORDER DEBUG POINTS (CORNERS)
-        // ctx.fillStyle = "#FF00FF" // left and right most corners (pink)
-        // ctx.fillRect(platform.leftMostPlatformCornerX - 2, platform.leftMostPlatformCornerY - 2, 4, 4)
-        // ctx.fillRect(platform.rightMostPlatformCornerX - 2, platform.rightMostPlatformCornerY - 2, 4, 4)
-        // ctx.fillStyle = "#0000FF" // center (blue)
-        // ctx.fillRect(platform.x + platform.width/2 - 2, platform.y + platform.height/2 - 2, 4, 4)
-
-        
-        ctx.restore(); // resets back to global space
     },
 
-    render : function() { // Render the platforms that are in view (and player lower shadow)
-    
+
+    render : function() { // Renders player lower shadow(should be done by player), platforms shadows, platforms, and checkpoints
+
         this.endZoneIsRendered = false; // resets every frame. if the endzone is being rendered it activates it. otherwise it stays false
 
         const ctx = canvasArea.ctx;
 
-        ctx.save();
+        ctx.save(); // #19
         ctx.translate(-player.x + midX, -player.y + midY); // move canvas when drawing platforms then restore. midX is center of canvas width
 
 
         // DRAWING LOWER PLAYER SHADOW
-        ctx.save(); // Saves the state of the canvas for drawing player shadow. Weird to draw it here but whatever. Could also put this above the first translate ^^
+        ctx.save(); // #20
         ctx.translate(player.x , player.y + this.style.platformHeight)
         ctx.rotate(player.lookAngle.getAngle() * Math.PI/180); // rotating canvas
-
         ctx.fillStyle = this.style.shadowColor;
-        // const blurValue = player.jumpValue / 16 + 1
-        // ctx.filter = "blur(" + blurValue + "px)";
         ctx.fillRect(-15, -15, 30, 30)
-        // ctx.filter = "none";
-        ctx.restore(); // restore back to top corner of map for drawing the platforms
+        ctx.restore(); // #20
 
 
 
-        // LOOP THROUGHT TO DRAW PLATFORMS LOWER SHADOWS
+        // LOOP THROUGHT TO DRAW PLATFORMS SHADOWS
         this.renderedPlatforms.forEach(platform => { 
 
-            ctx.save();
+            ctx.save(); // #21
             ctx.translate(platform.x + platform.width/2, platform.y + platform.height/2);
 
             ctx.fillStyle = this.style.shadowColor;
 
-            // ctx.filter = "blur(2px)"; // start blur
             ctx.beginPath();
             
             ctx.moveTo(platform.shadowPoints[0][0], platform.shadowPoints[0][1]); // this comes up in debug a lot
@@ -4152,14 +3972,19 @@ const Map = {
             ctx.closePath();
             ctx.fill();
 
-            // ctx.filter = "none"; // end blur
 
-            ctx.restore();
+            ctx.restore(); // #21
+        })
+
+
+        // Draw each rendered platform
+        this.renderedPlatforms.forEach(platform => {
+            Map.renderPlatform(platform)
         })
 
 
         this.checkpoints.forEach(checkpoint => { // draw line to show checkpoint triggers
-            ctx.strokeStyle = "white"
+            ctx.strokeStyle = UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1 
             ctx.lineWidth = 4
             ctx.beginPath(); 
             ctx.moveTo(checkpoint.triggerX1, checkpoint.triggerY1);
@@ -4168,12 +3993,9 @@ const Map = {
         });
 
 
-        ctx.restore(); // RESTORING VIEW FOLLOWING PLAYER I THINK
+        ctx.restore(); // #19
+    
     },
-
-    clearMap : function () {
-    }
-
 }
 
 
@@ -4301,8 +4123,8 @@ class Player {
     // https://steamcommunity.com/sharedfiles/filedetails/?id=184184420
     // https://github.com/myria666/qMovementDoc/blob/main/Quake_s_Player_Movement.pdf
 
-    wishDir = new Vector(0,0);   // left (-1,0) vector OR right (1,0) vector that is rotated by the change in angle that frame. 
-                                //if angle change is postive use Right vec. Negative use left vec
+    wishDir = new Vector(0,0);  // left (-1,0) vector OR right (1,0) vector that is rotated by the change in angle that frame. 
+                                // if angle change is postive use Right vec. Negative use left vec
                                 // normalized left and right vectors act as if strafe keys were pressed 
 
     velocity = new Vector(0,0);
@@ -4321,18 +4143,31 @@ class Player {
         
         const ctx = canvasArea.ctx;
         
-        ctx.strokeStyle = "#00000000" // player borders. add 00 to make transparent
-        ctx.lineJoin = "round"
-        ctx.lineWidth = 1
-
-        ctx.save(); // Saves the state of the canvas
+        ctx.save() // #21.5
         
+        // create playerClip
+        const clipPathCombo = new Path2D()
+        clipPathCombo.moveTo(0, 0)
+        clipPathCombo.lineTo(0, canvasArea.canvas.height)
+        clipPathCombo.lineTo(canvasArea.canvas.width, canvasArea.canvas.height)
+        clipPathCombo.lineTo(canvasArea.canvas.width, 0)
+        clipPathCombo.closePath()
+
+        clipPathCombo.addPath(Map.playerClip, new DOMMatrix([1, 0, 0, 1, -player.x + midX, -player.y + midY]))
+        
+        // ctx.lineWidth = 5
+        // ctx.strokeStyle = "#00ff00"
+        // ctx.stroke(clipPathCombo)
+        ctx.clip(clipPathCombo)
+
+
+        ctx.save(); // #22
         ctx.translate(midX, midY);
 
 
         // LOWER SHADOW IS DRAWN BY MAP
         // DRAWING UPPER SHADOW HERE \/
-        ctx.save()
+        ctx.save() // #23
         
         ctx.translate(-player.x, -player.y)
         ctx.clip(Map.upperShadowClip);
@@ -4346,7 +4181,7 @@ class Player {
         ctx.fillRect(-15, -15, 30, 30)
         // ctx.filter = "none";
 
-        ctx.restore() // clears upperShadowClip
+        ctx.restore() // #23 clears upperShadowClip
 
         // DRAWING PLAYER TOP
         ctx.translate(0, -this.jumpValue - 32); 
@@ -4365,22 +4200,12 @@ class Player {
         ctx.lineTo(8, 0)
         ctx.stroke();
 
-        ctx.strokeStyle = "#00000000"; // resetting border stroke
-        ctx.lineWidth = 1
 
-
-        // draw border
-        ctx.beginPath();
-        ctx.rect(-16,-16,32,32)
-        ctx.stroke();
-
-        // ctx.drawImage(document.getElementById("playerTop"), -16, -16);
-
-        ctx.restore(); // leaves players space translation AND rotation AND jump value translation
+        ctx.restore(); // #22 leaves players space translation AND rotation AND jump value translation
 
 
         // SIDES OF PLAYER
-        ctx.save();
+        ctx.save(); // #24
 
         const angleRad = this.lookAngle.getAngle() * (Math.PI/180);
         const loopedAngle = this.lookAngle.getAngle();
@@ -4401,7 +4226,6 @@ class Player {
             ctx.lineTo(midX - (16 * Math.cos(angleRad) + (16 * Math.sin(angleRad))), midY - this.jumpValue - (16 * Math.sin(angleRad) - (16 * Math.cos(angleRad))));
             ctx.closePath();
             ctx.fill();
-            ctx.stroke();
         }
 
         if (0 < loopedAngle && loopedAngle < 180) { // RIGHT WALL
@@ -4416,7 +4240,6 @@ class Player {
             ctx.lineTo(midX + (16 * Math.cos(angleRad) - (16 * Math.sin(angleRad))), midY - this.jumpValue + (16 * Math.sin(angleRad) + (16 * Math.cos(angleRad))));
             ctx.closePath();
             ctx.fill();
-            ctx.stroke();
         }
 
         if (90 < loopedAngle && loopedAngle < 270) { // TOP WALL
@@ -4431,7 +4254,6 @@ class Player {
             ctx.lineTo(midX - (16 * Math.cos(angleRad) - (16 * Math.sin(angleRad))), midY - 32 - this.jumpValue - (16 * Math.sin(angleRad) + (16 * Math.cos(angleRad))));
             ctx.closePath();
             ctx.fill();
-            ctx.stroke();
         }
 
         if (180 < loopedAngle && loopedAngle < 360) { // LEFT WALL
@@ -4446,11 +4268,32 @@ class Player {
             ctx.lineTo(midX - (16 * Math.cos(angleRad) - (16 * Math.sin(angleRad))), midY - this.jumpValue - (16 * Math.sin(angleRad) + (16 * Math.cos(angleRad))));
             ctx.closePath();
             ctx.fill();
-            ctx.stroke();
         }
 
 
-        ctx.restore(); 
+        ctx.restore(); // #24
+        ctx.restore(); // 21.5 Clears Map.playerClip
+
+
+        ctx.save() // #24.5
+
+        // DRAW PLAYER XRAY IF BEHIND WALL
+        if (Map.wallsToCheck.length != 0) { // could use more precice check here ex: looking to see if theres data in Map.playerClip
+            
+            ctx.translate(-player.x + midX, -player.y + midY)
+            ctx.clip(Map.playerClip)
+
+            ctx.translate(player.x , player.y);
+            ctx.rotate(player.lookAngle.getAngle() * Math.PI/180)
+
+            ctx.strokeStyle = Map.style.playerColor
+            ctx.lineWidth = 2
+            ctx.beginPath()
+            ctx.strokeRect(-15, -15, 30, 30)
+            ctx.stroke()
+        }
+
+        ctx.restore() // #24.5
     
     }
 
@@ -4906,7 +4749,10 @@ function updateGameArea() { // CALLED EVERY FRAME
     
     // UPDATING OBJECTS
     touchHandler.update();
-    UserInterface.update();
+    UserInterface.update();        
+    
+    dt = (performance.now() - prevDateNow)/10; // Delta Time for FPS independence. dt = amount of milliseconds between frames
+    prevDateNow = performance.now();
 
     if (UserInterface.gamestate == 2) { // In a MapBrowser
         MapBrowser.updateScroll()
@@ -4914,10 +4760,7 @@ function updateGameArea() { // CALLED EVERY FRAME
 
     if (UserInterface.gamestate == 6) {
         
-        dt = (performance.now() - prevDateNow)/10; // Delta Time for FPS independence. dt = amount of milliseconds between frames
-        prevDateNow = performance.now();
-
-        player.updatePos() // dont need dt
+        player.updatePos()
         
         // Map sorts all in view platforms, walls, and player
         // places the player.posInRenderQueue where it belongs
@@ -4925,7 +4768,6 @@ function updateGameArea() { // CALLED EVERY FRAME
     };
     
     if (UserInterface.gamestate == 7) {
-        // could only update if user is touching (no?)
         MapEditor.update();
     }
     
@@ -4941,10 +4783,8 @@ function updateGameArea() { // CALLED EVERY FRAME
 
     if (UserInterface.gamestate == 6) {
         
-        // should be called map.renderLowerShadows or map.renderBackground
-        Map.render(); // draws player lower shadow and platform lower shadows. also draws checkpoints (draw walls' upper shadows elsewhere)
-
-        canvasArea.renderTheQueue()
+        Map.render(); // draws player lower shadow too
+        player.render()
         
     }
     
