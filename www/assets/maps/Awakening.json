@@ -1,0 +1,3257 @@
+{
+    "playerStart": {
+        "x": 110,
+        "y": 5610,
+        "angle": 270
+    },
+    "checkpoints": [
+        {
+            "triggerX1": 160,
+            "triggerY1": 520,
+            "triggerX2": 780,
+            "triggerY2": 520,
+            "x": 490,
+            "y": 470,
+            "angle": 270
+        },
+        {
+            "triggerX1": -380,
+            "triggerY1": 2910,
+            "triggerX2": 410,
+            "triggerY2": 2910,
+            "x": 50,
+            "y": 2910,
+            "angle": 270
+        },
+        {
+            "triggerX1": -500,
+            "triggerY1": 2330,
+            "triggerX2": 530,
+            "triggerY2": 2330,
+            "x": 10,
+            "y": 2250,
+            "angle": 270
+        },
+        {
+            "triggerX1": -130,
+            "triggerY1": 1220,
+            "triggerX2": 290,
+            "triggerY2": 1650,
+            "x": 20,
+            "y": 1310,
+            "angle": 316
+        },
+        {
+            "triggerX1": -370,
+            "triggerY1": 3510,
+            "triggerX2": 120,
+            "triggerY2": 3980,
+            "x": 40,
+            "y": 3760,
+            "angle": 270
+        },
+        {
+            "triggerX1": -290,
+            "triggerY1": 5200,
+            "triggerX2": 570,
+            "triggerY2": 5200,
+            "x": 110,
+            "y": 5160,
+            "angle": 270
+        },
+        {
+            "triggerX1": -550,
+            "triggerY1": 4470,
+            "triggerX2": -180,
+            "triggerY2": 4120,
+            "x": -504,
+            "y": 4186,
+            "angle": 316
+        }
+    ],
+    "style": {
+        "platformTopColor": "rgba(209,70,63,1)",
+        "platformSideColor": "rgba(209,70,63,1)",
+        "wallTopColor": "rgba(125, 94, 49, 1)",
+        "wallSideColor": "rgba(125, 94, 49, 1)",
+        "endZoneTopColor": "rgba(255,218,98,1)",
+        "endZoneSideColor": "rgba(255,218,98,1)",
+        "backgroundColor": "rgba(96,178,195,1)",
+        "shadowColor": "rgba(7,7,10,0.25)",
+        "playerColor": "rgba(239,238,236,1)",
+        "platformHeight": 15,
+        "wallHeight": 50,
+        "lightAngle": 190,
+        "shadowContrastLight": -0.005,
+        "shadowContrastDark": -0.4,
+        "shadowLength": 13
+    },
+    "platforms": [
+        {
+            "x": 320,
+            "y": 60,
+            "width": 40,
+            "height": 40,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -20,
+                    20
+                ],
+                [
+                    -20,
+                    -20
+                ],
+                [
+                    20,
+                    20
+                ],
+                [
+                    20,
+                    -20
+                ]
+            ],
+            "rightMostPlatformCornerX": 360,
+            "rightMostPlatformCornerY": 60
+        },
+        {
+            "x": 320,
+            "y": 120,
+            "width": 40,
+            "height": 40,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -20,
+                    20
+                ],
+                [
+                    -20,
+                    -20
+                ],
+                [
+                    20,
+                    20
+                ],
+                [
+                    20,
+                    -20
+                ]
+            ],
+            "rightMostPlatformCornerX": 360,
+            "rightMostPlatformCornerY": 120
+        },
+        {
+            "x": 380,
+            "y": 0,
+            "width": 180,
+            "height": 160,
+            "angle": 0,
+            "endzone": 1,
+            "wall": 0,
+            "corners": [
+                [
+                    -90,
+                    80
+                ],
+                [
+                    -90,
+                    -80
+                ],
+                [
+                    90,
+                    80
+                ],
+                [
+                    90,
+                    -80
+                ]
+            ],
+            "leftMostPlatformCornerX": 380,
+            "leftMostPlatformCornerY": 160,
+            "rightMostPlatformCornerX": 560,
+            "rightMostPlatformCornerY": 0
+        },
+        {
+            "x": 580,
+            "y": 60,
+            "width": 40,
+            "height": 40,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -20,
+                    20
+                ],
+                [
+                    -20,
+                    -20
+                ],
+                [
+                    20,
+                    20
+                ],
+                [
+                    20,
+                    -20
+                ]
+            ],
+            "leftMostPlatformCornerX": 580,
+            "leftMostPlatformCornerY": 100
+        },
+        {
+            "x": 580,
+            "y": 120,
+            "width": 40,
+            "height": 40,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -20,
+                    20
+                ],
+                [
+                    -20,
+                    -20
+                ],
+                [
+                    20,
+                    20
+                ],
+                [
+                    20,
+                    -20
+                ]
+            ],
+            "leftMostPlatformCornerX": 580,
+            "leftMostPlatformCornerY": 160
+        },
+        {
+            "x": 640,
+            "y": 120,
+            "width": 40,
+            "height": 40,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -20,
+                    20
+                ],
+                [
+                    -20,
+                    -20
+                ],
+                [
+                    20,
+                    20
+                ],
+                [
+                    20,
+                    -20
+                ]
+            ],
+            "leftMostPlatformCornerX": 640,
+            "leftMostPlatformCornerY": 160
+        },
+        {
+            "x": 260,
+            "y": 120,
+            "width": 40,
+            "height": 40,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -20,
+                    20
+                ],
+                [
+                    -20,
+                    -20
+                ],
+                [
+                    20,
+                    20
+                ],
+                [
+                    20,
+                    -20
+                ]
+            ],
+            "rightMostPlatformCornerX": 300,
+            "rightMostPlatformCornerY": 120
+        },
+        {
+            "x": 210,
+            "y": 190,
+            "width": 510,
+            "height": 170,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -255,
+                    85
+                ],
+                [
+                    -255,
+                    -85
+                ],
+                [
+                    255,
+                    85
+                ],
+                [
+                    255,
+                    -85
+                ]
+            ],
+            "leftMostPlatformCornerX": 210,
+            "leftMostPlatformCornerY": 360,
+            "rightMostPlatformCornerX": 720,
+            "rightMostPlatformCornerY": 190
+        },
+        {
+            "x": 210,
+            "y": 380,
+            "width": 320,
+            "height": 160,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -160,
+                    80
+                ],
+                [
+                    -160,
+                    -80
+                ],
+                [
+                    160,
+                    80
+                ],
+                [
+                    160,
+                    -80
+                ]
+            ],
+            "rightMostPlatformCornerX": 530,
+            "rightMostPlatformCornerY": 380
+        },
+        {
+            "x": 550,
+            "y": 380,
+            "width": 170,
+            "height": 160,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -85,
+                    80
+                ],
+                [
+                    -85,
+                    -80
+                ],
+                [
+                    85,
+                    80
+                ],
+                [
+                    85,
+                    -80
+                ]
+            ],
+            "leftMostPlatformCornerX": 550,
+            "leftMostPlatformCornerY": 540,
+            "rightMostPlatformCornerX": 720,
+            "rightMostPlatformCornerY": 380
+        },
+        {
+            "x": 370,
+            "y": 560,
+            "width": 80,
+            "height": 280,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 1,
+            "corners": [
+                [
+                    -40,
+                    140
+                ],
+                [
+                    -40,
+                    -140
+                ],
+                [
+                    40,
+                    140
+                ],
+                [
+                    40,
+                    -140
+                ]
+            ],
+            "rightMostPlatformCornerX": 450,
+            "rightMostPlatformCornerY": 560,
+            "leftMostPlatformCornerX": 370,
+            "leftMostPlatformCornerY": 840
+        },
+        {
+            "x": 470,
+            "y": 560,
+            "width": 260,
+            "height": 270,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -130,
+                    135
+                ],
+                [
+                    -130,
+                    -135
+                ],
+                [
+                    130,
+                    135
+                ],
+                [
+                    130,
+                    -135
+                ]
+            ],
+            "leftMostPlatformCornerX": 470,
+            "leftMostPlatformCornerY": 830,
+            "rightMostPlatformCornerX": 730,
+            "rightMostPlatformCornerY": 560
+        },
+        {
+            "x": 750,
+            "y": 560,
+            "width": 90,
+            "height": 280,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 1,
+            "corners": [
+                [
+                    -45,
+                    140
+                ],
+                [
+                    -45,
+                    -140
+                ],
+                [
+                    45,
+                    140
+                ],
+                [
+                    45,
+                    -140
+                ]
+            ],
+            "leftMostPlatformCornerX": 750,
+            "leftMostPlatformCornerY": 840
+        },
+        {
+            "x": 476,
+            "y": 851,
+            "width": 27,
+            "height": 35,
+            "angle": 22,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -19.07259742143009,
+                    11.168528443803968
+                ],
+                [
+                    -5.96136665187317,
+                    -21.28290646603359
+                ],
+                [
+                    5.96136665187317,
+                    21.28290646603359
+                ],
+                [
+                    19.07259742143009,
+                    -11.168528443803968
+                ]
+            ],
+            "rightMostPlatformCornerX": 508.5725974214301,
+            "rightMostPlatformCornerY": 857.331471556196
+        },
+        {
+            "x": 518,
+            "y": 850,
+            "width": 25,
+            "height": 81,
+            "angle": 22,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -26.76136521542928,
+                    32.86836369225599
+                ],
+                [
+                    -3.581768851259593,
+                    42.233528527653796
+                ],
+                [
+                    3.581768851259593,
+                    -42.233528527653796
+                ],
+                [
+                    26.76136521542928,
+                    -32.86836369225599
+                ]
+            ],
+            "rightMostPlatformCornerX": 557.2613652154292,
+            "rightMostPlatformCornerY": 857.631636307744,
+            "leftMostPlatformCornerX": 503.7386347845707,
+            "leftMostPlatformCornerY": 923.368363692256
+        },
+        {
+            "x": 562,
+            "y": 847,
+            "width": 31,
+            "height": 122,
+            "angle": 22,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -37.22235194415584,
+                    50.751812930627395
+                ],
+                [
+                    -8.479652452585428,
+                    62.36461732652067
+                ],
+                [
+                    8.479652452585428,
+                    -62.36461732652067
+                ],
+                [
+                    37.22235194415584,
+                    -50.751812930627395
+                ]
+            ],
+            "leftMostPlatformCornerX": 540.2776480558441,
+            "leftMostPlatformCornerY": 958.7518129306274,
+            "rightMostPlatformCornerX": 614.7223519441559,
+            "rightMostPlatformCornerY": 857.2481870693726
+        },
+        {
+            "x": 612,
+            "y": 846,
+            "width": 30,
+            "height": 159,
+            "angle": 22,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -43.68898199506681,
+                    68.09201753682092
+                ],
+                [
+                    -15.873466358063194,
+                    79.33021533929829
+                ],
+                [
+                    15.873466358063194,
+                    -79.33021533929829
+                ],
+                [
+                    43.68898199506681,
+                    -68.09201753682092
+                ]
+            ],
+            "leftMostPlatformCornerX": 583.3110180049332,
+            "leftMostPlatformCornerY": 993.5920175368209,
+            "rightMostPlatformCornerX": 670.6889819950668,
+            "rightMostPlatformCornerY": 857.4079824631791
+        },
+        {
+            "x": 282,
+            "y": 847,
+            "width": 77,
+            "height": 202,
+            "angle": 45,
+            "endzone": 0,
+            "wall": 1,
+            "corners": [
+                [
+                    -98.64139597552338,
+                    44.194173824159236
+                ],
+                [
+                    -44.19417382415921,
+                    98.64139597552338
+                ],
+                [
+                    44.19417382415921,
+                    -98.64139597552338
+                ],
+                [
+                    98.64139597552338,
+                    -44.194173824159236
+                ]
+            ],
+            "rightMostPlatformCornerX": 419.1413959755234,
+            "rightMostPlatformCornerY": 903.8058261758408
+        },
+        {
+            "x": 656,
+            "y": 846,
+            "width": 39,
+            "height": 212,
+            "angle": 22,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -57.78838406613903,
+                    90.97666001246918
+                ],
+                [
+                    -21.62821373803432,
+                    105.58631715568976
+                ],
+                [
+                    21.62821373803432,
+                    -105.58631715568976
+                ],
+                [
+                    57.78838406613903,
+                    -90.97666001246918
+                ]
+            ],
+            "leftMostPlatformCornerX": 617.7116159338609,
+            "leftMostPlatformCornerY": 1042.9766600124692,
+            "rightMostPlatformCornerX": 733.2883840661391,
+            "rightMostPlatformCornerY": 861.0233399875308
+        },
+        {
+            "x": 330,
+            "y": 950,
+            "width": 250,
+            "height": 230,
+            "angle": 45,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -169.7056274847714,
+                    -7.071067811865461
+                ],
+                [
+                    -7.07106781186549,
+                    -169.7056274847714
+                ],
+                [
+                    7.07106781186549,
+                    169.7056274847714
+                ],
+                [
+                    169.7056274847714,
+                    7.071067811865461
+                ]
+            ],
+            "rightMostPlatformCornerX": 624.7056274847714,
+            "rightMostPlatformCornerY": 1072.0710678118653,
+            "leftMostPlatformCornerX": 285.2943725152286,
+            "leftMostPlatformCornerY": 1057.9289321881347
+        },
+        {
+            "x": 704,
+            "y": 863,
+            "width": 98,
+            "height": 255,
+            "angle": 22,
+            "endzone": 0,
+            "wall": 1,
+            "corners": [
+                [
+                    -93.19434953430135,
+                    99.86021837988571
+                ],
+                [
+                    -2.3303317867561972,
+                    136.5716645346451
+                ],
+                [
+                    2.3303317867561972,
+                    -136.5716645346451
+                ],
+                [
+                    93.19434953430135,
+                    -99.86021837988571
+                ]
+            ],
+            "leftMostPlatformCornerX": 659.8056504656986,
+            "leftMostPlatformCornerY": 1090.3602183798857,
+            "rightMostPlatformCornerX": 846.1943495343014,
+            "rightMostPlatformCornerY": 890.6397816201143
+        },
+        {
+            "x": 110,
+            "y": 1130,
+            "width": 430,
+            "height": 120,
+            "angle": 45,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -194.45436482630058,
+                    -109.60155108391484
+                ],
+                [
+                    -109.60155108391487,
+                    -194.45436482630055
+                ],
+                [
+                    109.60155108391487,
+                    194.45436482630055
+                ],
+                [
+                    194.45436482630058,
+                    109.60155108391484
+                ]
+            ],
+            "rightMostPlatformCornerX": 519.4543648263005,
+            "rightMostPlatformCornerY": 1299.6015510839147,
+            "leftMostPlatformCornerX": 130.54563517369942,
+            "leftMostPlatformCornerY": 1080.3984489160853
+        },
+        {
+            "x": 546,
+            "y": 1080,
+            "width": 77,
+            "height": 218,
+            "angle": 45,
+            "endzone": 0,
+            "wall": 1,
+            "corners": [
+                [
+                    -104.29825022501576,
+                    49.85102807365162
+                ],
+                [
+                    -49.85102807365159,
+                    104.29825022501576
+                ],
+                [
+                    49.85102807365159,
+                    -104.29825022501576
+                ],
+                [
+                    104.29825022501576,
+                    -49.85102807365162
+                ]
+            ],
+            "rightMostPlatformCornerX": 688.7982502250157,
+            "rightMostPlatformCornerY": 1139.1489719263484,
+            "leftMostPlatformCornerX": 480.20174977498425,
+            "leftMostPlatformCornerY": 1238.8510280736516
+        },
+        {
+            "x": 60,
+            "y": 1110,
+            "width": 130,
+            "height": 120,
+            "angle": 45,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -88.38834764831844,
+                    -3.5355339059327306
+                ],
+                [
+                    -3.535533905932745,
+                    -88.38834764831844
+                ],
+                [
+                    3.535533905932745,
+                    88.38834764831844
+                ],
+                [
+                    88.38834764831844,
+                    3.5355339059327306
+                ]
+            ],
+            "rightMostPlatformCornerX": 213.38834764831844,
+            "rightMostPlatformCornerY": 1173.5355339059327,
+            "leftMostPlatformCornerX": 36.611652351681556,
+            "leftMostPlatformCornerY": 1166.4644660940673
+        },
+        {
+            "x": 180,
+            "y": 1230,
+            "width": 70,
+            "height": 70,
+            "angle": 45,
+            "endzone": 0,
+            "wall": 1,
+            "corners": [
+                [
+                    -49.49747468305833,
+                    3.552713678800501e-15
+                ],
+                [
+                    -3.552713678800501e-15,
+                    -49.49747468305833
+                ],
+                [
+                    3.552713678800501e-15,
+                    49.49747468305833
+                ],
+                [
+                    49.49747468305833,
+                    -3.552713678800501e-15
+                ]
+            ],
+            "rightMostPlatformCornerX": 264.49747468305833,
+            "rightMostPlatformCornerY": 1265,
+            "leftMostPlatformCornerX": 165.50252531694167,
+            "leftMostPlatformCornerY": 1265
+        },
+        {
+            "x": 238,
+            "y": 1314,
+            "width": 173,
+            "height": 113,
+            "angle": 45,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -101.11626970967629,
+                    -21.21320343559642
+                ],
+                [
+                    -21.213203435596434,
+                    -101.11626970967629
+                ],
+                [
+                    21.213203435596434,
+                    101.11626970967629
+                ],
+                [
+                    101.11626970967629,
+                    21.21320343559642
+                ]
+            ],
+            "rightMostPlatformCornerX": 425.6162697096763,
+            "rightMostPlatformCornerY": 1391.7132034355964,
+            "leftMostPlatformCornerX": 223.3837302903237,
+            "leftMostPlatformCornerY": 1349.2867965644036
+        },
+        {
+            "x": -90,
+            "y": 1300,
+            "width": 430,
+            "height": 170,
+            "angle": 45,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -212.13203435596427,
+                    -91.92388155425115
+                ],
+                [
+                    -91.92388155425118,
+                    -212.13203435596424
+                ],
+                [
+                    91.92388155425118,
+                    212.13203435596424
+                ],
+                [
+                    212.13203435596427,
+                    91.92388155425115
+                ]
+            ],
+            "rightMostPlatformCornerX": 337.13203435596427,
+            "rightMostPlatformCornerY": 1476.9238815542512,
+            "leftMostPlatformCornerX": -87.13203435596427,
+            "leftMostPlatformCornerY": 1293.0761184457488
+        },
+        {
+            "x": -120,
+            "y": 1340,
+            "width": 40,
+            "height": 270,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -20,
+                    135
+                ],
+                [
+                    -20,
+                    -135
+                ],
+                [
+                    20,
+                    135
+                ],
+                [
+                    20,
+                    -135
+                ]
+            ],
+            "rightMostPlatformCornerX": -80,
+            "rightMostPlatformCornerY": 1340,
+            "leftMostPlatformCornerX": -120,
+            "leftMostPlatformCornerY": 1610
+        },
+        {
+            "x": -60,
+            "y": 1400,
+            "width": 40,
+            "height": 210,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -20,
+                    105
+                ],
+                [
+                    -20,
+                    -105
+                ],
+                [
+                    20,
+                    105
+                ],
+                [
+                    20,
+                    -105
+                ]
+            ],
+            "rightMostPlatformCornerX": -20,
+            "rightMostPlatformCornerY": 1400,
+            "leftMostPlatformCornerX": -60,
+            "leftMostPlatformCornerY": 1610
+        },
+        {
+            "x": 0,
+            "y": 1460,
+            "width": 40,
+            "height": 150,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -20,
+                    75
+                ],
+                [
+                    -20,
+                    -75
+                ],
+                [
+                    20,
+                    75
+                ],
+                [
+                    20,
+                    -75
+                ]
+            ],
+            "rightMostPlatformCornerX": 40,
+            "rightMostPlatformCornerY": 1460,
+            "leftMostPlatformCornerX": 0,
+            "leftMostPlatformCornerY": 1610
+        },
+        {
+            "x": 60,
+            "y": 1520,
+            "width": 40,
+            "height": 90,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -20,
+                    45
+                ],
+                [
+                    -20,
+                    -45
+                ],
+                [
+                    20,
+                    45
+                ],
+                [
+                    20,
+                    -45
+                ]
+            ],
+            "rightMostPlatformCornerX": 100,
+            "rightMostPlatformCornerY": 1520,
+            "leftMostPlatformCornerX": 60,
+            "leftMostPlatformCornerY": 1610
+        },
+        {
+            "x": 120,
+            "y": 1570,
+            "width": 40,
+            "height": 40,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -20,
+                    20
+                ],
+                [
+                    -20,
+                    -20
+                ],
+                [
+                    20,
+                    20
+                ],
+                [
+                    20,
+                    -20
+                ]
+            ],
+            "leftMostPlatformCornerX": 120,
+            "leftMostPlatformCornerY": 1610,
+            "rightMostPlatformCornerX": 160,
+            "rightMostPlatformCornerY": 1570
+        },
+        {
+            "x": -230,
+            "y": 1610,
+            "width": 100,
+            "height": 380,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 1,
+            "corners": [
+                [
+                    -50,
+                    190
+                ],
+                [
+                    -50,
+                    -190
+                ],
+                [
+                    50,
+                    190
+                ],
+                [
+                    50,
+                    -190
+                ]
+            ],
+            "rightMostPlatformCornerX": -130,
+            "rightMostPlatformCornerY": 1610,
+            "leftMostPlatformCornerX": -230,
+            "leftMostPlatformCornerY": 1990
+        },
+        {
+            "x": -120,
+            "y": 1610,
+            "width": 280,
+            "height": 400,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -140,
+                    200
+                ],
+                [
+                    -140,
+                    -200
+                ],
+                [
+                    140,
+                    200
+                ],
+                [
+                    140,
+                    -200
+                ]
+            ],
+            "rightMostPlatformCornerX": 160,
+            "rightMostPlatformCornerY": 1610,
+            "leftMostPlatformCornerX": -120,
+            "leftMostPlatformCornerY": 2010
+        },
+        {
+            "x": 170,
+            "y": 1610,
+            "width": 110,
+            "height": 380,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 1,
+            "corners": [
+                [
+                    -55,
+                    190
+                ],
+                [
+                    -55,
+                    -190
+                ],
+                [
+                    55,
+                    190
+                ],
+                [
+                    55,
+                    -190
+                ]
+            ],
+            "leftMostPlatformCornerX": 170,
+            "leftMostPlatformCornerY": 1990,
+            "rightMostPlatformCornerX": 280,
+            "rightMostPlatformCornerY": 1610
+        },
+        {
+            "x": -350,
+            "y": 1900,
+            "width": 100,
+            "height": 100,
+            "angle": -10,
+            "endzone": 0,
+            "wall": 1,
+            "corners": [
+                [
+                    -57.92279653395692,
+                    -40.55797876726388
+                ],
+                [
+                    -40.55797876726388,
+                    57.92279653395692
+                ],
+                [
+                    40.55797876726388,
+                    -57.92279653395692
+                ],
+                [
+                    57.92279653395692,
+                    40.55797876726388
+                ]
+            ],
+            "rightMostPlatformCornerX": -242.0772034660431,
+            "rightMostPlatformCornerY": 1990.5579787672639,
+            "leftMostPlatformCornerX": -357.9227965339569,
+            "leftMostPlatformCornerY": 1909.4420212327361
+        },
+        {
+            "x": 300,
+            "y": 1900,
+            "width": 100,
+            "height": 100,
+            "angle": 10,
+            "endzone": 0,
+            "wall": 1,
+            "corners": [
+                [
+                    -57.92279653395692,
+                    40.55797876726388
+                ],
+                [
+                    -40.55797876726388,
+                    -57.92279653395692
+                ],
+                [
+                    40.55797876726388,
+                    57.92279653395692
+                ],
+                [
+                    57.92279653395692,
+                    -40.55797876726388
+                ]
+            ],
+            "leftMostPlatformCornerX": 292.0772034660431,
+            "leftMostPlatformCornerY": 1990.5579787672639,
+            "rightMostPlatformCornerX": 407.9227965339569,
+            "rightMostPlatformCornerY": 1909.4420212327361
+        },
+        {
+            "x": -460,
+            "y": 1920,
+            "width": 100,
+            "height": 100,
+            "angle": -10,
+            "endzone": 0,
+            "wall": 1,
+            "corners": [
+                [
+                    -57.92279653395692,
+                    -40.55797876726388
+                ],
+                [
+                    -40.55797876726388,
+                    57.92279653395692
+                ],
+                [
+                    40.55797876726388,
+                    -57.92279653395692
+                ],
+                [
+                    57.92279653395692,
+                    40.55797876726388
+                ]
+            ],
+            "rightMostPlatformCornerX": -352.0772034660431,
+            "rightMostPlatformCornerY": 2010.5579787672639
+        },
+        {
+            "x": 410,
+            "y": 1920,
+            "width": 100,
+            "height": 100,
+            "angle": 10,
+            "endzone": 0,
+            "wall": 1,
+            "corners": [
+                [
+                    -57.92279653395692,
+                    40.55797876726388
+                ],
+                [
+                    -40.55797876726388,
+                    -57.92279653395692
+                ],
+                [
+                    40.55797876726388,
+                    57.92279653395692
+                ],
+                [
+                    57.92279653395692,
+                    -40.55797876726388
+                ]
+            ],
+            "leftMostPlatformCornerX": 402.0772034660431,
+            "leftMostPlatformCornerY": 2010.5579787672639
+        },
+        {
+            "x": -340,
+            "y": 2030,
+            "width": 730,
+            "height": 330,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -365,
+                    165
+                ],
+                [
+                    -365,
+                    -165
+                ],
+                [
+                    365,
+                    165
+                ],
+                [
+                    365,
+                    -165
+                ]
+            ],
+            "leftMostPlatformCornerX": -340,
+            "leftMostPlatformCornerY": 2360,
+            "rightMostPlatformCornerX": 390,
+            "rightMostPlatformCornerY": 2030
+        },
+        {
+            "x": -240,
+            "y": 2520,
+            "width": 540,
+            "height": 120,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -270,
+                    60
+                ],
+                [
+                    -270,
+                    -60
+                ],
+                [
+                    270,
+                    60
+                ],
+                [
+                    270,
+                    -60
+                ]
+            ],
+            "leftMostPlatformCornerX": -240,
+            "leftMostPlatformCornerY": 2640,
+            "rightMostPlatformCornerX": 300,
+            "rightMostPlatformCornerY": 2520
+        },
+        {
+            "x": 310,
+            "y": 2650,
+            "width": 40,
+            "height": 20,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -20,
+                    10
+                ],
+                [
+                    -20,
+                    -10
+                ],
+                [
+                    20,
+                    10
+                ],
+                [
+                    20,
+                    -10
+                ]
+            ],
+            "leftMostPlatformCornerX": 310,
+            "leftMostPlatformCornerY": 2670
+        },
+        {
+            "x": -240,
+            "y": 2650,
+            "width": 200,
+            "height": 170,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -100,
+                    85
+                ],
+                [
+                    -100,
+                    -85
+                ],
+                [
+                    100,
+                    85
+                ],
+                [
+                    100,
+                    -85
+                ]
+            ],
+            "rightMostPlatformCornerX": -40,
+            "rightMostPlatformCornerY": 2650,
+            "leftMostPlatformCornerX": -240,
+            "leftMostPlatformCornerY": 2820
+        },
+        {
+            "x": -30,
+            "y": 2650,
+            "width": 330,
+            "height": 70,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -165,
+                    35
+                ],
+                [
+                    -165,
+                    -35
+                ],
+                [
+                    165,
+                    35
+                ],
+                [
+                    165,
+                    -35
+                ]
+            ],
+            "leftMostPlatformCornerX": -30,
+            "leftMostPlatformCornerY": 2720,
+            "rightMostPlatformCornerX": 300,
+            "rightMostPlatformCornerY": 2650
+        },
+        {
+            "x": 310,
+            "y": 2680,
+            "width": 40,
+            "height": 40,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -20,
+                    20
+                ],
+                [
+                    -20,
+                    -20
+                ],
+                [
+                    20,
+                    20
+                ],
+                [
+                    20,
+                    -20
+                ]
+            ],
+            "leftMostPlatformCornerX": 310,
+            "leftMostPlatformCornerY": 2720,
+            "rightMostPlatformCornerX": 350,
+            "rightMostPlatformCornerY": 2680
+        },
+        {
+            "x": -290,
+            "y": 2830,
+            "width": 40,
+            "height": 110,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -20,
+                    55
+                ],
+                [
+                    -20,
+                    -55
+                ],
+                [
+                    20,
+                    55
+                ],
+                [
+                    20,
+                    -55
+                ]
+            ],
+            "rightMostPlatformCornerX": -250,
+            "rightMostPlatformCornerY": 2830
+        },
+        {
+            "x": -240,
+            "y": 2830,
+            "width": 200,
+            "height": 110,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -100,
+                    55
+                ],
+                [
+                    -100,
+                    -55
+                ],
+                [
+                    100,
+                    55
+                ],
+                [
+                    100,
+                    -55
+                ]
+            ],
+            "rightMostPlatformCornerX": -40,
+            "rightMostPlatformCornerY": 2830,
+            "leftMostPlatformCornerX": -240,
+            "leftMostPlatformCornerY": 2940
+        },
+        {
+            "x": -30,
+            "y": 2730,
+            "width": 160,
+            "height": 210,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -80,
+                    105
+                ],
+                [
+                    -80,
+                    -105
+                ],
+                [
+                    80,
+                    105
+                ],
+                [
+                    80,
+                    -105
+                ]
+            ],
+            "leftMostPlatformCornerX": -30,
+            "leftMostPlatformCornerY": 2940,
+            "rightMostPlatformCornerX": 130,
+            "rightMostPlatformCornerY": 2730
+        },
+        {
+            "x": 140,
+            "y": 2730,
+            "width": 160,
+            "height": 210,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -80,
+                    105
+                ],
+                [
+                    -80,
+                    -105
+                ],
+                [
+                    80,
+                    105
+                ],
+                [
+                    80,
+                    -105
+                ]
+            ],
+            "leftMostPlatformCornerX": 140,
+            "leftMostPlatformCornerY": 2940,
+            "rightMostPlatformCornerX": 300,
+            "rightMostPlatformCornerY": 2730
+        },
+        {
+            "x": 310,
+            "y": 2730,
+            "width": 40,
+            "height": 210,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -20,
+                    105
+                ],
+                [
+                    -20,
+                    -105
+                ],
+                [
+                    20,
+                    105
+                ],
+                [
+                    20,
+                    -105
+                ]
+            ],
+            "leftMostPlatformCornerX": 310,
+            "leftMostPlatformCornerY": 2940,
+            "rightMostPlatformCornerX": 350,
+            "rightMostPlatformCornerY": 2730
+        },
+        {
+            "x": -80,
+            "y": 3130,
+            "width": 50,
+            "height": 50,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -25,
+                    25
+                ],
+                [
+                    -25,
+                    -25
+                ],
+                [
+                    25,
+                    25
+                ],
+                [
+                    25,
+                    -25
+                ]
+            ],
+            "rightMostPlatformCornerX": -30,
+            "rightMostPlatformCornerY": 3130,
+            "leftMostPlatformCornerX": -80,
+            "leftMostPlatformCornerY": 3180
+        },
+        {
+            "x": -340,
+            "y": 3200,
+            "width": 310,
+            "height": 310,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -155,
+                    155
+                ],
+                [
+                    -155,
+                    -155
+                ],
+                [
+                    155,
+                    155
+                ],
+                [
+                    155,
+                    -155
+                ]
+            ],
+            "rightMostPlatformCornerX": -30,
+            "rightMostPlatformCornerY": 3200
+        },
+        {
+            "x": -10,
+            "y": 2970,
+            "width": 310,
+            "height": 290,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -155,
+                    145
+                ],
+                [
+                    -155,
+                    -145
+                ],
+                [
+                    155,
+                    145
+                ],
+                [
+                    155,
+                    -145
+                ]
+            ],
+            "leftMostPlatformCornerX": -10,
+            "leftMostPlatformCornerY": 3260,
+            "rightMostPlatformCornerX": 300,
+            "rightMostPlatformCornerY": 2970
+        },
+        {
+            "x": -10,
+            "y": 3280,
+            "width": 50,
+            "height": 50,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -25,
+                    25
+                ],
+                [
+                    -25,
+                    -25
+                ],
+                [
+                    25,
+                    25
+                ],
+                [
+                    25,
+                    -25
+                ]
+            ],
+            "rightMostPlatformCornerX": 40,
+            "rightMostPlatformCornerY": 3280
+        },
+        {
+            "x": -250,
+            "y": 3530,
+            "width": 220,
+            "height": 40,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -110,
+                    20
+                ],
+                [
+                    -110,
+                    -20
+                ],
+                [
+                    110,
+                    20
+                ],
+                [
+                    110,
+                    -20
+                ]
+            ],
+            "leftMostPlatformCornerX": -250,
+            "leftMostPlatformCornerY": 3570,
+            "rightMostPlatformCornerX": -30,
+            "rightMostPlatformCornerY": 3530
+        },
+        {
+            "x": -130,
+            "y": 3590,
+            "width": 100,
+            "height": 100,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -50,
+                    50
+                ],
+                [
+                    -50,
+                    -50
+                ],
+                [
+                    50,
+                    50
+                ],
+                [
+                    50,
+                    -50
+                ]
+            ],
+            "leftMostPlatformCornerX": -130,
+            "leftMostPlatformCornerY": 3690,
+            "rightMostPlatformCornerX": -30,
+            "rightMostPlatformCornerY": 3590
+        },
+        {
+            "x": -190,
+            "y": 3590,
+            "width": 40,
+            "height": 40,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -20,
+                    20
+                ],
+                [
+                    -20,
+                    -20
+                ],
+                [
+                    20,
+                    20
+                ],
+                [
+                    20,
+                    -20
+                ]
+            ],
+            "rightMostPlatformCornerX": -150,
+            "rightMostPlatformCornerY": 3590,
+            "leftMostPlatformCornerX": -190,
+            "leftMostPlatformCornerY": 3630
+        },
+        {
+            "x": -10,
+            "y": 3400,
+            "width": 300,
+            "height": 290,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -150,
+                    145
+                ],
+                [
+                    -150,
+                    -145
+                ],
+                [
+                    150,
+                    145
+                ],
+                [
+                    150,
+                    -145
+                ]
+            ],
+            "leftMostPlatformCornerX": -10,
+            "leftMostPlatformCornerY": 3690
+        },
+        {
+            "x": -70,
+            "y": 3710,
+            "width": 40,
+            "height": 40,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -20,
+                    20
+                ],
+                [
+                    -20,
+                    -20
+                ],
+                [
+                    20,
+                    20
+                ],
+                [
+                    20,
+                    -20
+                ]
+            ],
+            "leftMostPlatformCornerX": -70,
+            "leftMostPlatformCornerY": 3750,
+            "rightMostPlatformCornerX": -30,
+            "rightMostPlatformCornerY": 3710
+        },
+        {
+            "x": -10,
+            "y": 3710,
+            "width": 100,
+            "height": 100,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -50,
+                    50
+                ],
+                [
+                    -50,
+                    -50
+                ],
+                [
+                    50,
+                    50
+                ],
+                [
+                    50,
+                    -50
+                ]
+            ],
+            "leftMostPlatformCornerX": -10,
+            "leftMostPlatformCornerY": 3810,
+            "rightMostPlatformCornerX": 90,
+            "rightMostPlatformCornerY": 3710
+        },
+        {
+            "x": 110,
+            "y": 3710,
+            "width": 40,
+            "height": 40,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -20,
+                    20
+                ],
+                [
+                    -20,
+                    -20
+                ],
+                [
+                    20,
+                    20
+                ],
+                [
+                    20,
+                    -20
+                ]
+            ],
+            "rightMostPlatformCornerX": 150,
+            "rightMostPlatformCornerY": 3710,
+            "leftMostPlatformCornerX": 110,
+            "leftMostPlatformCornerY": 3750
+        },
+        {
+            "x": 50,
+            "y": 3830,
+            "width": 40,
+            "height": 40,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -20,
+                    20
+                ],
+                [
+                    -20,
+                    -20
+                ],
+                [
+                    20,
+                    20
+                ],
+                [
+                    20,
+                    -20
+                ]
+            ],
+            "leftMostPlatformCornerX": 50,
+            "leftMostPlatformCornerY": 3870
+        },
+        {
+            "x": -400,
+            "y": 3700,
+            "width": 350,
+            "height": 400,
+            "angle": 45,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -265.1650429449553,
+                    17.677669529663703
+                ],
+                [
+                    -17.67766952966366,
+                    265.1650429449553
+                ],
+                [
+                    17.67766952966366,
+                    -265.1650429449553
+                ],
+                [
+                    265.1650429449553,
+                    -17.677669529663703
+                ]
+            ],
+            "rightMostPlatformCornerX": 40.1650429449553,
+            "rightMostPlatformCornerY": 3882.3223304703365,
+            "leftMostPlatformCornerX": -490.1650429449553,
+            "leftMostPlatformCornerY": 3917.6776695296635
+        },
+        {
+            "x": -670,
+            "y": 4000,
+            "width": 350,
+            "height": 330,
+            "angle": 45,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -240.41630560342617,
+                    -7.071067811865461
+                ],
+                [
+                    -7.07106781186549,
+                    -240.41630560342617
+                ],
+                [
+                    7.07106781186549,
+                    240.41630560342617
+                ],
+                [
+                    240.41630560342617,
+                    7.071067811865461
+                ]
+            ],
+            "rightMostPlatformCornerX": -254.58369439657383,
+            "rightMostPlatformCornerY": 4172.071067811865
+        },
+        {
+            "x": -420,
+            "y": 4300,
+            "width": 450,
+            "height": 330,
+            "angle": 45,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -275.77164466275354,
+                    -42.426406871192825
+                ],
+                [
+                    -42.42640687119287,
+                    -275.7716446627535
+                ],
+                [
+                    42.42640687119287,
+                    275.7716446627535
+                ],
+                [
+                    275.77164466275354,
+                    42.426406871192825
+                ]
+            ],
+            "leftMostPlatformCornerX": -470.7716446627535,
+            "leftMostPlatformCornerY": 4422.573593128807,
+            "rightMostPlatformCornerX": 80.77164466275354,
+            "rightMostPlatformCornerY": 4507.426406871193
+        },
+        {
+            "x": -67,
+            "y": 4613,
+            "width": 362,
+            "height": 286,
+            "angle": 45,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -229.1025971044414,
+                    -26.87005768508878
+                ],
+                [
+                    -26.870057685088824,
+                    -229.10259710444137
+                ],
+                [
+                    26.870057685088824,
+                    229.10259710444137
+                ],
+                [
+                    229.1025971044414,
+                    26.87005768508878
+                ]
+            ],
+            "leftMostPlatformCornerX": -115.10259710444143,
+            "leftMostPlatformCornerY": 4729.129942314911,
+            "rightMostPlatformCornerX": 343.10259710444143,
+            "rightMostPlatformCornerY": 4782.870057685089
+        },
+        {
+            "x": -150,
+            "y": 4775,
+            "width": 50,
+            "height": 50,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -25,
+                    25
+                ],
+                [
+                    -25,
+                    -25
+                ],
+                [
+                    25,
+                    25
+                ],
+                [
+                    25,
+                    -25
+                ]
+            ],
+            "rightMostPlatformCornerX": -100,
+            "rightMostPlatformCornerY": 4775
+        },
+        {
+            "x": -80,
+            "y": 4800,
+            "width": 20,
+            "height": 20,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -10,
+                    10
+                ],
+                [
+                    -10,
+                    -10
+                ],
+                [
+                    10,
+                    10
+                ],
+                [
+                    10,
+                    -10
+                ]
+            ],
+            "rightMostPlatformCornerX": -60,
+            "rightMostPlatformCornerY": 4800
+        },
+        {
+            "x": 330,
+            "y": 4810,
+            "width": 20,
+            "height": 20,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -10,
+                    10
+                ],
+                [
+                    -10,
+                    -10
+                ],
+                [
+                    10,
+                    10
+                ],
+                [
+                    10,
+                    -10
+                ]
+            ],
+            "leftMostPlatformCornerX": 330,
+            "leftMostPlatformCornerY": 4830
+        },
+        {
+            "x": 300,
+            "y": 4850,
+            "width": 50,
+            "height": 50,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -25,
+                    25
+                ],
+                [
+                    -25,
+                    -25
+                ],
+                [
+                    25,
+                    25
+                ],
+                [
+                    25,
+                    -25
+                ]
+            ],
+            "leftMostPlatformCornerX": 300,
+            "leftMostPlatformCornerY": 4900
+        },
+        {
+            "x": -150,
+            "y": 4850,
+            "width": 50,
+            "height": 50,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -25,
+                    25
+                ],
+                [
+                    -25,
+                    -25
+                ],
+                [
+                    25,
+                    25
+                ],
+                [
+                    25,
+                    -25
+                ]
+            ],
+            "rightMostPlatformCornerX": -100,
+            "rightMostPlatformCornerY": 4850
+        },
+        {
+            "x": -75,
+            "y": 4850,
+            "width": 50,
+            "height": 50,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -25,
+                    25
+                ],
+                [
+                    -25,
+                    -25
+                ],
+                [
+                    25,
+                    25
+                ],
+                [
+                    25,
+                    -25
+                ]
+            ],
+            "rightMostPlatformCornerX": -25,
+            "rightMostPlatformCornerY": 4850
+        },
+        {
+            "x": 0,
+            "y": 4880,
+            "width": 20,
+            "height": 20,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -10,
+                    10
+                ],
+                [
+                    -10,
+                    -10
+                ],
+                [
+                    10,
+                    10
+                ],
+                [
+                    10,
+                    -10
+                ]
+            ],
+            "rightMostPlatformCornerX": 20,
+            "rightMostPlatformCornerY": 4880
+        },
+        {
+            "x": 260,
+            "y": 4890,
+            "width": 20,
+            "height": 20,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -10,
+                    10
+                ],
+                [
+                    -10,
+                    -10
+                ],
+                [
+                    10,
+                    10
+                ],
+                [
+                    10,
+                    -10
+                ]
+            ],
+            "leftMostPlatformCornerX": 260,
+            "leftMostPlatformCornerY": 4910
+        },
+        {
+            "x": 225,
+            "y": 4925,
+            "width": 50,
+            "height": 50,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -25,
+                    25
+                ],
+                [
+                    -25,
+                    -25
+                ],
+                [
+                    25,
+                    25
+                ],
+                [
+                    25,
+                    -25
+                ]
+            ],
+            "leftMostPlatformCornerX": 225,
+            "leftMostPlatformCornerY": 4975
+        },
+        {
+            "x": 300,
+            "y": 4925,
+            "width": 50,
+            "height": 50,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -25,
+                    25
+                ],
+                [
+                    -25,
+                    -25
+                ],
+                [
+                    25,
+                    25
+                ],
+                [
+                    25,
+                    -25
+                ]
+            ],
+            "leftMostPlatformCornerX": 300,
+            "leftMostPlatformCornerY": 4975
+        },
+        {
+            "x": -150,
+            "y": 4925,
+            "width": 50,
+            "height": 50,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -25,
+                    25
+                ],
+                [
+                    -25,
+                    -25
+                ],
+                [
+                    25,
+                    25
+                ],
+                [
+                    25,
+                    -25
+                ]
+            ],
+            "rightMostPlatformCornerX": -100,
+            "rightMostPlatformCornerY": 4925
+        },
+        {
+            "x": -75,
+            "y": 4925,
+            "width": 50,
+            "height": 50,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -25,
+                    25
+                ],
+                [
+                    -25,
+                    -25
+                ],
+                [
+                    25,
+                    25
+                ],
+                [
+                    25,
+                    -25
+                ]
+            ],
+            "rightMostPlatformCornerX": -25,
+            "rightMostPlatformCornerY": 4925
+        },
+        {
+            "x": 0,
+            "y": 4925,
+            "width": 50,
+            "height": 50,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -25,
+                    25
+                ],
+                [
+                    -25,
+                    -25
+                ],
+                [
+                    25,
+                    25
+                ],
+                [
+                    25,
+                    -25
+                ]
+            ],
+            "rightMostPlatformCornerX": 50,
+            "rightMostPlatformCornerY": 4925
+        },
+        {
+            "x": 180,
+            "y": 4960,
+            "width": 20,
+            "height": 20,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -10,
+                    10
+                ],
+                [
+                    -10,
+                    -10
+                ],
+                [
+                    10,
+                    10
+                ],
+                [
+                    10,
+                    -10
+                ]
+            ],
+            "leftMostPlatformCornerX": 180,
+            "leftMostPlatformCornerY": 4980
+        },
+        {
+            "x": 80,
+            "y": 4960,
+            "width": 20,
+            "height": 20,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -10,
+                    10
+                ],
+                [
+                    -10,
+                    -10
+                ],
+                [
+                    10,
+                    10
+                ],
+                [
+                    10,
+                    -10
+                ]
+            ],
+            "rightMostPlatformCornerX": 100,
+            "rightMostPlatformCornerY": 4960
+        },
+        {
+            "x": 225,
+            "y": 5000,
+            "width": 50,
+            "height": 50,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -25,
+                    25
+                ],
+                [
+                    -25,
+                    -25
+                ],
+                [
+                    25,
+                    25
+                ],
+                [
+                    25,
+                    -25
+                ]
+            ],
+            "leftMostPlatformCornerX": 225,
+            "leftMostPlatformCornerY": 5050
+        },
+        {
+            "x": -150,
+            "y": 5000,
+            "width": 50,
+            "height": 50,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -25,
+                    25
+                ],
+                [
+                    -25,
+                    -25
+                ],
+                [
+                    25,
+                    25
+                ],
+                [
+                    25,
+                    -25
+                ]
+            ],
+            "rightMostPlatformCornerX": -100,
+            "rightMostPlatformCornerY": 5000
+        },
+        {
+            "x": 0,
+            "y": 5000,
+            "width": 50,
+            "height": 50,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -25,
+                    25
+                ],
+                [
+                    -25,
+                    -25
+                ],
+                [
+                    25,
+                    25
+                ],
+                [
+                    25,
+                    -25
+                ]
+            ],
+            "rightMostPlatformCornerX": 50,
+            "rightMostPlatformCornerY": 5000
+        },
+        {
+            "x": 150,
+            "y": 5000,
+            "width": 50,
+            "height": 50,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -25,
+                    25
+                ],
+                [
+                    -25,
+                    -25
+                ],
+                [
+                    25,
+                    25
+                ],
+                [
+                    25,
+                    -25
+                ]
+            ],
+            "leftMostPlatformCornerX": 150,
+            "leftMostPlatformCornerY": 5050
+        },
+        {
+            "x": -75,
+            "y": 5000,
+            "width": 50,
+            "height": 50,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -25,
+                    25
+                ],
+                [
+                    -25,
+                    -25
+                ],
+                [
+                    25,
+                    25
+                ],
+                [
+                    25,
+                    -25
+                ]
+            ],
+            "rightMostPlatformCornerX": -25,
+            "rightMostPlatformCornerY": 5000
+        },
+        {
+            "x": 75,
+            "y": 5000,
+            "width": 50,
+            "height": 50,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -25,
+                    25
+                ],
+                [
+                    -25,
+                    -25
+                ],
+                [
+                    25,
+                    25
+                ],
+                [
+                    25,
+                    -25
+                ]
+            ],
+            "leftMostPlatformCornerX": 75,
+            "leftMostPlatformCornerY": 5050,
+            "rightMostPlatformCornerX": 125,
+            "rightMostPlatformCornerY": 5000
+        },
+        {
+            "x": 300,
+            "y": 5000,
+            "width": 50,
+            "height": 50,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -25,
+                    25
+                ],
+                [
+                    -25,
+                    -25
+                ],
+                [
+                    25,
+                    25
+                ],
+                [
+                    25,
+                    -25
+                ]
+            ],
+            "leftMostPlatformCornerX": 300,
+            "leftMostPlatformCornerY": 5050
+        },
+        {
+            "x": -150,
+            "y": 5070,
+            "width": 500,
+            "height": 160,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -250,
+                    80
+                ],
+                [
+                    -250,
+                    -80
+                ],
+                [
+                    250,
+                    80
+                ],
+                [
+                    250,
+                    -80
+                ]
+            ],
+            "rightMostPlatformCornerX": 350,
+            "rightMostPlatformCornerY": 5070,
+            "leftMostPlatformCornerX": -150,
+            "leftMostPlatformCornerY": 5230
+        },
+        {
+            "x": 360,
+            "y": 5180,
+            "width": 60,
+            "height": 50,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -30,
+                    25
+                ],
+                [
+                    -30,
+                    -25
+                ],
+                [
+                    30,
+                    25
+                ],
+                [
+                    30,
+                    -25
+                ]
+            ],
+            "leftMostPlatformCornerX": 360,
+            "leftMostPlatformCornerY": 5230,
+            "rightMostPlatformCornerX": 420,
+            "rightMostPlatformCornerY": 5180
+        },
+        {
+            "x": -180,
+            "y": 5240,
+            "width": 600,
+            "height": 70,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -300,
+                    35
+                ],
+                [
+                    -300,
+                    -35
+                ],
+                [
+                    300,
+                    35
+                ],
+                [
+                    300,
+                    -35
+                ]
+            ],
+            "leftMostPlatformCornerX": -180,
+            "leftMostPlatformCornerY": 5310,
+            "rightMostPlatformCornerX": 420,
+            "rightMostPlatformCornerY": 5240
+        },
+        {
+            "x": 430,
+            "y": 5240,
+            "width": 40,
+            "height": 70,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -20,
+                    35
+                ],
+                [
+                    -20,
+                    -35
+                ],
+                [
+                    20,
+                    35
+                ],
+                [
+                    20,
+                    -35
+                ]
+            ],
+            "leftMostPlatformCornerX": 430,
+            "leftMostPlatformCornerY": 5310
+        },
+        {
+            "x": -180,
+            "y": 5320,
+            "width": 600,
+            "height": 70,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -300,
+                    35
+                ],
+                [
+                    -300,
+                    -35
+                ],
+                [
+                    300,
+                    35
+                ],
+                [
+                    300,
+                    -35
+                ]
+            ],
+            "rightMostPlatformCornerX": 420,
+            "rightMostPlatformCornerY": 5320,
+            "leftMostPlatformCornerX": -180,
+            "leftMostPlatformCornerY": 5390
+        },
+        {
+            "x": 430,
+            "y": 5320,
+            "width": 40,
+            "height": 60,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -20,
+                    30
+                ],
+                [
+                    -20,
+                    -30
+                ],
+                [
+                    20,
+                    30
+                ],
+                [
+                    20,
+                    -30
+                ]
+            ],
+            "leftMostPlatformCornerX": 430,
+            "leftMostPlatformCornerY": 5380,
+            "rightMostPlatformCornerX": 470,
+            "rightMostPlatformCornerY": 5320
+        },
+        {
+            "x": -280,
+            "y": 5500,
+            "width": 40,
+            "height": 240,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -20,
+                    120
+                ],
+                [
+                    -20,
+                    -120
+                ],
+                [
+                    20,
+                    120
+                ],
+                [
+                    20,
+                    -120
+                ]
+            ],
+            "rightMostPlatformCornerX": -240,
+            "rightMostPlatformCornerY": 5500
+        },
+        {
+            "x": -230,
+            "y": 5390,
+            "width": 700,
+            "height": 440,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -350,
+                    220
+                ],
+                [
+                    -350,
+                    -220
+                ],
+                [
+                    350,
+                    220
+                ],
+                [
+                    350,
+                    -220
+                ]
+            ],
+            "leftMostPlatformCornerX": -230,
+            "leftMostPlatformCornerY": 5830,
+            "rightMostPlatformCornerX": 470,
+            "rightMostPlatformCornerY": 5390
+        },
+        {
+            "x": 470,
+            "y": 5450,
+            "width": 60,
+            "height": 60,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -30,
+                    30
+                ],
+                [
+                    -30,
+                    -30
+                ],
+                [
+                    30,
+                    30
+                ],
+                [
+                    30,
+                    -30
+                ]
+            ],
+            "leftMostPlatformCornerX": 470,
+            "leftMostPlatformCornerY": 5510,
+            "rightMostPlatformCornerX": 530,
+            "rightMostPlatformCornerY": 5450
+        },
+        {
+            "x": 470,
+            "y": 5520,
+            "width": 60,
+            "height": 60,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -30,
+                    30
+                ],
+                [
+                    -30,
+                    -30
+                ],
+                [
+                    30,
+                    30
+                ],
+                [
+                    30,
+                    -30
+                ]
+            ],
+            "rightMostPlatformCornerX": 530,
+            "rightMostPlatformCornerY": 5520,
+            "leftMostPlatformCornerX": 470,
+            "leftMostPlatformCornerY": 5580
+        },
+        {
+            "x": 470,
+            "y": 5590,
+            "width": 60,
+            "height": 60,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -30,
+                    30
+                ],
+                [
+                    -30,
+                    -30
+                ],
+                [
+                    30,
+                    30
+                ],
+                [
+                    30,
+                    -30
+                ]
+            ],
+            "leftMostPlatformCornerX": 470,
+            "leftMostPlatformCornerY": 5650,
+            "rightMostPlatformCornerX": 530,
+            "rightMostPlatformCornerY": 5590
+        },
+        {
+            "x": 470,
+            "y": 5660,
+            "width": 60,
+            "height": 60,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -30,
+                    30
+                ],
+                [
+                    -30,
+                    -30
+                ],
+                [
+                    30,
+                    30
+                ],
+                [
+                    30,
+                    -30
+                ]
+            ],
+            "leftMostPlatformCornerX": 470,
+            "leftMostPlatformCornerY": 5720,
+            "rightMostPlatformCornerX": 530,
+            "rightMostPlatformCornerY": 5660
+        },
+        {
+            "x": 470,
+            "y": 5730,
+            "width": 60,
+            "height": 60,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -30,
+                    30
+                ],
+                [
+                    -30,
+                    -30
+                ],
+                [
+                    30,
+                    30
+                ],
+                [
+                    30,
+                    -30
+                ]
+            ],
+            "leftMostPlatformCornerX": 470,
+            "leftMostPlatformCornerY": 5790,
+            "rightMostPlatformCornerX": 530,
+            "rightMostPlatformCornerY": 5730
+        },
+        {
+            "x": -140,
+            "y": 5830,
+            "width": 510,
+            "height": 100,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -255,
+                    50
+                ],
+                [
+                    -255,
+                    -50
+                ],
+                [
+                    255,
+                    50
+                ],
+                [
+                    255,
+                    -50
+                ]
+            ],
+            "rightMostPlatformCornerX": 370,
+            "rightMostPlatformCornerY": 5830,
+            "leftMostPlatformCornerX": -140,
+            "leftMostPlatformCornerY": 5930
+        },
+        {
+            "x": -190,
+            "y": 5830,
+            "width": 50,
+            "height": 50,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -25,
+                    25
+                ],
+                [
+                    -25,
+                    -25
+                ],
+                [
+                    25,
+                    25
+                ],
+                [
+                    25,
+                    -25
+                ]
+            ],
+            "rightMostPlatformCornerX": -140,
+            "rightMostPlatformCornerY": 5830
+        },
+        {
+            "x": 370,
+            "y": 5830,
+            "width": 50,
+            "height": 50,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -25,
+                    25
+                ],
+                [
+                    -25,
+                    -25
+                ],
+                [
+                    25,
+                    25
+                ],
+                [
+                    25,
+                    -25
+                ]
+            ],
+            "leftMostPlatformCornerX": 370,
+            "leftMostPlatformCornerY": 5880
+        },
+        {
+            "x": -60,
+            "y": 5930,
+            "width": 340,
+            "height": 30,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "corners": [
+                [
+                    -170,
+                    15
+                ],
+                [
+                    -170,
+                    -15
+                ],
+                [
+                    170,
+                    15
+                ],
+                [
+                    170,
+                    -15
+                ]
+            ],
+            "rightMostPlatformCornerX": 280,
+            "rightMostPlatformCornerY": 5930
+        }
+    ],
+    "name": "Awakening"
+}

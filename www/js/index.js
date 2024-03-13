@@ -574,14 +574,17 @@ const UserInterface = {
 
             MapEditor.editorState = 0;
             MapEditor.loadedMap = null;
-            MapEditor.screenX = 0
-            MapEditor.screenY = 0
-            MapEditor.scrollX_vel = 0, // for smooth scrolling 
-            MapEditor.scrollY_vel = 0,
-            MapEditor.renderedPlatforms = [], // dont actually need to reset all this shit
-            UserInterface.renderedButtons = UserInterface.btnGroup_mapEditorMenu
+            MapEditor.screenX = 0;
+            MapEditor.screenY = 0;
+            MapEditor.scrollX_vel = 0;
+            MapEditor.scrollY_vel = 0;
+            MapEditor.snapAmount = 0;
+            MapEditor.renderedPlatforms = [];
             MapEditor.selectedPlatformIndex = -1;
+            MapEditor.selectedCheckpointIndex = [-1,1];
+            btn_snappingSlider.updateState(0);
             
+            UserInterface.renderedButtons = UserInterface.btnGroup_mapEditorMenu
         })
         
         btn_add_platform = new Button("canvasArea.canvas.width - 240", "25", 204, "platform_button", "", 0, "", function() {
@@ -675,8 +678,8 @@ const UserInterface = {
                 }
                 
                 if (this.isPressed) {
-                    platform.x += touchHandler.dragAmountX
-                    platform.y += touchHandler.dragAmountY
+                    platform.x += Math.round(touchHandler.dragAmountX)
+                    platform.y += Math.round(touchHandler.dragAmountY)
                 } else if (MapEditor.snapAmount > 0) {
                     platform.x = Math.round(platform.x / MapEditor.snapAmount) * MapEditor.snapAmount
                     platform.y = Math.round(platform.y / MapEditor.snapAmount) * MapEditor.snapAmount
@@ -692,8 +695,8 @@ const UserInterface = {
                 
                 if (MapEditor.selectedCheckpointIndex[1] == 1) {
                     if (this.isPressed) {
-                        checkpoint.triggerX1 += touchHandler.dragAmountX
-                        checkpoint.triggerY1 += touchHandler.dragAmountY
+                        checkpoint.triggerX1 += Math.round(touchHandler.dragAmountX)
+                        checkpoint.triggerY1 += Math.round(touchHandler.dragAmountY)
                     } else if (MapEditor.snapAmount > 0) {
                         checkpoint.triggerX1 = Math.round(checkpoint.triggerX1 / MapEditor.snapAmount) * MapEditor.snapAmount
                         checkpoint.triggerY1 = Math.round(checkpoint.triggerY1 / MapEditor.snapAmount) * MapEditor.snapAmount
@@ -705,8 +708,8 @@ const UserInterface = {
 
                 if (MapEditor.selectedCheckpointIndex[1] == 2) {
                     if (this.isPressed) {
-                        checkpoint.triggerX2 += touchHandler.dragAmountX
-                        checkpoint.triggerY2 += touchHandler.dragAmountY
+                        checkpoint.triggerX2 += Math.round(touchHandler.dragAmountX)
+                        checkpoint.triggerY2 += Math.round(touchHandler.dragAmountY)
                     } else if (MapEditor.snapAmount > 0) {
                         checkpoint.triggerX2 = Math.round(checkpoint.triggerX2 / MapEditor.snapAmount) * MapEditor.snapAmount
                         checkpoint.triggerY2 = Math.round(checkpoint.triggerY2 / MapEditor.snapAmount) * MapEditor.snapAmount
@@ -718,8 +721,8 @@ const UserInterface = {
 
                 if (MapEditor.selectedCheckpointIndex[1] == 3) {
                     if (this.isPressed) {
-                        checkpoint.x += touchHandler.dragAmountX
-                        checkpoint.y += touchHandler.dragAmountY
+                        checkpoint.x += Math.round(touchHandler.dragAmountX)
+                        checkpoint.y += Math.round(touchHandler.dragAmountY)
                     } else if (MapEditor.snapAmount > 0) {
                         checkpoint.x = Math.round(checkpoint.x / MapEditor.snapAmount) * MapEditor.snapAmount
                         checkpoint.y = Math.round(checkpoint.y / MapEditor.snapAmount) * MapEditor.snapAmount
@@ -1112,7 +1115,23 @@ const UserInterface = {
 
 
         // LEVEL BUTTONS
-        btn_level_pitfall = new Button(250, 50, 175, "", "", 0, "Pitfall", function() {
+        btn_level_awakening = new Button(250, 50, 175, "", "", 0, "Awakening", function() {
+            if (this.toggle) {
+                this.toggle = 0;
+                MapBrowser.selectedMapIndex = -1
+            } else {
+                // loop through each button and untoggle it
+                UserInterface.renderedButtons.forEach(button => {
+                    if (button.toggle == 1) {button.toggle = 0}
+                })
+
+                this.toggle = 1;
+                MapBrowser.selectedMapIndex = "Awakening"
+                Tutorial.isActive = true;
+            }
+        })
+
+        btn_level_pitfall = new Button(250, 150, 175, "", "", 0, "Pitfall", function() {
             if (this.toggle) {
             
                 this.toggle = 0;
@@ -1130,7 +1149,7 @@ const UserInterface = {
             }
         })
 
-        btn_level_below = new Button(250, 150, 175, "", "", 0, "Below", function() {
+        btn_level_below = new Button(250, 250, 175, "", "", 0, "Below", function() {
             if (this.toggle) {
             
                 this.toggle = 0;
@@ -1148,7 +1167,7 @@ const UserInterface = {
             }
         })
 
-        btn_level_turmoil = new Button(250, 250, 175, "", "", 0, "Turmoil", function() {
+        btn_level_turmoil = new Button(250, 350, 175, "", "", 0, "Turmoil", function() {
             if (this.toggle) {
             
                 this.toggle = 0;
@@ -1165,7 +1184,6 @@ const UserInterface = {
                 MapBrowser.selectedMapIndex = "noob"
             }
         })
-
 
 
 
@@ -1259,6 +1277,11 @@ const UserInterface = {
                 UserInterface.gamestate = 2;
                 MapBrowser.state = 1;
                 UserInterface.renderedButtons = UserInterface.btnGroup_standardMapBrowser;
+
+                if (Tutorial.isActive) { // leaving tutorial level
+                    Tutorial.reset()
+                }
+
                 return
             }
             
@@ -1287,6 +1310,11 @@ const UserInterface = {
             UserInterface.levelState = 1;
             player.checkpointIndex = -1;
             player.restart();
+
+            if (Tutorial.isActive) { // restarting tutorial level
+                // Could confirm user wants to restart here.
+                Tutorial.reset()
+            }
         })
 
         btn_jump = new Button(40, "canvasArea.canvas.height - 140", 100, "jump_button", "", 0, "", function() { 
@@ -1298,13 +1326,82 @@ const UserInterface = {
         })
 
 
+        // TUTORIAL BUTTONS
+        btn_next = new Button("midX + 128", 140, 120, "", "", 0, "Next", function() { 
+            
+            Tutorial.timerStarted = false; // easier to always set it here
+
+            if (Tutorial.state == 1) {
+                Tutorial.state ++;
+                UserInterface.renderedButtons = [btn_mainMenu]
+                return
+            }
+
+            if (Tutorial.state == 2) {
+                Tutorial.state ++; // going into STATE 3
+                UserInterface.renderedButtons = [btn_mainMenu]
+
+                player.lookAngle.set(0,-1) // so that ur not already looking at a target
+                return
+            }
+
+            if (Tutorial.state == 3) {
+                Tutorial.state ++; // going into STATE 4
+                UserInterface.renderedButtons = [btn_mainMenu, btn_restart]
+                return
+            }
+
+            if (Tutorial.state == 4) {
+                Tutorial.state ++; // going into STATE 5
+                console.log("state changed to 5")
+                UserInterface.renderedButtons = UserInterface.btnGroup_inLevel
+                
+                return
+            }
+
+            if (Tutorial.state == 5) {
+                Tutorial.state ++; // going into STATE 6
+                UserInterface.renderedButtons = UserInterface.btnGroup_inLevel
+                return
+            }
+
+            // state 6 doesnt have a next button. Progresses automatically
+
+            // CAN COMBINE A LOT OF THESE INTO ONE
+            if (Tutorial.state == 7) {
+                Tutorial.state ++; // going into STATE 8
+                UserInterface.renderedButtons = UserInterface.btnGroup_inLevel
+                return
+            }
+
+            if (Tutorial.state == 8) {
+                Tutorial.state ++; // going into STATE 9
+                Tutorial.pausePlayer = false;
+                UserInterface.renderedButtons = UserInterface.btnGroup_inLevel
+                return
+            }
+
+            // 9 progresses to 10 automatically
+            
+            if (Tutorial.state == 10) {
+                Tutorial.state ++; // going into STATE 11
+                Tutorial.pausePlayer = false;
+                UserInterface.renderedButtons = UserInterface.btnGroup_inLevel
+                return
+            }
+
+
+        })
+
+
         // GROUPS OF BUTTONS TO RENDER ON DIFFERENT PAGES
         this.btnGroup_mainMenu = [btn_play, btn_settings, btn_mapEditor]
         this.btnGroup_settings = [btn_mainMenu, btn_sensitivitySlider, btn_volumeSlider, btn_debugText, btn_strafeHUD, btn_reset_settings]
         this.btnGroup_standardMapBrowser = [
             btn_mainMenu, btn_custom_maps, btn_playMap,
+            btn_level_awakening,
             btn_level_pitfall,
-            btn_level_below, 
+            btn_level_below,
 
             btn_level_turmoil,
         ]
@@ -1474,11 +1571,15 @@ const UserInterface = {
 
         // test if released within the edit platform panel
         // needs to be matched with MapEditor.render() values
-        //canvasArea.canvas.width - 220, 20, 200, 260
+        //     x : canvasArea.canvas.width - 280,
+        //     y : 20,
+        //     width : 225,
+        //     height : 320
+        
         if (
             UserInterface.gamestate == 7 && MapEditor.editorState == 2 &&
-            x >= canvasArea.canvas.width - 220 && x <= canvasArea.canvas.width - 20 &&
-            y >= 20 && y <= 260
+            x >= canvasArea.canvas.width - 280 && x <= canvasArea.canvas.width - 280 + 225 &&
+            y >= 20 && y <= 20 + 320
         ) {
             clickedSidePanel = true;
         }
@@ -1580,8 +1681,10 @@ const UserInterface = {
             canvasArea.canvas.style.backgroundColor = "#a3d5e1";
             document.body.style.backgroundColor = "#a3d5e1";
   
-            const title = document.getElementById("title")
-            canvasArea.ctx.drawImage(title, canvasArea.canvas.width/2 - 250, 30, 500, 500 * (title.height / title.width))
+            // Draw title text
+            canvasArea.ctx.fillStyle = UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
+            canvasArea.ctx.font = "140px BAHNSCHRIFT"
+            canvasArea.ctx.fillText("Null Hop", midX - canvasArea.ctx.measureText("Null Hop").width / 2, 130)
 
             const menu_background = document.getElementById("menu_background")
             canvasArea.ctx.drawImage(menu_background, -30, 15, canvasArea.canvas.width + 60, (menu_background.height / menu_background.width) * canvasArea.canvas.width + 60)
@@ -2184,7 +2287,7 @@ class SliderUI {
         this.max = max;
         this.decimalDetail = decimalDetail // 1 = whole numbers, 10 = 10ths place, 100 = 100ths place
         this.label = label;
-        // this.labelColor = labelColor;
+        // this.labelColor = labelColor; kill
         this.value = variable;
         this.variableToControl = String(variable);
         this.func = func;
@@ -2260,6 +2363,207 @@ class SliderUI {
             }
         }
     }
+}
+
+
+const Tutorial = {
+    isActive : false,
+    state : 0, //  20 stages in google doc
+    targets : [50,50,50,50,50,50], // 1s turn to 0s when target is completed
+    timerStarted : false, // used to prevent multiple timers from being set every frame
+    pausePlayer : false,
+
+    reset : function() { // called on restart and when leaving level
+        this.state = 0;
+        this.targets = [50,50,50,50,50,50];
+        this.timerStarted = false;
+    },
+
+
+
+    update : function() {
+        if (UserInterface.gamestate == 2) { // in map browser
+            // this.state = 0;
+            if (MapBrowser.selectedMapIndex !== "Awakening") { // tutorial level not selected
+                this.isActive = false;
+            }
+        } 
+
+        if (this.state == 0) {
+            if (UserInterface.gamestate == 6) { // map is loaded 
+                UserInterface.renderedButtons = [btn_mainMenu]
+                this.state = 1;
+            }
+        }
+
+        if (this.state == 1) {
+            if (
+                !UserInterface.renderedButtons.includes(btn_next) &&  
+                Math.abs(player.lookAngle.getAngle() - Map.playerStart.angle) > 60
+            ) {
+                UserInterface.renderedButtons = UserInterface.renderedButtons.concat(btn_next)
+            }
+        }
+
+        if (!this.timerStarted && (this.state == 2 || this.state == 4 || this.state == 7 || this.state == 8 || this.state == 10)) {
+            setTimeout(() => {UserInterface.renderedButtons = UserInterface.renderedButtons.concat(btn_next)}, 1000);
+            this.timerStarted = true;
+        }
+
+        if (this.state == 3) {
+            if (!UserInterface.renderedButtons.includes(btn_next)) {
+
+                // dwindle down targets if looking at them
+                for (let i = 0; i < this.targets.length; i++) {
+                    if (this.targets[i] > 0) {
+                        if (Math.abs(player.lookAngle.getAngle() - (i * 60)) < 8) {
+                            this.targets[i] -= (0.8 * dt);
+                            if (this.targets[i] < 0) {this.targets[i] = 0} 
+                        } else {this.targets[i] = 50}
+                    }                
+                }
+                
+                if (this.targets.filter((v) => (v === 0)).length == 1) { // All targets completed
+                    UserInterface.renderedButtons = UserInterface.renderedButtons.concat(btn_next)
+                }
+            }
+        }
+
+        if (this.state == 5) {
+            if (UserInterface.levelState == 2) { // if player is jumping
+                this.state ++;
+            }
+        }
+
+        if (!this.timerStarted && this.state == 6) { // jumping for 2 seconds
+            setTimeout(() => {this.timerStarted = false; this.state ++; this.pausePlayer = true}, 2000);
+            this.timerStarted = true;
+        }
+
+        if (this.state == 9) {
+            if (player.checkpointIndex == 4) {this.state ++; this.pausePlayer = true}
+        }
+
+    },
+
+
+    render : function() {
+        const ctx = canvasArea.ctx;
+        canvasArea.ctx.font = "28px BAHNSCHRIFT";
+        const bg_color = UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
+        const icon_color = !UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
+
+        ctx.fillText("state: " + this.state, midX, 400)
+        ctx.fillText("next buttons: " + UserInterface.renderedButtons.filter((v) => (v === btn_next)).length, midX, 450)
+
+        function drawTextPanel (text){
+            const textWidth = ctx.measureText(text).width
+
+            ctx.fillStyle = bg_color
+            canvasArea.roundedRect(midX - 25 - textWidth/2, 50, textWidth + 50, 80, 25)
+            ctx.fill()
+
+            ctx.fillStyle = icon_color
+            ctx.fillText(text, midX - textWidth/2, 100)
+        }
+
+        if (this.state == 1) {
+            drawTextPanel("Slide horizontally to turn the player");
+
+            // Add Finger
+        }
+
+        if (this.state == 2) {
+            drawTextPanel("Sliding vertically does NOT turn the player")
+
+            //Add Finger
+        }
+
+        if (this.state == 3) {
+
+            const targetCounter = String(this.targets.filter((v) => (v === 0)).length + "/6")
+            drawTextPanel("Rotate the player to look at the targets: " + targetCounter)
+            
+            ctx.save() // #4
+            
+            ctx.translate(midX, midY)
+            ctx.strokeStyle = Map.style.shadowColor
+            ctx.fillStyle = Map.style.shadowColor
+            ctx.lineWidth = 8
+            ctx.lineCap = "round"
+            
+            for (let i = 0; i < this.targets.length; i++) { // COULD MAKE THIS A FUNCTION SIINCE ITS THE SAME CODE TWICE
+                if (this.targets[i] > 0) {
+                    ctx.beginPath()
+                    ctx.arc(75, 0, 14, 0, (this.targets[i]/ 50) * (2 * Math.PI));
+                    ctx.stroke()
+    
+                    if (this.targets[i] < 50 ) {
+                        ctx.beginPath()
+                        ctx.arc(75, 0, 5, 0, 2 * Math.PI);
+                        ctx.fill()
+                    }
+                }
+
+                ctx.rotate(60 * Math.PI / 180)
+            }
+
+
+            ctx.translate(0, -32)
+            ctx.strokeStyle = bg_color
+            ctx.fillStyle = bg_color
+
+            
+            for (let i = 0; i < this.targets.length; i++) {
+                
+                if (this.targets[i] > 0) {
+                    ctx.beginPath()
+                    ctx.arc(75, 0, 14, 0, (this.targets[i]/ 50) * (2 * Math.PI));
+                    ctx.stroke()
+    
+                    if (this.targets[i] < 50 ) {
+                        ctx.beginPath()
+                        ctx.arc(75, 0, 5, 0, 2 * Math.PI);
+                        ctx.fill()
+                    }
+                }
+
+                ctx.rotate(60 * Math.PI / 180)
+            }
+
+
+                
+            ctx.restore() // #4
+            
+            //Add Finger
+        }
+
+        if (this.state == 4) {
+            drawTextPanel("This button restarts the map")
+            
+            //Add Arrow
+        }
+
+        if (this.state == 5) {
+            drawTextPanel("Start jumping by pressing the jump button")
+            
+            //Add Arrow
+        }
+
+        if (this.state == 7) {
+            drawTextPanel("Jump on the red platforms. Don't hit the blue ground")  
+        }
+        
+        if (this.state == 8) {
+            drawTextPanel("Slide horizontally to change the direction of the player")  
+        }
+
+        if (this.state == 10) {
+            drawTextPanel("Turning gains speed. But turning too sharply loses speed")  
+        }
+
+    },
+
 }
 
 
@@ -2828,7 +3132,6 @@ const MapEditor = {
     renderedPlatforms : [],
     selectedPlatformIndex : -1, // -1 = nothing, -2 = player
     selectedCheckpointIndex : [-1,1],
-    // snapping : true, // dont need
     snapAmount : 0,
     debugText : false,
 
@@ -3026,7 +3329,7 @@ const MapEditor = {
                 const sidePanel = {// If these change also change the values in UserInterface.touchReleased()
                     x : canvasArea.canvas.width - 280,
                     y : 20,
-                    width : 220,
+                    width : 225,
                     height : 320
                 }
 
@@ -4754,17 +5057,20 @@ function updateGameArea() { // CALLED EVERY FRAME
     dt = (performance.now() - prevDateNow)/10; // Delta Time for FPS independence. dt = amount of milliseconds between frames
     prevDateNow = performance.now();
 
+
     if (UserInterface.gamestate == 2) { // In a MapBrowser
         MapBrowser.updateScroll()
+        if (Tutorial.isActive) {
+            Tutorial.update();
+        }
     }
 
     if (UserInterface.gamestate == 6) {
-        
-        player.updatePos()
-        
-        // Map sorts all in view platforms, walls, and player
-        // places the player.posInRenderQueue where it belongs
+        if (!Tutorial.pausePlayer) {player.updatePos()}     
         Map.update();
+        if (Tutorial.isActive) {
+            Tutorial.update();
+        }
     };
     
     if (UserInterface.gamestate == 7) {
@@ -4782,12 +5088,12 @@ function updateGameArea() { // CALLED EVERY FRAME
     }
 
     if (UserInterface.gamestate == 6) {
-        
         Map.render(); // draws player lower shadow too
         player.render()
-        
+        if (Tutorial.isActive) {
+            Tutorial.render();
+        }        
     }
-    
 
     if (UserInterface.gamestate == 7) {
         MapEditor.render();
