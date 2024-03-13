@@ -67,6 +67,15 @@
             "x": -504,
             "y": 4186,
             "angle": 316
+        },
+        {
+            "triggerX1": 0,
+            "triggerY1": 5600,
+            "triggerX2": 200,
+            "triggerY2": 5600,
+            "x": 110,
+            "y": 5610,
+            "angle": 270
         }
     ],
     "style": {

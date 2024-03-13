@@ -1327,9 +1327,11 @@ const UserInterface = {
 
 
         // TUTORIAL BUTTONS
-        btn_next = new Button("midX + 128", 140, 120, "", "", 0, "Next", function() { 
+        btn_next = new Button("midX + 170", 150, 75, "next_button", "", 0, "", function() { 
             
-            Tutorial.timerStarted = false; // easier to always set it here
+            Tutorial.timerStarted = false; // easier to always set these here even if they arent always needed
+            Tutorial.animatePos = 0;
+            Tutorial.animateVel = 0;
 
             if (Tutorial.state == 1) {
                 Tutorial.state ++;
@@ -1353,19 +1355,21 @@ const UserInterface = {
 
             if (Tutorial.state == 4) {
                 Tutorial.state ++; // going into STATE 5
-                console.log("state changed to 5")
                 UserInterface.renderedButtons = UserInterface.btnGroup_inLevel
                 
                 return
             }
 
-            if (Tutorial.state == 5) {
-                Tutorial.state ++; // going into STATE 6
-                UserInterface.renderedButtons = UserInterface.btnGroup_inLevel
-                return
-            }
+            // KILL
+            // if (Tutorial.state == 5) {
+            //     Tutorial.state ++; // going into STATE 6
+            //     console.log("THIS SHOULD NEVER FIRE STATE 5 ON BTN NEXT")
+            //     UserInterface.renderedButtons = UserInterface.btnGroup_inLevel
+            //     return
+            // }
 
             // state 6 doesnt have a next button. Progresses automatically
+
 
             // CAN COMBINE A LOT OF THESE INTO ONE
             if (Tutorial.state == 7) {
@@ -1390,6 +1394,47 @@ const UserInterface = {
                 return
             }
 
+            // 10 progresses to 12 automatically
+
+            if (Tutorial.state == 12) {
+                Tutorial.state ++; // going into STATE 13
+                Tutorial.pausePlayer = false;
+                UserInterface.renderedButtons = UserInterface.btnGroup_inLevel
+                return
+            }
+
+            // 13 to 14 is automatic
+
+            if (Tutorial.state == 14) {
+                Tutorial.state ++; // going into STATE 15
+                Tutorial.pausePlayer = false;
+                UserInterface.renderedButtons = UserInterface.btnGroup_inLevel
+                return
+            }
+
+            // 15 to 16 is automatic
+
+            if (Tutorial.state == 16) {
+                Tutorial.state ++; // going into STATE 15
+                Tutorial.pausePlayer = false;
+                UserInterface.renderedButtons = UserInterface.btnGroup_inLevel
+                return
+            }
+
+            // 17 to 18 automatic
+
+            if (Tutorial.state == 18) {
+                Tutorial.state ++; // going into STATE 19
+                UserInterface.renderedButtons = UserInterface.btnGroup_inLevel
+                return
+            }
+
+
+            if (Tutorial.state == 19) {
+                Tutorial.state ++; // going into STATE 20
+                UserInterface.renderedButtons = UserInterface.btnGroup_inLevel
+                return
+            }
 
         })
 
@@ -2372,41 +2417,102 @@ const Tutorial = {
     targets : [50,50,50,50,50,50], // 1s turn to 0s when target is completed
     timerStarted : false, // used to prevent multiple timers from being set every frame
     pausePlayer : false,
+    animatePos : 0,
+    animateVel : 0,
+    decalLoadState : -1, // -1 no, 0 started load, 4 finished load (number of decals loaded)
+    decalList : ["horizontal_finger", "vertical_finger", "finger", "arrow"],
+
 
     reset : function() { // called on restart and when leaving level
         this.state = 0;
         this.targets = [50,50,50,50,50,50];
         this.timerStarted = false;
+        this.pausePlayer = false;
+        this.animatePos = 0;
+        this.animateVel = 0;
+
     },
 
 
 
     update : function() {
         if (UserInterface.gamestate == 2) { // in map browser
-            // this.state = 0;
             if (MapBrowser.selectedMapIndex !== "Awakening") { // tutorial level not selected
                 this.isActive = false;
             }
         } 
 
         if (this.state == 0) {
-            if (UserInterface.gamestate == 6) { // map is loaded 
+            if ((UserInterface.gamestate == 5 || UserInterface.gamestate == 6) && this.decalLoadState == -1) { // decals havnt started loading yet
+                // INITIATE DECALS
+                this.decalLoadState = 0
+
+                window.resolveLocalFileSystemURL(cordova.file.applicationDirectory + "www/assets/images/decals/", (dirEntry) => {
+                    // LOOP TO GET EACH DECAL IMAGE
+                    for(let i = 0; i < this.decalList.length; i++) {
+
+                        dirEntry.getFile(this.decalList[i] + ".svg", {create: false, exclusive: false}, (fileEntry) => {
+                            fileEntry.file( (file) => {
+                                const reader = new FileReader();
+                                reader.onload = (e) => {
+    
+                                    const SVG = new DOMParser().parseFromString(e.target.result, "image/svg+xml").documentElement;                                
+                                    SVG.getElementById("bg").style.fill = UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1
+                                    const SVG_string = new XMLSerializer().serializeToString(SVG);
+                                    const SVG_blob = new Blob([SVG_string], {type: 'image/svg+xml'});
+                                    const SVG_url = URL.createObjectURL(SVG_blob);
+                                    this.decalList[i] = new Image()
+                                    this.decalList[i].addEventListener("load", () => {
+                                        //once image is loaded
+                                        this.decalLoadState ++;
+                                        URL.revokeObjectURL(SVG_url)
+                                    }, {once: true});
+
+                                    this.decalList[i].src = SVG_url
+                                };
+                                reader.onerror = (e) => alert(e.target.error.name);
+                    
+                                reader.readAsText(file)
+                            })
+                        }, () => {console.log(this.decalList[i] + ": no svg found");});
+                    
+
+                    } // end of for loop
+                })
+            }
+            
+            if (UserInterface.gamestate == 6) { // map is loaded
+                // called early incase decals arent loaded yet. Dont want all buttons visible
                 UserInterface.renderedButtons = [btn_mainMenu]
-                this.state = 1;
+
+                if (this.decalLoadState == 4) {
+                    this.state = 1;
+                }
             }
         }
 
         if (this.state == 1) {
             if (
                 !UserInterface.renderedButtons.includes(btn_next) &&  
-                Math.abs(player.lookAngle.getAngle() - Map.playerStart.angle) > 60
+                Math.abs(player.lookAngle.getAngle() - Map.playerStart.angle) > 45
             ) {
                 UserInterface.renderedButtons = UserInterface.renderedButtons.concat(btn_next)
             }
         }
 
-        if (!this.timerStarted && (this.state == 2 || this.state == 4 || this.state == 7 || this.state == 8 || this.state == 10)) {
-            setTimeout(() => {UserInterface.renderedButtons = UserInterface.renderedButtons.concat(btn_next)}, 1000);
+        if (!this.timerStarted && (
+            this.state == 2 || 
+            this.state == 4 || 
+            this.state == 7 || 
+            this.state == 8 || 
+            this.state == 10 ||
+            this.state == 12 ||
+            this.state == 14 ||
+            this.state == 16 ||
+            this.state == 18 ||
+            this.state == 19
+        )) {
+            setTimeout(() => {UserInterface.renderedButtons = UserInterface.renderedButtons.concat(btn_next)}, 500);
             this.timerStarted = true;
         }
 
@@ -2423,7 +2529,7 @@ const Tutorial = {
                     }                
                 }
                 
-                if (this.targets.filter((v) => (v === 0)).length == 1) { // All targets completed
+                if (this.targets.filter((v) => (v === 0)).length == 6) { // All targets completed
                     UserInterface.renderedButtons = UserInterface.renderedButtons.concat(btn_next)
                 }
             }
@@ -2432,6 +2538,8 @@ const Tutorial = {
         if (this.state == 5) {
             if (UserInterface.levelState == 2) { // if player is jumping
                 this.state ++;
+                Tutorial.animatePos = 0;
+                Tutorial.animateVel = 0;
             }
         }
 
@@ -2444,6 +2552,22 @@ const Tutorial = {
             if (player.checkpointIndex == 4) {this.state ++; this.pausePlayer = true}
         }
 
+        if (this.state == 11) {
+            if (player.checkpointIndex == 1) {this.state ++; this.pausePlayer = true}
+        }
+
+        if (this.state == 13) {
+            if (player.checkpointIndex == 2) {this.state ++; this.pausePlayer = true}
+        }
+
+        if (this.state == 15) {
+            if (player.checkpointIndex == 0) {this.state ++; this.pausePlayer = true}
+        }
+
+        if (this.state == 17) { // check if ended level
+            if (UserInterface.levelState == 3) {this.state ++;}
+        }
+
     },
 
 
@@ -2453,8 +2577,8 @@ const Tutorial = {
         const bg_color = UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
         const icon_color = !UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
 
-        ctx.fillText("state: " + this.state, midX, 400)
-        ctx.fillText("next buttons: " + UserInterface.renderedButtons.filter((v) => (v === btn_next)).length, midX, 450)
+        ctx.fillText("state: " + this.state, midX, 30)
+        // ctx.fillText("next buttons: " + UserInterface.renderedButtons.filter((v) => (v === btn_next)).length, midX, 450)
 
         function drawTextPanel (text){
             const textWidth = ctx.measureText(text).width
@@ -2467,17 +2591,34 @@ const Tutorial = {
             ctx.fillText(text, midX - textWidth/2, 100)
         }
 
+
         if (this.state == 1) {
             drawTextPanel("Slide horizontally to turn the player");
 
-            // Add Finger
+            if (this.animatePos == 0 && this.animateVel == 0) {this.animateVel = 3} // STARTING ANIMATION
+            if (this.animatePos > 0) {this.animateVel -= 0.06 * dt}
+            if (this.animatePos < 0) {this.animateVel += 0.06 * dt}
+            this.animatePos += this.animateVel * dt
+
+            if (touchHandler.dragging == false) {
+                const image = this.decalList[0]
+                ctx.drawImage(image, midX - image.width/2 + this.animatePos, canvasArea.canvas.height - image.height - 60)
+            }
         }
+
 
         if (this.state == 2) {
             drawTextPanel("Sliding vertically does NOT turn the player")
 
-            //Add Finger
+            if (this.animatePos == 0 && this.animateVel == 0) {this.animateVel = 2.5} // STARTING ANIMATION
+            if (this.animatePos > 0) {this.animateVel -= 0.05 * dt}
+            if (this.animatePos < 0) {this.animateVel += 0.05 * dt}
+            this.animatePos += this.animateVel * dt
+
+            const image = this.decalList[1]
+            ctx.drawImage(image, midX - 250, midY - 60 + this.animatePos)
         }
+
 
         if (this.state == 3) {
 
@@ -2538,28 +2679,99 @@ const Tutorial = {
             //Add Finger
         }
 
+
         if (this.state == 4) {
-            drawTextPanel("This button restarts the map")
+            drawTextPanel("This button restarts the tutorial map")
             
-            //Add Arrow
+            if (this.animatePos == 0 && this.animateVel == 0) {this.animateVel = 1} // STARTING ANIMATION
+            if (this.animatePos > 0) {this.animateVel -= 0.03 * dt}
+            if (this.animatePos < 0) {this.animateVel += 0.03 * dt}
+            this.animatePos += this.animateVel * dt
+
+            const image = this.decalList[3] // ARROW
+            ctx.drawImage(image, btn_restart.x + 150 + this.animatePos, btn_restart.y + btn_restart.width/2 - image.height/2)
         }
+
 
         if (this.state == 5) {
             drawTextPanel("Start jumping by pressing the jump button")
             
-            //Add Arrow
+            if (this.animatePos == 0 && this.animateVel == 0) {this.animateVel = 1} // STARTING ANIMATION
+            if (this.animatePos > 0) {this.animateVel -= 0.03 * dt}
+            if (this.animatePos < 0) {this.animateVel += 0.03 * dt}
+            this.animatePos += this.animateVel * dt
+
+            const image = this.decalList[3] // ARROW
+            ctx.drawImage(image, btn_jump.x + 150 + this.animatePos, btn_jump.y + btn_jump.width/2 - image.height/2)
         }
+
 
         if (this.state == 7) {
-            drawTextPanel("Jump on the red platforms. Don't hit the blue ground")  
-        }
-        
-        if (this.state == 8) {
-            drawTextPanel("Slide horizontally to change the direction of the player")  
+            drawTextPanel("Jump on the red platforms and avoid the blue ground")  
         }
 
+        
+        if (this.state == 8) {
+            drawTextPanel("Slide horizontally to change the direction of the player")
+
+            if (this.animatePos == 0 && this.animateVel == 0) {this.animateVel = 3} // STARTING ANIMATION
+            if (this.animatePos > 20) {this.animateVel -= 0.06 * dt}
+            if (this.animatePos < -20) {this.animateVel += 0.06 * dt}
+            this.animatePos += this.animateVel * dt
+
+            const image = this.decalList[0]
+            ctx.drawImage(image, midX - image.width/2 + this.animatePos, canvasArea.canvas.height - image.height - 60)
+        }
+
+
         if (this.state == 10) {
-            drawTextPanel("Turning gains speed. But turning too sharply loses speed")  
+            drawTextPanel("Smooth turns increase speed. Sharp turns decrease speed")
+
+            // graphic showing smooth turn vs sharp turn?
+        }
+
+
+        if (this.state == 12) {
+            drawTextPanel("Turn smoothly to gain speed and clear the gap")
+            
+            if (this.animatePos == 0 && this.animateVel == 0) {this.animateVel = 3} // STARTING ANIMATION
+            if (this.animatePos > 20) {this.animateVel -= 0.06 * dt}
+            if (this.animatePos < -20) {this.animateVel += 0.06 * dt}
+            this.animatePos += this.animateVel * dt
+
+            const image = this.decalList[0]
+            ctx.drawImage(image, midX - image.width/2 + this.animatePos, canvasArea.canvas.height - image.height - 60)
+        }
+
+
+        if (this.state == 14) {
+            drawTextPanel("Don't touch the brown walls")
+        }
+
+
+        if (this.state == 16) {
+            drawTextPanel("Reach the gold endzone to finish the level")
+        }
+
+
+        if (this.state == 18) {
+            drawTextPanel("Finish levels faster to climb the leaderboards")
+
+            // arrow to leaderboard??
+        }
+
+
+        if (this.state == 19) {
+            drawTextPanel("Click the back button to select a new level")
+
+            // arrow to back button
+            if (this.animatePos == 0 && this.animateVel == 0) {this.animateVel = 1} // STARTING ANIMATION
+            if (this.animatePos > 0) {this.animateVel -= 0.03 * dt}
+            if (this.animatePos < 0) {this.animateVel += 0.03 * dt}
+            this.animatePos += this.animateVel * dt
+
+            const image = this.decalList[3] // ARROW
+            ctx.drawImage(image, btn_mainMenu.x + 150 + this.animatePos, btn_mainMenu.y + btn_mainMenu.width/2 - image.height/2)
         }
 
     },
@@ -4144,7 +4356,6 @@ const Map = {
 
 
 
-
     renderPlatform : function(platform) { // seperate function to render platforms so that it can be called at different times (ex. called after drawing player inorder to render infront)
         
         const ctx = canvasArea.ctx;        
@@ -4286,14 +4497,16 @@ const Map = {
         })
 
 
-        this.checkpoints.forEach(checkpoint => { // draw line to show checkpoint triggers
-            ctx.strokeStyle = UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1 
-            ctx.lineWidth = 4
-            ctx.beginPath(); 
-            ctx.moveTo(checkpoint.triggerX1, checkpoint.triggerY1);
-            ctx.lineTo(checkpoint.triggerX2, checkpoint.triggerY2);
-            ctx.stroke();
-        });
+        if (UserInterface.debugText == true) {
+            this.checkpoints.forEach(checkpoint => { // draw line to show checkpoint triggers
+                ctx.strokeStyle = UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1 
+                ctx.lineWidth = 4
+                ctx.beginPath(); 
+                ctx.moveTo(checkpoint.triggerX1, checkpoint.triggerY1);
+                ctx.lineTo(checkpoint.triggerX2, checkpoint.triggerY2);
+                ctx.stroke();
+            });
+        }
 
 
         ctx.restore(); // #19
