@@ -21,6 +21,483 @@ function onDeviceReady() { // Called on page load in HMTL
 }
 
 
+class Averager {
+    
+    constructor(maxFramesSampled) {
+        this.maxFramesSampled = maxFramesSampled;
+        // this.dtAdjusted = dtAdjusted;
+        this.frames = [];
+    }
+        
+    pushValue = (value) => {
+        if (this.frames.push(value) > this.maxFramesSampled / dt) {this.frames.shift()} // adds new value to frames[] & removes oldest (if theres more then max allowed frames in array)
+    }
+
+    getAverage = () => {
+        const average = this.frames.reduce((a, b) => a + b) / this.frames.length
+        return average
+    }
+
+    clear = () => {
+        this.frames = []
+    }
+}
+
+
+class Button {
+    constructor(x, y, width, image, image_pressed, togglable, label, func) {
+        this.x = eval(x);
+        this.y = eval(y);
+        this.savedX = x;
+        this.savedY = y;
+
+
+        // GET ICON DIRECTLY THROUGH CORDOVA LOCAL STORAGE   
+        const buttonURL = cordova.file.applicationDirectory + "www/assets/images/buttons/"
+        
+        window.resolveLocalFileSystemURL(buttonURL, (dirEntry) => {
+
+            // GETTING ICONS FOR IMAGE PARAMETER
+            dirEntry.getFile(image + ".svg", {create: false, exclusive: false}, (fileEntry) => {
+
+                fileEntry.file( (file) => {
+
+                    const reader = new FileReader();
+                    
+                    reader.onload = (e) => {
+
+                        // create SVG elements documents
+                        // CAN COMBINE ALL INITs HERE
+                        const lightSVG = new DOMParser().parseFromString(e.target.result, "image/svg+xml").documentElement;
+                        const lightSVG_p = new DOMParser().parseFromString(e.target.result, "image/svg+xml").documentElement;
+                        
+                        const darkSVG = new DOMParser().parseFromString(e.target.result, "image/svg+xml").documentElement;
+                        const darkSVG_p = new DOMParser().parseFromString(e.target.result, "image/svg+xml").documentElement;
+                        
+
+                        // edit fills to to be light/dark modes
+                        lightSVG.getElementById("bg").style.fill = UserInterface.lightColor_1
+                        lightSVG.getElementById("icon").style.fill = UserInterface.darkColor_1
+                        lightSVG_p.getElementById("bg").style.fill = UserInterface.lightColor_2
+                        lightSVG_p.getElementById("icon").style.fill = UserInterface.darkColor_2
+
+                        darkSVG.getElementById("bg").style.fill = UserInterface.darkColor_1
+                        darkSVG.getElementById("icon").style.fill= UserInterface.lightColor_1
+                        darkSVG_p.getElementById("bg").style.fill = UserInterface.darkColor_2
+                        darkSVG_p.getElementById("icon").style.fill= UserInterface.lightColor_2
+
+                        
+                        // converts svg element to string
+                        const lightSVG_string = new XMLSerializer().serializeToString(lightSVG);
+                        const lightSVG_p_string = new XMLSerializer().serializeToString(lightSVG_p);
+
+                        const darkSVG_string = new XMLSerializer().serializeToString(darkSVG);
+                        const darkSVG_p_string = new XMLSerializer().serializeToString(darkSVG_p);
+
+
+                        // Converting SVG text string to blob for image source
+                        // https://medium.com/@benjamin.black/using-blob-from-svg-text-as-image-source-2a8947af7a8e
+                        const lightSVG_blob = new Blob([lightSVG_string], {type: 'image/svg+xml'});
+                        const lightSVG_p_blob = new Blob([lightSVG_p_string], {type: 'image/svg+xml'});
+
+                        const darkSVG_blob = new Blob([darkSVG_string], {type: 'image/svg+xml'});
+                        const darkSVG_p_blob = new Blob([darkSVG_p_string], {type: 'image/svg+xml'});
+
+
+                        // create links for adding to source of img
+                        const lightSVG_url = URL.createObjectURL(lightSVG_blob);
+                        const lightSVG_p_url = URL.createObjectURL(lightSVG_p_blob);
+
+                        const darkSVG_url = URL.createObjectURL(darkSVG_blob);
+                        const darkSVG_p_url = URL.createObjectURL(darkSVG_p_blob);
+
+
+                        // add these svg links as src to two images
+                        this.lightIcon = new Image()
+                        this.lightIcon_p = new Image()
+
+                        this.darkIcon = new Image()
+                        this.darkIcon_p = new Image()
+
+                        this.lightIcon.addEventListener("load", () => {URL.revokeObjectURL(lightSVG_url)}, {once: true});
+                        this.lightIcon_p.addEventListener("load", () => {URL.revokeObjectURL(lightSVG_p_url)}, {once: true});
+
+                        this.darkIcon.addEventListener("load", () => {URL.revokeObjectURL(darkSVG_url)}, {once: true});
+                        this.darkIcon_p.addEventListener("load", () => {URL.revokeObjectURL(darkSVG_p_url)}, {once: true});
+
+                        // Waits till after the images are loaded to get their aspect ratios
+                        // COULD MOVE TO A FUNCTION ELSEWERE THAT IS JUST CALLED
+                        this.lightIcon.addEventListener("load", () => { // just uses another random event listener... yuck
+                            this.image = this.lightIcon
+                            this.width = width
+                            this.height = this.width * (this.image.height / this.image.width)
+                        }, {once: true});
+
+                        this.lightIcon.src = lightSVG_url
+                        this.lightIcon_p.src = lightSVG_p_url
+
+                        this.darkIcon.src = darkSVG_url
+                        this.darkIcon_p.src = darkSVG_p_url
+
+
+                    };
+                    reader.onerror = (e) => alert(e.target.error.name);
+        
+                    reader.readAsText(file)
+                })
+            }, () => {
+                // console.log(image + ": no svg for this button. set height to 75");
+                this.width = width;
+                this.height = this.width > 75 ? 75 : this.width
+
+                // TRUNCATE AND SET LABEL
+                canvasArea.ctx.font = "22px BAHNSCHRIFT"; // for measuring text
+
+                if (canvasArea.ctx.measureText(label).width > this.width - 30) { // if needs to be truncated
+                    while (canvasArea.ctx.measureText(label + "...").width > this.width - 30) {
+                        label = label.slice(0, -1) // slice off last character
+                    }
+                    this.shortLabel = label + "..."
+                }
+
+                
+            });
+
+
+            // GETTING IMAGE_PRESSED. messy to do most of this code twice but... 
+            if (image_pressed != "") {
+                dirEntry.getFile(image_pressed + ".svg", {create: false, exclusive: false}, (fileEntry) => {
+
+                    fileEntry.file( (file) => {
+    
+                        const reader = new FileReader();
+                        
+                        reader.onload = (e) => {
+    
+                            // create SVG elements documents
+                            // CAN COMBINE ALL INITs HERE
+                            const lightSVG = new DOMParser().parseFromString(e.target.result, "image/svg+xml").documentElement;
+                            const darkSVG = new DOMParser().parseFromString(e.target.result, "image/svg+xml").documentElement;
+                            
+    
+                            // edit fills to to be light/dark modes
+                            lightSVG.getElementById("bg").style.fill = UserInterface.lightColor_1
+                            lightSVG.getElementById("icon").style.fill = UserInterface.darkColor_1
+    
+                            darkSVG.getElementById("bg").style.fill = UserInterface.darkColor_1
+                            darkSVG.getElementById("icon").style.fill= UserInterface.lightColor_1
+
+                            
+                            // converts svg element to string
+                            const lightSVG_string = new XMLSerializer().serializeToString(lightSVG);    
+                            const darkSVG_string = new XMLSerializer().serializeToString(darkSVG);
+    
+    
+                            // Converting SVG text string to blob for image source
+                            // https://medium.com/@benjamin.black/using-blob-from-svg-text-as-image-source-2a8947af7a8e
+                            const lightSVG_blob = new Blob([lightSVG_string], {type: 'image/svg+xml'});    
+                            const darkSVG_blob = new Blob([darkSVG_string], {type: 'image/svg+xml'});
+    
+    
+                            // create links for adding to source of img
+                            const lightSVG_url = URL.createObjectURL(lightSVG_blob);
+                            const darkSVG_url = URL.createObjectURL(darkSVG_blob);
+    
+    
+                            // add these svg links as src to two images
+                            this.lightIcon_toggled = new Image()    
+                            this.darkIcon_toggled = new Image()
+    
+                            this.lightIcon_toggled.addEventListener("load", () => {URL.revokeObjectURL(lightSVG_url)}, {once: true});    
+                            this.darkIcon_toggled.addEventListener("load", () => {URL.revokeObjectURL(darkSVG_url)}, {once: true});
+    
+
+                            this.lightIcon_toggled.src = lightSVG_url    
+                            this.darkIcon_toggled.src = darkSVG_url
+
+                            this.hasToggleImage = true
+    
+                        };
+                        reader.onerror = (e) => alert(e.target.error.name);
+            
+                        reader.readAsText(file)
+                    })
+                });
+            }
+
+
+        })
+        
+
+        this.isPressed = false
+        this.func = func;
+
+        this.toggle = 0
+        if (togglable) {
+            this.func(true) // runs the released function with the "sync" tag to sync button's toggle state
+        }
+
+
+        // shortLabel set in asych function above ^
+        this.label = label
+
+    }
+
+    render() {
+
+        canvasArea.ctx.save()
+
+        const shrinkFactor = (this.hasToggleImage) ? 1 : 0.95 // doesnt need to be calculated every frame
+
+        if (this.image == null) { // dynamically draw button (no icon). Should KILL this. have svg for every button -- even blanks FALSE BAD BAD 
+
+            let x, y, w, h
+
+            if (UserInterface.darkMode == false) {
+                canvasArea.ctx.fillStyle = (this.toggle == 1 || this.isPressed) ? UserInterface.lightColor_2 : UserInterface.lightColor_1;
+            } else {
+                canvasArea.ctx.fillStyle = (this.toggle == 1 || this.isPressed) ? UserInterface.darkColor_2 : UserInterface.darkColor_1;
+            }
+
+            if (this.toggle == 1 || this.isPressed) {
+                w = this.width * shrinkFactor
+                h = this.height * shrinkFactor
+                x = this.x + ((this.width - w) / 2)
+                y = this.y + ((this.height - h) / 2)
+            } else {
+                w = this.width;
+                h = this.height;
+                x = this.x;
+                y = this.y;
+            }
+
+            const radius = h/2
+            canvasArea.ctx.beginPath()
+            canvasArea.ctx.moveTo(x + radius, y) // top line
+            canvasArea.ctx.lineTo(x + w - radius, y)
+            canvasArea.ctx.arc(x + w - radius, y + radius, radius, 1.5*Math.PI, 0.5*Math.PI) // right arc
+            canvasArea.ctx.lineTo(x + radius, y + h)
+            canvasArea.ctx.arc(x + radius, y + radius, radius, 0.5*Math.PI, 1.5*Math.PI)
+
+            canvasArea.ctx.fill()
+
+        } else { // draw image normally
+
+            let icon, x, y, w, h
+
+            if (UserInterface.darkMode == false) { // light mode
+                if (this.hasToggleImage) {
+                    icon = (this.toggle == 1 || this.isPressed) ? this.lightIcon_toggled : this.lightIcon;
+                } else {
+                    icon = (this.toggle == 1 || this.isPressed) ? this.lightIcon_p : this.lightIcon;
+                }
+            } else { // dark mode
+                if (this.hasToggleImage) {
+                    icon = (this.toggle == 1 || this.isPressed) ? this.darkIcon_toggled : this.darkIcon;
+                } else {
+                    icon = (this.toggle == 1 || this.isPressed) ? this.darkIcon_p : this.darkIcon;
+                }
+            }
+
+            if (this.toggle == 1 || this.isPressed) {
+                w = this.width * shrinkFactor
+                h = this.height * shrinkFactor
+                x = this.x + ((this.width - w) / 2)
+                y = this.y + ((this.height - h) / 2)
+            } else {
+                w = this.width;
+                h = this.height;
+                x = this.x;
+                y = this.y;
+            }
+
+            // draws whatever icon with whatever pressed state were set above
+            canvasArea.ctx.drawImage(icon, x, y, w, h)
+
+        }
+
+        canvasArea.ctx.restore() // resets to no shadows
+
+        if (this.label != "") {
+
+            canvasArea.ctx.font = "22px BAHNSCHRIFT";
+            canvasArea.ctx.fillStyle = (!UserInterface.darkMode) ? UserInterface.darkColor_1: UserInterface.lightColor_1;
+
+            if (this.shortLabel != null) {
+                canvasArea.ctx.fillText(this.shortLabel, this.x + (this.width - canvasArea.ctx.measureText(this.shortLabel).width)/2, this.y + (this.height/2) + 7)
+            } else {
+                canvasArea.ctx.fillText(this.label, this.x + (this.width - canvasArea.ctx.measureText(this.label).width)/2, this.y + (this.height/2) + 7)
+            }
+        }
+     
+    }
+
+    pressed() {
+        this.isPressed = true;
+        // any release event calls released() on applicable buttons then sets isPressed = false on every rendered button
+    }
+
+    released(override) { // overide ignores the requirement to be pressed before released
+        if (override) {this.func()}
+        if (this.isPressed) {this.func()}
+    }
+
+}
+
+
+class SliderUI {
+// KILL labelColor
+
+    constructor(x, y, width, min, max, decimalDetail, label, labelColor, variable, func) {
+        this.x = eval(x);
+        this.y = eval(y);
+        this.width = width;
+        this.min = min;
+        this.max = max;
+        this.decimalDetail = decimalDetail // 1 = whole numbers, 10 = 10ths place, 100 = 100ths place
+        this.label = label;
+        // this.labelColor = labelColor; kill
+        this.value = variable;
+        this.variableToControl = String(variable);
+        this.func = func;
+        this.sliderX = this.x + width / ((max - min)/this.value);
+        this.confirmed = true;
+    }
+
+    updateState(value) { // updates the button when its value is changed by external source
+        this.value = value;
+        // this.sliderX = this.x + this.width / ((this.max - this.min)/this.value);
+        this.sliderX = (this.value - this.min) * (this.x + this.width - this.x) / (this.max - this.min) + this.x;
+
+    }
+
+
+    render() {
+        canvasArea.ctx.lineWidth = 8;
+        canvasArea.ctx.lineCap = "round"
+        canvasArea.ctx.fillStyle = canvasArea.ctx.strokeStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1: UserInterface.lightColor_1;
+
+        
+        canvasArea.ctx.beginPath(); // Slider Line
+        canvasArea.ctx.moveTo(this.x, this.y)
+        canvasArea.ctx.lineTo(this.x + this.width, this.y)
+        canvasArea.ctx.stroke();
+
+        canvasArea.ctx.font = "20px BAHNSCHRIFT"; // Label
+        canvasArea.ctx.fillText(this.label + ": " + this.value, this.x, this.y - 30)
+
+        canvasArea.ctx.beginPath(); // Slider Handle
+        canvasArea.ctx.arc(this.sliderX, this.y, 15, 0, 2 * Math.PI);
+        canvasArea.ctx.fill();
+
+        // draw highlight color in slider handle
+        canvasArea.ctx.fillStyle = (!UserInterface.darkMode) ? UserInterface.darkColor_1: UserInterface.lightColor_1;
+        canvasArea.ctx.beginPath();
+        canvasArea.ctx.arc(this.sliderX, this.y, 10, 0, 2 * Math.PI);
+        canvasArea.ctx.fill();
+    }
+
+    update() {
+        if (touchHandler.dragging) { // User is touching the screen
+            
+            if (Math.abs(touchHandler.touchX - this.sliderX) < 30 && Math.abs(touchHandler.touchY - this.y) < 30) {
+                
+                if (touchHandler.touchX > this.x && touchHandler.touchX < this.x + this.width) {
+
+                    this.sliderX = touchHandler.touchX
+                }
+
+                // MAP TO RANGE: https://stackoverflow.com/questions/10756313/javascript-jquery-map-a-range-of-numbers-to-another-range-of-numbers
+                // (number - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
+                // inmin = this.x
+                // inmax = this.x + this.width
+                // outmin = this.min
+                // outmax = this.max
+
+                this.value = (this.sliderX - this.x) * (this.max - this.min) / (this.width) + this.min;
+                this.value = Math.round(this.value * this.decimalDetail) / this.decimalDetail;
+                // this.value = Math.round(this.value / 10) * 10; // for snapping to nearest multiple of 10 
+
+
+                this.confirmed = false;
+            }
+        } else { // if not dragging (testing for a touch end on slider)
+            if (!this.confirmed) { // and if real values havent been updated
+
+                // map snapped value to pixels along slider. snapping the position of the visual slider
+                this.sliderX = (this.value - this.min) * (this.x + this.width - this.x) / (this.max - this.min) + this.x;
+
+                this.func(); // run the functions built into the slider
+                this.confirmed = true;
+            }
+        }
+    }
+}
+
+
+class Vector {
+    constructor(x, y) {
+      this.x = x;
+      this.y = y;
+    }
+
+    set = function(x,y) {
+        this.x = x;
+        this.y = y;
+        // should add angle
+    }
+
+    add = function(otherVec) {
+        this.x += otherVec.x;
+        this.y += otherVec.y;
+    }
+
+    divide = function(scalar) {
+        return new Vector(this.x / scalar, this.y / scalar);
+    }
+
+    multiply = function(scalar) {
+        this.x *= scalar;
+        this.y *= scalar;
+    }
+
+    dotProduct = function(otherVec) { // ONLY FOR 2D Vectors. Projects Parent Vector onto otherVec
+        return (this.x * otherVec.x) + (this.y * otherVec.y)
+    }
+
+    magnitude = function() {
+        return Math.sqrt((this.x ** 2) + (this.y ** 2))
+    }
+
+    rotate = function(ang) // angle in degrees. returns new array -- doesnt modify existing one. It seems to incriment by the angle
+    {
+        ang = ang * (Math.PI/180);
+        const cos = Math.cos(ang);
+        const sin = Math.sin(ang);
+        return new Vector(Math.round(10000*(this.x * cos - this.y * sin))/10000, Math.round(10000*(this.x * sin + this.y * cos))/10000);
+    }
+
+    angleDifference = function(otherVec) { // returns degrees i guess idk
+        return Math.acos((this.dotProduct(otherVec)) / (this.magnitude() * otherVec.magnitude()))
+    }
+
+    getAngle = function() { // RETURNS ANGLE IN DEGREES. https://stackoverflow.com/questions/35271222/getting-the-angle-from-a-direction-vector
+        const angle = Math.atan2(this.y, this.x);   //radians
+        // you need to divide by PI, and MULTIPLY by 180:
+        const degrees = 180 * angle/Math.PI;  //degrees
+        return (360+Math.round(degrees))%360; //round number, avoid decimal fragments
+    }
+
+    normalize = function(multiplier) { // NOTE: requires multiplier
+        if (this.length !== 0) {
+            const n = this.divide(this.magnitude()); // dont ever want to normalize when vector length is zero
+            this.x = n.x * multiplier;
+            this.y = n.y * multiplier;
+        }
+    }
+}
+
+
 const canvasArea = { //Canvas Object
     
 
@@ -180,7 +657,8 @@ const canvasArea = { //Canvas Object
         return RGB_Linear_Shade(darkness, color)
     },
 
-    roundedRect : function (x, y, width, height, radius) {
+
+    roundedRect : function (x, y, width, height, radius) { // not perfect corner arcs. could use .arc() instead
         const ctx = canvasArea.ctx
 
         ctx.beginPath();
@@ -220,6 +698,9 @@ const UserInterface = {
     timerStart : null, // set by jump button
     levelState : 1, // 1 = pre-start, 2 = playing level, 3 = in endzone
 
+    showVerticalWarning : false,
+    showOverstrafeWarning : false,
+
     darkMode : false,
 
     lightColor_1 : "#fff8ea", // lighter
@@ -227,6 +708,7 @@ const UserInterface = {
     darkColor_1 : "#503c4b",
     darkColor_2 : "#412b3a",
 
+    renderedButtons : [],
     
     // lightColor_1 : "rgb(244,243,240)", // lighter
     // lightColor_2 : "rgb(231,230,223)", // darker
@@ -237,6 +719,7 @@ const UserInterface = {
     // lightColor_2 : "#dcd8d6", // darker
     // darkColor_1 : "#36393d",
     // darkColor_2 : "#292d30",
+    
 
 
     start : function() { // where all buttons are created
@@ -274,11 +757,9 @@ const UserInterface = {
         // Main Menu BUTTONS
         btn_play = new Button("midX - 90", 180, 180, "play_button", "", 0, "", function() { 
             UserInterface.gamestate = 2;
-            MapBrowser.state = 1;
-            // MapBrowser.init()
-            
             UserInterface.renderedButtons = UserInterface.btnGroup_standardMapBrowser
-
+            MapBrowser.state = 1;
+            MapBrowser.init()
         })
 
         btn_settings = new Button("midX - 116.5", 280, 233, "settings_button", "", 0, "", function() {
@@ -473,7 +954,7 @@ const UserInterface = {
 
 
         // MAP EDITOR BUTTONS
-        btn_exit_edit = new Button("25", "25", 100, "back_button", "back_button_pressed", 0, "", function() {
+        btn_exit_edit = new Button(50, 50, 100, "back_button", "back_button_pressed", 0, "", function() {
 
             // DONT REALLY NEED TO DO ALL THIS STUFF BELOW UNLESS USER CONFIRMS THEY WANT TO SAVE MAP. SHOULD MOVE TO BE WITHIN CONFIRMATION
             const map = MapEditor.loadedMap;
@@ -940,24 +1421,30 @@ const UserInterface = {
         
 
         // MAP BROWSER BUTTONS
-        btn_custom_maps = new Button(40, "canvasArea.canvas.height - 150", 175, "custom_maps_button", "", 0, "", function() { 
+        btn_custom_maps = new Button(50, "canvasArea.canvas.height - 150", 175, "custom_maps_button", "", 0, "", function() { 
             UserInterface.gamestate = 2;
+            
+            // loop through each button (including non-maps eww) and untoggle it
+            UserInterface.renderedButtons.forEach(button => {
+                if (button.toggle == 1) {button.toggle = 0}
+            })
+            
             UserInterface.renderedButtons = UserInterface.btnGroup_customMapBrowser
             MapBrowser.state = 2
             MapBrowser.init()
         })
 
-        btn_playMap = new Button("canvasArea.canvas.width - 250", "canvasArea.canvas.height - 110", 200, "play_button", "", 0, "", function() {
+        btn_playMap = new Button("canvasArea.canvas.width - 300", "canvasArea.canvas.height - 150", 200, "play_button", "", 0, "", function() {
+            
+            MapBrowser.toggleAllButtons()
+            MapBrowser.scrollY = 0;
+            MapBrowser.scrollVel = 0;
             
             UserInterface.gamestate = 5;
             UserInterface.renderedButtons = [btn_mainMenu];
-            MapBrowser.scrollVel = 0;
-            MapBrowser.scrollY = 0;
 
             if (MapBrowser.state == 1) { // in normal maps browser
 
-                UserInterface.gamestate = 5;
-                UserInterface.renderedButtons = [btn_mainMenu];
                 Map.initMap(MapBrowser.selectedMapIndex);
 
             } else { // in custom maps browser
@@ -978,6 +1465,7 @@ const UserInterface = {
                                     mapData.name = String(fileEntry.name.split(".")[0]) // for getting the name of a custom map
                                     console.log(mapData)
                                     Map.initMap(mapData);
+                                    MapBrowser.selectedMapIndex = -1;
     
                                 };
                                 reader.onerror = (e) => alert(e.target.error.name);
@@ -990,7 +1478,7 @@ const UserInterface = {
             }
         })
 
-        btn_editMap = new Button("canvasArea.canvas.width - 250", "canvasArea.canvas.height - 110", 200, "", "", 0, "Edit Map", function() {
+        btn_editMap = new Button("canvasArea.canvas.width - 300", "canvasArea.canvas.height - 110", 200, "", "", 0, "Edit Map", function() {
             
             let mapData = null;
             window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function (fileSystem) {
@@ -1005,6 +1493,7 @@ const UserInterface = {
                                 // delete shareDiv when leaving browser page
                                 document.getElementById("shareDiv").remove()
 
+                                MapBrowser.toggleAllButtons()
                                 MapBrowser.scrollVel = 0;
                                 MapBrowser.scrollY = 0;
 
@@ -1023,7 +1512,7 @@ const UserInterface = {
             }, (error) => { console.log(error) });    
         })
         
-        btn_deleteMap = new Button("canvasArea.canvas.width - 250", "canvasArea.canvas.height - 200", 200, "", "", 0, "Delete Map", function() {
+        btn_deleteMap = new Button("canvasArea.canvas.width - 300", "canvasArea.canvas.height - 200", 200, "", "", 0, "Delete Map", function() {
 
             const deleteMap = confirm("Delete Map?");
             if (deleteMap) {
@@ -1050,7 +1539,7 @@ const UserInterface = {
             }
         })
 
-        btn_shareMap = new Button("canvasArea.canvas.width - 250", "canvasArea.canvas.height - 290", 200, "", "", 0, "Share Map", function(createDiv) {
+        btn_shareMap = new Button("canvasArea.canvas.width - 300", "canvasArea.canvas.height - 290", 200, "", "", 0, "Share Map", function(createDiv) {
             // The shareDiv does all the work for this button.
             // createDiv is called by btn_load_map
             // shareDiv is removed by btn_mainMenu, btn_editMap and btn_deleteMap
@@ -1114,72 +1603,48 @@ const UserInterface = {
         })
 
 
+
         // LEVEL BUTTONS
-        btn_level_awakening = new Button(250, 50, 175, "", "", 0, "Awakening", function() {
+        btn_level_awakening = new Button(300, 50, 280, "", "", 0, "Awakening", function() {
             if (this.toggle) {
                 this.toggle = 0;
                 MapBrowser.selectedMapIndex = -1
             } else {
-                // loop through each button and untoggle it
-                UserInterface.renderedButtons.forEach(button => {
-                    if (button.toggle == 1) {button.toggle = 0}
-                })
-
+                MapBrowser.toggleAllButtons()
                 this.toggle = 1;
                 MapBrowser.selectedMapIndex = "Awakening"
                 Tutorial.isActive = true;
             }
         })
 
-        btn_level_pitfall = new Button(250, 150, 175, "", "", 0, "Pitfall", function() {
+        btn_level_pitfall = new Button(300, 150, 280, "", "", 0, "Pitfall", function() {
             if (this.toggle) {
-            
                 this.toggle = 0;
                 MapBrowser.selectedMapIndex = -1
-            
             } else {
-
-                // loop through each button and untoggle it
-                UserInterface.renderedButtons.forEach(button => {
-                    if (button.toggle == 1) {button.toggle = 0}
-                })
-
+                MapBrowser.toggleAllButtons()
                 this.toggle = 1;
                 MapBrowser.selectedMapIndex = "original"
             }
         })
 
-        btn_level_below = new Button(250, 250, 175, "", "", 0, "Below", function() {
+        btn_level_below = new Button(300, 250, 280, "", "", 0, "Below", function() {
             if (this.toggle) {
-            
                 this.toggle = 0;
                 MapBrowser.selectedMapIndex = -1
-            
             } else {
-
-                // loop through each button and untoggle it
-                UserInterface.renderedButtons.forEach(button => {
-                    if (button.toggle == 1) {button.toggle = 0}
-                })
-
+                MapBrowser.toggleAllButtons()
                 this.toggle = 1;
                 MapBrowser.selectedMapIndex = "hellscape"
             }
         })
 
-        btn_level_turmoil = new Button(250, 350, 175, "", "", 0, "Turmoil", function() {
+        btn_level_turmoil = new Button(300, 350, 280, "", "", 0, "Turmoil", function() {
             if (this.toggle) {
-            
                 this.toggle = 0;
                 MapBrowser.selectedMapIndex = -1
-
             } else {
-
-                // loop through each button and untoggle it
-                UserInterface.renderedButtons.forEach(button => {
-                    if (button.toggle == 1) {button.toggle = 0}
-                })
-
+                MapBrowser.toggleAllButtons()
                 this.toggle = 1;
                 MapBrowser.selectedMapIndex = "noob"
             }
@@ -1188,7 +1653,7 @@ const UserInterface = {
 
 
         // IN LEVEL Buttons
-        btn_mainMenu = new Button(40, 40, 100, "back_button", "", 0, "", function() { 
+        btn_mainMenu = new Button(50, 50, 100, "back_button", "", 0, "", function() { 
             
             // UserInterface.gamestate
             // 1: main menu
@@ -1221,8 +1686,10 @@ const UserInterface = {
                 if (MapEditor.editorState == 5) { // in MapEditor's MapBrowser
 
                     // goto MapEditor's main menu
-                    // Could also just call btn_map_editor.released(true) it does the same thing. 
                     MapBrowser.state = 0;
+                    MapBrowser.scrollY = 0;
+                    MapBrowser.selectedMapIndex = -1;
+
                     UserInterface.gamestate = 7;
                     MapEditor.editorState = 0;
                     UserInterface.renderedButtons = UserInterface.btnGroup_mapEditorMenu
@@ -1238,6 +1705,10 @@ const UserInterface = {
                     MapBrowser.scrollY = 0;
                     MapBrowser.selectedMapIndex = -1;
                     UserInterface.gamestate = 1
+                    // loop through each button (including non-maps eww) and untoggle it
+                    UserInterface.renderedButtons.forEach(button => {
+                        if (button.toggle == 1) {button.toggle = 0}
+                    })    
                     UserInterface.renderedButtons = UserInterface.btnGroup_mainMenu;
                     return
                 }
@@ -1245,9 +1716,8 @@ const UserInterface = {
                 if (MapBrowser.state == 2) { // in play custom map browser
                     // goto play standard map browser
                     MapBrowser.state = 1;
-                    MapBrowser.scrollY = 0;
-                    MapBrowser.selectedMapIndex = -1;
                     UserInterface.renderedButtons = UserInterface.btnGroup_standardMapBrowser
+                    MapBrowser.init();
                     return
                 }
             }
@@ -1264,7 +1734,7 @@ const UserInterface = {
                 UserInterface.gamestate = 2;
                 MapBrowser.state = 1;
                 UserInterface.renderedButtons = UserInterface.btnGroup_standardMapBrowser;
-
+                MapBrowser.init();
                 return
             }
 
@@ -1277,6 +1747,8 @@ const UserInterface = {
                 UserInterface.gamestate = 2;
                 MapBrowser.state = 1;
                 UserInterface.renderedButtons = UserInterface.btnGroup_standardMapBrowser;
+                MapBrowser.init();
+
 
                 if (Tutorial.isActive) { // leaving tutorial level
                     Tutorial.reset()
@@ -1305,19 +1777,19 @@ const UserInterface = {
 
         })
 
-        btn_restart = new Button(40, "canvasArea.canvas.height - 280", 100, "restart_button", "", 0, "", function() { 
-            UserInterface.timer = 0;
-            UserInterface.levelState = 1;
-            player.checkpointIndex = -1;
-            player.restart();
-
-            if (Tutorial.isActive) { // restarting tutorial level
-                // Could confirm user wants to restart here.
-                Tutorial.reset()
+        btn_restart = new Button(50, "canvasArea.canvas.height - 280", 100, "restart_button", "", 0, "", function() { 
+            
+            if (Tutorial.isActive) { // restart pressed in tutorial level
+                // DRAW ALERT "Restart Disabled"
+            } else {
+                UserInterface.timer = 0;
+                UserInterface.levelState = 1;
+                player.checkpointIndex = -1;
+                player.restart();
             }
         })
 
-        btn_jump = new Button(40, "canvasArea.canvas.height - 140", 100, "jump_button", "", 0, "", function() { 
+        btn_jump = new Button(50, "canvasArea.canvas.height - 150", 100, "jump_button", "", 0, "", function() { 
             if (UserInterface.levelState == 1) {
                 UserInterface.timerStart = Date.now();
                 UserInterface.levelState = 2;
@@ -1327,7 +1799,7 @@ const UserInterface = {
 
 
         // TUTORIAL BUTTONS
-        btn_next = new Button("midX + 170", 150, 75, "next_button", "", 0, "", function() { 
+        btn_next = new Button("canvasArea.canvas.width - 130", 50, 80, "next_button", "", 0, "", function() { 
             
             Tutorial.timerStarted = false; // easier to always set these here even if they arent always needed
             Tutorial.animatePos = 0;
@@ -1347,26 +1819,10 @@ const UserInterface = {
                 return
             }
 
-            if (Tutorial.state == 3) {
-                Tutorial.state ++; // going into STATE 4
-                UserInterface.renderedButtons = [btn_mainMenu, btn_restart]
-                return
-            }
 
-            if (Tutorial.state == 4) {
-                Tutorial.state ++; // going into STATE 5
-                UserInterface.renderedButtons = UserInterface.btnGroup_inLevel
-                
-                return
-            }
+            // state 3 progresses to 5 when all targets are completed
 
-            // KILL
-            // if (Tutorial.state == 5) {
-            //     Tutorial.state ++; // going into STATE 6
-            //     console.log("THIS SHOULD NEVER FIRE STATE 5 ON BTN NEXT")
-            //     UserInterface.renderedButtons = UserInterface.btnGroup_inLevel
-            //     return
-            // }
+            // state 5 uses jump button to progress
 
             // state 6 doesnt have a next button. Progresses automatically
 
@@ -1378,12 +1834,7 @@ const UserInterface = {
                 return
             }
 
-            if (Tutorial.state == 8) {
-                Tutorial.state ++; // going into STATE 9
-                Tutorial.pausePlayer = false;
-                UserInterface.renderedButtons = UserInterface.btnGroup_inLevel
-                return
-            }
+            // 8 progressed to 9 when user starts turning again.
 
             // 9 progresses to 10 automatically
             
@@ -1396,14 +1847,9 @@ const UserInterface = {
 
             // 10 progresses to 12 automatically
 
-            if (Tutorial.state == 12) {
-                Tutorial.state ++; // going into STATE 13
-                Tutorial.pausePlayer = false;
-                UserInterface.renderedButtons = UserInterface.btnGroup_inLevel
-                return
-            }
+            // 12 progresses to 13 when user starts turning
 
-            // 13 to 14 is automatic
+            // 13 to 14 is automatic (by checkpoint)
 
             if (Tutorial.state == 14) {
                 Tutorial.state ++; // going into STATE 15
@@ -1429,13 +1875,6 @@ const UserInterface = {
                 return
             }
 
-
-            if (Tutorial.state == 19) {
-                Tutorial.state ++; // going into STATE 20
-                UserInterface.renderedButtons = UserInterface.btnGroup_inLevel
-                return
-            }
-
         })
 
 
@@ -1443,15 +1882,15 @@ const UserInterface = {
         this.btnGroup_mainMenu = [btn_play, btn_settings, btn_mapEditor]
         this.btnGroup_settings = [btn_mainMenu, btn_sensitivitySlider, btn_volumeSlider, btn_debugText, btn_strafeHUD, btn_reset_settings]
         this.btnGroup_standardMapBrowser = [
-            btn_mainMenu, btn_custom_maps, btn_playMap,
+            btn_mainMenu, btn_custom_maps,
             btn_level_awakening,
             btn_level_pitfall,
             btn_level_below,
 
             btn_level_turmoil,
         ]
-        this.btnGroup_customMapBrowser = [btn_mainMenu, btn_playMap]
-        this.btnGroup_editMapBrowser = [btn_mainMenu, btn_editMap, btn_deleteMap, btn_shareMap]
+        this.btnGroup_customMapBrowser = [btn_mainMenu]
+        this.btnGroup_editMapBrowser = [btn_mainMenu]
         this.btnGroup_mapEditorMenu = [btn_mainMenu, btn_new_map, btn_load_map, btn_import_map, btn_import_map_text]
         this.btnGroup_mapEditorInterface = [btn_exit_edit, btn_add_platform, btn_map_colors, btn_map_settings, btn_add_checkpoint, btn_snappingSlider]
         this.btnGroup_inLevel = [btn_mainMenu, btn_restart, btn_jump];
@@ -1586,7 +2025,6 @@ const UserInterface = {
                     y >= button.y && y <= button.y + button.height
                 ) {
                     button.pressed();
-                    clickedButton = true;
                 }
             }
         });
@@ -1600,7 +2038,8 @@ const UserInterface = {
             if (button.constructor.name == "Button") { // only run on buttons not sliders
                 if ( // if x and y touch is within button
                     x >= button.x && x <= button.x + button.width &&
-                    y >= button.y && y <= button.y + button.height
+                    y >= button.y && y <= button.y + button.height &&
+                    (MapBrowser.scrollVel == 0 || MapBrowser.scrollAmount == null) // dont release if scrolling in MapBrowser
                 ) {
                     clickedSidePanel = true;
                     button.released();
@@ -1739,45 +2178,75 @@ const UserInterface = {
         if (this.gamestate == 3) { // In Settings
             canvasArea.ctx.font = "20px BAHNSCHRIFT";
             canvasArea.ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1: UserInterface.lightColor_1;
-            canvasArea.ctx.fillText("Debug Text", 180, 270)
-            canvasArea.ctx.fillText("Strafe Info", 180, 330)
+            canvasArea.ctx.fillText("Debug Info", 180, 270)
+            canvasArea.ctx.fillText("Strafe Helper", 180, 330)
 
         }
 
         if (this.gamestate == 6) { // In Level
-
-            canvasArea.ctx.font = "25px BAHNSCHRIFT";
             canvasArea.ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1: UserInterface.lightColor_1;
-            canvasArea.ctx.fillText("Time: " + UserInterface.secondsToMinutes(this.timer), canvasArea.canvas.width - 230, 60)
-            canvasArea.ctx.fillText("Record: " + UserInterface.secondsToMinutes(Map.record), canvasArea.canvas.width - 230, 90);
+
+
+            if (this.levelState !== 3 && Tutorial.isActive == false) {
+                canvasArea.ctx.font = "25px BAHNSCHRIFT";
+                canvasArea.ctx.fillText("Time: " + UserInterface.secondsToMinutes(this.timer), canvasArea.canvas.width - 230, 60)
+                canvasArea.ctx.fillText("Record: " + UserInterface.secondsToMinutes(Map.record), canvasArea.canvas.width - 230, 90);
+            }
 
 
             if (this.debugText == 1) { // DRAWING DEBUG TEXT
-                const textX = canvasArea.canvas.width * 0.18; 
+                const textX = 200; 
                 canvasArea.ctx.font = "15px BAHNSCHRIFT";
                 canvasArea.ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1: UserInterface.lightColor_1;
     
-                canvasArea.ctx.fillText("dragAmountX: " + touchHandler.dragAmountX, textX, 60);
-                canvasArea.ctx.fillText("fps: " + Math.round(100/dt), textX, 80);
-                canvasArea.ctx.fillText("rounded dt: " + Math.round(dt * 10) / 10 + " milliseconds", textX, 100);
-                canvasArea.ctx.fillText("velocity: " + Math.round(player.velocity.magnitude()), textX, 120);
-                canvasArea.ctx.fillText("lookAngle: " + player.lookAngle.getAngle(), textX, 140);
-                canvasArea.ctx.fillText("timer: " + UserInterface.secondsToMinutes(this.timer), textX, 160);
-                canvasArea.ctx.fillText("renderedPlatforms Count: " + Map.renderedPlatforms.length, textX, 180);
+                canvasArea.ctx.fillText("fps: " + Math.round(100/dt), textX, 60);
+                canvasArea.ctx.fillText("rounded dt: " + Math.round(dt * 10) / 10 + " milliseconds", textX, 80);
+                canvasArea.ctx.fillText("renderedPlatforms Count: " + Map.renderedPlatforms.length, textX, 100);
+                canvasArea.ctx.fillText("endZoneIsRendered: " + Map.endZoneIsRendered, textX, 120);
+                canvasArea.ctx.fillText("dragging: " + touchHandler.dragging, textX, 140);
+                canvasArea.ctx.fillText("touchStartX: " + touchHandler.touchStartX, textX, 160);
+                canvasArea.ctx.fillText("touchStartY: " + touchHandler.touchStartY, textX, 180);
                 canvasArea.ctx.fillText("touch x: " + touchHandler.touchX, textX, 200);
                 canvasArea.ctx.fillText("touch y: " + touchHandler.touchY, textX, 220);
-                canvasArea.ctx.fillText("player pos: " + Math.round(player.x) + ", " + Math.round(player.y), textX, 240);
-                canvasArea.ctx.fillText("dragging: " + touchHandler.dragging, textX, 260);
-                canvasArea.ctx.fillText("endZoneIsRendered: " + Map.endZoneIsRendered, textX, 280);
-                canvasArea.ctx.fillText("player posInRenderQueue: " + player.posInRenderQueue, textX, 300);
-                canvasArea.ctx.fillText("lookAngle Length: " + player.lookAngle.magnitude(), textX, 320);
-                canvasArea.ctx.fillText("velocity: " + player.velocity.x + ", " + player.velocity.y, textX, 340)
-                canvasArea.ctx.fillText("wishDir: " + player.wishDir.x + ", " + player.wishDir.y, textX, 360)
+                canvasArea.ctx.fillText("dragAmountX: " + touchHandler.dragAmountX, textX, 240);
+                canvasArea.ctx.fillText("velocity: " + Math.round(player.velocity.magnitude()), textX, 260);
+                canvasArea.ctx.fillText("player pos: " + Math.round(player.x) + ", " + Math.round(player.y), textX, 280);
+                canvasArea.ctx.fillText("lookAngle: " + player.lookAngle.getAngle(), textX, 300);
+
+
+                // DRAWING PLAYER MOVEMENT DEBUG VECTORS
+                // player wishDir
+                canvasArea.ctx.strokeStyle = "#FF00FF";
+                canvasArea.ctx.lineWidth = 3
+                canvasArea.ctx.beginPath();
+                canvasArea.ctx.moveTo(midX, midY);
+                canvasArea.ctx.lineTo(midX + player.wishDir.x * 100, midY + player.wishDir.y * 100);
+                canvasArea.ctx.stroke();
+
+                // player velocity
+                canvasArea.ctx.strokeStyle = "#0000FF";
+                canvasArea.ctx.lineWidth = 4
+                canvasArea.ctx.beginPath();
+                canvasArea.ctx.moveTo(midX, midY);
+                canvasArea.ctx.lineTo(midX + player.velocity.x * 10, midY + player.velocity.y * 10);
+                canvasArea.ctx.stroke();
+
+                // player lookAngle
+                canvasArea.ctx.strokeStyle = "#FF00FF";
+                canvasArea.ctx.lineWidth = 2
+                canvasArea.ctx.beginPath();
+                canvasArea.ctx.moveTo(midX, midY);
+                canvasArea.ctx.lineTo(midX + player.lookAngle.x * 100, midY + player.lookAngle.y * 100);
+                canvasArea.ctx.stroke();
+
+                canvasArea.ctx.strokeStyle = "#000000"; // resetting
+                canvasArea.ctx.lineWidth = 1
 
             }
     
             if (this.strafeHUD == 1) { // STRAFE OPTIMIZER HUD
-                
+
+                /* DRAW THE OLD LITTLE GRAPHS UNDER PLAYER
                 canvasArea.ctx.fillRect(midX - 18, midY + 28, 8, 4 * Math.abs(touchHandler.dragAmountX) * UserInterface.sensitivity); // YOUR STRAFE
                 canvasArea.ctx.fillRect(midX - 4, midY + 28, 8, 10 * player.currentSpeedProjected); // THE THRESHOLD
                 canvasArea.ctx.fillRect(midX + 12, midY + 28 + 10 * airAcceleration * dt , 8, 2); // ADDSPEED LIMIT
@@ -1794,37 +2263,77 @@ const UserInterface = {
                 canvasArea.ctx.fillText("addSpeed: " + player.addSpeed, 0, -28)
                 canvasArea.ctx.fillText("airAcceleration * dt: " + airAcceleration * dt, 0, -42)
                 canvasArea.ctx.restore()
-
-                // DRAWING PLAYER MOVEMENT DEBUG VECTORS
-                // player wishDir
-                canvasArea.ctx.strokeStyle = "#FF00FF";
-                canvasArea.ctx.lineWidth = 4
-                canvasArea.ctx.beginPath();
-                canvasArea.ctx.moveTo(midX, midY);
-                canvasArea.ctx.lineTo(midX + player.wishDir.x * 100, midY + player.wishDir.y * 100);
-                canvasArea.ctx.stroke();
-
-                // player velocity
-                canvasArea.ctx.strokeStyle = "#0000FF";
-                canvasArea.ctx.lineWidth = 5
-                canvasArea.ctx.beginPath();
-                canvasArea.ctx.moveTo(midX, midY);
-                canvasArea.ctx.lineTo(midX + player.velocity.x * 10, midY + player.velocity.y * 10);
-                canvasArea.ctx.stroke();
-
-                // player lookAngle
-                canvasArea.ctx.strokeStyle = "#FF00FF";
-                canvasArea.ctx.lineWidth = 1
-                canvasArea.ctx.beginPath();
-                canvasArea.ctx.moveTo(midX, midY);
-                canvasArea.ctx.lineTo(midX + player.lookAngle.x * 100, midY + player.lookAngle.y * 100);
-                canvasArea.ctx.stroke();
+                */
 
 
-                canvasArea.ctx.strokeStyle = "#000000"; // resetting
-                canvasArea.ctx.lineWidth = 1
+                const ctx = canvasArea.ctx
 
+                if (touchHandler.dragging && this.levelState != 3) {
+
+                    let lineUpOffset = 0
+                    if (touchHandler.touchStartX > midX - 200 && touchHandler.touchStartX < midX + 200) { // if touched withing slider's X => offset the handle to lineup with finger
+                        lineUpOffset = touchHandler.touchStartX - midX
+                    }
+
+                    let strafeDistanceX = touchHandler.touchX - touchHandler.touchStartX + lineUpOffset
+                    while (strafeDistanceX > 212) { // loop back to negative
+                        strafeDistanceX = -212 + (strafeDistanceX - 212)
+                    }
+                    while (strafeDistanceX < -212) { // loop back to positive
+                        strafeDistanceX = 212 + (strafeDistanceX + 212)
+                    }
+    
+    
+                    ctx.strokeStyle = UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1
+                    
+
+                    // DRAW SLIDER
+
+                    // border
+                    ctx.lineWidth = 6
+
+                    const radius = 20
+                    const x = midX - 200
+                    const y = canvasArea.canvas.height - 150
+                    const w = 400
+                    const h = 40
+
+                    ctx.beginPath()
+                    ctx.moveTo(x + radius, y) // top line
+                    ctx.lineTo(x + w - radius, y)
+                    ctx.arc(x + w - radius, y + radius, radius, 1.5*Math.PI, 0.5*Math.PI) // right arc
+                    ctx.lineTo(x + radius, y + h)
+                    ctx.arc(x + radius, y + radius, radius, 0.5*Math.PI, 1.5*Math.PI) // left arc
+                
+                    ctx.stroke()    
+                    ctx.save() // strafeHelper 
+                    ctx.clip()
+
+                    // Handle
+                    ctx.beginPath();
+                    ctx.arc(midX + strafeDistanceX, canvasArea.canvas.height - 130, 12, 0, 2 * Math.PI);
+                    ctx.fill();
+
+                    ctx.restore() // strafeHelper
+    
+
+                    // DRAW VERTICAL WARNING
+                    const averageX = Math.abs(touchHandler.averageDragX.getAverage())
+                    const averageY = Math.abs(touchHandler.averageDragY.getAverage())
+                    if (averageY > 5 * dt/1.5 && averageY > averageX*1.25)  { /// no mathematical reason for dt/1.5 just feels better
+                        if (this.showVerticalWarning == false) {
+                            this.showVerticalWarning = true;
+                            setTimeout(() => {UserInterface.showVerticalWarning = false}, 1500); // waits 1 second to hide warning
+                        }
+                    }
+
+                    if (this.showVerticalWarning) {
+                        ctx.font = "20px BAHNSCHRIFT";
+                        ctx.fillText("VERTICAL SWIPING DOES NOT TURN PLAYER!", midX - 200, 160)
+                    }
+                }
             }
+
 
             if (player.endSlow == 0) { // level name, your time, best time, strafe efficiency
 
@@ -1863,14 +2372,21 @@ const MapBrowser = { // should set back to 0 at some points??
     state : 0, // 0 = disabled, 1 = standard map browser, 2 = custom map browser
     scrollY: 0,
     scrollVel: 0,
+    scrollVelAverager : new Averager(10),
+    scrollAmount: null,
     selectedMapIndex: -1, // -1 == no map selected
+    maxScroll: -50,
 
     init : function() {
 
-        // Other buttons should set the state
-        // also adding btn_mainMenu and other non-dynamic buttons should be added to renderedButtons by other buttons
-        // button options: play map, edit map, delete map, (rename map, copy map)
-        // also gamestate being set to 2 should be done elsewhere
+        function setMaxScroll() {
+            MapBrowser.maxScroll = -50
+            UserInterface.renderedButtons.forEach((button) => {
+                if (button.x == 300) {MapBrowser.maxScroll -= 100}
+            })
+            MapBrowser.maxScroll += 525 // 5 = buttons to offset
+            if (MapBrowser.maxScroll > 0) {MapBrowser.maxScroll = 0} // clipping it incase theres not more than 5 buttons
+        }
 
         if (this.state == 1) { // Normal map browser
             
@@ -1878,15 +2394,15 @@ const MapBrowser = { // should set back to 0 at some points??
             this.scrollVel = 0
             this.selectedMapIndex = -1
         
+            setMaxScroll()
         }
 
         // CUSTOM MAP BROWSER
-        if (this.state == 2 || this.state == 3) {
+        if (this.state == 2) {
             
             this.scrollY = 0
             this.scrollVel = 0
             this.selectedMapIndex = -1
-            console.log(UserInterface.renderedButtons)
 
             // access file system and set up all nessasary map buttons for the browser type
             // a horrible nested mess but it keeps everything firing in the right sequence
@@ -1924,7 +2440,7 @@ const MapBrowser = { // should set back to 0 at some points??
                             // create toggle buttons for each map. These can be selected to preview map info. seperate play button will play them 
 
                             // create these with blank button icons. render() adds text ontop . ALSO CHANGE THE CHECK IN RENDER FUNC
-                            let button = new Button(250, 50 + (100 * mapNumber), 175, "", "", 1, String(mapEntry.name.split(".")[0]), function(sync) {
+                            let button = new Button(300, 50 + (100 * mapNumber), 280, "", "", 1, String(mapEntry.name.split(".")[0]), function(sync) {
                                 // has access to mapEntry and .name
                                 
                                 // Use the buttons initial Y value to determine its index within all the maps. Silly but works
@@ -1939,14 +2455,9 @@ const MapBrowser = { // should set back to 0 at some points??
                                     if (this.toggle) { // toggle off
                                         this.toggle = 0;
                                         MapBrowser.selectedMapIndex = -1
-
                                     } else { // toggle on
 
-                                        // loop through each button and untoggle it
-                                        UserInterface.renderedButtons.forEach(button => {
-                                            if (button.toggle == 1) {button.toggle = 0}
-                                        })
-
+                                        MapBrowser.toggleAllButtons();
                                         this.toggle = 1;
                                         MapBrowser.selectedMapIndex = (this.savedY - 50)/100
                                     }
@@ -1956,7 +2467,9 @@ const MapBrowser = { // should set back to 0 at some points??
                             
                             UserInterface.renderedButtons = UserInterface.renderedButtons.concat([button])
                             mapNumber ++
-                        })                        
+                            setMaxScroll()
+
+                        }) // end of forEach loop                        
                     }, (error) => { console.log(error) });
                 }, (error) => { console.log(error) });
             }
@@ -1967,39 +2480,91 @@ const MapBrowser = { // should set back to 0 at some points??
         
     },
     
-    updateScroll: function() {
+    toggleAllButtons : function() {
+        UserInterface.renderedButtons.forEach(button => {
+            if (button.toggle == 1) {button.toggle = 0}
+        })
+    },
+
+    update : function() {
         // called every frame when gamestate == 2
-        // change position of buttons
 
-        if (touchHandler.dragging == 1) {
-            if (touchHandler.touchX > 50 && touchHandler.touchX < 500) {
-                this.scrollVel += touchHandler.dragAmountY
+        // changes the position of buttons on scroll
+        if (touchHandler.dragging == 1 && touchHandler.touchX > 250 && touchHandler.touchX < 650) {
+            if (this.scrollAmount == null) { // start of scroll
+                this.scrollAmount = this.scrollY
             }
+
+            // is scrolling
+            if (touchHandler.touchX > 250 && touchHandler.touchX < 650) {
+                this.scrollAmount += touchHandler.dragAmountY
+
+                // sets scrollVel to average drag amount of past 10 frames
+                this.scrollVelAverager.pushValue(touchHandler.dragAmountY)
+                this.scrollVel = this.scrollVelAverager.getAverage()
+
+                this.scrollY = this.scrollAmount;
+            }
+        } else { // not dragging
+
+            if (this.scrollAmount != null) { // just stopped dragging
+                this.scrollAmount = null
+                this.scrollVelAverager.clear()
+            }
+
+            this.scrollY += this.scrollVel
+            this.scrollVel = (Math.abs(this.scrollVel) > 0.1) ? this.scrollVel * (1 - 0.05 * dt) : 0        
         }
 
-        this.scrollY += this.scrollVel / 8;
 
-        if (this.scrollY > 0) { // stop at min scroll
-            this.scrollY = 0;
-            this.scrollVel = 0;
-        }
+        // stopping scrolling
+        if (this.scrollY > 0) {this.scrollY = 0}
+        if (this.scrollY < this.maxScroll) {this.scrollY = this.maxScroll}
 
-        // THIS WILL NEED TO CHANGE IF NUMBER OF STATIC BUTTONS CHANGE FOR THIS SCREEN
-        const maxScroll = 50 + ((UserInterface.renderedButtons.length - 3) * 100) // stop at max scroll
-        if (this.scrollY < -maxScroll) {
-            this.scrollY = -maxScroll;
-            this.scrollVel = 0;
-        }
 
         UserInterface.renderedButtons.forEach((button) => {
-            if (button.x > 50 && button.x < 500) {
+            if (button.x > 100 && button.x < 600) {
                 button.y = button.savedY + this.scrollY
             }
         })
 
-        this.scrollVel *= 0.9
-    },
 
+
+
+
+        // ENABLING and DISABLING btn_playMap in browsers BESIDES map editor's
+
+        if (MapEditor.editorState != 5) { // not in map editors browser
+            if (
+                this.selectedMapIndex != -1 &&
+                !UserInterface.renderedButtons.includes(btn_playMap)
+            ) {UserInterface.renderedButtons = UserInterface.renderedButtons.concat(btn_playMap)}
+            
+            if (
+                this.selectedMapIndex == -1 &&
+                UserInterface.renderedButtons.includes(btn_playMap)
+            ) {UserInterface.renderedButtons = UserInterface.renderedButtons.slice(0,-1)}
+        } else {
+            // in MapEditors browser
+            // btn_editMap, btn_deleteMap, btn_shareMap
+            
+            if (
+                this.selectedMapIndex != -1 &&
+                !UserInterface.renderedButtons.includes(btn_editMap)
+            ) {
+                UserInterface.renderedButtons = UserInterface.renderedButtons.concat(btn_editMap)
+                UserInterface.renderedButtons = UserInterface.renderedButtons.concat(btn_deleteMap)
+                UserInterface.renderedButtons = UserInterface.renderedButtons.concat(btn_shareMap)
+            }
+            
+            if (
+                this.selectedMapIndex == -1 &&
+                UserInterface.renderedButtons.includes(btn_editMap)
+            ) {UserInterface.renderedButtons = UserInterface.renderedButtons.slice(0,-3)}
+
+        }
+
+    },
 
     render : function() {
         // needs to be called every frame when gamestate == 2
@@ -2007,406 +2572,49 @@ const MapBrowser = { // should set back to 0 at some points??
         // desription of maps
         const ctx = canvasArea.ctx;
 
+        // DRAW INFO BOX BG
+        ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1: UserInterface.lightColor_1;
+        const boxHeight = (MapEditor.editorState == 5) ? 150 : 300
+        canvasArea.roundedRect(canvasArea.canvas.width - 500, 50, 400, boxHeight, 25)
+        ctx.fill()
+
+        // DRAW TEXT INFO BOX
+        ctx.font = "40px BAHNSCHRIFT";
+        ctx.fillStyle = (!UserInterface.darkMode) ? UserInterface.darkColor_1: UserInterface.lightColor_1;
+
+        if (this.state == 1) { // normal map browser
+            if (this.selectedMapIndex != -1) {
+                ctx.fillText(this.selectedMapIndex, canvasArea.canvas.width - 475, 110)
+            } else {
+                ctx.fillText("Select A Map", canvasArea.canvas.width - 475, 110)
+            }
+        }
+
+        if (this.state == 2) { // custom map browser
+            if (this.selectedMapIndex != -1) {
+                // Needs to do indexing stuff to get names of map selected (like in playMap Button)
+                ctx.fillText("Custom Map " + (this.selectedMapIndex + 1), canvasArea.canvas.width - 475, 110)
+            } else {
+                ctx.font = "25px BAHNSCHRIFT";
+                ctx.fillText("Import or create custom", canvasArea.canvas.width - 475, 100)
+                ctx.fillText("maps in the Map Editor", canvasArea.canvas.width - 475, 130)
+            }
+        }
+
+
+
+        // Map BROWSER DEBUG TEXT
         ctx.font = "15px BAHNSCHRIFT";
         ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1: UserInterface.lightColor_1;
-        ctx.fillText("selectedMapIndex: " + this.selectedMapIndex, 10, 200)
-        ctx.fillText("scrollY: " + this.scrollY, 10, 220)
+        ctx.fillText("MapIndex: " + this.selectedMapIndex, 80, 200)
+        ctx.fillText("scrollAmount: " + this.scrollAmount, 80, 220)
+        ctx.fillText("scrollY: " + this.scrollY, 80, 240)
+        ctx.fillText("scrollVel: " + this.scrollVel, 80, 260)
+        ctx.fillText("scrollVelAverager: " + this.scrollVelAverager.frames, 80, 280)
 
-        const maxScroll = 50 + ((UserInterface.renderedButtons.length - 2) * 100)
-        ctx.fillText("maxScroll: " + maxScroll, 10, 240)
 
-    }
+        ctx.fillText("maxScroll: " + this.maxScroll, 80, 300)
 
-}
-
-
-class Button {
-    constructor(x, y, width, image, image_pressed, togglable, label, func) {
-        this.x = eval(x);
-        this.y = eval(y);
-        this.savedX = x;
-        this.savedY = y;
-
-
-        // GET ICON DIRECTLY THROUGH CORDOVA LOCAL STORAGE   
-        const buttonURL = cordova.file.applicationDirectory + "www/assets/images/buttons/"
-        
-        window.resolveLocalFileSystemURL(buttonURL, (dirEntry) => {
-
-            // GETTING ICONS FOR IMAGE PARAMETER
-            dirEntry.getFile(image + ".svg", {create: false, exclusive: false}, (fileEntry) => {
-
-                fileEntry.file( (file) => {
-
-                    const reader = new FileReader();
-                    
-                    reader.onload = (e) => {
-
-                        // create SVG elements documents
-                        // CAN COMBINE ALL INITs HERE
-                        const lightSVG = new DOMParser().parseFromString(e.target.result, "image/svg+xml").documentElement;
-                        const lightSVG_p = new DOMParser().parseFromString(e.target.result, "image/svg+xml").documentElement;
-                        
-                        const darkSVG = new DOMParser().parseFromString(e.target.result, "image/svg+xml").documentElement;
-                        const darkSVG_p = new DOMParser().parseFromString(e.target.result, "image/svg+xml").documentElement;
-                        
-
-                        // edit fills to to be light/dark modes
-                        lightSVG.getElementById("bg").style.fill = UserInterface.lightColor_1
-                        lightSVG.getElementById("icon").style.fill = UserInterface.darkColor_1
-                        lightSVG_p.getElementById("bg").style.fill = UserInterface.lightColor_2
-                        lightSVG_p.getElementById("icon").style.fill = UserInterface.darkColor_2
-
-                        darkSVG.getElementById("bg").style.fill = UserInterface.darkColor_1
-                        darkSVG.getElementById("icon").style.fill= UserInterface.lightColor_1
-                        darkSVG_p.getElementById("bg").style.fill = UserInterface.darkColor_2
-                        darkSVG_p.getElementById("icon").style.fill= UserInterface.lightColor_2
-
-                        
-                        // converts svg element to string
-                        const lightSVG_string = new XMLSerializer().serializeToString(lightSVG);
-                        const lightSVG_p_string = new XMLSerializer().serializeToString(lightSVG_p);
-
-                        const darkSVG_string = new XMLSerializer().serializeToString(darkSVG);
-                        const darkSVG_p_string = new XMLSerializer().serializeToString(darkSVG_p);
-
-
-                        // Converting SVG text string to blob for image source
-                        // https://medium.com/@benjamin.black/using-blob-from-svg-text-as-image-source-2a8947af7a8e
-                        const lightSVG_blob = new Blob([lightSVG_string], {type: 'image/svg+xml'});
-                        const lightSVG_p_blob = new Blob([lightSVG_p_string], {type: 'image/svg+xml'});
-
-                        const darkSVG_blob = new Blob([darkSVG_string], {type: 'image/svg+xml'});
-                        const darkSVG_p_blob = new Blob([darkSVG_p_string], {type: 'image/svg+xml'});
-
-
-                        // create links for adding to source of img
-                        const lightSVG_url = URL.createObjectURL(lightSVG_blob);
-                        const lightSVG_p_url = URL.createObjectURL(lightSVG_p_blob);
-
-                        const darkSVG_url = URL.createObjectURL(darkSVG_blob);
-                        const darkSVG_p_url = URL.createObjectURL(darkSVG_p_blob);
-
-
-                        // add these svg links as src to two images
-                        this.lightIcon = new Image()
-                        this.lightIcon_p = new Image()
-
-                        this.darkIcon = new Image()
-                        this.darkIcon_p = new Image()
-
-                        this.lightIcon.addEventListener("load", () => {URL.revokeObjectURL(lightSVG_url)}, {once: true});
-                        this.lightIcon_p.addEventListener("load", () => {URL.revokeObjectURL(lightSVG_p_url)}, {once: true});
-
-                        this.darkIcon.addEventListener("load", () => {URL.revokeObjectURL(darkSVG_url)}, {once: true});
-                        this.darkIcon_p.addEventListener("load", () => {URL.revokeObjectURL(darkSVG_p_url)}, {once: true});
-
-                        // Waits till after the images are loaded to get their aspect ratios
-                        // COULD MOVE TO A FUNCTION ELSEWERE THAT IS JUST CALLED
-                        this.lightIcon.addEventListener("load", () => { // just uses another random event listener... yuck
-                            this.image = this.lightIcon
-                            this.width = width
-                            this.height = this.width * (this.image.height / this.image.width)
-                        }, {once: true});
-
-                        this.lightIcon.src = lightSVG_url
-                        this.lightIcon_p.src = lightSVG_p_url
-
-                        this.darkIcon.src = darkSVG_url
-                        this.darkIcon_p.src = darkSVG_p_url
-
-
-                    };
-                    reader.onerror = (e) => alert(e.target.error.name);
-        
-                    reader.readAsText(file)
-                })
-            }, () => {
-                // console.log(image + ": no svg for this button. set height to 75");
-                this.width = width;
-                this.height = this.width > 75 ? 75 : this.width
-
-                // TRUNCATE AND SET LABEL
-                canvasArea.ctx.font = "22px BAHNSCHRIFT"; // for measuring text
-
-                if (canvasArea.ctx.measureText(label).width > this.width - 30) { // if needs to be truncated
-                    while (canvasArea.ctx.measureText(label + "...").width > this.width - 30) {
-                        label = label.slice(0, -1) // slice off last character
-                    }
-                    this.shortLabel = label + "..."
-                }
-
-                
-            });
-
-
-            // GETTING IMAGE_PRESSED. messy to do most of this code twice but... 
-            if (image_pressed != "") {
-                dirEntry.getFile(image_pressed + ".svg", {create: false, exclusive: false}, (fileEntry) => {
-
-                    fileEntry.file( (file) => {
-    
-                        const reader = new FileReader();
-                        
-                        reader.onload = (e) => {
-    
-                            // create SVG elements documents
-                            // CAN COMBINE ALL INITs HERE
-                            const lightSVG = new DOMParser().parseFromString(e.target.result, "image/svg+xml").documentElement;
-                            const darkSVG = new DOMParser().parseFromString(e.target.result, "image/svg+xml").documentElement;
-                            
-    
-                            // edit fills to to be light/dark modes
-                            lightSVG.getElementById("bg").style.fill = UserInterface.lightColor_1
-                            lightSVG.getElementById("icon").style.fill = UserInterface.darkColor_1
-    
-                            darkSVG.getElementById("bg").style.fill = UserInterface.darkColor_1
-                            darkSVG.getElementById("icon").style.fill= UserInterface.lightColor_1
-
-                            
-                            // converts svg element to string
-                            const lightSVG_string = new XMLSerializer().serializeToString(lightSVG);    
-                            const darkSVG_string = new XMLSerializer().serializeToString(darkSVG);
-    
-    
-                            // Converting SVG text string to blob for image source
-                            // https://medium.com/@benjamin.black/using-blob-from-svg-text-as-image-source-2a8947af7a8e
-                            const lightSVG_blob = new Blob([lightSVG_string], {type: 'image/svg+xml'});    
-                            const darkSVG_blob = new Blob([darkSVG_string], {type: 'image/svg+xml'});
-    
-    
-                            // create links for adding to source of img
-                            const lightSVG_url = URL.createObjectURL(lightSVG_blob);
-                            const darkSVG_url = URL.createObjectURL(darkSVG_blob);
-    
-    
-                            // add these svg links as src to two images
-                            this.lightIcon_toggled = new Image()    
-                            this.darkIcon_toggled = new Image()
-    
-                            this.lightIcon_toggled.addEventListener("load", () => {URL.revokeObjectURL(lightSVG_url)}, {once: true});    
-                            this.darkIcon_toggled.addEventListener("load", () => {URL.revokeObjectURL(darkSVG_url)}, {once: true});
-    
-
-                            this.lightIcon_toggled.src = lightSVG_url    
-                            this.darkIcon_toggled.src = darkSVG_url
-
-                            this.hasToggleImage = true
-    
-                        };
-                        reader.onerror = (e) => alert(e.target.error.name);
-            
-                        reader.readAsText(file)
-                    })
-                });
-            }
-
-
-        })
-        
-
-        this.isPressed = false
-        this.func = func;
-
-        this.toggle = 0
-        if (togglable) {
-            this.func(true) // runs the released function with the "sync" tag to sync button's toggle state
-        }
-
-
-        // shortLabel set in asych function above ^
-        this.label = label
-
-    }
-
-    render() {
-
-        canvasArea.ctx.save()
-
-        const shrinkFactor = (this.hasToggleImage) ? 1 : 0.95 // doesnt need to be calculated every frame
-
-        if (this.image == null) { // dynamically draw button (no icon). Should KILL this. have svg for every button -- even blanks FALSE BAD BAD 
-
-            let x, y, w, h
-
-            if (UserInterface.darkMode == false) {
-                canvasArea.ctx.fillStyle = (this.toggle == 1 || this.isPressed) ? UserInterface.lightColor_2 : UserInterface.lightColor_1;
-            } else {
-                canvasArea.ctx.fillStyle = (this.toggle == 1 || this.isPressed) ? UserInterface.darkColor_2 : UserInterface.darkColor_1;
-            }
-
-            if (this.toggle == 1 || this.isPressed) {
-                w = this.width * shrinkFactor
-                h = this.height * shrinkFactor
-                x = this.x + ((this.width - w) / 2)
-                y = this.y + ((this.height - h) / 2)
-            } else {
-                w = this.width;
-                h = this.height;
-                x = this.x;
-                y = this.y;
-            }
-
-            const radius = h/2
-            canvasArea.ctx.beginPath()
-            canvasArea.ctx.moveTo(x + radius, y) // top line
-            canvasArea.ctx.lineTo(x + w - radius, y)
-            canvasArea.ctx.arc(x + w - radius, y + radius, radius, 1.5*Math.PI, 0.5*Math.PI) // right arc
-            canvasArea.ctx.lineTo(x + radius, y + h)
-            canvasArea.ctx.arc(x + radius, y + radius, radius, 0.5*Math.PI, 1.5*Math.PI)
-
-            canvasArea.ctx.fill()
-
-        } else { // draw image normally
-
-            let icon, x, y, w, h
-
-            if (UserInterface.darkMode == false) { // light mode
-                if (this.hasToggleImage) {
-                    icon = (this.toggle == 1 || this.isPressed) ? this.lightIcon_toggled : this.lightIcon;
-                } else {
-                    icon = (this.toggle == 1 || this.isPressed) ? this.lightIcon_p : this.lightIcon;
-                }
-            } else { // dark mode
-                if (this.hasToggleImage) {
-                    icon = (this.toggle == 1 || this.isPressed) ? this.darkIcon_toggled : this.darkIcon;
-                } else {
-                    icon = (this.toggle == 1 || this.isPressed) ? this.darkIcon_p : this.darkIcon;
-                }
-            }
-
-            if (this.toggle == 1 || this.isPressed) {
-                w = this.width * shrinkFactor
-                h = this.height * shrinkFactor
-                x = this.x + ((this.width - w) / 2)
-                y = this.y + ((this.height - h) / 2)
-            } else {
-                w = this.width;
-                h = this.height;
-                x = this.x;
-                y = this.y;
-            }
-
-            // draws whatever icon with whatever pressed state were set above
-            canvasArea.ctx.drawImage(icon, x, y, w, h)
-
-        }
-
-        canvasArea.ctx.restore() // resets to no shadows
-
-        if (this.label != "") {
-
-            canvasArea.ctx.font = "22px BAHNSCHRIFT";
-            canvasArea.ctx.fillStyle = (!UserInterface.darkMode) ? UserInterface.darkColor_1: UserInterface.lightColor_1;
-
-            if (this.shortLabel != null) {
-                canvasArea.ctx.fillText(this.shortLabel, this.x + (this.width - canvasArea.ctx.measureText(this.shortLabel).width)/2, this.y + (this.height/2) + 7)
-            } else {
-                canvasArea.ctx.fillText(this.label, this.x + (this.width - canvasArea.ctx.measureText(this.label).width)/2, this.y + (this.height/2) + 7)
-            }
-        }
-     
-    }
-
-    pressed() {
-        this.isPressed = true;
-        // any release event calls released() on applicable buttons then sets isPressed = false on every rendered button
-    }
-
-    released(override) { // overide ignores the requirement to be pressed before released
-        if (override) {this.func()}
-        if (this.isPressed) {this.func()}
-    }
-
-}
-
-
-class SliderUI {
-// KILL labelColor
-
-    constructor(x, y, width, min, max, decimalDetail, label, labelColor, variable, func) {
-        this.x = eval(x);
-        this.y = eval(y);
-        this.width = width;
-        this.min = min;
-        this.max = max;
-        this.decimalDetail = decimalDetail // 1 = whole numbers, 10 = 10ths place, 100 = 100ths place
-        this.label = label;
-        // this.labelColor = labelColor; kill
-        this.value = variable;
-        this.variableToControl = String(variable);
-        this.func = func;
-        this.sliderX = this.x + width / ((max - min)/this.value);
-        this.confirmed = true;
-    }
-
-    updateState(value) { // updates the button when its value is changed by external source
-        this.value = value;
-        // this.sliderX = this.x + this.width / ((this.max - this.min)/this.value);
-        this.sliderX = (this.value - this.min) * (this.x + this.width - this.x) / (this.max - this.min) + this.x;
-
-    }
-
-
-    render() {
-        canvasArea.ctx.lineWidth = 8;
-        canvasArea.ctx.lineCap = "round"
-        canvasArea.ctx.fillStyle = canvasArea.ctx.strokeStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1: UserInterface.lightColor_1;
-
-        
-        canvasArea.ctx.beginPath(); // Slider Line
-        canvasArea.ctx.moveTo(this.x, this.y)
-        canvasArea.ctx.lineTo(this.x + this.width, this.y)
-        canvasArea.ctx.stroke();
-
-        canvasArea.ctx.font = "20px BAHNSCHRIFT"; // Label
-        canvasArea.ctx.fillText(this.label + ": " + this.value, this.x, this.y - 30)
-
-        canvasArea.ctx.beginPath(); // Slider Handle
-        canvasArea.ctx.arc(this.sliderX, this.y, 15, 0, 2 * Math.PI);
-        canvasArea.ctx.fill();
-
-        // draw highlight color in slider handle
-        canvasArea.ctx.fillStyle = (!UserInterface.darkMode) ? UserInterface.darkColor_1: UserInterface.lightColor_1;
-        canvasArea.ctx.beginPath();
-        canvasArea.ctx.arc(this.sliderX, this.y, 10, 0, 2 * Math.PI);
-        canvasArea.ctx.fill();
-    }
-
-    update() {
-        if (touchHandler.dragging) { // User is touching the screen
-            
-            if (Math.abs(touchHandler.touchX - this.sliderX) < 30 && Math.abs(touchHandler.touchY - this.y) < 30) {
-                
-                if (touchHandler.touchX > this.x && touchHandler.touchX < this.x + this.width) {
-
-                    this.sliderX = touchHandler.touchX
-                }
-
-                // MAP TO RANGE: https://stackoverflow.com/questions/10756313/javascript-jquery-map-a-range-of-numbers-to-another-range-of-numbers
-                // (number - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
-                // inmin = this.x
-                // inmax = this.x + this.width
-                // outmin = this.min
-                // outmax = this.max
-
-                this.value = (this.sliderX - this.x) * (this.max - this.min) / (this.width) + this.min;
-                this.value = Math.round(this.value * this.decimalDetail) / this.decimalDetail;
-                // this.value = Math.round(this.value / 10) * 10; // for snapping to nearest multiple of 10 
-
-
-                this.confirmed = false;
-            }
-        } else { // if not dragging (testing for a touch end on slider)
-            if (!this.confirmed) { // and if real values havent been updated
-
-                // map snapped value to pixels along slider. snapping the position of the visual slider
-                this.sliderX = (this.value - this.min) * (this.x + this.width - this.x) / (this.max - this.min) + this.x;
-
-                this.func(); // run the functions built into the slider
-                this.confirmed = true;
-            }
-        }
     }
 }
 
@@ -2414,23 +2622,24 @@ class SliderUI {
 const Tutorial = {
     isActive : false,
     state : 0, //  20 stages in google doc
+    // STATES SKIPPED / REMOVED: 4, 
     targets : [50,50,50,50,50,50], // 1s turn to 0s when target is completed
     timerStarted : false, // used to prevent multiple timers from being set every frame
+    timerCompleted : false,
     pausePlayer : false,
     animatePos : 0,
     animateVel : 0,
     decalLoadState : -1, // -1 no, 0 started load, 4 finished load (number of decals loaded)
     decalList : ["horizontal_finger", "vertical_finger", "finger", "arrow"],
 
-
     reset : function() { // called on restart and when leaving level
         this.state = 0;
         this.targets = [50,50,50,50,50,50];
         this.timerStarted = false;
+        this.timerCompleted = false;
         this.pausePlayer = false;
         this.animatePos = 0;
         this.animateVel = 0;
-
     },
 
 
@@ -2502,17 +2711,13 @@ const Tutorial = {
 
         if (!this.timerStarted && (
             this.state == 2 || 
-            this.state == 4 || 
             this.state == 7 || 
-            this.state == 8 || 
             this.state == 10 ||
-            this.state == 12 ||
             this.state == 14 ||
             this.state == 16 ||
-            this.state == 18 ||
-            this.state == 19
+            this.state == 18
         )) {
-            setTimeout(() => {UserInterface.renderedButtons = UserInterface.renderedButtons.concat(btn_next)}, 500);
+            setTimeout(() => {UserInterface.renderedButtons = UserInterface.renderedButtons.concat(btn_next)}, 1500);
             this.timerStarted = true;
         }
 
@@ -2529,8 +2734,9 @@ const Tutorial = {
                     }                
                 }
                 
-                if (this.targets.filter((v) => (v === 0)).length == 6) { // All targets completed
-                    UserInterface.renderedButtons = UserInterface.renderedButtons.concat(btn_next)
+                if (this.targets.filter((v) => (v === 0)).length == 1) { // All targets completed
+                    this.state = 5;
+                    UserInterface.renderedButtons = UserInterface.btnGroup_inLevel
                 }
             }
         }
@@ -2548,6 +2754,19 @@ const Tutorial = {
             this.timerStarted = true;
         }
 
+        if (this.state == 8 || this.state == 12) { // wait for a second then allow player to progess by swiping
+            if (!this.timerStarted && !this.timerCompleted) {
+                setTimeout(() => {this.timerStarted = false; this.timerCompleted = true}, 1200);
+                this.timerStarted = true;
+            }
+
+            if (this.timerCompleted && touchHandler.dragging == true) {
+                this.state ++; 
+                this.pausePlayer = false
+                this.timerCompleted = false
+            }
+        }
+
         if (this.state == 9) {
             if (player.checkpointIndex == 4) {this.state ++; this.pausePlayer = true}
         }
@@ -2555,6 +2774,8 @@ const Tutorial = {
         if (this.state == 11) {
             if (player.checkpointIndex == 1) {this.state ++; this.pausePlayer = true}
         }
+
+        // 12 is bundled with state 8 ^^
 
         if (this.state == 13) {
             if (player.checkpointIndex == 2) {this.state ++; this.pausePlayer = true}
@@ -2577,6 +2798,7 @@ const Tutorial = {
         const bg_color = UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
         const icon_color = !UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
 
+        // DEBUG TEXT
         ctx.fillText("state: " + this.state, midX, 30)
         // ctx.fillText("next buttons: " + UserInterface.renderedButtons.filter((v) => (v === btn_next)).length, midX, 450)
 
@@ -2589,6 +2811,8 @@ const Tutorial = {
 
             ctx.fillStyle = icon_color
             ctx.fillText(text, midX - textWidth/2, 100)
+            
+            btn_next.x = midX + textWidth/2 + 45
         }
 
 
@@ -2615,12 +2839,14 @@ const Tutorial = {
             if (this.animatePos < 0) {this.animateVel += 0.05 * dt}
             this.animatePos += this.animateVel * dt
 
-            const image = this.decalList[1]
-            ctx.drawImage(image, midX - 250, midY - 60 + this.animatePos)
+            if (touchHandler.dragging == false) {
+                const image = this.decalList[1]
+                ctx.drawImage(image, midX - 250, midY - 60 + this.animatePos)
+            }
         }
 
 
-        if (this.state == 3) {
+        if (this.state == 3) { // Targets
 
             const targetCounter = String(this.targets.filter((v) => (v === 0)).length + "/6")
             drawTextPanel("Rotate the player to look at the targets: " + targetCounter)
@@ -2680,18 +2906,6 @@ const Tutorial = {
         }
 
 
-        if (this.state == 4) {
-            drawTextPanel("This button restarts the tutorial map")
-            
-            if (this.animatePos == 0 && this.animateVel == 0) {this.animateVel = 1} // STARTING ANIMATION
-            if (this.animatePos > 0) {this.animateVel -= 0.03 * dt}
-            if (this.animatePos < 0) {this.animateVel += 0.03 * dt}
-            this.animatePos += this.animateVel * dt
-
-            const image = this.decalList[3] // ARROW
-            ctx.drawImage(image, btn_restart.x + 150 + this.animatePos, btn_restart.y + btn_restart.width/2 - image.height/2)
-        }
-
 
         if (this.state == 5) {
             drawTextPanel("Start jumping by pressing the jump button")
@@ -2707,7 +2921,7 @@ const Tutorial = {
 
 
         if (this.state == 7) {
-            drawTextPanel("Jump on the red platforms and avoid the blue ground")  
+            drawTextPanel("Stay on the red platforms")  
         }
 
         
@@ -2719,13 +2933,15 @@ const Tutorial = {
             if (this.animatePos < -20) {this.animateVel += 0.06 * dt}
             this.animatePos += this.animateVel * dt
 
-            const image = this.decalList[0]
-            ctx.drawImage(image, midX - image.width/2 + this.animatePos, canvasArea.canvas.height - image.height - 60)
+            if (touchHandler.dragging == false && this.timerCompleted) {
+                const image = this.decalList[0]
+                ctx.drawImage(image, midX - image.width/2 + this.animatePos, canvasArea.canvas.height - image.height - 60)
+            }
         }
 
 
         if (this.state == 10) {
-            drawTextPanel("Smooth turns increase speed. Sharp turns decrease speed")
+            drawTextPanel("Slow and smooth swipes increase speed")
 
             // graphic showing smooth turn vs sharp turn?
         }
@@ -2739,8 +2955,10 @@ const Tutorial = {
             if (this.animatePos < -20) {this.animateVel += 0.06 * dt}
             this.animatePos += this.animateVel * dt
 
-            const image = this.decalList[0]
-            ctx.drawImage(image, midX - image.width/2 + this.animatePos, canvasArea.canvas.height - image.height - 60)
+            if (touchHandler.dragging == false && this.timerCompleted) {
+                const image = this.decalList[0]
+                ctx.drawImage(image, midX - image.width/2 + this.animatePos, canvasArea.canvas.height - image.height - 60)
+            }
         }
 
 
@@ -2762,7 +2980,7 @@ const Tutorial = {
 
 
         if (this.state == 19) {
-            drawTextPanel("Click the back button to select a new level")
+            drawTextPanel("Click here to select a new level")
 
             // arrow to back button
             if (this.animatePos == 0 && this.animateVel == 0) {this.animateVel = 1} // STARTING ANIMATION
@@ -3550,7 +3768,7 @@ const MapEditor = {
                 canvasArea.roundedRect(sidePanel.x, sidePanel.y, sidePanel.width, sidePanel.height, 25) 
                 ctx.fill()
 
-                ctx.fillStyle = UserInterface.darkColor_1; // for text
+                ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1 : UserInterface.lightColor_1; // for text
 
                 if (this.selectedPlatformIndex == -2) { // player start is selected
                     
@@ -4518,15 +4736,19 @@ const Map = {
 class InputHandler {
     dragAmountX = 0;
     dragAmountY = 0;
+    touchStartX = null;
+    touchStartY = null;
     previousX = 0;
     previousY = 0;
     touchX = 0;
     touchY = 0;
     dragging = false;
     currentDragID = null;
+    averageDragX = new Averager(30)
+    averageDragY = new Averager(30)
 
 
-    constructor(){
+    constructor() {
 
         window.addEventListener("touchstart", e => {
             // e.preventDefault() // attempt to suppress highlighting magnifing glass (didnt work on old ios)
@@ -4538,8 +4760,8 @@ class InputHandler {
                     this.currentDragID = e.changedTouches[i].identifier;
                     this.dragging = true;
 
-                    this.touchX = e.changedTouches[i].pageX * canvasArea.scale;
-                    this.touchY = e.changedTouches[i].pageY * canvasArea.scale;
+                    this.touchStartX = this.touchX = e.changedTouches[i].pageX * canvasArea.scale;
+                    this.touchStartY = this.touchY = e.changedTouches[i].pageY * canvasArea.scale;
                     this.previousX = e.changedTouches[i].pageX * canvasArea.scale;
                     this.previousY = e.changedTouches[i].pageY * canvasArea.scale;
                 }
@@ -4577,11 +4799,18 @@ class InputHandler {
 
                 if (this.dragging && e.changedTouches[i].identifier == this.currentDragID) { // might not need to check if dragging is true here
                     
-                    if (e.touches.length == 0) {
+                    // released current drag
+
+                    this.averageDragX.clear()
+                    this.averageDragY.clear()
+
+                    if (e.touches.length == 0) { // if theres no other drags to switch to
 
                         this.currentDragID = null;
                         this.dragAmountX = 0;
                         this.dragAmountY = 0;
+                        this.touchStartX = null;
+                        this.touchStartY = null;
                         this.touchX = 0;
                         this.touchY = 0;
                         this.previousX = 0;
@@ -4589,13 +4818,14 @@ class InputHandler {
                         this.dragging = false;
 
 
-                    } else {
+                    } else { // switch to another touch for primary dragging
                         this.currentDragID = e.touches[0].identifier
-                        this.touchX = e.touches[0].pageX * canvasArea.scale;
-                        this.touchY = e.touches[0].pageY * canvasArea.scale;
+                        this.touchStartX = this.touchX = e.touches[0].pageX * canvasArea.scale;
+                        this.touchStartY = this.touchY = e.touches[0].pageY * canvasArea.scale;
                         this.previousX = e.touches[0].pageX * canvasArea.scale;
                         this.previousY = e.touches[0].pageY * canvasArea.scale;
                     }
+            
                 }
 
                 UserInterface.touchReleased(e.changedTouches[i].pageX * canvasArea.scale, e.changedTouches[i].pageY * canvasArea.scale); // sends touchRealease for every release
@@ -4608,6 +4838,10 @@ class InputHandler {
         if (this.dragging == true) {
             this.dragAmountX = this.touchX - this.previousX;
             this.dragAmountY = this.touchY - this.previousY;
+
+            this.averageDragX.pushValue(this.dragAmountX)
+            this.averageDragY.pushValue(this.dragAmountY)
+
             this.previousY = this.touchY;
             this.previousX = this.touchX;
         }
@@ -5198,69 +5432,6 @@ class Player {
 }
 
 
-class Vector {
-    constructor(x, y) {
-      this.x = x;
-      this.y = y;
-    }
-
-    set = function(x,y) {
-        this.x = x;
-        this.y = y;
-        // should add angle
-    }
-
-    add = function(otherVec) {
-        this.x += otherVec.x;
-        this.y += otherVec.y;
-    }
-
-    divide = function(scalar) {
-        return new Vector(this.x / scalar, this.y / scalar);
-    }
-
-    multiply = function(scalar) {
-        this.x *= scalar;
-        this.y *= scalar;
-    }
-
-    dotProduct = function(otherVec) { // ONLY FOR 2D Vectors. Projects Parent Vector onto otherVec
-        return (this.x * otherVec.x) + (this.y * otherVec.y)
-    }
-
-    magnitude = function() {
-        return Math.sqrt((this.x ** 2) + (this.y ** 2))
-    }
-
-    rotate = function(ang) // angle in degrees. returns new array -- doesnt modify existing one. It seems to incriment by the angle
-    {
-        ang = ang * (Math.PI/180);
-        const cos = Math.cos(ang);
-        const sin = Math.sin(ang);
-        return new Vector(Math.round(10000*(this.x * cos - this.y * sin))/10000, Math.round(10000*(this.x * sin + this.y * cos))/10000);
-    }
-
-    angleDifference = function(otherVec) { // returns degrees i guess idk
-        return Math.acos((this.dotProduct(otherVec)) / (this.magnitude() * otherVec.magnitude()))
-    }
-
-    getAngle = function() { // RETURNS ANGLE IN DEGREES. https://stackoverflow.com/questions/35271222/getting-the-angle-from-a-direction-vector
-        const angle = Math.atan2(this.y, this.x);   //radians
-        // you need to divide by PI, and MULTIPLY by 180:
-        const degrees = 180 * angle/Math.PI;  //degrees
-        return (360+Math.round(degrees))%360; //round number, avoid decimal fragments
-    }
-
-    normalize = function(multiplier) { // NOTE: requires multiplier
-        if (this.length !== 0) {
-            const n = this.divide(this.magnitude()); // dont ever want to normalize when vector length is zero
-            this.x = n.x * multiplier;
-            this.y = n.y * multiplier;
-        }
-    }
-}
-
-
 function updateGameArea() { // CALLED EVERY FRAME
     
     // UPDATING OBJECTS
@@ -5272,7 +5443,7 @@ function updateGameArea() { // CALLED EVERY FRAME
 
 
     if (UserInterface.gamestate == 2) { // In a MapBrowser
-        MapBrowser.updateScroll()
+        MapBrowser.update()
         if (Tutorial.isActive) {
             Tutorial.update();
         }
