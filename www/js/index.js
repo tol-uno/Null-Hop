@@ -681,8 +681,7 @@ const UserInterface = {
     
     gamestate : 1,
     // 1: main menu
-    // 2: level select browser
-    // 2.5: custom level browser (DEPRICATED) KILL
+    // 2: level select map browser
     // 3: settings
     // 4: store
     // 5: loading map page
@@ -692,8 +691,11 @@ const UserInterface = {
     sensitivity : null,
     debugText : null,
     strafeHUD : null,
+    showVelocity : true,
     volume : null,
     
+    playTutorial : true,
+
     timer : 0,
     timerStart : null, // set by jump button
     levelState : 1, // 1 = pre-start, 2 = playing level, 3 = in endzone
@@ -707,8 +709,6 @@ const UserInterface = {
     lightColor_2 : "#f7f1e4", // darker
     darkColor_1 : "#503c4b",
     darkColor_2 : "#412b3a",
-
-    renderedButtons : [],
     
     // lightColor_1 : "rgb(244,243,240)", // lighter
     // lightColor_2 : "rgb(231,230,223)", // darker
@@ -1608,12 +1608,12 @@ const UserInterface = {
         btn_level_awakening = new Button(300, 50, 280, "", "", 0, "Awakening", function() {
             if (this.toggle) {
                 this.toggle = 0;
-                MapBrowser.selectedMapIndex = -1
+                MapBrowser.selectedMapIndex = -1 
             } else {
                 MapBrowser.toggleAllButtons()
                 this.toggle = 1;
                 MapBrowser.selectedMapIndex = "Awakening"
-                Tutorial.isActive = true;
+                if (UserInterface.playTutorial == true) {Tutorial.isActive = true}
             }
         })
 
@@ -1877,6 +1877,20 @@ const UserInterface = {
 
         })
 
+        // not implemented
+        btn_tutorial = new Button("canvasArea.canvas.width - 420", "420", 80, "toggle_button", "toggle_button_pressed", 1, "", function(sync) { 
+            if (sync) {
+                this.toggle = UserInterface.playTutorial // gets initial value of toggle
+            } else {
+                if (this.toggle) {
+                    this.toggle = 0;
+                    UserInterface.playTutorial = false
+                } else {
+                    this.toggle = 1;
+                    UserInterface.playTutorial = true
+                }
+            }
+        })
 
         // GROUPS OF BUTTONS TO RENDER ON DIFFERENT PAGES
         this.btnGroup_mainMenu = [btn_play, btn_settings, btn_mapEditor]
@@ -1967,7 +1981,16 @@ const UserInterface = {
         }
 
         if (this.levelState == 2) {
-            this.timer = Date.now() - this.timerStart;
+            if (Tutorial.pausePlayer == true) {
+                
+                // Date.now() - this.timerStart) - this.timer = time to add to this.timerStart
+                // Date.now() - this.timer = this.timerStart
+
+                this.timerStart += Date.now() - this.timer - this.timerStart
+
+            } else {
+                this.timer = Date.now() - this.timerStart;
+            }
         }
     },
 
@@ -2184,13 +2207,26 @@ const UserInterface = {
         }
 
         if (this.gamestate == 6) { // In Level
-            canvasArea.ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1: UserInterface.lightColor_1;
+            canvasArea.ctx.fillStyle = UserInterface.darkMode ? UserInterface.darkColor_1: UserInterface.lightColor_1;
 
 
             if (this.levelState !== 3 && Tutorial.isActive == false) {
-                canvasArea.ctx.font = "25px BAHNSCHRIFT";
-                canvasArea.ctx.fillText("Time: " + UserInterface.secondsToMinutes(this.timer), canvasArea.canvas.width - 230, 60)
-                canvasArea.ctx.fillText("Record: " + UserInterface.secondsToMinutes(Map.record), canvasArea.canvas.width - 230, 90);
+                canvasArea.roundedRect(canvasArea.canvas.width - 260, 20, 220, 100, 25)
+                canvasArea.ctx.fill()
+
+                canvasArea.ctx.font = "26px BAHNSCHRIFT";
+                canvasArea.ctx.fillStyle = !UserInterface.darkMode ? UserInterface.darkColor_1: UserInterface.lightColor_1;
+
+                canvasArea.ctx.fillText("Time: " + UserInterface.secondsToMinutes(this.timer), canvasArea.canvas.width - 240, 60)
+                canvasArea.ctx.fillText("Record: " + UserInterface.secondsToMinutes(Map.record), canvasArea.canvas.width - 240, 90);
+            }
+
+
+            if (this.showVelocity && this.levelState == 2) {
+                canvasArea.ctx.font = "26px BAHNSCHRIFT";
+                canvasArea.ctx.fillStyle = UserInterface.darkMode ? UserInterface.darkColor_1: UserInterface.lightColor_1;
+                const offsetY = Tutorial.pausePlayer ? 34 : 60
+                canvasArea.ctx.fillText("Speed: " + Math.round(player.velocity.magnitude()), midX - canvasArea.ctx.measureText("Speed: 00").width/2, offsetY)
             }
 
 
@@ -2212,6 +2248,7 @@ const UserInterface = {
                 canvasArea.ctx.fillText("velocity: " + Math.round(player.velocity.magnitude()), textX, 260);
                 canvasArea.ctx.fillText("player pos: " + Math.round(player.x) + ", " + Math.round(player.y), textX, 280);
                 canvasArea.ctx.fillText("lookAngle: " + player.lookAngle.getAngle(), textX, 300);
+                canvasArea.ctx.fillText("Timer: " + UserInterface.secondsToMinutes(this.timer), textX, 320);
 
 
                 // DRAWING PLAYER MOVEMENT DEBUG VECTORS
@@ -2268,7 +2305,7 @@ const UserInterface = {
 
                 const ctx = canvasArea.ctx
 
-                if (touchHandler.dragging && this.levelState != 3) {
+                if (touchHandler.dragging && this.levelState != 3) { // check if any button is pressed
 
                     let lineUpOffset = 0
                     if (touchHandler.touchStartX > midX - 200 && touchHandler.touchStartX < midX + 200) { // if touched withing slider's X => offset the handle to lineup with finger
@@ -2285,51 +2322,68 @@ const UserInterface = {
     
     
                     ctx.strokeStyle = UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1
-                    
+                    ctx.fillStyle = UserInterface.darkMode ? UserInterface.darkColor_1: UserInterface.lightColor_1;
+
 
                     // DRAW SLIDER
-
-                    // border
-                    ctx.lineWidth = 6
-
-                    const radius = 20
-                    const x = midX - 200
-                    const y = canvasArea.canvas.height - 150
-                    const w = 400
-                    const h = 40
-
-                    ctx.beginPath()
-                    ctx.moveTo(x + radius, y) // top line
-                    ctx.lineTo(x + w - radius, y)
-                    ctx.arc(x + w - radius, y + radius, radius, 1.5*Math.PI, 0.5*Math.PI) // right arc
-                    ctx.lineTo(x + radius, y + h)
-                    ctx.arc(x + radius, y + radius, radius, 0.5*Math.PI, 1.5*Math.PI) // left arc
-                
-                    ctx.stroke()    
-                    ctx.save() // strafeHelper 
-                    ctx.clip()
-
-                    // Handle
-                    ctx.beginPath();
-                    ctx.arc(midX + strafeDistanceX, canvasArea.canvas.height - 130, 12, 0, 2 * Math.PI);
-                    ctx.fill();
-
-                    ctx.restore() // strafeHelper
+                    if (Tutorial.pausePlayer == false) { // as long as player isnt paused
+                        
+                        // border
+                        ctx.lineWidth = 4
     
+                        const radius = 10
+                        const x = midX - 200
+                        const y = canvasArea.canvas.height - 140
+                        const w = 400
+                        const h = 20
+    
+                        ctx.beginPath()
+                        ctx.moveTo(x + radius, y) // top line
+                        ctx.lineTo(x + w - radius, y)
+                        ctx.arc(x + w - radius, y + radius, radius, 1.5*Math.PI, 0.5*Math.PI) // right arc
+                        ctx.lineTo(x + radius, y + h)
+                        ctx.arc(x + radius, y + radius, radius, 0.5*Math.PI, 1.5*Math.PI) // left arc
+                    
+                        ctx.stroke()    
+                        ctx.save() // #2.2
+                        ctx.clip()
+    
+                        // Handle
+                        ctx.beginPath();
+                        ctx.arc(midX + strafeDistanceX, canvasArea.canvas.height - 130, 8, 0, 2 * Math.PI);
+                        ctx.fill();
+    
+                        ctx.restore() // #2.2
+        
+    
+                        // DRAW VERTICAL WARNING
 
-                    // DRAW VERTICAL WARNING
-                    const averageX = Math.abs(touchHandler.averageDragX.getAverage())
-                    const averageY = Math.abs(touchHandler.averageDragY.getAverage())
-                    if (averageY > 5 * dt/1.5 && averageY > averageX*1.25)  { /// no mathematical reason for dt/1.5 just feels better
-                        if (this.showVerticalWarning == false) {
-                            this.showVerticalWarning = true;
-                            setTimeout(() => {UserInterface.showVerticalWarning = false}, 1500); // waits 1 second to hide warning
+                        // calculations
+                        const averageX = Math.abs(touchHandler.averageDragX.getAverage())
+                        const averageY = Math.abs(touchHandler.averageDragY.getAverage())
+                        if (averageY > 5 * dt/1.5 && averageY > averageX*1.25)  { /// no mathematical reason for dt/1.5 just feels better
+                            if (this.showVerticalWarning == false) {
+                                this.showVerticalWarning = true;
+                                setTimeout(() => {UserInterface.showVerticalWarning = false}, 1500); // waits 1 second to hide warning
+                            }
                         }
-                    }
+    
+                        if (this.showVerticalWarning) {
+                            ctx.font = "22px BAHNSCHRIFT";
 
-                    if (this.showVerticalWarning) {
-                        ctx.font = "20px BAHNSCHRIFT";
-                        ctx.fillText("VERTICAL SWIPING DOES NOT TURN PLAYER!", midX - 200, 160)
+
+                            canvasArea.roundedRect(midX - 200, canvasArea.canvas.height - 180, ctx.measureText("DON'T SWIPE VERTICAL").width + 30, 30, 12)
+                            
+                            ctx.fillStyle = UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1
+                            // ctx.strokeStyle = UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1
+                            ctx.fill()
+                            // ctx.stroke()
+
+                            ctx.fillStyle = !UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1
+                            // ctx.fillText("DON'T SWIPE VERTICAL", midX - ctx.measureText("DON'T SWIPE VERTICAL").width/2, 160)
+                            ctx.fillText("DON'T SWIPE VERTICAL", midX - 185, canvasArea.canvas.height - 157)
+
+                        }
                     }
                 }
             }
@@ -2344,7 +2398,7 @@ const UserInterface = {
 
                 canvasArea.ctx.save(); // save 3
                 
-                canvasArea.ctx.shadowColor = "rgba(0, 0, 0, 0.5)"; 
+                canvasArea.ctx.shadowColor = "rgba(0, 0, 0, 0.3)"; 
                 canvasArea.ctx.shadowBlur = 20;
                 canvasArea.ctx.fill();
 
@@ -2535,6 +2589,8 @@ const MapBrowser = { // should set back to 0 at some points??
         // ENABLING and DISABLING btn_playMap in browsers BESIDES map editor's
 
         if (MapEditor.editorState != 5) { // not in map editors browser
+            
+            // ADDING AND REMOVING btn_playmap
             if (
                 this.selectedMapIndex != -1 &&
                 !UserInterface.renderedButtons.includes(btn_playMap)
@@ -2544,6 +2600,8 @@ const MapBrowser = { // should set back to 0 at some points??
                 this.selectedMapIndex == -1 &&
                 UserInterface.renderedButtons.includes(btn_playMap)
             ) {UserInterface.renderedButtons = UserInterface.renderedButtons.slice(0,-1)}
+
+
         } else {
             // in MapEditors browser
             // btn_editMap, btn_deleteMap, btn_shareMap
@@ -2623,7 +2681,7 @@ const Tutorial = {
     isActive : false,
     state : 0, //  20 stages in google doc
     // STATES SKIPPED / REMOVED: 4, 
-    targets : [50,50,50,50,50,50], // 1s turn to 0s when target is completed
+    targets : [[240,50],[120,50],[180,50],[0,50],[60,50],[300,50]], // 1st number is target angle, 2nd is targets health
     timerStarted : false, // used to prevent multiple timers from being set every frame
     timerCompleted : false,
     pausePlayer : false,
@@ -2634,7 +2692,7 @@ const Tutorial = {
 
     reset : function() { // called on restart and when leaving level
         this.state = 0;
-        this.targets = [50,50,50,50,50,50];
+        this.targets = [[240,50],[120,50],[180,50],[0,50],[60,50],[300,50]];
         this.timerStarted = false;
         this.timerCompleted = false;
         this.pausePlayer = false;
@@ -2646,7 +2704,7 @@ const Tutorial = {
 
     update : function() {
         if (UserInterface.gamestate == 2) { // in map browser
-            if (MapBrowser.selectedMapIndex !== "Awakening") { // tutorial level not selected
+            if (MapBrowser.selectedMapIndex !== "Awakening" || UserInterface.playTutorial == false) { // tutorial level not selected
                 this.isActive = false;
             }
         } 
@@ -2722,23 +2780,24 @@ const Tutorial = {
         }
 
         if (this.state == 3) {
-            if (!UserInterface.renderedButtons.includes(btn_next)) {
 
-                // dwindle down targets if looking at them
-                for (let i = 0; i < this.targets.length; i++) {
-                    if (this.targets[i] > 0) {
-                        if (Math.abs(player.lookAngle.getAngle() - (i * 60)) < 8) {
-                            this.targets[i] -= (0.8 * dt);
-                            if (this.targets[i] < 0) {this.targets[i] = 0} 
-                        } else {this.targets[i] = 50}
-                    }                
-                }
-                
-                if (this.targets.filter((v) => (v === 0)).length == 1) { // All targets completed
-                    this.state = 5;
-                    UserInterface.renderedButtons = UserInterface.btnGroup_inLevel
-                }
+    
+            if (this.targets.length > 0) {
+
+                if (this.targets[0][1] > 0) {
+
+                    if (Math.abs(player.lookAngle.getAngle() - this.targets[0][0]) < 8) {
+                        this.targets[0][1] -= (0.8 * dt);
+                    } else { this.targets[0][1] = 50 }
+    
+                } else { this.targets.shift()} // remove first element
+
+            } else { // All targets completed
+                this.state = 5; // skip state 4
+                UserInterface.renderedButtons = UserInterface.btnGroup_inLevel
             }
+
+            
         }
 
         if (this.state == 5) {
@@ -2799,8 +2858,9 @@ const Tutorial = {
         const icon_color = !UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
 
         // DEBUG TEXT
-        ctx.fillText("state: " + this.state, midX, 30)
-        // ctx.fillText("next buttons: " + UserInterface.renderedButtons.filter((v) => (v === btn_next)).length, midX, 450)
+        // ctx.fillText("state: " + this.state, midX - 200, 34)
+        // ctx.fillText(this.targets, 300, midY)
+
 
         function drawTextPanel (text){
             const textWidth = ctx.measureText(text).width
@@ -2846,63 +2906,61 @@ const Tutorial = {
         }
 
 
-        if (this.state == 3) { // Targets
+        if (this.state == 3 && this.targets.length > 0) { // Targets
 
-            const targetCounter = String(this.targets.filter((v) => (v === 0)).length + "/6")
+            const targetCounter = String(6 - this.targets.length + "/6")
             drawTextPanel("Rotate the player to look at the targets: " + targetCounter)
             
             ctx.save() // #4
             
             ctx.translate(midX, midY)
+            ctx.rotate(this.targets[0][0] * Math.PI / 180)
+
             ctx.strokeStyle = Map.style.shadowColor
             ctx.fillStyle = Map.style.shadowColor
             ctx.lineWidth = 8
             ctx.lineCap = "round"
-            
-            for (let i = 0; i < this.targets.length; i++) { // COULD MAKE THIS A FUNCTION SIINCE ITS THE SAME CODE TWICE
-                if (this.targets[i] > 0) {
-                    ctx.beginPath()
-                    ctx.arc(75, 0, 14, 0, (this.targets[i]/ 50) * (2 * Math.PI));
-                    ctx.stroke()
-    
-                    if (this.targets[i] < 50 ) {
-                        ctx.beginPath()
-                        ctx.arc(75, 0, 5, 0, 2 * Math.PI);
-                        ctx.fill()
-                    }
-                }
 
-                ctx.rotate(60 * Math.PI / 180)
+    
+            // DRAW TARGET SHADOW
+            if (this.targets[0][1] > 0) { // these two blocks could be a function. theyre called twice
+                ctx.beginPath()
+                ctx.arc(75, 0, 14, 0, (this.targets[0][1] / 50) * (2 * Math.PI));
+                ctx.stroke()
+            }
+
+            if (this.targets[0][1] < 50 ) {
+                ctx.beginPath()
+                ctx.arc(75, 0, 5, 0, 2 * Math.PI);
+                ctx.fill()
             }
 
 
+            // move up for actual targets
+            ctx.rotate(-this.targets[0][0] * Math.PI / 180) // have to unrotate first
             ctx.translate(0, -32)
+            ctx.rotate(this.targets[0][0] * Math.PI / 180)
+
             ctx.strokeStyle = bg_color
             ctx.fillStyle = bg_color
 
             
-            for (let i = 0; i < this.targets.length; i++) {
-                
-                if (this.targets[i] > 0) {
-                    ctx.beginPath()
-                    ctx.arc(75, 0, 14, 0, (this.targets[i]/ 50) * (2 * Math.PI));
-                    ctx.stroke()
-    
-                    if (this.targets[i] < 50 ) {
-                        ctx.beginPath()
-                        ctx.arc(75, 0, 5, 0, 2 * Math.PI);
-                        ctx.fill()
-                    }
-                }
-
-                ctx.rotate(60 * Math.PI / 180)
+            // DRAW ACTUAL TARGET
+            if (this.targets[0][1] > 0) {
+                ctx.beginPath()
+                ctx.arc(75, 0, 14, 0, (this.targets[0][1] / 50) * (2 * Math.PI));
+                ctx.stroke()
             }
 
+            if (this.targets[0][1] < 50 ) {
+                ctx.beginPath()
+                ctx.arc(75, 0, 5, 0, 2 * Math.PI);
+                ctx.fill()
+            }
 
                 
             ctx.restore() // #4
             
-            //Add Finger
         }
 
 
