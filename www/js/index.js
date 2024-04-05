@@ -477,7 +477,7 @@ class Vector {
         return new Vector(Math.round(10000*(this.x * cos - this.y * sin))/10000, Math.round(10000*(this.x * sin + this.y * cos))/10000);
     }
 
-    angleDifference = function(otherVec) { // returns degrees i guess idk
+    angleDifference = function(otherVec) { // returns radians. not sure why
         return Math.acos((this.dotProduct(otherVec)) / (this.magnitude() * otherVec.magnitude()))
     }
 
@@ -498,6 +498,7 @@ class Vector {
 }
 
 
+
 const canvasArea = { //Canvas Object
     
 
@@ -508,14 +509,6 @@ const canvasArea = { //Canvas Object
 
         this.canvas.width = window.outerWidth * this.scale;
         this.canvas.height = window.outerHeight * this.scale;
-
-        // this.canvas.width = document.documentElement.clientWidth
-        // this.canvas.height = document.documentElement.clientHeight
-
-        // const deviceAspectRation = (window.outerWidth / window.outerHeight);
-
-        // this.canvas.width = 1920;
-        // this.canvas.height = 1920 / deviceAspectRation;
 
         this.canvas.style.width = window.outerWidth + "px";
         this.canvas.style.height = window.outerHeight + "px";
@@ -626,35 +619,49 @@ const canvasArea = { //Canvas Object
     },
 
 
-    calculateShadedColor(sideNormalVector, color) {
-        let lightAngleVector;
-        let shadowContrastLight;
-        let shadowContrastDark;
+    getShadedColor: function (color, litPercent) { // litPercent is how much sun is hitting the face 0 -> 1 
+        
+        let directLight;
+        let ambientLight;
 
         if (UserInterface.gamestate == 5 || UserInterface.gamestate == 6) {
-            lightAngleVector = Map.style.lightAngleVector
-            shadowContrastLight = Map.style.shadowContrastLight
-            shadowContrastDark = Map.style.shadowContrastDark
+            //directLight = Map.style.directLight ?? "rba(255,255,255)"
+            //ambientLight = Map.style.ambientLight ?? "rba(140,184,198)"
+            directLight = Map.style.directLight ?? "rba(155,155,155)"
+            ambientLight = Map.style.ambientLight ?? "rba(40,84,98)"
+            
         } else {
-            lightAngleVector = MapEditor.loadedMap.style.lightAngleVector
-            shadowContrastLight = MapEditor.loadedMap.style.shadowContrastLight
-            shadowContrastDark = MapEditor.loadedMap.style.shadowContrastDark
+            directLight = MapEditor.loadedMap.style.directLight ?? "rba(255,255,255)"
+            ambientLight = MapEditor.loadedMap.style.ambientLight ?? "rba(140,184,198)"
         }
 
-        let darkness = 180 - (sideNormalVector.angleDifference(lightAngleVector) * (180/Math.PI));
-    
-        // MAP TO RANGE: https://stackoverflow.com/questions/10756313/javascript-jquery-map-a-range-of-numbers-to-another-range-of-numbers
-        // (number - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
-        darkness = (darkness) * (shadowContrastDark - shadowContrastLight) / 180 + shadowContrastLight;
-
-        // USED TO BRIGHTEN AND DARKEN COLORS. p = percent to brighten/darken. c = color in rgba
-        // https://stackoverflow.com/questions/5560248/programmatically-lighten-or-darken-a-hex-color-or-rgb-and-blend-colors
-        function RGB_Linear_Shade(p,c) {
-        var i=parseInt,r=Math.round,[a,b,c,d]=c.split(","),P=p<0,t=P?0:255*p,P=P?1+p:1-p; // not sure why i needs to be decalared as "var" here instead of "let"
-        return"rgb"+(d?"a(":"(")+r(i(a[3]=="a"?a.slice(5):a.slice(4))*P+t)+","+r(i(b)*P+t)+","+r(i(c)*P+t)+(d?","+d:")");
+        // parse main color
+        color = color.replace(/[^\d,.]/g, '').split(',')
+        let r = color[0]
+        let g = color[1]
+        let b = color[2]
+        
+        // parse directLight color
+        directLight = directLight.replace(/[^\d,.]/g, '').split(',')
+        directLight = {
+            r : directLight[0],
+            g : directLight[1],
+            b : directLight[2]
         }
+        
+        // parse ambientLight color
+        ambientLight = ambientLight.replace(/[^\d,.]/g, '').split(',')
+        ambientLight = {
+            r : ambientLight[0],
+            g : ambientLight[1],
+            b : ambientLight[2]
+        }
+        
+        r = (litPercent) * (r * (directLight.r / 255)) + (1 - litPercent) * (r * (ambientLight.r / 255)) // left of + is color fully lit by sunlight
+        g = (litPercent) * (g * (directLight.g / 255)) + (1 - litPercent) * (g * (ambientLight.g / 255)) // right of + is color fully lit by ambient light
+        b = (litPercent) * (b * (directLight.b / 255)) + (1 - litPercent) * (b * (ambientLight.b / 255))
 
-        return RGB_Linear_Shade(darkness, color)
+        return `rgb(${r},${g},${b})`
     },
 
 
@@ -1086,8 +1093,8 @@ const UserInterface = {
             UserInterface.renderedButtons = UserInterface.btnGroup_editPlatform
             
             // SYNC ALL BUTTONS AND SLIDERS
-            btn_translate.func() // intially syncs the buttons position to the selected platform. Called whenever screen is scrolled too. not really needed here but avoids a 1 frame flash 
-            btn_resize.func()
+            btn_translate.func(true) // intially syncs the buttons position to the selected platform. Called whenever screen is scrolled too. not really needed here but avoids a 1 frame flash 
+            btn_resize.func(true)
             btn_angleSlider.updateState(MapEditor.loadedMap.platforms[MapEditor.selectedPlatformIndex].angle)
             btn_wall.func(true) // syncs the wall button's toggle state
         })
@@ -1111,10 +1118,7 @@ const UserInterface = {
         btn_map_colors = new Button("canvasArea.canvas.width -388", "25", 126, "map_colors_button", "", 0, "", function() {
             MapEditor.editorState = 3 // map colors
             
-            PreviewWindow.update(PreviewWindow.wall)
-            PreviewWindow.update(PreviewWindow.endzone)
-            PreviewWindow.update(PreviewWindow.platform)
-
+            PreviewWindow.update()
 
             UserInterface.renderedButtons = UserInterface.btnGroup_mapColor
         })
@@ -1122,9 +1126,7 @@ const UserInterface = {
         btn_map_settings = new Button("canvasArea.canvas.width - 550", "25", 141, "map_settings_button", "", 0, "", function() {
             MapEditor.editorState = 4 // map settings
             
-            PreviewWindow.update(PreviewWindow.wall)
-            PreviewWindow.update(PreviewWindow.endzone)
-            PreviewWindow.update(PreviewWindow.platform)
+            PreviewWindow.update()
 
             btn_platformHeightSlider.updateState(MapEditor.loadedMap.style.platformHeight) // value is set to 0 before we're in MapEditor
             btn_wallHeightSlider.updateState(MapEditor.loadedMap.style.wallHeight)
@@ -1147,7 +1149,7 @@ const UserInterface = {
             UserInterface.renderedButtons = UserInterface.btnGroup_mapEditorInterface
         })
 
-        btn_translate = new Button(0, 0, 50, "translate_button", "", 0, "", function() {
+        btn_translate = new Button(0, 0, 50, "translate_button", "", 0, "", function(updateFrame) {
             
             if (MapEditor.selectedPlatformIndex != -1) { // platform selected
                 let platform;
@@ -1161,13 +1163,37 @@ const UserInterface = {
                 if (this.isPressed) {
                     platform.x += Math.round(touchHandler.dragAmountX)
                     platform.y += Math.round(touchHandler.dragAmountY)
-                } else if (MapEditor.snapAmount > 0) {
+
+                    if (this.x > canvasArea.canvas.width - 340) {
+                        MapEditor.screenX -= Math.round(4 * dt)
+                        platform.x += Math.round(4 * dt)
+                    }
+    
+                    if (this.x < 30) {
+                        MapEditor.screenX += Math.round(4 * dt)
+                        platform.x -= Math.round(4 * dt)
+                    }
+    
+                    if (this.y > canvasArea.canvas.height - 60) {
+                        MapEditor.screenY -= Math.round(4 * dt)
+                        platform.y += Math.round(4 * dt)
+                    }
+    
+                    if (this.y < 30) {
+                        MapEditor.screenY += Math.round(4 * dt)
+                        platform.y -= Math.round(4 * dt)
+                    }
+
+                }
+                if (!updateFrame && MapEditor.snapAmount > 0) {
                     platform.x = Math.round(platform.x / MapEditor.snapAmount) * MapEditor.snapAmount
                     platform.y = Math.round(platform.y / MapEditor.snapAmount) * MapEditor.snapAmount
                 }
 
+
                 this.x =  MapEditor.screenX + platform.x + (platform.width ? platform.width/2 : 32) - this.width/2
                 this.y =  MapEditor.screenY + platform.y + (platform.height ? platform.height/2 : 32) - this.height/2
+
             }
 
             if (MapEditor.selectedCheckpointIndex[0] != -1) { // checkpoint selected
@@ -1178,7 +1204,8 @@ const UserInterface = {
                     if (this.isPressed) {
                         checkpoint.triggerX1 += Math.round(touchHandler.dragAmountX)
                         checkpoint.triggerY1 += Math.round(touchHandler.dragAmountY)
-                    } else if (MapEditor.snapAmount > 0) {
+                    }
+                    if (!updateFrame && MapEditor.snapAmount > 0) {
                         checkpoint.triggerX1 = Math.round(checkpoint.triggerX1 / MapEditor.snapAmount) * MapEditor.snapAmount
                         checkpoint.triggerY1 = Math.round(checkpoint.triggerY1 / MapEditor.snapAmount) * MapEditor.snapAmount
                     }   
@@ -1191,7 +1218,8 @@ const UserInterface = {
                     if (this.isPressed) {
                         checkpoint.triggerX2 += Math.round(touchHandler.dragAmountX)
                         checkpoint.triggerY2 += Math.round(touchHandler.dragAmountY)
-                    } else if (MapEditor.snapAmount > 0) {
+                    }
+                    if (!updateFrame && MapEditor.snapAmount > 0) {
                         checkpoint.triggerX2 = Math.round(checkpoint.triggerX2 / MapEditor.snapAmount) * MapEditor.snapAmount
                         checkpoint.triggerY2 = Math.round(checkpoint.triggerY2 / MapEditor.snapAmount) * MapEditor.snapAmount
                     }
@@ -1204,7 +1232,8 @@ const UserInterface = {
                     if (this.isPressed) {
                         checkpoint.x += Math.round(touchHandler.dragAmountX)
                         checkpoint.y += Math.round(touchHandler.dragAmountY)
-                    } else if (MapEditor.snapAmount > 0) {
+                    }
+                    if (!updateFrame && MapEditor.snapAmount > 0) {
                         checkpoint.x = Math.round(checkpoint.x / MapEditor.snapAmount) * MapEditor.snapAmount
                         checkpoint.y = Math.round(checkpoint.y / MapEditor.snapAmount) * MapEditor.snapAmount
                     }
@@ -1216,34 +1245,43 @@ const UserInterface = {
             }
         })
 
-        btn_resize = new Button(0, 0, 50, "scale_button", "", 0, "", function() {
+        btn_resize = new Button(0, 0, 50, "scale_button", "", 0, "", function(updateFrame) {
 
             let platform = MapEditor.loadedMap.platforms[MapEditor.selectedPlatformIndex]
 
-            // bot right corner
+            // bot right corner (relative to platform center)
             const angleRad = platform.angle * (Math.PI/180);
             const cornerX =  ((platform.width / 2) * Math.cos(angleRad)) - ((platform.height / 2) * Math.sin(angleRad))
             const cornerY = ((platform.width / 2) * Math.sin(angleRad)) + ((platform.height / 2) * Math.cos(angleRad))
+            
+            if (this.isPressed) {
+                const oldMidX = platform.x + platform.width/2
+                const oldMidY = platform.y + platform.height/2
 
-            if (this.isPressed && touchHandler.dragging) {
-                this.x = touchHandler.touchX - this.width/2
-                this.y = touchHandler.touchY - this.height/2
+                // transform drag amount to match with platform angle
+                let drag = new Vector(touchHandler.dragAmountX, touchHandler.dragAmountY).rotate(-platform.angle)
 
-                platform.width = Math.round(this.x - platform.x + platform.width/2 - cornerX - MapEditor.screenX)
+                platform.width += Math.round(drag.x) * 2 // multiplied by 2 because platform will be moving oppposite direction from drag direction (to appear stable)
                 if (platform.width < 10) {platform.width = 10}
-                platform.height = Math.round(this.y - platform.y + platform.height/2 - cornerY - MapEditor.screenY)
+
+                platform.height += Math.round(drag.y) * 2
                 if (platform.height < 10) {platform.height = 10}
 
-            } else { // not touching -- just set it to default position
-                if (MapEditor.snapAmount > 0) {
-                    platform.width = Math.round(platform.width / MapEditor.snapAmount) * MapEditor.snapAmount
-                    platform.height = Math.round(platform.height / MapEditor.snapAmount) * MapEditor.snapAmount
-                }
 
-                this.x = platform.x + platform.width/2 + cornerX + MapEditor.screenX
-                this.y = platform.y + platform.height/2 + cornerY + MapEditor.screenY
+                const newMidX = platform.x + platform.width/2
+                const newMidY = platform.y + platform.height/2
+
+                platform.x += Math.round(oldMidX - newMidX)
+                platform.y += Math.round(oldMidY - newMidY)
             }
 
+            if (!updateFrame && MapEditor.snapAmount > 0) {
+                platform.width = Math.round(platform.width / MapEditor.snapAmount) * MapEditor.snapAmount
+                platform.height = Math.round(platform.height / MapEditor.snapAmount) * MapEditor.snapAmount
+            }
+
+            this.x = platform.x + platform.width/2 + cornerX + MapEditor.screenX
+            this.y = platform.y + platform.height/2 + cornerY + MapEditor.screenY
             
         })
 
@@ -1279,7 +1317,7 @@ const UserInterface = {
             }    
         })
 
-        btn_delete_platform = new Button("canvasArea.canvas.width - 220", "350", 150, "delete_button", "", 0, "", function() {
+        btn_delete_platform = new Button("canvasArea.canvas.width - 175", "canvasArea.canvas.height - 100", 120, "delete_button", "", 0, "", function() {
             if (MapEditor.selectedPlatformIndex != -1) { // platform being deleted
                 MapEditor.loadedMap.platforms.splice(MapEditor.selectedPlatformIndex, 1)
                 MapEditor.selectedPlatformIndex = -1; // No selected platform
@@ -1294,55 +1332,57 @@ const UserInterface = {
             
         })
 
+        btn_duplicate_platform = new Button("canvasArea.canvas.width - 250", "canvasArea.canvas.height - 185", 200, "", "", 0, "Duplicate", function() {
+            
+            const newPlatform = {...MapEditor.loadedMap.platforms[MapEditor.selectedPlatformIndex]} // get selected platform
+            newPlatform.x = Math.round(-MapEditor.screenX + canvasArea.canvas.width/2), // center it
+            newPlatform.y = Math.round(-MapEditor.screenY + canvasArea.canvas.height/2),
+
+            MapEditor.loadedMap.platforms.push(newPlatform); // add it
+            MapEditor.selectedPlatformIndex = MapEditor.loadedMap.platforms.length - 1;
+            UserInterface.renderedButtons = UserInterface.btnGroup_editPlatform
+            
+            // SYNC ALL BUTTONS AND SLIDERS
+            btn_translate.func(true) // intially syncs the buttons position to the selected platform. Called whenever screen is scrolled too. not really needed here but avoids a 1 frame flash 
+            btn_resize.func(true)
+            btn_angleSlider.updateState(MapEditor.loadedMap.platforms[MapEditor.selectedPlatformIndex].angle)
+            btn_wall.func(true) // syncs the wall button's toggle state
+        })
+
+
 
 
         // MAP SETTINGS SLIDERS
         btn_platformHeightSlider = new SliderUI("170", "70", 300, 0, 150, 1, "Platform Height", "white", MapEditor.loadedMap ? MapEditor.loadedMap.style.platformHeight : 0, function() { 
             MapEditor.loadedMap.style.platformHeight = this.value
-
-            PreviewWindow.update(PreviewWindow.wall)
-            PreviewWindow.update(PreviewWindow.endzone)
-            PreviewWindow.update(PreviewWindow.platform)
+            PreviewWindow.update()
         })
 
         btn_wallHeightSlider = new SliderUI("170", "150", 300, 0, 150, 1, "Wall Height", "white", MapEditor.loadedMap ? MapEditor.loadedMap.style.wallHeight : 0, function() { 
             MapEditor.loadedMap.style.wallHeight = this.value
-
-            PreviewWindow.update(PreviewWindow.wall)
-            PreviewWindow.update(PreviewWindow.endzone)
-            PreviewWindow.update(PreviewWindow.platform)
+            PreviewWindow.update()
         })
 
         btn_lightAngleSlider = new SliderUI("canvasArea.canvas.width - 550", "70", 360, 0, 360, 1, "Light Angle", "white", MapEditor.loadedMap ? MapEditor.loadedMap.style.lightAngle : 0, function() { 
             MapEditor.loadedMap.style.lightAngle = this.value
-
-            PreviewWindow.update(PreviewWindow.wall)
-            PreviewWindow.update(PreviewWindow.endzone)
-            PreviewWindow.update(PreviewWindow.platform)
+            PreviewWindow.update()
         })
 
         btn_shadowContrastLightSlider = new SliderUI("canvasArea.canvas.width - 550", "150", 360, -1, 0, 1000, "Shadow Contrast Light", "white", MapEditor.loadedMap ? MapEditor.loadedMap.style.shadowContrastLight : 0, function() { 
             MapEditor.loadedMap.style.shadowContrastLight = this.value
-
-            PreviewWindow.update(PreviewWindow.wall)
-            PreviewWindow.update(PreviewWindow.endzone)
-            PreviewWindow.update(PreviewWindow.platform)
+            PreviewWindow.update()
         })
 
         btn_shadowContrastDarkSlider = new SliderUI("canvasArea.canvas.width - 550", "220", 360, -1, 0, 1000, "Shadow Contrast Dark", "white", MapEditor.loadedMap ? MapEditor.loadedMap.style.shadowContrastDark : 0, function() { 
             MapEditor.loadedMap.style.shadowContrastDark = this.value
 
-            PreviewWindow.update(PreviewWindow.wall)
-            PreviewWindow.update(PreviewWindow.endzone)
-            PreviewWindow.update(PreviewWindow.platform)
+            PreviewWindow.update()
         })
 
         btn_shadowLengthSlider = new SliderUI("canvasArea.canvas.width - 550", "290", 360, 0, 150, 1, "Shadow Length", "white", MapEditor.loadedMap ? MapEditor.loadedMap.style.shadowLength : 0, function() { 
             MapEditor.loadedMap.style.shadowLength = this.value
 
-            PreviewWindow.update(PreviewWindow.wall)
-            PreviewWindow.update(PreviewWindow.endzone)
-            PreviewWindow.update(PreviewWindow.platform)
+            PreviewWindow.update()
         })
 
 
@@ -1377,44 +1417,53 @@ const UserInterface = {
         // SET COLOR BUTTONS
         btn_backgroundColor = new Button("canvasArea.canvas.width - 410", "20", 175, "", "", 0, "Background", function() {
             canvasArea.canvas.style.backgroundColor = MapEditor.loadedMap.style.backgroundColor = ColorPicker.getColor()
-            // set ColorPicker.partIndex = 1
-            // ColorPicker.setColor(MapEditor.loadedMap.style.backgroundColor)
             UserInterface.determineButtonColor()
+            PreviewWindow.update()
         })
 
         btn_playerColor = new Button("canvasArea.canvas.width - 225", "20", 175, "", "", 0, "Player", function() {
             MapEditor.loadedMap.style.playerColor = ColorPicker.getColor()
+            PreviewWindow.update()
         })
 
         btn_platformTopColor = new Button("canvasArea.canvas.width - 410", "120", 175, "", "", 0, "Platform Top", function() {
             MapEditor.loadedMap.style.platformTopColor = ColorPicker.getColor()
+            PreviewWindow.update()
         })
 
         btn_platformSideColor = new Button("canvasArea.canvas.width - 225", "120", 175, "", "", 0, "Platform Side", function() {
             MapEditor.loadedMap.style.platformSideColor = ColorPicker.getColor()
-            PreviewWindow.update(PreviewWindow.platform)
+            PreviewWindow.update()
         })
 
         btn_wallTopColor = new Button("canvasArea.canvas.width - 410", "220", 175, "", "", 0, "Wall Top", function() {
             MapEditor.loadedMap.style.wallTopColor = ColorPicker.getColor()
+            PreviewWindow.update()
         })
 
         btn_wallSideColor = new Button("canvasArea.canvas.width - 225", "220", 175, "", "", 0, "Wall Side", function() {
             MapEditor.loadedMap.style.wallSideColor = ColorPicker.getColor()
-            PreviewWindow.update(PreviewWindow.wall)
+            PreviewWindow.update()
         })
 
         btn_endZoneTopColor = new Button("canvasArea.canvas.width - 410", "320", 175, "", "", 0, "End Zone Top", function() {
             MapEditor.loadedMap.style.endZoneTopColor = ColorPicker.getColor()
+            PreviewWindow.update()
         })
 
         btn_endZoneSideColor = new Button("canvasArea.canvas.width - 225", "320", 175, "", "", 0, "End Zone Side", function() {
             MapEditor.loadedMap.style.endZoneSideColor = ColorPicker.getColor()
-            PreviewWindow.update(PreviewWindow.endzone)
+            PreviewWindow.update()
         })
 
-        btn_shadowColor = new Button("canvasArea.canvas.width - 410", "420", 175, "", "", 0, "Shadow", function() {
-            MapEditor.loadedMap.style.shadowColor = ColorPicker.getColor()
+        btn_directLightColor = new Button("canvasArea.canvas.width - 410", "420", 175, "", "", 0, "Direct Light", function() {
+            MapEditor.loadedMap.style.directLight = ColorPicker.getColor()
+            PreviewWindow.update()
+        })
+
+        btn_ambientLightColor = new Button("canvasArea.canvas.width - 225", "420", 175, "", "", 0, "Ambient Light", function() {
+            MapEditor.loadedMap.style.ambientLight = ColorPicker.getColor()
+            PreviewWindow.update()
         })
 
 
@@ -1924,7 +1973,8 @@ const UserInterface = {
             btn_wallSideColor,
             btn_endZoneTopColor,
             btn_endZoneSideColor,
-            btn_shadowColor,
+            btn_directLightColor,
+            btn_ambientLightColor,
         ];
         this.btnGroup_mapSettings = [
             btn_mainMenu, 
@@ -1945,6 +1995,7 @@ const UserInterface = {
             btn_wall,
 
             btn_delete_platform,
+            btn_duplicate_platform,
             btn_snappingSlider
         ]
         this.btnGroup_editPlayerStart = [
@@ -2108,8 +2159,8 @@ const UserInterface = {
                     this.renderedButtons = this.btnGroup_editPlatform;
                     
                     // SYNC ALL BUTTONS AND SLIDERS
-                    btn_translate.func() // intially syncs the buttons position to the selected platform. Called whenever screen is scrolled too. not really needed here but avoids a 1 frame flash 
-                    btn_resize.func()
+                    btn_translate.func(true) // intially syncs the buttons position to the selected platform. Called whenever screen is scrolled too. not really needed here but avoids a 1 frame flash 
+                    btn_resize.func(true)
                     btn_angleSlider.updateState(MapEditor.loadedMap.platforms[MapEditor.selectedPlatformIndex].angle)
                     btn_wall.func(true) // syncs the wall button's toggle state
                 }
@@ -2125,7 +2176,7 @@ const UserInterface = {
                 this.renderedButtons = this.btnGroup_editPlayerStart
 
                 // SYNC ALL BUTTONS AND SLIDERS
-                btn_translate.func() // intially syncs the buttons position to the selected platform. Called whenever screen is scrolled too. not really needed here but avoids a 1 frame flash 
+                btn_translate.func(true) // intially syncs the buttons position to the selected platform. Called whenever screen is scrolled too. not really needed here but avoids a 1 frame flash 
                 btn_playerAngleSlider.updateState(MapEditor.loadedMap.playerStart.angle)
             }
 
@@ -2172,7 +2223,7 @@ const UserInterface = {
                     }
                     
                     // SYNC ALL BUTTONS AND SLIDERS
-                    btn_translate.func() // intially syncs the buttons position to the selected checkpoint. Called whenever screen is scrolled too. not really needed here but avoids a 1 frame flash 
+                    btn_translate.func(true) // intially syncs the buttons position to the selected checkpoint. Called whenever screen is scrolled too. not really needed here but avoids a 1 frame flash 
                 }
             })
         }
@@ -2550,7 +2601,7 @@ const MapBrowser = { // should set back to 0 at some points??
             }
 
             // is scrolling
-            if (touchHandler.touchX > 250 && touchHandler.touchX < 650) {
+            // if (touchHandler.touchX > 250 && touchHandler.touchX < 650) { // dont need this check??
                 this.scrollAmount += touchHandler.dragAmountY
 
                 // sets scrollVel to average drag amount of past 10 frames
@@ -2558,7 +2609,7 @@ const MapBrowser = { // should set back to 0 at some points??
                 this.scrollVel = this.scrollVelAverager.getAverage()
 
                 this.scrollY = this.scrollAmount;
-            }
+            // }
         } else { // not dragging
 
             if (this.scrollAmount != null) { // just stopped dragging
@@ -2581,8 +2632,6 @@ const MapBrowser = { // should set back to 0 at some points??
                 button.y = button.savedY + this.scrollY
             }
         })
-
-
 
 
 
@@ -3102,115 +3151,109 @@ const PreviewWindow = {
     },
 
 
-    update : function(platform) { // updates the calculations for side colors and shadow points
-        // Calculate lighting and shadows for each platform and the endzone
-        MapEditor.loadedMap.style.lightAngleVector =  new Vector(Math.cos(MapEditor.loadedMap.style.lightAngle * (Math.PI/180)), Math.sin(MapEditor.loadedMap.style.lightAngle * (Math.PI/180)))
-        const shadowX = MapEditor.loadedMap.style.lightAngleVector.x * MapEditor.loadedMap.style.shadowLength;
-        const shadowY = MapEditor.loadedMap.style.lightAngleVector.y * MapEditor.loadedMap.style.shadowLength;
-
-        // let platformIndex = 0 // set this so that it is z-order
-        // this.platforms.forEach(platform => { // CALCULATE PLATFORMS COLORS and SHADOW POLYGON
-
-        // Setting the colors for platforms, endzones, and walls
-        let colorToUse = MapEditor.loadedMap.style.platformSideColor;
-        if(platform.endzone) {
-            colorToUse = MapEditor.loadedMap.style.endZoneSideColor;
-        }
-        if(platform.wall) {
-            colorToUse = MapEditor.loadedMap.style.wallSideColor;
-        }
-
-
-        // COLORS
-        const side1Vec = new Vector(-1,0).rotate(platform.angle)
-        const side2Vec = new Vector(0,1).rotate(platform.angle)
-        const side3Vec = new Vector(1,0).rotate(platform.angle)
-
-        platform.sideColor1 = canvasArea.calculateShadedColor(side1Vec, colorToUse) // COULD OPTIMIZE. Some sides arent visible at certain platform rotations. Those sides dont need to be calculated
-        platform.sideColor2 = canvasArea.calculateShadedColor(side2Vec, colorToUse)
-        platform.sideColor3 = canvasArea.calculateShadedColor(side3Vec, colorToUse)
-
-        // SHADOW POLYGON
-        const angleRad = platform.angle * (Math.PI/180);
-        const wallShadowMultiplier = platform.wall ? (1 + (MapEditor.loadedMap.style.wallHeight / MapEditor.loadedMap.style.platformHeight)) : 1;
-
-        platform.shadowPoints = [ // ALL THE POSSIBLE POINTS TO INPUT IN CONVEX HULL FUNCTION
+    update : function() { // updates the shading for all colors (and platform shadow points)
         
-            // bot left corner
-            [
-            -((platform.width / 2) * Math.cos(angleRad)) - ((platform.height / 2) * Math.sin(angleRad)),
-            -((platform.width / 2) * Math.sin(angleRad)) + ((platform.height / 2) * Math.cos(angleRad)) + MapEditor.loadedMap.style.platformHeight
-            ],
+        function updatePlatform(platform) { // Calculate lighting and shadows for whatever platform is passed as param
 
-            // bot right corner
-            [
-            ((platform.width / 2) * Math.cos(angleRad)) - ((platform.height / 2) * Math.sin(angleRad)),
-            ((platform.width / 2) * Math.sin(angleRad)) + ((platform.height / 2) * Math.cos(angleRad)) + MapEditor.loadedMap.style.platformHeight
-            ],
+            MapEditor.loadedMap.style.lightAngleVector =  new Vector(Math.cos(MapEditor.loadedMap.style.lightAngle * (Math.PI/180)), Math.sin(MapEditor.loadedMap.style.lightAngle * (Math.PI/180)))
+            const shadowX = MapEditor.loadedMap.style.lightAngleVector.x * MapEditor.loadedMap.style.shadowLength;
+            const shadowY = MapEditor.loadedMap.style.lightAngleVector.y * MapEditor.loadedMap.style.shadowLength;
 
-            // top right corner
-            [
-            ((platform.width / 2) * Math.cos(angleRad)) + ((platform.height / 2) * Math.sin(angleRad)),
-            ((platform.width / 2) * Math.sin(angleRad)) - ((platform.height / 2) * Math.cos(angleRad)) + MapEditor.loadedMap.style.platformHeight
-            ],
-        
-            // top left corner
-            [
-            -((platform.width / 2) * Math.cos(angleRad)) + ((platform.height / 2) * Math.sin(angleRad)),
-            -((platform.width / 2) * Math.sin(angleRad)) - ((platform.height / 2) * Math.cos(angleRad)) + MapEditor.loadedMap.style.platformHeight
-            ],
-        
-            // bot left SHADOW
-            [
-            -((platform.width / 2) * Math.cos(angleRad)) - ((platform.height / 2) * Math.sin(angleRad)) + shadowX * wallShadowMultiplier,
-            -((platform.width / 2) * Math.sin(angleRad)) + ((platform.height / 2) * Math.cos(angleRad)) + MapEditor.loadedMap.style.platformHeight + shadowY * wallShadowMultiplier
-            ],
+            // Setting the colors for platforms, endzones, and walls
+            let colorToUse = MapEditor.loadedMap.style.platformSideColor;
+            if (platform.endzone) {colorToUse = MapEditor.loadedMap.style.endZoneSideColor;}
+            if (platform.wall) {colorToUse = MapEditor.loadedMap.style.wallSideColor;}
 
-            // bot right SHADOW
-            [
-            ((platform.width / 2) * Math.cos(angleRad)) - ((platform.height / 2) * Math.sin(angleRad)) + shadowX * wallShadowMultiplier,
-            ((platform.width / 2) * Math.sin(angleRad)) + ((platform.height / 2) * Math.cos(angleRad)) + MapEditor.loadedMap.style.platformHeight + shadowY * wallShadowMultiplier
-            ],
+            let colorToUse2 = MapEditor.loadedMap.style.platformTopColor;
+            if (platform.endzone) {colorToUse2 = MapEditor.loadedMap.style.endZoneTopColor;}
+            if (platform.wall) {colorToUse2 = MapEditor.loadedMap.style.wallTopColor;}
             
-            // top right SHADOW
-            [
-            ((platform.width / 2) * Math.cos(angleRad)) + ((platform.height / 2) * Math.sin(angleRad)) + shadowX * wallShadowMultiplier,
-            ((platform.width / 2) * Math.sin(angleRad)) - ((platform.height / 2) * Math.cos(angleRad)) + MapEditor.loadedMap.style.platformHeight + shadowY * wallShadowMultiplier
-            ],
+            // platform COLORS + wall and endzone
+            const side1Vec = new Vector(-1,0).rotate(platform.angle)
+            const side2Vec = new Vector(0,1).rotate(platform.angle)
+            const side3Vec = new Vector(1,0).rotate(platform.angle)
 
-            // top left SHADOW
-            [
-                -((platform.width / 2) * Math.cos(angleRad)) + ((platform.height / 2) * Math.sin(angleRad)) + shadowX * wallShadowMultiplier,
-                -((platform.width / 2) * Math.sin(angleRad)) - ((platform.height / 2) * Math.cos(angleRad)) + MapEditor.loadedMap.style.platformHeight + shadowY * wallShadowMultiplier
-            ],
+            const litPercent1 = (side1Vec.angleDifference(MapEditor.loadedMap.style.lightAngleVector)* (180/Math.PI)) / 180
+            const litPercent2 = (side2Vec.angleDifference(MapEditor.loadedMap.style.lightAngleVector)* (180/Math.PI)) / 180
+            const litPercent3 = (side3Vec.angleDifference(MapEditor.loadedMap.style.lightAngleVector)* (180/Math.PI)) / 180
             
-        ]; // end of shadowPoints array
+            platform.lit_topColor = canvasArea.getShadedColor(colorToUse2, 1)
+            platform.sideColor1 = canvasArea.getShadedColor(colorToUse, litPercent1)
+            platform.sideColor2 = canvasArea.getShadedColor(colorToUse, litPercent2)
+            platform.sideColor3 = canvasArea.getShadedColor(colorToUse, litPercent3)
 
 
-        platform.shadowPoints = canvasArea.convexHull(platform.shadowPoints)
+            // SHADOW POLYGON
+            const angleRad = platform.angle * (Math.PI/180);
+            const wallShadowMultiplier = platform.wall ? (1 + (MapEditor.loadedMap.style.wallHeight / MapEditor.loadedMap.style.platformHeight)) : 1;
+
+            platform.shadowPoints = [ // ALL THE POSSIBLE POINTS TO INPUT IN CONVEX HULL FUNCTION
+            
+                // bot left corner
+                [
+                -((platform.width / 2) * Math.cos(angleRad)) - ((platform.height / 2) * Math.sin(angleRad)),
+                -((platform.width / 2) * Math.sin(angleRad)) + ((platform.height / 2) * Math.cos(angleRad)) + MapEditor.loadedMap.style.platformHeight
+                ],
+
+                // bot right corner
+                [
+                ((platform.width / 2) * Math.cos(angleRad)) - ((platform.height / 2) * Math.sin(angleRad)),
+                ((platform.width / 2) * Math.sin(angleRad)) + ((platform.height / 2) * Math.cos(angleRad)) + MapEditor.loadedMap.style.platformHeight
+                ],
+
+                // top right corner
+                [
+                ((platform.width / 2) * Math.cos(angleRad)) + ((platform.height / 2) * Math.sin(angleRad)),
+                ((platform.width / 2) * Math.sin(angleRad)) - ((platform.height / 2) * Math.cos(angleRad)) + MapEditor.loadedMap.style.platformHeight
+                ],
+            
+                // top left corner
+                [
+                -((platform.width / 2) * Math.cos(angleRad)) + ((platform.height / 2) * Math.sin(angleRad)),
+                -((platform.width / 2) * Math.sin(angleRad)) - ((platform.height / 2) * Math.cos(angleRad)) + MapEditor.loadedMap.style.platformHeight
+                ],
+            
+                // bot left SHADOW
+                [
+                -((platform.width / 2) * Math.cos(angleRad)) - ((platform.height / 2) * Math.sin(angleRad)) + shadowX * wallShadowMultiplier,
+                -((platform.width / 2) * Math.sin(angleRad)) + ((platform.height / 2) * Math.cos(angleRad)) + MapEditor.loadedMap.style.platformHeight + shadowY * wallShadowMultiplier
+                ],
+
+                // bot right SHADOW
+                [
+                ((platform.width / 2) * Math.cos(angleRad)) - ((platform.height / 2) * Math.sin(angleRad)) + shadowX * wallShadowMultiplier,
+                ((platform.width / 2) * Math.sin(angleRad)) + ((platform.height / 2) * Math.cos(angleRad)) + MapEditor.loadedMap.style.platformHeight + shadowY * wallShadowMultiplier
+                ],
+                
+                // top right SHADOW
+                [
+                ((platform.width / 2) * Math.cos(angleRad)) + ((platform.height / 2) * Math.sin(angleRad)) + shadowX * wallShadowMultiplier,
+                ((platform.width / 2) * Math.sin(angleRad)) - ((platform.height / 2) * Math.cos(angleRad)) + MapEditor.loadedMap.style.platformHeight + shadowY * wallShadowMultiplier
+                ],
+
+                // top left SHADOW
+                [
+                    -((platform.width / 2) * Math.cos(angleRad)) + ((platform.height / 2) * Math.sin(angleRad)) + shadowX * wallShadowMultiplier,
+                    -((platform.width / 2) * Math.sin(angleRad)) - ((platform.height / 2) * Math.cos(angleRad)) + MapEditor.loadedMap.style.platformHeight + shadowY * wallShadowMultiplier
+                ],
+                
+            ]; // end of shadowPoints array
+
+            platform.shadowPoints = canvasArea.convexHull(platform.shadowPoints)
+        }
+
+        updatePlatform(PreviewWindow.platform)
+        updatePlatform(PreviewWindow.wall)
+        updatePlatform(PreviewWindow.endzone)
 
 
-            // // SHADOW CLIP FOR UPPER PLAYER SHADOW
-            // this.upperShadowClip.moveTo( // bot left
-            //     platform.x + platform.width/2 + platform.corners[0][0], // x
-            //     platform.y + platform.height/2 + platform.corners[0][1] // y
-            //     )
-            // this.upperShadowClip.lineTo( // bot right
-            //     platform.x + platform.width/2 + platform.corners[1][0],
-            //     platform.y + platform.height/2 + platform.corners[1][1]
-            // )
-            // this.upperShadowClip.lineTo( // top right
-            //     platform.x + platform.width/2 + platform.corners[2][0],
-            //     platform.y + platform.height/2 + platform.corners[2][1]
-            // )
-            // this.upperShadowClip.lineTo( // top left
-            //     platform.x + platform.width/2 + platform.corners[3][0],
-            //     platform.y + platform.height/2 + platform.corners[3][1]
-            // )
-            // this.upperShadowClip.closePath()
+        // update all other colors
+        MapEditor.loadedMap.style.lit_playerTop = canvasArea.getShadedColor(MapEditor.loadedMap.style.playerColor, 1) // 0.2 instead of 0 to pretend there's bounce lighting
+        MapEditor.loadedMap.style.lit_background = canvasArea.getShadedColor(MapEditor.loadedMap.style.backgroundColor, 1)
 
-
-        // });
+        MapEditor.loadedMap.style.platformShadow = canvasArea.getShadedColor(MapEditor.loadedMap.style.platformTopColor, 0.2) // 0.2 instead of 0 to pretend there's bounce lighting
+        MapEditor.loadedMap.style.endzoneShadow = canvasArea.getShadedColor(MapEditor.loadedMap.style.endZoneTopColor, 0.2)
+        MapEditor.loadedMap.style.backgroundShadow = canvasArea.getShadedColor(MapEditor.loadedMap.style.backgroundColor, 0.2)
     },
 
 
@@ -3218,15 +3261,15 @@ const PreviewWindow = {
         const ctx = canvasArea.ctx
 
         // WINDOW
-        ctx.fillStyle = MapEditor.loadedMap.style.backgroundColor
+        ctx.fillStyle = MapEditor.loadedMap.style.lit_background
         ctx.fillRect(0,0,canvasArea.canvas.width, canvasArea.canvas.height)
 
-        // RENDER FUNCTION FOR PLATFORM, WALL, and ENDZONE
-        function renderPreviewItemShadow(platform) {
+        
+        function renderPreviewItemShadow(platform) { // render lower shadows
             ctx.save();
             ctx.translate(PreviewWindow.x + platform.x + platform.width/2, PreviewWindow.y + platform.y + platform.height/2);
 
-            ctx.fillStyle = MapEditor.loadedMap.style.shadowColor;
+            ctx.fillStyle = MapEditor.loadedMap.style.backgroundShadow;
 
             ctx.beginPath();
             
@@ -3242,9 +3285,7 @@ const PreviewWindow = {
         }
 
         function renderPreviewItem(platform) {
-            
-            // const ctx = canvasArea.ctx;
-            
+                        
             const adjustedHeight = platform.wall ? MapEditor.loadedMap.style.wallHeight : 0 // for adding height to walls
 
             // DRAW PLATFORM TOP
@@ -3252,15 +3293,10 @@ const PreviewWindow = {
             ctx.translate(PreviewWindow.x + platform.x + platform.width/2, PreviewWindow.y + platform.y + platform.height/2 - adjustedHeight);
             ctx.rotate(platform.angle * Math.PI/180);
 
-            // Change to endzone or wall color if needed. Also where its determined if endzone is being rendered
-            if (platform.endzone) {
-                ctx.fillStyle = MapEditor.loadedMap.style.endZoneTopColor;
-            } else if (platform.wall) {
-                ctx.fillStyle = MapEditor.loadedMap.style.wallTopColor;
-            } else {
-                ctx.fillStyle = MapEditor.loadedMap.style.platformTopColor;
-            }
+
             
+            ctx.fillStyle = platform.lit_topColor
+
             ctx.fillRect(-platform.width/2, -platform.height/2, platform.width, platform.height);
 
             ctx.restore(); // restores platform rotation NOT translation
@@ -3272,7 +3308,6 @@ const PreviewWindow = {
 
             const angleRad = platform.angle * (Math.PI/180);
             
-
             // platform angles should only be max of 90 and -90 in mapData
             // calculating shading works with any angle but sides arent draw because drawing "if statements" are hardcoded to 90 degrees
 
@@ -3334,7 +3369,7 @@ const PreviewWindow = {
         
         ctx.rotate(this.player.angle * Math.PI/180)
 
-        ctx.fillStyle = MapEditor.loadedMap.style.shadowColor;
+        ctx.fillStyle = MapEditor.loadedMap.style.platformShadow;
         ctx.fillRect(-15, -15, 30, 30)
         
         ctx.restore() // player translation and rotation
@@ -3344,7 +3379,7 @@ const PreviewWindow = {
         ctx.save()
         ctx.translate(PreviewWindow.x + this.player.x, PreviewWindow.y + this.player.y - this.player.jumpValue - 32); 
         ctx.rotate(this.player.angle * Math.PI/180) // rotating canvas
-        ctx.fillStyle = MapEditor.loadedMap.style.playerColor;
+        ctx.fillStyle = MapEditor.loadedMap.style.lit_playerTop;
         ctx.fillRect(-16,-16,32,32)
         
         // Draw players top arrow
@@ -3374,7 +3409,9 @@ const PreviewWindow = {
         if (loopedAngle > 270 || loopedAngle < 90) { // BOT WALL
 
             const sideVector = new Vector(0,1).rotate(this.player.angle)
-            ctx.fillStyle = canvasArea.calculateShadedColor(sideVector, MapEditor.loadedMap.style.playerColor)
+            const litPercent = (sideVector.angleDifference(MapEditor.loadedMap.style.lightAngleVector)* (180/Math.PI)) / 180
+            ctx.fillStyle = canvasArea.getShadedColor(MapEditor.loadedMap.style.playerColor, litPercent)
+
 
             ctx.beginPath();
             ctx.moveTo(originX - (16 * Math.cos(angleRad) + (16 * Math.sin(angleRad))), originY - 32 - this.player.jumpValue - (16 * Math.sin(angleRad) - (16 * Math.cos(angleRad))));
@@ -3388,7 +3425,8 @@ const PreviewWindow = {
         if (0 < loopedAngle && loopedAngle < 180) { // RIGHT WALL
 
             const sideVector = new Vector(1,0).rotate(this.player.angle)
-            ctx.fillStyle = canvasArea.calculateShadedColor(sideVector, MapEditor.loadedMap.style.playerColor)
+            const litPercent = (sideVector.angleDifference(MapEditor.loadedMap.style.lightAngleVector)* (180/Math.PI)) / 180
+            ctx.fillStyle = canvasArea.getShadedColor(MapEditor.loadedMap.style.playerColor, litPercent)
 
             ctx.beginPath();
             ctx.moveTo(originX + (16 * Math.cos(angleRad) - (16 * Math.sin(angleRad))), originY - 32 - this.player.jumpValue + (16 * Math.sin(angleRad) + (16 * Math.cos(angleRad))));
@@ -3402,7 +3440,8 @@ const PreviewWindow = {
         if (90 < loopedAngle && loopedAngle < 270) { // TOP WALL
             
             const sideVector = new Vector(0,-1).rotate(this.player.angle)
-            ctx.fillStyle = canvasArea.calculateShadedColor(sideVector, MapEditor.loadedMap.style.playerColor)            
+            const litPercent = (sideVector.angleDifference(MapEditor.loadedMap.style.lightAngleVector)* (180/Math.PI)) / 180
+            ctx.fillStyle = canvasArea.getShadedColor(MapEditor.loadedMap.style.playerColor, litPercent)
 
             ctx.beginPath();
             ctx.moveTo(originX + (16 * Math.cos(angleRad) + (16 * Math.sin(angleRad))), originY - 32 - this.player.jumpValue + (16 * Math.sin(angleRad) - (16 * Math.cos(angleRad))));
@@ -3416,7 +3455,8 @@ const PreviewWindow = {
         if (180 < loopedAngle && loopedAngle < 360) { // LEFT WALL
             
             const sideVector = new Vector(-1,0).rotate(this.player.angle)
-            ctx.fillStyle = canvasArea.calculateShadedColor(sideVector, MapEditor.loadedMap.style.playerColor)            
+            const litPercent = (sideVector.angleDifference(MapEditor.loadedMap.style.lightAngleVector)* (180/Math.PI)) / 180
+            ctx.fillStyle = canvasArea.getShadedColor(MapEditor.loadedMap.style.playerColor, litPercent)
 
             ctx.beginPath();
             ctx.moveTo(originX - (16 * Math.cos(angleRad) - (16 * Math.sin(angleRad))), originY - 32 - this.player.jumpValue - (16 * Math.sin(angleRad) + (16 * Math.cos(angleRad))));
@@ -3613,14 +3653,24 @@ const MapEditor = {
     // 5 = custom map browser screen
 
     loadedMap : null,
-    scrollX_vel : 0, // for smooth scrolling 
-    scrollY_vel : 0,
+    scrollAmountX : null,
+    scrollAmountY : null,
+    scrollVelX : 0, // for smooth scrolling 
+    scrollVelY : 0,
     screenX : 0, // where the view is located
     screenY : 0,
+
+
+    scrollVelAveragerX : new Averager(10),
+    scrollVelAveragerY : new Averager(10),
+
+
+
     renderedPlatforms : [],
     selectedPlatformIndex : -1, // -1 = nothing, -2 = player
     selectedCheckpointIndex : [-1,1],
     snapAmount : 0,
+    multiSelect : false,
     debugText : false,
 
     render : function() {
@@ -3655,13 +3705,10 @@ const MapEditor = {
 
 
                 if (platform == this.loadedMap.platforms[this.selectedPlatformIndex]) { // DRAWING THE BORDER AROUND THE SELECTED PLATFORM
-                    ctx.strokeStyle = UserInterface.lightColor_1
-                    ctx.lineWidth = 6
-                    ctx.strokeRect(-platform.width/2 + 3, -platform.height/2 + 3, platform.width - 6, platform.height - 6);
                     
-                    ctx.strokeStyle = UserInterface.darkColor_1
-                    ctx.lineWidth = 2
-                    ctx.strokeRect(-platform.width/2 + 3, -platform.height/2 + 3, platform.width - 6, platform.height - 6);
+                    ctx.strokeStyle = UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1
+                    ctx.lineWidth = 4
+                    ctx.strokeRect(-platform.width/2 + 2, -platform.height/2 + 2, platform.width - 4, platform.height - 4);
                 }
                 
 
@@ -3673,6 +3720,15 @@ const MapEditor = {
                 // ctx.fillText("screen Loc Y: " + (platform.y + platform.height/2 + this.screenY), 0, 40);
 
                 ctx.restore(); // restoring platform rotation and translation
+
+                // Draw platform corner and origin debug points
+                // ctx.fillStyle = "#00FF00";
+                // ctx.fillRect(platform.x, platform.y, 5, 5)
+                // const angleRad = platform.angle * (Math.PI/180);
+                // const pinCornerX = -((platform.width / 2) * Math.cos(angleRad)) + ((platform.height / 2) * Math.sin(angleRad))
+                // const pinCornerY = -((platform.width / 2) * Math.sin(angleRad)) - ((platform.height / 2) * Math.cos(angleRad))
+                // ctx.fillStyle = "#0000FF";
+                // ctx.fillRect(pinCornerX + platform.x + platform.width/2, pinCornerY + platform.y + platform.height/2, 5, 5)
             })
 
 
@@ -3908,19 +3964,55 @@ const MapEditor = {
 
         if (this.editorState == 1 || this.editorState == 2) { // main map edit screen OR platform select screen
 
-            // SCROLLING THE SCREEN OR USING THE GIZMO's buttons/slider
-            if (touchHandler.dragging == 1) {
-                if (!btn_translate.isPressed && !btn_resize.isPressed && btn_angleSlider.confirmed && btn_playerAngleSlider.confirmed && btn_checkpointAngleSlider.confirmed && btn_snappingSlider.confirmed) {
-                    this.scrollX_vel += touchHandler.dragAmountX
-                    this.scrollY_vel += touchHandler.dragAmountY
+            // SCROLLING THE SCREEN and SETTING OBJECTS TO ANGLE SLIDERS VALUES EVERY FRAME
+            if (touchHandler.dragging == 1 &&
+                !btn_translate.isPressed && 
+                !btn_resize.isPressed && 
+                btn_angleSlider.confirmed && 
+                btn_playerAngleSlider.confirmed && 
+                btn_checkpointAngleSlider.confirmed && 
+                btn_snappingSlider.confirmed 
+            ){
+                if (this.scrollAmountX == null && this.scrollAmountY == null) { // starting scroll
+                    this.scrollAmountX = this.screenX;
+                    this.scrollAmountY = this.screenY;
                 }
+
+                this.scrollAmountX += touchHandler.dragAmountX
+                this.scrollAmountY += touchHandler.dragAmountY
+
+
+                // sets scrollVel to average drag amount of past 10 frames
+                this.scrollVelAveragerX.pushValue(touchHandler.dragAmountX)
+                this.scrollVelAveragerY.pushValue(touchHandler.dragAmountY)
+
+                this.scrollVelX = this.scrollVelAveragerX.getAverage()
+                this.scrollVelY = this.scrollVelAveragerY.getAverage()
+
+                this.screenX = this.scrollAmountX;
+                this.screenY = this.scrollAmountY;
+            
+            } else { // not dragging around screen
+
+                if (this.scrollAmountX != null && this.scrollAmountY != null) { // just stopped dragging
+                    this.scrollAmountX = null
+                    this.scrollAmountY = null
+
+                    this.scrollVelAveragerX.clear()
+                    this.scrollVelAveragerY.clear()
+                }
+    
+                this.screenX += this.scrollVelX
+                this.screenY += this.scrollVelY
+                this.scrollVelX = (Math.abs(this.scrollVelX) > 0.1) ? this.scrollVelX * (1 - 0.05 * dt) : 0 // dampening
+                this.scrollVelY = (Math.abs(this.scrollVelY) > 0.1) ? this.scrollVelY * (1 - 0.05 * dt) : 0
+
+
+                // UPDATE THE ANGLE OF OBJECTS WHEN THEIR ANGLE SLIDER IS PRESSED
+                if (!btn_angleSlider.confirmed) {this.loadedMap.platforms[this.selectedPlatformIndex].angle = btn_angleSlider.value}
+                if (!btn_playerAngleSlider.confirmed) {this.loadedMap.playerStart.angle = btn_playerAngleSlider.value}
+                if (!btn_checkpointAngleSlider.confirmed) {this.loadedMap.checkpoints[this.selectedCheckpointIndex[0]].angle = btn_checkpointAngleSlider.value}
             }
-
-            this.screenX += this.scrollX_vel / 10;
-            this.screenY += this.scrollY_vel / 10;
-
-            this.scrollX_vel *= 0.95
-            this.scrollY_vel *= 0.95
 
 
 
@@ -3929,7 +4021,6 @@ const MapEditor = {
 
             this.loadedMap.platforms.forEach(platform => { // Loop through platforms
                 const hypotenuse = Math.sqrt(platform.width * platform.width + platform.height * platform.height)/2
-
 
                 if (
                     (platform.x + platform.width/2 + hypotenuse + this.screenX > 0) && // coming into frame on left side
@@ -3954,11 +4045,11 @@ const MapEditor = {
         if (this.editorState == 2) { // update translate and resize buttons every frame
 
             if (UserInterface.renderedButtons.includes(btn_translate)) {
-                btn_translate.func() 
+                btn_translate.func(true)
             }
             
             if (UserInterface.renderedButtons.includes(btn_resize)) {
-                btn_resize.func()
+                btn_resize.func(true) // update tag is true -- distinguish between updates and touch releases
             }
         }
 
@@ -4242,13 +4333,11 @@ const AudioHandler = {
 const Map = {
     walls : [],
     renderedPlatforms : [],
-    renderQueue : [],
     wallsToCheck : [],
     endZoneIsRendered : false,
     name : null,
     record : null,
     upperShadowClip : new Path2D(),
-    behindWallClip : new Path2D(), // depricated kill
     playerClip : new Path2D(),
     endZone : null,
 
@@ -4258,7 +4347,6 @@ const Map = {
         this.style = null;
         this.checkpoints = [];
         this.upperShadowClip = new Path2D()
-        this.behindWallClip = new Path2D()
         
 
         if (typeof name  === "string"){ // distinguishing between loading a normal map (string) OR a custom map (object)
@@ -4300,9 +4388,6 @@ const Map = {
     // Called within getJsonData Function to maintain corect order of events
     parseMapData : function (jsonData) {
         
-        // console.log("jsonData passed as param to parseMapData: ")
-        // console.log(jsonData)
-
         this.playerStart = jsonData.playerStart;
         this.style = jsonData.style;
         this.checkpoints = jsonData.checkpoints; // returns an object
@@ -4322,27 +4407,36 @@ const Map = {
         this.platforms.forEach(platform => { // CALCULATE PLATFORMS COLORS and SHADOW POLYGON
 
             // Setting the colors for platforms, endzones, and walls
-            let colorToUse = this.style.platformSideColor;
-            if(platform.endzone) {
-                colorToUse = this.style.endZoneSideColor;
+            let colorToUse1 = this.style.platformTopColor;
+            let colorToUse2 = this.style.platformSideColor;
+
+            if (platform.endzone) {
+                colorToUse1 = this.style.endZoneTopColor;
+                colorToUse2 = this.style.endZoneSideColor;
                 this.endZone = platform;
             }
-            if(platform.wall) {
-                colorToUse = this.style.wallSideColor;
+            if (platform.wall) {
+                colorToUse1 = this.style.wallTopColor;
+                colorToUse2 = this.style.wallSideColor;
                 this.walls.push(platform);
             }
 
             platform.index = platformIndex; // asigns an index to each platform for debugging
             platformIndex ++;
 
-            // COLORS
-            platform.side1Vec = new Vector(-1,0).rotate(platform.angle) // !! DONT need to be properties of platform. only made properties for debug
-            platform.side2Vec = new Vector(0,1).rotate(platform.angle)
-            platform.side3Vec = new Vector(1,0).rotate(platform.angle)
+            // PLATFORM COLORS
+            side1Vec = new Vector(-1,0).rotate(platform.angle)
+            side2Vec = new Vector(0,1).rotate(platform.angle)
+            side3Vec = new Vector(1,0).rotate(platform.angle)
 
-            platform.sideColor1 = canvasArea.calculateShadedColor(platform.side1Vec, colorToUse) // COULD OPTIMIZE. Some sides arent visible at certain platform rotations. Those sides dont need to be calculated
-            platform.sideColor2 = canvasArea.calculateShadedColor(platform.side2Vec, colorToUse)
-            platform.sideColor3 = canvasArea.calculateShadedColor(platform.side3Vec, colorToUse)
+            const litPercent1 = (side1Vec.angleDifference(this.style.lightAngleVector)* (180/Math.PI)) / 180
+            const litPercent2 = (side2Vec.angleDifference(this.style.lightAngleVector)* (180/Math.PI)) / 180
+            const litPercent3 = (side3Vec.angleDifference(this.style.lightAngleVector)* (180/Math.PI)) / 180
+
+            platform.shaded_topColor = canvasArea.getShadedColor(colorToUse1, 1)
+            platform.shaded_sideColor1 = canvasArea.getShadedColor(colorToUse2, litPercent1)
+            platform.shaded_sideColor2 = canvasArea.getShadedColor(colorToUse2, litPercent2)
+            platform.shaded_sideColor3 = canvasArea.getShadedColor(colorToUse2, litPercent3)
 
             // SHADOW POLYGON
             const angleRad = platform.angle * (Math.PI/180);
@@ -4491,21 +4585,31 @@ const Map = {
             platform.rightMostPlatformCornerX = platform.cornersSorted[3][0] + platform.x + platform.width/2 // platform corners are relative to the platforms middle
             platform.rightMostPlatformCornerY = platform.cornersSorted[3][1] + platform.y + platform.height/2
 
-
-            platform.getSplitLineY = function(x) {
-                // y = mx + b
-                // m = rise over run
-                const slope = (this.rightMostPlatformCornerY - this.leftMostPlatformCornerY) / (this.rightMostPlatformCornerX - this.leftMostPlatformCornerX)
-                // b = y - mx
-                const b = this.rightMostPlatformCornerY - (slope * this.rightMostPlatformCornerX) 
-                const y = slope * x + b
-                return y
+            if (!platform.getSplitLineY) { // if getSplitLineY exists
+                platform.getSplitLineY = function(x) {
+                    // y = mx + b
+                    // m = rise over run
+                    const slope = (this.rightMostPlatformCornerY - this.leftMostPlatformCornerY) / (this.rightMostPlatformCornerX - this.leftMostPlatformCornerX)
+                    // b = y - mx
+                    const b = this.rightMostPlatformCornerY - (slope * this.rightMostPlatformCornerX) 
+                    const y = slope * x + b
+                    return y
+                }
             }
 
-        });
+        }); // end of looping thrugh each platform
 
-        canvasArea.canvas.style.backgroundColor = this.style.backgroundColor;
-        document.body.style.backgroundColor = this.style.backgroundColor;
+        // calculate all other map colors
+        this.style.shaded_playerColor = canvasArea.getShadedColor(this.style.playerColor, 1) // 0.2 instead of 0 to pretend there's bounce lighting
+        this.style.shaded_backgroundColor = canvasArea.getShadedColor(this.style.backgroundColor, 1)
+
+        this.style.shadow_platformColor = canvasArea.getShadedColor(this.style.platformTopColor, 0.2) // 0.2 instead of 0 to pretend there's bounce lighting
+        this.style.shadow_endzoneColor = canvasArea.getShadedColor(this.style.endZoneTopColor, 0.2)
+        this.style.shadow_backgroundColor = canvasArea.getShadedColor(this.style.backgroundColor, 0.2)
+        
+
+        canvasArea.canvas.style.backgroundColor = this.style.shaded_backgroundColor;
+        document.body.style.backgroundColor = this.style.shaded_backgroundColor;
         player = new Player(this.playerStart.x, this.playerStart.y, this.playerStart.angle);
 
         // Get map record from local storage
@@ -4528,6 +4632,7 @@ const Map = {
             const hypotenuse = Math.sqrt(platform.width * platform.width + platform.height * platform.height)/2
             const adjustedHeight = platform.wall ? this.style.wallHeight : 0 // for adding height to walls
             const wallShadowMultiplier = platform.wall ? (this.style.wallHeight + this.style.platformHeight) / this.style.platformHeight : 1 // makes sure shadows are longer for taller walls
+
 
             if (
                 (platform.x + platform.width/2 + hypotenuse + (this.style.shadowLength * wallShadowMultiplier) > player.x - midX) && // coming into frame on left side
@@ -4595,8 +4700,8 @@ const Map = {
 
                     // NEW TEST FOR WHETHER OR NOT TO ADD PLATFORM TO CLIP
                     if (
-                        (player.x <= platform.x && player.rightMostPlayerCornerY < platform.getSplitLineY(player.rightMostPlayerCornerX)) ||  
-                        (player.x > platform.x && player.leftMostPlayerCornerY < platform.getSplitLineY(player.leftMostPlayerCornerX))
+                        (player.x <= platform.x + platform.width/2 && player.rightMostPlayerCornerY < platform.getSplitLineY(player.rightMostPlayerCornerX)) ||  
+                        (player.x > platform.x + platform.width/2 && player.leftMostPlayerCornerY < platform.getSplitLineY(player.leftMostPlayerCornerX))
                     ) {
                         addToPlayerClip()
                     }
@@ -4627,6 +4732,10 @@ const Map = {
 
                 }   
             }
+
+            if (platform.endzone) {
+                this.endZoneIsRendered = true;
+            } 
         }); // end of looping through each rendered platform
     },
 
@@ -4642,15 +4751,7 @@ const Map = {
         ctx.translate(platform.x + platform.width/2, platform.y + platform.height/2 - adjustedHeight);
         ctx.rotate(platform.angle * Math.PI/180);
 
-        // Change to endzone or wall color if needed. Also where its determined if endzone is being rendered
-        if (platform.endzone) {
-            ctx.fillStyle = this.style.endZoneTopColor;
-            this.endZoneIsRendered = true;
-        } else if (platform.wall) {
-            ctx.fillStyle = this.style.wallTopColor;
-        } else {
-            ctx.fillStyle = this.style.platformTopColor;
-        }
+        ctx.fillStyle = platform.shaded_topColor;        
         
         ctx.fillRect(-platform.width/2, -platform.height/2, platform.width, platform.height);
 
@@ -4668,7 +4769,7 @@ const Map = {
 
         if (-90 < platform.angle && platform.angle < 90) { // ALMOST ALWAYS RENDER BOTTOM SIDE. side2
             
-            ctx.fillStyle = platform.sideColor2; // sideColor2
+            ctx.fillStyle = platform.shaded_sideColor2;
             ctx.beginPath();
             ctx.moveTo(platform.width/2 * Math.cos(angleRad) - (platform.height/2 * Math.sin(angleRad)), platform.width/2 * Math.sin(angleRad) + (platform.height/2 * Math.cos(angleRad)) - adjustedHeight); // bot right
             ctx.lineTo(-platform.width/2 * Math.cos(angleRad) - (platform.height/2 * Math.sin(angleRad)), -platform.width/2 * Math.sin(angleRad) + (platform.height/2 * Math.cos(angleRad)) - adjustedHeight); // bot left
@@ -4681,7 +4782,7 @@ const Map = {
 
         if (0 < platform.angle && platform.angle <= 90) { // side3
 
-            ctx.fillStyle = platform.sideColor3; // sideColor3
+            ctx.fillStyle = platform.shaded_sideColor3; // sideColor3
             ctx.beginPath();
             ctx.moveTo(platform.width/2 * Math.cos(angleRad) - (platform.height/2 * Math.sin(angleRad)), platform.width/2 * Math.sin(angleRad) + (platform.height/2 * Math.cos(angleRad)) - adjustedHeight); // bot right
             ctx.lineTo(platform.width/2 * Math.cos(angleRad) + (platform.height/2 * Math.sin(angleRad)), platform.width/2 * Math.sin(angleRad) - (platform.height/2 * Math.cos(angleRad)) - adjustedHeight); // top right
@@ -4693,7 +4794,7 @@ const Map = {
 
         if (-90 <= platform.angle && platform.angle < 0) { // side1
 
-            ctx.fillStyle = platform.sideColor1; // sideColor1  
+            ctx.fillStyle = platform.shaded_sideColor1; // sideColor1  
             ctx.beginPath();
             ctx.moveTo(-platform.width/2 * Math.cos(angleRad) - (platform.height/2 * Math.sin(angleRad)), -platform.width/2 * Math.sin(angleRad) + (platform.height/2 * Math.cos(angleRad)) - adjustedHeight); // bot left
             ctx.lineTo(-platform.width/2 * Math.cos(angleRad) + (platform.height/2 * Math.sin(angleRad)), -platform.width/2 * Math.sin(angleRad) - (platform.height/2 * Math.cos(angleRad)) - adjustedHeight); // top left
@@ -4724,7 +4825,7 @@ const Map = {
     },
 
 
-    render : function() { // Renders player lower shadow(should be done by player), platforms shadows, platforms, and checkpoints
+    render : function() { // Renders player lower shadow, platforms shadows, platforms, and checkpoints
 
         this.endZoneIsRendered = false; // resets every frame. if the endzone is being rendered it activates it. otherwise it stays false
 
@@ -4738,7 +4839,7 @@ const Map = {
         ctx.save(); // #20
         ctx.translate(player.x , player.y + this.style.platformHeight)
         ctx.rotate(player.lookAngle.getAngle() * Math.PI/180); // rotating canvas
-        ctx.fillStyle = this.style.shadowColor;
+        ctx.fillStyle = this.style.shadow_backgroundColor;
         ctx.fillRect(-15, -15, 30, 30)
         ctx.restore(); // #20
 
@@ -4750,7 +4851,7 @@ const Map = {
             ctx.save(); // #21
             ctx.translate(platform.x + platform.width/2, platform.y + platform.height/2);
 
-            ctx.fillStyle = this.style.shadowColor;
+            ctx.fillStyle = this.style.shadow_backgroundColor;
 
             ctx.beginPath();
             
@@ -4773,8 +4874,9 @@ const Map = {
         })
 
 
+        // Draw checkpoints
         if (UserInterface.debugText == true) {
-            this.checkpoints.forEach(checkpoint => { // draw line to show checkpoint triggers
+            this.checkpoints.forEach(checkpoint => { 
                 ctx.strokeStyle = UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1 
                 ctx.lineWidth = 4
                 ctx.beginPath(); 
@@ -4918,7 +5020,6 @@ class Player {
     endSlow = 1;
     gain = 0;
     checkpointIndex = -1;
-    posInRenderQueue = null; // Not Used
 
     currentSpeedProjected = 0;
     addSpeed = 0; // initialized here so that userInterface can access for debug
@@ -4963,9 +5064,11 @@ class Player {
 
         clipPathCombo.addPath(Map.playerClip, new DOMMatrix([1, 0, 0, 1, -player.x + midX, -player.y + midY]))
         
+        // Draw playerClip DEBUG
         // ctx.lineWidth = 5
         // ctx.strokeStyle = "#00ff00"
         // ctx.stroke(clipPathCombo)
+        
         ctx.clip(clipPathCombo)
 
 
@@ -4983,7 +5086,8 @@ class Player {
     
         ctx.rotate(this.lookAngle.getAngle() * Math.PI/180)
 
-        ctx.fillStyle = Map.style.shadowColor;
+        // needs to be clipped so that this color isnt shown over endzone. also need to draw a clipped endzone shadow if endzone is rendered
+        ctx.fillStyle = Map.style.shadow_platformColor;
         // const blurValue = player.jumpValue / 16 + 1
         // ctx.filter = "blur(" + blurValue + "px)";
         ctx.fillRect(-15, -15, 30, 30)
@@ -4994,7 +5098,7 @@ class Player {
         // DRAWING PLAYER TOP
         ctx.translate(0, -this.jumpValue - 32); 
         ctx.rotate(this.lookAngle.getAngle() * Math.PI/180) // rotating canvas
-        ctx.fillStyle = Map.style.playerColor;
+        ctx.fillStyle = Map.style.shaded_playerColor;
         ctx.fillRect(-16,-16,32,32)
 
         // Draw players top arrow
@@ -5025,7 +5129,8 @@ class Player {
         if (loopedAngle > 270 || loopedAngle < 90) { // BOT WALL
 
             const sideVector = new Vector(0,1).rotate(this.lookAngle.getAngle())
-            ctx.fillStyle = canvasArea.calculateShadedColor(sideVector, Map.style.playerColor)
+            const litPercent = (sideVector.angleDifference(Map.style.lightAngleVector)* (180/Math.PI)) / 180
+            ctx.fillStyle = canvasArea.getShadedColor(Map.style.playerColor, litPercent)
 
             ctx.beginPath();
             ctx.moveTo(midX - (16 * Math.cos(angleRad) + (16 * Math.sin(angleRad))), midY - 32 - this.jumpValue - (16 * Math.sin(angleRad) - (16 * Math.cos(angleRad))));
@@ -5039,7 +5144,8 @@ class Player {
         if (0 < loopedAngle && loopedAngle < 180) { // RIGHT WALL
 
             const sideVector = new Vector(1,0).rotate(this.lookAngle.getAngle())
-            ctx.fillStyle = canvasArea.calculateShadedColor(sideVector, Map.style.playerColor)
+            const litPercent = (sideVector.angleDifference(Map.style.lightAngleVector)* (180/Math.PI)) / 180
+            ctx.fillStyle = canvasArea.getShadedColor(Map.style.playerColor, litPercent)
 
             ctx.beginPath();
             ctx.moveTo(midX + (16 * Math.cos(angleRad) - (16 * Math.sin(angleRad))), midY - 32 - this.jumpValue + (16 * Math.sin(angleRad) + (16 * Math.cos(angleRad))));
@@ -5053,8 +5159,9 @@ class Player {
         if (90 < loopedAngle && loopedAngle < 270) { // TOP WALL
             
             const sideVector = new Vector(0,-1).rotate(this.lookAngle.getAngle())
-            ctx.fillStyle = canvasArea.calculateShadedColor(sideVector, Map.style.playerColor)
-            
+            const litPercent = (sideVector.angleDifference(Map.style.lightAngleVector)* (180/Math.PI)) / 180
+            ctx.fillStyle = canvasArea.getShadedColor(Map.style.playerColor, litPercent)
+
             ctx.beginPath();
             ctx.moveTo(midX + (16 * Math.cos(angleRad) + (16 * Math.sin(angleRad))), midY - 32 - this.jumpValue + (16 * Math.sin(angleRad) - (16 * Math.cos(angleRad))));
             ctx.lineTo(midX + (16 * Math.cos(angleRad) + (16 * Math.sin(angleRad))), midY - this.jumpValue + (16 * Math.sin(angleRad) - (16 * Math.cos(angleRad))));
@@ -5067,7 +5174,8 @@ class Player {
         if (180 < loopedAngle && loopedAngle < 360) { // LEFT WALL
 
             const sideVector = new Vector(-1,0).rotate(this.lookAngle.getAngle())
-            ctx.fillStyle = canvasArea.calculateShadedColor(sideVector, Map.style.playerColor)
+            const litPercent = (sideVector.angleDifference(Map.style.lightAngleVector)* (180/Math.PI)) / 180
+            ctx.fillStyle = canvasArea.getShadedColor(Map.style.playerColor, litPercent)
 
             ctx.beginPath();
             ctx.moveTo(midX - (16 * Math.cos(angleRad) - (16 * Math.sin(angleRad))), midY - 32 - this.jumpValue - (16 * Math.sin(angleRad) + (16 * Math.cos(angleRad))));
@@ -5094,7 +5202,7 @@ class Player {
             ctx.translate(player.x , player.y);
             ctx.rotate(player.lookAngle.getAngle() * Math.PI/180)
 
-            ctx.strokeStyle = Map.style.playerColor
+            ctx.strokeStyle = Map.style.shaded_playerColor
             ctx.lineWidth = 2
             ctx.beginPath()
             ctx.strokeRect(-15, -15, 30, 30)
@@ -5179,6 +5287,11 @@ class Player {
 
             // CHECK IF COLLIDING WITH WALLS
             if (this.checkCollision(Map.wallsToCheck)) {
+
+                // new wall collision that doesnt instakill
+                // get walls normal
+                // subtract that normals direction
+
                 AudioHandler.splashAudio.play();
                 this.teleport();
             }
@@ -5508,8 +5621,8 @@ function updateGameArea() { // CALLED EVERY FRAME
     }
 
     if (UserInterface.gamestate == 6) {
-        if (!Tutorial.pausePlayer) {player.updatePos()}     
         Map.update();
+        if (!Tutorial.pausePlayer) {player.updatePos()}     
         if (Tutorial.isActive) {
             Tutorial.update();
         }
