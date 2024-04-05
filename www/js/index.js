@@ -527,6 +527,7 @@ const canvasArea = { //Canvas Object
 
     },
 
+
     clear : function() { // CLEARS WHOLE CANVAS
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
     },
@@ -878,12 +879,11 @@ const UserInterface = {
                         "wallSideColor": "rgba(125, 94, 49, 1)",
                         "endZoneTopColor": "rgba(255,218,98,1)",
                         "endZoneSideColor": "rgba(255,218,98,1)",
-                        "shadowColor": "rgba(7,7,10,0.25)",
+                        "directLight" : "rba(255,255,255)",
+                        "ambientLight" : "rba(140,184,198)",
                         "platformHeight": 25,
                         "wallHeight": 50,
                         "lightAngle": 45,
-                        "shadowContrastLight": -0.005,
-                        "shadowContrastDark": -0.4,
                         "shadowLength": 25
                     },
                     "platforms": [
@@ -981,13 +981,12 @@ const UserInterface = {
                     "endZoneTopColor": map.style.endZoneTopColor,
                     "endZoneSideColor": map.style.endZoneSideColor,
                     "backgroundColor": map.style.backgroundColor,
-                    "shadowColor": map.style.shadowColor,
                     "playerColor": map.style.playerColor,
+                    "directLight": map.style.directLight ?? "rba(255,255,255)", 
+                    "ambientLight" : map.style.ambientLight ?? "rba(140,184,198)",
                     "platformHeight": map.style.platformHeight,
                     "wallHeight": map.style.wallHeight,
                     "lightAngle": map.style.lightAngle,
-                    "shadowContrastLight": map.style.shadowContrastLight,
-                    "shadowContrastDark": map.style.shadowContrastDark,
                     "shadowLength": map.style.shadowLength
                 }
             downloadMap.platforms = [];
@@ -1131,8 +1130,6 @@ const UserInterface = {
             btn_platformHeightSlider.updateState(MapEditor.loadedMap.style.platformHeight) // value is set to 0 before we're in MapEditor
             btn_wallHeightSlider.updateState(MapEditor.loadedMap.style.wallHeight)
             btn_lightAngleSlider.updateState(MapEditor.loadedMap.style.lightAngle)
-            btn_shadowContrastLightSlider.updateState(MapEditor.loadedMap.style.shadowContrastLight)
-            btn_shadowContrastDarkSlider.updateState(MapEditor.loadedMap.style.shadowContrastDark)
             btn_shadowLengthSlider.updateState(MapEditor.loadedMap.style.shadowLength)
 
             UserInterface.renderedButtons = UserInterface.btnGroup_mapSettings
@@ -1353,35 +1350,23 @@ const UserInterface = {
 
 
         // MAP SETTINGS SLIDERS
-        btn_platformHeightSlider = new SliderUI("170", "70", 300, 0, 150, 1, "Platform Height", "white", MapEditor.loadedMap ? MapEditor.loadedMap.style.platformHeight : 0, function() { 
+        btn_platformHeightSlider = new SliderUI("canvasArea.canvas.width - 650", "100", 460, 0, 200, 1, "Platform Height", "white", MapEditor.loadedMap ? MapEditor.loadedMap.style.platformHeight : 0, function() { 
             MapEditor.loadedMap.style.platformHeight = this.value
             PreviewWindow.update()
         })
 
-        btn_wallHeightSlider = new SliderUI("170", "150", 300, 0, 150, 1, "Wall Height", "white", MapEditor.loadedMap ? MapEditor.loadedMap.style.wallHeight : 0, function() { 
+        btn_wallHeightSlider = new SliderUI("canvasArea.canvas.width - 650", "200", 460, 0, 200, 1, "Wall Height", "white", MapEditor.loadedMap ? MapEditor.loadedMap.style.wallHeight : 0, function() { 
             MapEditor.loadedMap.style.wallHeight = this.value
             PreviewWindow.update()
         })
 
-        btn_lightAngleSlider = new SliderUI("canvasArea.canvas.width - 550", "70", 360, 0, 360, 1, "Light Angle", "white", MapEditor.loadedMap ? MapEditor.loadedMap.style.lightAngle : 0, function() { 
+        btn_lightAngleSlider = new SliderUI("canvasArea.canvas.width - 650", "300", 460, 0, 360, 1, "Light Angle", "white", MapEditor.loadedMap ? MapEditor.loadedMap.style.lightAngle : 0, function() { 
             MapEditor.loadedMap.style.lightAngle = this.value
             PreviewWindow.update()
         })
 
-        btn_shadowContrastLightSlider = new SliderUI("canvasArea.canvas.width - 550", "150", 360, -1, 0, 1000, "Shadow Contrast Light", "white", MapEditor.loadedMap ? MapEditor.loadedMap.style.shadowContrastLight : 0, function() { 
-            MapEditor.loadedMap.style.shadowContrastLight = this.value
-            PreviewWindow.update()
-        })
-
-        btn_shadowContrastDarkSlider = new SliderUI("canvasArea.canvas.width - 550", "220", 360, -1, 0, 1000, "Shadow Contrast Dark", "white", MapEditor.loadedMap ? MapEditor.loadedMap.style.shadowContrastDark : 0, function() { 
-            MapEditor.loadedMap.style.shadowContrastDark = this.value
-
-            PreviewWindow.update()
-        })
-
-        btn_shadowLengthSlider = new SliderUI("canvasArea.canvas.width - 550", "290", 360, 0, 150, 1, "Shadow Length", "white", MapEditor.loadedMap ? MapEditor.loadedMap.style.shadowLength : 0, function() { 
+        btn_shadowLengthSlider = new SliderUI("canvasArea.canvas.width - 660", "400", 460, 0, 200, 1, "Shadow Length", "white", MapEditor.loadedMap ? MapEditor.loadedMap.style.shadowLength : 0, function() { 
             MapEditor.loadedMap.style.shadowLength = this.value
-
             PreviewWindow.update()
         })
 
@@ -1981,8 +1966,6 @@ const UserInterface = {
             btn_platformHeightSlider,
             btn_wallHeightSlider,
             btn_lightAngleSlider,
-            btn_shadowContrastLightSlider,
-            btn_shadowContrastDarkSlider,
             btn_shadowLengthSlider
         ];
         this.btnGroup_editPlatform = [
@@ -4035,11 +4018,35 @@ const MapEditor = {
 
         }
 
-        // updating interface components based on editorState
-        if (this.editorState == 3) { // in map settings screen
+        // UPDATING SLIDER CHANGES EVERY FRAME
+        if (this.editorState == 3) { // in map color screen
             ColorPicker.update();
             // ColorPicker.render called in MapEditor.render()
         }
+
+
+        if (this.editorState == 4) { // in map settings screen
+            if (!btn_platformHeightSlider.confirmed) {
+                this.loadedMap.style.platformHeight = btn_platformHeightSlider.value
+                PreviewWindow.update()
+            }
+
+            if (!btn_wallHeightSlider.confirmed) {
+                this.loadedMap.style.wallHeight = btn_wallHeightSlider.value
+                PreviewWindow.update()
+            }
+
+            if (!btn_lightAngleSlider.confirmed) {
+                this.loadedMap.style.lightAngle = btn_lightAngleSlider.value
+                PreviewWindow.update()
+            }
+
+            if (!btn_shadowLengthSlider.confirmed) {
+                this.loadedMap.style.shadowLength = btn_shadowLengthSlider.value
+                PreviewWindow.update()
+            }   
+        }
+
 
 
         if (this.editorState == 2) { // update translate and resize buttons every frame
@@ -4062,6 +4069,7 @@ const MapEditor = {
         if (this.editorState == 2 && (this.selectedPlatformIndex == -1 && this.selectedCheckpointIndex[0] == -1)) {
             this.editorState = 1;
         }
+        
 
     
     },
@@ -4338,7 +4346,8 @@ const Map = {
     name : null,
     record : null,
     upperShadowClip : new Path2D(),
-    playerClip : new Path2D(),
+    endZoneShadowClip : new Path2D(),
+    playerClip : new Path2D(), // calculated every frame
     endZone : null,
 
     initMap : function (name) {
@@ -4347,6 +4356,8 @@ const Map = {
         this.style = null;
         this.checkpoints = [];
         this.upperShadowClip = new Path2D()
+        this.endZoneShadowClip = new Path2D()
+
         
 
         if (typeof name  === "string"){ // distinguishing between loading a normal map (string) OR a custom map (object)
@@ -4495,7 +4506,7 @@ const Map = {
             ]; // end of shadowPoints array
         
         
-        
+    
             platform.corners = [] // save the first 4 corner coordinates before its modified
             for(let i=0; i < 4; i++) { // taking the first 4
                 platform.corners.push([platform.shadowPoints[i][0], platform.shadowPoints[i][1] - this.style.platformHeight]) // take away platformHeight
@@ -4534,28 +4545,30 @@ const Map = {
             platform.shadowPoints = canvasArea.convexHull(platform.shadowPoints)
 
 
+            const clipToUse = platform.endzone ? this.endZoneShadowClip : this.upperShadowClip // get shadow clip to add this platform to
+
             // SHADOW CLIP FOR UPPER PLAYER SHADOW
-            this.upperShadowClip.moveTo( // bot left
+            clipToUse.moveTo( // bot left
                 platform.x + platform.width/2 + platform.corners[0][0], // x
                 platform.y + platform.height/2 + platform.corners[0][1] // y
-                )
+            )
             
-            this.upperShadowClip.lineTo( // bot right
+            clipToUse.lineTo( // bot right
                 platform.x + platform.width/2 + platform.corners[1][0],
                 platform.y + platform.height/2 + platform.corners[1][1]
             )
 
-            this.upperShadowClip.lineTo( // top right
+            clipToUse.lineTo( // top right
                 platform.x + platform.width/2 + platform.corners[2][0],
                 platform.y + platform.height/2 + platform.corners[2][1]
             )
 
-            this.upperShadowClip.lineTo( // top left
+            clipToUse.lineTo( // top left
                 platform.x + platform.width/2 + platform.corners[3][0],
                 platform.y + platform.height/2 + platform.corners[3][1]
             )
 
-            this.upperShadowClip.closePath()
+            clipToUse.closePath()
 
 
             // SORT CORNERS AFTER CREATING SHADOW and behindWall CLIP. called bellow
@@ -4622,7 +4635,7 @@ const Map = {
 
 
     update : function() {  // Figure out which platforms are in view. Update Map.playerClip
-        // This is probably were I should check endZoneIsRendered but it's done in render(). Saves an if statement i guess...
+        // checks if endZoneIsRendered at the bottom
 
         this.renderedPlatforms = [];
         this.wallsToCheck = [];
@@ -4646,6 +4659,8 @@ const Map = {
 
 
         this.playerClip = new Path2D() // resets the clip every frame. when it is used there must be an counter clockwise rectangle drawn first to invert clip
+
+        this.endZoneIsRendered = false; // resets every frame. if one of renderedPlatforms is an endzone then its made true
 
         this.renderedPlatforms.forEach(platform => { // Loop through RENDERED platforms (will loop through in order of index)
                                     
@@ -4698,7 +4713,7 @@ const Map = {
 
                     
 
-                    // NEW TEST FOR WHETHER OR NOT TO ADD PLATFORM TO CLIP
+                    // NEW TEST FOR WHETHER OR NOT TO ADD WALL PLATFORM TO CLIP
                     if (
                         (player.x <= platform.x + platform.width/2 && player.rightMostPlayerCornerY < platform.getSplitLineY(player.rightMostPlayerCornerX)) ||  
                         (player.x > platform.x + platform.width/2 && player.leftMostPlayerCornerY < platform.getSplitLineY(player.leftMostPlayerCornerX))
@@ -4735,8 +4750,9 @@ const Map = {
 
             if (platform.endzone) {
                 this.endZoneIsRendered = true;
-            } 
+            }
         }); // end of looping through each rendered platform
+
     },
 
 
@@ -4827,7 +4843,6 @@ const Map = {
 
     render : function() { // Renders player lower shadow, platforms shadows, platforms, and checkpoints
 
-        this.endZoneIsRendered = false; // resets every frame. if the endzone is being rendered it activates it. otherwise it stays false
 
         const ctx = canvasArea.ctx;
 
@@ -5054,7 +5069,7 @@ class Player {
         
         ctx.save() // #21.5
         
-        // create playerClip
+        // create inverted playerClip so not drawn behind walls
         const clipPathCombo = new Path2D()
         clipPathCombo.moveTo(0, 0)
         clipPathCombo.lineTo(0, canvasArea.canvas.height)
@@ -5077,23 +5092,49 @@ class Player {
 
 
         // LOWER SHADOW IS DRAWN BY MAP
-        // DRAWING UPPER SHADOW HERE \/
+        // DRAWING UPPER SHADOW HERE \/ (drawn twice while over platform or over endzone)
         ctx.save() // #23
         
         ctx.translate(-player.x, -player.y)
+        
+        // Draw standard shadowClip DEBUG
+        // ctx.lineWidth = 5
+        // ctx.strokeStyle = "#00ff00"
+        // ctx.stroke(Map.upperShadowClip)
+        
         ctx.clip(Map.upperShadowClip);
         ctx.translate(player.x , player.y);
     
         ctx.rotate(this.lookAngle.getAngle() * Math.PI/180)
 
-        // needs to be clipped so that this color isnt shown over endzone. also need to draw a clipped endzone shadow if endzone is rendered
         ctx.fillStyle = Map.style.shadow_platformColor;
-        // const blurValue = player.jumpValue / 16 + 1
-        // ctx.filter = "blur(" + blurValue + "px)";
         ctx.fillRect(-15, -15, 30, 30)
-        // ctx.filter = "none";
 
         ctx.restore() // #23 clears upperShadowClip
+
+        if (Map.endZoneIsRendered) { // draw a clipped version of the players shadow over endzone
+            ctx.save() // #23.5
+            
+            ctx.translate(-player.x, -player.y)
+            
+            // Draw endZoneShadowClip DEBUG
+            // ctx.lineWidth = 3
+            // ctx.strokeStyle = "#0000ff"
+            // ctx.stroke(Map.endZoneShadowClip)
+            
+            ctx.clip(Map.endZoneShadowClip);
+            ctx.translate(player.x , player.y);
+
+            ctx.rotate(this.lookAngle.getAngle() * Math.PI/180)
+
+            ctx.fillStyle = Map.style.shadow_endzoneColor;
+            ctx.fillRect(-15, -15, 30, 30)
+
+            ctx.restore() // #23.5 clears endZoneShadowClip
+        }
+
+
+
 
         // DRAWING PLAYER TOP
         ctx.translate(0, -this.jumpValue - 32); 
