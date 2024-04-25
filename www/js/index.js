@@ -962,116 +962,7 @@ const UserInterface = {
 
         // MAP EDITOR BUTTONS
         btn_exit_edit = new Button(50, 50, 100, "back_button", "back_button_pressed", 0, "", function() {
-
-            // DONT REALLY NEED TO DO ALL THIS STUFF BELOW UNLESS USER CONFIRMS THEY WANT TO SAVE MAP. SHOULD MOVE TO BE WITHIN CONFIRMATION
-            const map = MapEditor.loadedMap;
-
-            downloadMap = {};
-            downloadMap.playerStart = {
-                    "x": map.playerStart.x,
-                    "y": map.playerStart.y,
-                    "angle": map.playerStart.angle
-                },
-            downloadMap.checkpoints = map.checkpoints;
-            downloadMap.style = {
-                    "platformTopColor": map.style.platformTopColor,
-                    "platformSideColor": map.style.platformSideColor,
-                    "wallTopColor": map.style.wallTopColor,
-                    "wallSideColor": map.style.wallSideColor,
-                    "endZoneTopColor": map.style.endZoneTopColor,
-                    "endZoneSideColor": map.style.endZoneSideColor,
-                    "backgroundColor": map.style.backgroundColor,
-                    "playerColor": map.style.playerColor,
-                    "directLight": map.style.directLight ?? "rba(255,255,255)", 
-                    "ambientLight" : map.style.ambientLight ?? "rba(140,184,198)",
-                    "platformHeight": map.style.platformHeight,
-                    "wallHeight": map.style.wallHeight,
-                    "lightAngle": map.style.lightAngle,
-                    "shadowLength": map.style.shadowLength
-                }
-            downloadMap.platforms = [];
-            map.platforms.forEach(platform => {
-                downloadMap.platforms.push(
-                    {
-                        "x": platform.x,
-                        "y": platform.y,
-                        "width": platform.width,
-                        "height": platform.height,
-                        "angle": platform.angle,
-                        "endzone": platform.endzone,
-                        "wall": platform.wall
-                    }
-                )
-            })
-
-
-            console.log(JSON.stringify(downloadMap.platforms))
-
-            MapEditor.sortPlatforms2(downloadMap.platforms)
-
-            console.log(JSON.stringify(downloadMap.platforms))
-
-
-            const savemap = confirm("Save Map?");
-            if (savemap) {
-                saveCustomMap(downloadMap, "custom_map")
-            }
-
-            // function downloadObjectAsJson(exportObj, exportName) { // https://stackoverflow.com/questions/19721439/download-json-object-as-a-file-from-browser
-            //     exportName = prompt("Enter Map Name");
-            //     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj));
-            //     const downloadAnchorNode = document.createElement('a');
-            //     downloadAnchorNode.setAttribute("href", dataStr);
-            //     downloadAnchorNode.setAttribute("download", exportName + ".json");
-            //     document.body.appendChild(downloadAnchorNode); // required for firefox
-            //     downloadAnchorNode.click();
-            //     downloadAnchorNode.remove();
-            // }
-
-            function saveCustomMap(exportObj, exportName) {
-                exportName = prompt("Enter Map Name");
-    
-                // writes (dataObj) to cordova.file.dataDirectory with specified (name)
-                function writeFile(exportName, dataObj) {
-                    // create directory and empty file
-                    window.resolveLocalFileSystemURL(cordova.file.dataDirectory, (directoryEntry) => {
-                        directoryEntry.getFile(exportName + ".json", {create: true, exclusive: false}, (logFileEntry) => {
-                            // addding to the empty file
-                            logFileEntry.createWriter(function(writer) {
-                                writer.onwriteend = function() {
-                                    console.log("Success!");
-                                };
-                        
-                                writer.onerror = function(e) {
-                                    console.log("Error :(", e);
-                                };
-                        
-                                writer.write(dataObj);
-                            });
-                        });
-                    }, error => {console.log(error)});
-                }
-
-
-                const blob = new Blob([JSON.stringify(exportObj, null, 2)], { type: "application/json" });
-
-                writeFile(exportName, blob)
-
-            }
-
-            MapEditor.editorState = 0;
-            MapEditor.loadedMap = null;
-            MapEditor.screenX = 0;
-            MapEditor.screenY = 0;
-            MapEditor.scrollX_vel = 0;
-            MapEditor.scrollY_vel = 0;
-            MapEditor.snapAmount = 0;
-            MapEditor.renderedPlatforms = [];
-            MapEditor.selectedPlatformIndex = -1;
-            MapEditor.selectedCheckpointIndex = [-1,1];
-            btn_snappingSlider.updateState(0);
-            
-            UserInterface.renderedButtons = UserInterface.btnGroup_mapEditorMenu
+            MapEditor.saveCustomMap()
         })
         
         btn_add_platform = new Button("canvasArea.canvas.width - 240", "25", 204, "platform_button", "", 0, "", function() {
@@ -1081,6 +972,7 @@ const UserInterface = {
                 "y": Math.round(-MapEditor.screenY + canvasArea.canvas.height/2),
                 "width": 100,
                 "height": 100,
+                "hypotenuse": Math.sqrt(this.width * this.width + this.height * this.height)/2,
                 "angle": 0,
                 "endzone": 0,
                 "wall": 0
@@ -3643,11 +3535,8 @@ const MapEditor = {
     screenX : 0, // where the view is located
     screenY : 0,
 
-
     scrollVelAveragerX : new Averager(10),
     scrollVelAveragerY : new Averager(10),
-
-
 
     renderedPlatforms : [],
     selectedPlatformIndex : -1, // -1 = nothing, -2 = player
@@ -3999,17 +3888,17 @@ const MapEditor = {
 
 
 
-            // FIGURING OUT WHICH PLATFORMS TO RENDER
+            // FIGURING OUT WHICH PLATFORMS TO RENDER IN MAP EDITOR
             this.renderedPlatforms = [];
 
             this.loadedMap.platforms.forEach(platform => { // Loop through platforms
-                const hypotenuse = Math.sqrt(platform.width * platform.width + platform.height * platform.height)/2
+                if (!platform.hypotenuse) {platform.hypotenuse = Math.sqrt(platform.width * platform.width + platform.height * platform.height)/2}
 
                 if (
-                    (platform.x + platform.width/2 + hypotenuse + this.screenX > 0) && // coming into frame on left side
-                    (platform.x + platform.width/2 - hypotenuse + this.screenX < canvasArea.canvas.width) && // right side
-                    (platform.y + platform.height/2 + hypotenuse + this.screenY > 0) && // top side
-                    (platform.y + platform.height/2 - hypotenuse + this.screenY < canvasArea.canvas.height) // bottom side
+                    (platform.x + platform.width/2 + platform.hypotenuse + this.screenX > 0) && // coming into frame on left side
+                    (platform.x + platform.width/2 - platform.hypotenuse + this.screenX < canvasArea.canvas.width) && // right side
+                    (platform.y + platform.height/2 + platform.hypotenuse + this.screenY > 0) && // top side
+                    (platform.y + platform.height/2 - platform.hypotenuse + this.screenY < canvasArea.canvas.height) // bottom side
                 ) {
                     this.renderedPlatforms.push(platform); // ADD platform to renderedPlatforms
                 }
@@ -4074,139 +3963,110 @@ const MapEditor = {
     
     },
 
-    sortPlatforms2 : function(platforms) { 
-        // inefficient sorting algorithm but its only run on map save so whatever
-        // this doesnt need to return anything because it's directly editing the object its passed as a perameter (not a copy)
+    saveCustomMap : async function() {
 
+        const savemap = confirm("Save Map?");
+        if (savemap) {
 
-        // sort all platforms by y initially (keeps rendering order correct when some platforms arent compared with each other)
-        platforms.sort(sortY)
+            const map = this.loadedMap;
 
-        function sortY(a, b) {
-            // if return is negative ... a comes first 
-            // if return is positive ... b comes first
-            // return is 0... nothing is changed
-            if (a.y + a.height/2 < b.y + b.height/2) {return -1;}
-            if (a.y + a.height/2 > b.y + b.height/2) {return 1;}
-            return 0;
-        }
-
-
-        console.log("platforms.length = " + platforms.length)
-
-        for (let i = 0; i < platforms.length; i++) { // if its NOT the last platform. dont need to test last platform
-
-            // takes platforms[i] and compares it to every other platform using compareIndex
-            // Needs to do this otherwise long walls create this gap where two platforms arent being compared to each other.
-        
-            for (let compareIndex = 1; compareIndex + i < platforms.length; compareIndex ++) {
-
-                if (shouldBeInFront(platforms[i], platforms[i+compareIndex]) == true) {
-
-                    // swap them in the array
-                    console.log("SWAPED.  i=" + i + "  compareIndex=" + compareIndex + "  (" + platforms[i].x + ", " + platforms[i].y + ") with (" + platforms[i+compareIndex].x + ", " + platforms[i+compareIndex].y + ")")
-
-                    const temp = platforms[i]
-                    platforms[i] = platforms[i+compareIndex]
-                    platforms[i+compareIndex] = temp 
-                } else {
-                    console.log("No swap. i=" + i + "  compareIndex=" + compareIndex)
+            downloadMap = {};
+            downloadMap.playerStart = {
+                    "x": map.playerStart.x,
+                    "y": map.playerStart.y,
+                    "angle": map.playerStart.angle
+                },
+            downloadMap.checkpoints = map.checkpoints;
+            downloadMap.style = {
+                    "platformTopColor": map.style.platformTopColor,
+                    "platformSideColor": map.style.platformSideColor,
+                    "wallTopColor": map.style.wallTopColor,
+                    "wallSideColor": map.style.wallSideColor,
+                    "endZoneTopColor": map.style.endZoneTopColor,
+                    "endZoneSideColor": map.style.endZoneSideColor,
+                    "backgroundColor": map.style.backgroundColor,
+                    "playerColor": map.style.playerColor,
+                    "directLight": map.style.directLight ?? "rba(255,255,255)", 
+                    "ambientLight" : map.style.ambientLight ?? "rba(140,184,198)",
+                    "platformHeight": map.style.platformHeight,
+                    "wallHeight": map.style.wallHeight,
+                    "lightAngle": map.style.lightAngle,
+                    "shadowLength": map.style.shadowLength
                 }
-            }
+            downloadMap.platforms = [];
+            map.platforms.forEach(platform => {
+                downloadMap.platforms.push(
+                    {
+                        "x": platform.x,
+                        "y": platform.y,
+                        "width": platform.width,
+                        "height": platform.height,
+                        "angle": platform.angle,
+                        "endzone": platform.endzone,
+                        "wall": platform.wall,
+                    }
+                )
+            })
+
+            downloadMap.platforms = sortPlatforms(downloadMap.platforms)
+
+            writeCustomMap(downloadMap, "custom_map")
+
+        
+        } else {
+            exitEdit()
         }
 
-        console.log("done sorting")
-    
         
+        function exitEdit() {
+            MapEditor.editorState = 0;
+            MapEditor.loadedMap = null;
+            MapEditor.screenX = 0;
+            MapEditor.screenY = 0;
+            MapEditor.scrollX_vel = 0;
+            MapEditor.scrollY_vel = 0;
+            MapEditor.snapAmount = 0;
+            MapEditor.renderedPlatforms = [];
+            MapEditor.selectedPlatformIndex = -1;
+            MapEditor.selectedCheckpointIndex = [-1,1];
+            btn_snappingSlider.updateState(0);
+            
+            UserInterface.renderedButtons = UserInterface.btnGroup_mapEditorMenu
+        }
 
-        function shouldBeInFront(a,b) {
+        function sortPlatforms(platforms) {  // returns array of sorted platforms
+            const millis = Date.now()
 
-            // a is in correct spot behind b
-            // return false; 
-
-            // a should be rendered infront of b
-            // return true;
-
-
-            // only sort/swap if platforms could be overlapping each other.
-            const hypotenuse_a = Math.sqrt(a.width * a.width + a.height * a.height)/2
-            const hypotenuse_b = Math.sqrt(b.width * b.width + b.height * b.height)/2
-
-            const adjustedHeight_a = a.wall ? MapEditor.loadedMap.style.wallHeight : 0 // for adding height to a if its a wall
-            const adjustedHeight_b = b.wall ? MapEditor.loadedMap.style.wallHeight : 0 // for adding height to b if its a wall
-
-            if (
-                    (a.x + a.width/2 + hypotenuse_a > b.x + b.width/2 - hypotenuse_b) && // a colliding with b from left side
-                    (a.x + a.width/2 - hypotenuse_a < b.x + b.width/2 + hypotenuse_b) && // right side
-                    (a.y + a.height/2 + hypotenuse_a > b.y + b.height/2 - hypotenuse_b - adjustedHeight_b) && // top side
-                    (a.y + a.height/2 - hypotenuse_a - adjustedHeight_a < b.y + b.height/2 + hypotenuse_b) // bottom side (could also use downloadMap here i think)
-                ) {
+            // create all generated properties for each platform
+            platforms.forEach( platform => {
+                platform.hypotenuse = Math.sqrt(platform.width * platform.width + platform.height * platform.height)/2
+                platform.angleRad = platform.angle * (Math.PI/180)
+                platform.corners = [ // order: BL BR TR TL
+                    // bot left corner        
+                    [
+                    -((platform.width / 2) * Math.cos(platform.angleRad)) - ((platform.height / 2) * Math.sin(platform.angleRad)),
+                    -((platform.width / 2) * Math.sin(platform.angleRad)) + ((platform.height / 2) * Math.cos(platform.angleRad))
+                    ],
+        
+                    // bot right corner
+                    [
+                    ((platform.width / 2) * Math.cos(platform.angleRad)) - ((platform.height / 2) * Math.sin(platform.angleRad)),
+                    ((platform.width / 2) * Math.sin(platform.angleRad)) + ((platform.height / 2) * Math.cos(platform.angleRad))
+                    ],
+        
+                    // top right corner
+                    [
+                    ((platform.width / 2) * Math.cos(platform.angleRad)) + ((platform.height / 2) * Math.sin(platform.angleRad)),
+                    ((platform.width / 2) * Math.sin(platform.angleRad)) - ((platform.height / 2) * Math.cos(platform.angleRad))
+                    ],
                 
-                // corners will be added/sorted after first loop. check if they are already added.
-                if (!("corners" in a)) {
-                    const angleRad = a.angle * (Math.PI/180);
-                    a.corners = [
-                        // bot left corner        
-                        [
-                        -((a.width / 2) * Math.cos(angleRad)) - ((a.height / 2) * Math.sin(angleRad)),
-                        -((a.width / 2) * Math.sin(angleRad)) + ((a.height / 2) * Math.cos(angleRad))
-                        ],
-            
-                        // bot right corner
-                        [
-                        ((a.width / 2) * Math.cos(angleRad)) - ((a.height / 2) * Math.sin(angleRad)),
-                        ((a.width / 2) * Math.sin(angleRad)) + ((a.height / 2) * Math.cos(angleRad))
-                        ],
-            
-                        // top right corner
-                        [
-                        ((a.width / 2) * Math.cos(angleRad)) + ((a.height / 2) * Math.sin(angleRad)),
-                        ((a.width / 2) * Math.sin(angleRad)) - ((a.height / 2) * Math.cos(angleRad))
-                        ],
-                    
-                        // top left corner
-                        [
-                        -((a.width / 2) * Math.cos(angleRad)) + ((a.height / 2) * Math.sin(angleRad)),
-                        -((a.width / 2) * Math.sin(angleRad)) - ((a.height / 2) * Math.cos(angleRad))
-                        ]
+                    // top left corner
+                    [
+                    -((platform.width / 2) * Math.cos(platform.angleRad)) + ((platform.height / 2) * Math.sin(platform.angleRad)),
+                    -((platform.width / 2) * Math.sin(platform.angleRad)) - ((platform.height / 2) * Math.cos(platform.angleRad))
                     ]
-                    
-                    a.corners.sort(sortCornersX)
-                }
-    
-    
-                if (!("corners" in b)) {
-                    const angleRad = b.angle * (Math.PI/180);
-                    b.corners = [
-                        // bot left corner        
-                        [
-                        -((b.width / 2) * Math.cos(angleRad)) - ((b.height / 2) * Math.sin(angleRad)),
-                        -((b.width / 2) * Math.sin(angleRad)) + ((b.height / 2) * Math.cos(angleRad))
-                        ],
-            
-                        // bot right corner
-                        [
-                        ((b.width / 2) * Math.cos(angleRad)) - ((b.height / 2) * Math.sin(angleRad)),
-                        ((b.width / 2) * Math.sin(angleRad)) + ((b.height / 2) * Math.cos(angleRad))
-                        ],
-            
-                        // top right corner
-                        [
-                        ((b.width / 2) * Math.cos(angleRad)) + ((b.height / 2) * Math.sin(angleRad)),
-                        ((b.width / 2) * Math.sin(angleRad)) - ((b.height / 2) * Math.cos(angleRad))
-                        ],
-                    
-                        // top left corner
-                        [
-                        -((b.width / 2) * Math.cos(angleRad)) + ((b.height / 2) * Math.sin(angleRad)),
-                        -((b.width / 2) * Math.sin(angleRad)) - ((b.height / 2) * Math.cos(angleRad))
-                        ]
-                    ]
-                    
-                    b.corners.sort(sortCornersX)
-                }
-        
-    
+                ]
+
                 function sortCornersX(a, b) {
                     // if return is negative ... a comes first 
                     // if return is positive ... b comes first
@@ -4215,66 +4075,136 @@ const MapEditor = {
                     if (a[0] > b[0]) {return 1;}
                     return 0;
                 }
-        
-        
-    
-                if ((a.x + a.width/2) < (b.x + b.width/2)) { // A IS TO THE LEFT OF B
-                // if (a.x < b.x) { // A IS TO THE LEFT OF B
-    
-                    // console.log("RETURNING TRUE")
-                    // return true
-    
-                    // GETS A's platform.corner for right most corner (end of corners array) NOTE: corner array is in local space
-                    a.rightMostPlatformCornerX = a.corners[3][0] + a.x + a.width/2 // platform corners are relative to the platforms middle
-                    a.rightMostPlatformCornerY = a.corners[3][1] + a.y + a.height/2
-        
-                    // gets B's platform.corner for left most corner (start of corners array) NOTE: corner array is in local space
-                    b.leftMostPlatformCornerX = b.corners[0][0] + b.x + b.width/2 // platform corners are relative to the platforms middle
-                    b.leftMostPlatformCornerY = b.corners[0][1] + b.y + b.height/2
-        
-                    // gets corner extension for A's corner compared to B 
-                    const aCornerExtensionY = a.rightMostPlatformCornerY + (b.leftMostPlatformCornerX - a.rightMostPlatformCornerX) * Math.tan(a.angle * (Math.PI/180))
-        
-                    if (a.rightMostPlatformCornerY > b.leftMostPlatformCornerY){ // below
-                        // render a in front of b
-                        // console.log("a was to the LEFT of b and should be infront")
-                        return true;
-                    } else {return false;} // above. render b in front of a
-        
-        
-                }
+
+                // toSorted() isnt supported by old safari i guess?
+                platform.cornersSorted = [...platform.corners]
+                platform.cornersSorted.sort(sortCornersX)
+
+                // global coordinates of left and rightmost corners
+                platform.leftMostCornerX = platform.cornersSorted[0][0] + platform.x + platform.width/2
+                platform.leftMostCornerY = platform.cornersSorted[0][1] + platform.y + platform.height/2
                 
-                if ((a.x + a.width/2) >= (b.x + b.width/2)) { // A IS TO THE RIGHT OF B
-                // if (a.x >= b.x) { // A IS TO THE RIGHT OF B (its always doing this one)
-    
-                    // console.log("RETURNING FALSE")
-                    // return false
-    
-                    // gets A's platform.corner for left most corner (start of corners array) NOTE: corner array is in local space
-                    a.leftMostPlatformCornerX = a.corners[0][0] + a.x + a.width/2 // platform corners are relative to the platforms middle
-                    a.leftMostPlatformCornerY = a.corners[0][1] + a.y + a.height/2
-        
-                    // GETS B's platform.corner for right most corner (end of corners array) NOTE: corner array is in local space
-                    b.rightMostPlatformCornerX = b.corners[3][0] + b.x + b.width/2 // platform corners are relative to the platforms middle
-                    b.rightMostPlatformCornerY = b.corners[3][1] + b.y + b.height/2
-        
-                    const aCornerExtensionY = a.leftMostPlatformCornerY + (b.rightMostPlatformCornerX - a.leftMostPlatformCornerX) * Math.tan(a.angle * (Math.PI/180))
-        
-                    if (a.leftMostPlatformCornerY > b.rightMostPlatformCornerY){ // a is below
-                        // render a in front of b
-                        // console.log("a was to the RIGHT of b and should be infront")
-                        return true;
-                    } else {return false;} // above. render b in front of a
-    
+                platform.rightMostCornerX = platform.cornersSorted[3][0] + platform.x + platform.width/2
+                platform.rightMostCornerY = platform.cornersSorted[3][1] + platform.y + platform.height/2
+
+
+                platform.getSplitLineY = function(x) {
+                    // y = mx + b
+                    // m = rise over run
+                    const slope = (this.rightMostCornerY - this.leftMostCornerY) / (this.rightMostCornerX - this.leftMostCornerX)
+                    // b = y - mx
+                    const b = this.rightMostCornerY - (slope * this.rightMostCornerX) 
+                    const y = slope * x + b
+
+                    if (x > this.rightMostCornerX) {return this.rightMostCornerY} // keeps y value within the platform's bounds...
+                    if (x < this.leftMostCornerX) {return this.leftMostCornerY} // ...doesnt extend the function past the corners
+                    return y
+
                 }
 
-            } else {
-                console.log("didnt check: " + "(" + a.x + ", " + a.y + ") with (" + b.x + ", " + b.y + ")")
-                return false
-            }
-        } // end of shouldBeInFront
 
-    }
+            })
+
+
+            console.log("platforms.length = " + platforms.length)
+
+            /*
+            function sortY(a, b) {
+                // if return is negative ... a comes first 
+                // if return is positive ... b comes first
+                // return is 0... nothing is changed
+                if (a.y + a.height/2 < b.y + b.height/2) {return -1;}
+                if (a.y + a.height/2 > b.y + b.height/2) {return 1;}
+                return 0;
+            }
+            */
+
+            function test_A_below_B(a, b) {
+                if (
+                    (a.x + a.width/2 <= b.x + b.width/2 && a.rightMostCornerY > b.getSplitLineY(a.rightMostCornerX)) ||  // a is to the left && a's rightCorner is below/infront of b
+                    (a.x + a.width/2 > b.x + b.width/2 && a.leftMostCornerY > b.getSplitLineY(a.leftMostCornerX)) // a is to the right && a's leftCorner is below/infront of b
+                ) {
+                    return true // a is below/infront of b
+                } else {
+                    return false // a is NOT below/infront of b
+                }
+            }
+
+
+            // take unsorted platforms array
+            // select 2 platforms and place them sorted into new array
+            // select platform from unsorted array
+            // compare this platform with each platform in the sorted array
+            // if this platform needs to be in front of a platform in the sorted array, record that index
+            // after comparing this platform to every platform in the sorted array, move it into the highest recorded index(needs to be in front of this index) within the sorted array
+
+
+            let sortedPlatforms = []
+            console.log(platforms)
+
+            platforms.forEach( platform => {
+                let deepestIndex = 0
+                let indexBeingChecked = 0
+                
+                sortedPlatforms.forEach( sortedPlatform => {        
+
+                    if (test_A_below_B(platform, sortedPlatform)) {
+                        deepestIndex = indexBeingChecked + 1
+
+                        // console.log("v infront of platform " + sortedPlatform.y)
+                    } else {
+                        // console.log("^ NOT it front of " + sortedPlatform.y)
+                    }    
+
+                    indexBeingChecked ++
+                })
+
+                sortedPlatforms.splice(deepestIndex, 0, platform) // array.splice(start, deleteCount, item1);
+
+                console.log("[][][] SPLICED " + platform.y + " to index " + deepestIndex + ". indexes checked: " + indexBeingChecked)
+            })
+
+
+            console.log("finished sort in: " + (Date.now() - millis) + "ms")
+
+
+            return sortedPlatforms
+
+        }
+
+        function writeCustomMap(exportObj, exportName) {
+            console.log("WRITING MAP NOW!")
+            exportName = prompt("Enter Map Name");
+
+            // writes (dataObj) to cordova.file.dataDirectory with specified (name)
+            function writeFile(exportName, dataObj) {
+                // create directory and empty file
+                window.resolveLocalFileSystemURL(cordova.file.dataDirectory, (directoryEntry) => {
+                    directoryEntry.getFile(exportName + ".json", {create: true, exclusive: false}, (logFileEntry) => {
+                        // addding to the empty file
+                        logFileEntry.createWriter(function(writer) {
+                            writer.onwriteend = function() {
+                                
+                                console.log("Successful Save");
+                                
+                                exitEdit()
+                            };
+                    
+                            writer.onerror = function(e) {
+                                console.log("Error :(", e);
+                            };
+                    
+                            writer.write(dataObj);
+                        });
+                    });
+                }, error => {console.log(error)});
+            }
+
+            const blob = new Blob([JSON.stringify(exportObj, null, 2)], { type: "application/json" });
+
+            writeFile(exportName, blob)
+        }
+    },
 
 }
 
@@ -4505,13 +4435,6 @@ const Map = {
             
             ]; // end of shadowPoints array
         
-        
-    
-            platform.corners = [] // save the first 4 corner coordinates before its modified
-            for(let i=0; i < 4; i++) { // taking the first 4
-                platform.corners.push([platform.shadowPoints[i][0], platform.shadowPoints[i][1] - this.style.platformHeight]) // take away platformHeight
-            }
-
 
             // add a .clipPoints property to each wall for occluding player and drawing players xray
             if (platform.wall) {
@@ -4571,6 +4494,7 @@ const Map = {
             clipToUse.closePath()
 
 
+            /* KILL KILL
             // SORT CORNERS AFTER CREATING SHADOW and behindWall CLIP. called bellow
             function sortCornersX(a, b) {
                 // if return is negative ... a comes first 
@@ -4588,7 +4512,6 @@ const Map = {
             platform.cornersSorted.sort(sortCornersX)
 
 
-
             // GETTING FURTHEST RIGHT/LEFT CORNERS
             // get platform.corner x for LEFT MOST corner (start of corners array) NOTE: corner array is in local space
             platform.leftMostPlatformCornerX = platform.cornersSorted[0][0] + platform.x + platform.width/2 // platform corners are relative to the platforms middle
@@ -4598,17 +4521,18 @@ const Map = {
             platform.rightMostPlatformCornerX = platform.cornersSorted[3][0] + platform.x + platform.width/2 // platform corners are relative to the platforms middle
             platform.rightMostPlatformCornerY = platform.cornersSorted[3][1] + platform.y + platform.height/2
 
-            if (!platform.getSplitLineY) { // if getSplitLineY exists
-                platform.getSplitLineY = function(x) {
-                    // y = mx + b
-                    // m = rise over run
-                    const slope = (this.rightMostPlatformCornerY - this.leftMostPlatformCornerY) / (this.rightMostPlatformCornerX - this.leftMostPlatformCornerX)
-                    // b = y - mx
-                    const b = this.rightMostPlatformCornerY - (slope * this.rightMostPlatformCornerX) 
-                    const y = slope * x + b
-                    return y
-                }
+            */
+
+            platform.getSplitLineY = function(x) {
+                // y = mx + b
+                // m = rise over run
+                const slope = (platform.rightMostCornerY - platform.leftMostCornerY) / (platform.rightMostCornerX - platform.leftMostCornerX)
+                // b = y - mx
+                const b = platform.rightMostCornerY - (slope * platform.rightMostCornerX) 
+                const y = slope * x + b
+                return y
             }
+        
 
         }); // end of looping thrugh each platform
 
@@ -4642,16 +4566,15 @@ const Map = {
 
 
         this.platforms.forEach(platform => { // Loop through ALL platforms to get renderedPlatforms
-            const hypotenuse = Math.sqrt(platform.width * platform.width + platform.height * platform.height)/2
+
             const adjustedHeight = platform.wall ? this.style.wallHeight : 0 // for adding height to walls
             const wallShadowMultiplier = platform.wall ? (this.style.wallHeight + this.style.platformHeight) / this.style.platformHeight : 1 // makes sure shadows are longer for taller walls
 
-
             if (
-                (platform.x + platform.width/2 + hypotenuse + (this.style.shadowLength * wallShadowMultiplier) > player.x - midX) && // coming into frame on left side
-                (platform.x + platform.width/2 - hypotenuse - (this.style.shadowLength * wallShadowMultiplier) < player.x + midX) && // right side
-                (platform.y + platform.height/2 + hypotenuse + (this.style.shadowLength * wallShadowMultiplier) + this.style.platformHeight > player.y - midY) && // top side
-                (platform.y + platform.height/2 - hypotenuse - (this.style.shadowLength * wallShadowMultiplier) - adjustedHeight < player.y + midY) // bottom side
+                (platform.x + platform.width/2 + platform.hypotenuse + (this.style.shadowLength * wallShadowMultiplier) > player.x - midX) && // coming into frame on left side
+                (platform.x + platform.width/2 - platform.hypotenuse - (this.style.shadowLength * wallShadowMultiplier) < player.x + midX) && // right side
+                (platform.y + platform.height/2 + platform.hypotenuse + (this.style.shadowLength * wallShadowMultiplier) + this.style.platformHeight > player.y - midY) && // top side
+                (platform.y + platform.height/2 - platform.hypotenuse - (this.style.shadowLength * wallShadowMultiplier) - adjustedHeight < player.y + midY) // bottom side
             ) {
                 this.renderedPlatforms.push(platform); // ADD platform to renderedPlatforms
             }
@@ -4665,14 +4588,12 @@ const Map = {
         this.renderedPlatforms.forEach(platform => { // Loop through RENDERED platforms (will loop through in order of index)
                                     
             if (platform.wall) {
-
-                const hypotenuse = Math.sqrt(platform.width * platform.width + platform.height * platform.height)/2
                 
                 if ( // if wall is close enough to player that it needs to be checked with player rotation
-                    (platform.x + platform.width/2 + hypotenuse > player.x - 25) && // colliding with player from left
-                    (platform.x + platform.width/2 - hypotenuse < player.x + 25) && // right side
-                    (platform.y + platform.height/2 + hypotenuse > player.y - 73) && // top side
-                    (platform.y + platform.height/2 - hypotenuse - this.style.wallHeight < player.y + 25) // bottom side
+                    (platform.x + platform.width/2 + platform.hypotenuse > player.x - 25) && // colliding with player from left
+                    (platform.x + platform.width/2 - platform.hypotenuse < player.x + 25) && // right side
+                    (platform.y + platform.height/2 + platform.hypotenuse > player.y - 73) && // top side
+                    (platform.y + platform.height/2 - platform.hypotenuse - this.style.wallHeight < player.y + 25) // bottom side
                 ) { // test for player overlap and rendering z-order tests
                     
                     this.wallsToCheck.push(platform) // for checking if player is colliding with walls in player.updatePos()
@@ -4756,7 +4677,6 @@ const Map = {
     },
 
 
-
     renderPlatform : function(platform) { // seperate function to render platforms so that it can be called at different times (ex. called after drawing player inorder to render infront)
         
         const ctx = canvasArea.ctx;        
@@ -4821,23 +4741,32 @@ const Map = {
         }
 
         // PLAFORM RENDERING DEBUG TEXT
-        // ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1 :  UserInterface.lightColor_1;
-        // ctx.font = "12px BAHNSCHRIFT"
-        // ctx.fillText("index: " + platform.index, 0, 0);
+        ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1 :  UserInterface.lightColor_1;
+        ctx.font = "12px BAHNSCHRIFT"
+        ctx.fillText("index: " + platform.index, 0, 0);
         // ctx.fillText("renderIndex: " + this.renderedPlatforms.indexOf(platform), 0, 0)
         // ctx.fillText("angle: " + platform.angle, 0, 20);
-        // ctx.fillText("position: " + platform.x + ", " + platform.y, 0 , 40)
+        ctx.fillText("position: " + platform.x + ", " + platform.y, 0 , 20)
         // ctx.fillText("width / height: " + platform.width + ", " + platform.height, 0 , 40)
 
         
         ctx.restore(); // #18 back to map origin translation
         
-        // Drawing split line for testing
+        // Drawing wall split line for testing player behind wall
         // if (platform.wall) {
         //     ctx.fillStyle = "#00FF00"
         //     ctx.fillRect(player.x, platform.getSplitLineY(player.x), 5, 5)
         // }
         
+
+        // Drawing split line
+        ctx.strokeStyle = "#00FF00"
+        ctx.lineWidth = 1
+        ctx.beginPath()
+        ctx.moveTo(platform.leftMostCornerX, platform.leftMostCornerY)
+        ctx.lineTo(platform.rightMostCornerX, platform.rightMostCornerY)
+        ctx.stroke()
+
     },
 
 
