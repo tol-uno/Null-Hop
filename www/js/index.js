@@ -249,7 +249,7 @@ class Button {
 
         const shrinkFactor = (this.hasToggleImage) ? 1 : 0.95 // doesnt need to be calculated every frame
 
-        if (this.image == null) { // dynamically draw button (no icon). Should KILL this. have svg for every button -- even blanks FALSE BAD BAD 
+        if (this.image == null) { // dynamically draw button (no icon)
 
             let x, y, w, h
 
@@ -346,9 +346,8 @@ class Button {
 
 
 class SliderUI {
-// KILL labelColor
 
-    constructor(x, y, width, min, max, decimalDetail, label, labelColor, variable, func) {
+    constructor(x, y, width, min, max, decimalDetail, label, variable, func) {
         this.x = eval(x);
         this.y = eval(y);
         this.width = width;
@@ -356,7 +355,6 @@ class SliderUI {
         this.max = max;
         this.decimalDetail = decimalDetail // 1 = whole numbers, 10 = 10ths place, 100 = 100ths place
         this.label = label;
-        // this.labelColor = labelColor; kill
         this.value = variable;
         this.variableToControl = String(variable);
         this.func = func;
@@ -496,7 +494,6 @@ class Vector {
         }
     }
 }
-
 
 
 const canvasArea = { //Canvas Object
@@ -814,12 +811,12 @@ const UserInterface = {
 
         })
 
-        btn_sensitivitySlider = new SliderUI(180, 100, 300, 0.1, 3, 10, "Sensitivity", "white", UserInterface.sensitivity, function() { 
+        btn_sensitivitySlider = new SliderUI(180, 100, 300, 0.1, 3, 10, "Sensitivity", UserInterface.sensitivity, function() { 
             UserInterface.sensitivity = this.value
             window.localStorage.setItem("sensitivity_storage", this.value)
         })
 
-        btn_volumeSlider = new SliderUI(180, 200, 300, 0, 1, 10, "Volume", "white", UserInterface.volume, function() { 
+        btn_volumeSlider = new SliderUI(180, 200, 300, 0, 1, 10, "Volume", UserInterface.volume, function() { 
             UserInterface.volume = this.value
             window.localStorage.setItem("volume_storage", this.value)
             AudioHandler.setVolumes();
@@ -1027,7 +1024,7 @@ const UserInterface = {
             UserInterface.renderedButtons = UserInterface.btnGroup_mapSettings
         })
 
-        btn_snappingSlider = new SliderUI("60", "canvasArea.canvas.height - 60", 170, 0, 50, 0.2, "Snapping", "white", MapEditor.loadedMap ? MapEditor.snapAmount : 0, function() {
+        btn_snappingSlider = new SliderUI("60", "canvasArea.canvas.height - 60", 170, 0, 50, 0.2, "Snapping", MapEditor.loadedMap ? MapEditor.snapAmount : 0, function() {
             MapEditor.snapAmount = this.value
         })
 
@@ -1174,18 +1171,18 @@ const UserInterface = {
             
         })
 
-        btn_angleSlider = new SliderUI("canvasArea.canvas.width - 250", "250", 170, -50, 50, 1, "Angle", "black", MapEditor.loadedMap ? MapEditor.loadedMap.platforms[MapEditor.selectedPlatformIndex] : 0, function() {
+        btn_angleSlider = new SliderUI("canvasArea.canvas.width - 250", "250", 170, -50, 50, 1, "Angle", MapEditor.loadedMap ? MapEditor.loadedMap.platforms[MapEditor.selectedPlatformIndex] : 0, function() {
             if (MapEditor.snapAmount > 0) {this.updateState(Math.round(this.value / MapEditor.snapAmount) * MapEditor.snapAmount)}
             MapEditor.loadedMap.platforms[MapEditor.selectedPlatformIndex].angle = this.value
         })
 
-        btn_playerAngleSlider = new SliderUI("canvasArea.canvas.width - 250", "250", 170, 0, 360, 1, "Angle", "black", MapEditor.loadedMap ? MapEditor.loadedMap.playerStart : 0, function() {
+        btn_playerAngleSlider = new SliderUI("canvasArea.canvas.width - 250", "250", 170, 0, 360, 1, "Angle", MapEditor.loadedMap ? MapEditor.loadedMap.playerStart : 0, function() {
             if (MapEditor.snapAmount > 0) {this.updateState(Math.round(this.value / MapEditor.snapAmount) * MapEditor.snapAmount)}
             MapEditor.loadedMap.playerStart.angle = this.value
             
         })
 
-        btn_checkpointAngleSlider = new SliderUI("canvasArea.canvas.width - 250", "280", 170, 0, 360, 1, "Angle", "black", MapEditor.loadedMap ? MapEditor.loadedMap.checkpoints[MapEditor.selectedCheckpointIndex[0]] : 0, function() {
+        btn_checkpointAngleSlider = new SliderUI("canvasArea.canvas.width - 250", "280", 170, 0, 360, 1, "Angle", MapEditor.loadedMap ? MapEditor.loadedMap.checkpoints[MapEditor.selectedCheckpointIndex[0]] : 0, function() {
             if (MapEditor.snapAmount > 0) {this.updateState(Math.round(this.value / MapEditor.snapAmount) * MapEditor.snapAmount)}
             MapEditor.loadedMap.checkpoints[MapEditor.selectedCheckpointIndex[0]].angle = this.value
         })
@@ -1242,22 +1239,22 @@ const UserInterface = {
 
 
         // MAP SETTINGS SLIDERS
-        btn_platformHeightSlider = new SliderUI("canvasArea.canvas.width - 650", "100", 460, 0, 200, 1, "Platform Height", "white", MapEditor.loadedMap ? MapEditor.loadedMap.style.platformHeight : 0, function() { 
+        btn_platformHeightSlider = new SliderUI("canvasArea.canvas.width - 650", "100", 460, 0, 200, 1, "Platform Height", MapEditor.loadedMap ? MapEditor.loadedMap.style.platformHeight : 0, function() { 
             MapEditor.loadedMap.style.platformHeight = this.value
             PreviewWindow.update()
         })
 
-        btn_wallHeightSlider = new SliderUI("canvasArea.canvas.width - 650", "200", 460, 0, 200, 1, "Wall Height", "white", MapEditor.loadedMap ? MapEditor.loadedMap.style.wallHeight : 0, function() { 
+        btn_wallHeightSlider = new SliderUI("canvasArea.canvas.width - 650", "200", 460, 0, 200, 1, "Wall Height", MapEditor.loadedMap ? MapEditor.loadedMap.style.wallHeight : 0, function() { 
             MapEditor.loadedMap.style.wallHeight = this.value
             PreviewWindow.update()
         })
 
-        btn_lightAngleSlider = new SliderUI("canvasArea.canvas.width - 650", "300", 460, 0, 360, 1, "Light Angle", "white", MapEditor.loadedMap ? MapEditor.loadedMap.style.lightAngle : 0, function() { 
+        btn_lightAngleSlider = new SliderUI("canvasArea.canvas.width - 650", "300", 460, 0, 360, 1, "Light Angle", MapEditor.loadedMap ? MapEditor.loadedMap.style.lightAngle : 0, function() { 
             MapEditor.loadedMap.style.lightAngle = this.value
             PreviewWindow.update()
         })
 
-        btn_shadowLengthSlider = new SliderUI("canvasArea.canvas.width - 660", "400", 460, 0, 200, 1, "Shadow Length", "white", MapEditor.loadedMap ? MapEditor.loadedMap.style.shadowLength : 0, function() { 
+        btn_shadowLengthSlider = new SliderUI("canvasArea.canvas.width - 660", "400", 460, 0, 200, 1, "Shadow Length", MapEditor.loadedMap ? MapEditor.loadedMap.style.shadowLength : 0, function() { 
             MapEditor.loadedMap.style.shadowLength = this.value
             PreviewWindow.update()
         })
@@ -1269,22 +1266,22 @@ const UserInterface = {
             ColorPicker.setFromHex()
         })
 
-        btn_hueSlider = new SliderUI("ColorPicker.x", "ColorPicker.y + 130", 300, 0, 360, 1, "Hue", "gray", ColorPicker.h, function() { 
+        btn_hueSlider = new SliderUI("ColorPicker.x", "ColorPicker.y + 130", 300, 0, 360, 1, "Hue", ColorPicker.h, function() { 
             ColorPicker.h = this.value
             ColorPicker.start()
         })
 
-        btn_saturationSlider = new SliderUI("ColorPicker.x", "ColorPicker.y + 200", 300, 0, 100, 1, "Saturation", "gray", ColorPicker.s, function() { 
+        btn_saturationSlider = new SliderUI("ColorPicker.x", "ColorPicker.y + 200", 300, 0, 100, 1, "Saturation", ColorPicker.s, function() { 
             ColorPicker.s = this.value
             ColorPicker.start()
         })
 
-        btn_lightnessSlider = new SliderUI("ColorPicker.x", "ColorPicker.y + 270", 300, 0, 100, 1, "Lightness", "gray", ColorPicker.l, function() { 
+        btn_lightnessSlider = new SliderUI("ColorPicker.x", "ColorPicker.y + 270", 300, 0, 100, 1, "Lightness", ColorPicker.l, function() { 
             ColorPicker.l = this.value
             ColorPicker.start()
         })
 
-        btn_alphaSlider = new SliderUI("ColorPicker.x", "ColorPicker.y + 340", 300, 0, 1, 100, "Alpha", "gray", ColorPicker.a, function() { 
+        btn_alphaSlider = new SliderUI("ColorPicker.x", "ColorPicker.y + 340", 300, 0, 1, 100, "Alpha", ColorPicker.a, function() { 
             ColorPicker.a = this.value
             ColorPicker.start()
         })
@@ -2577,25 +2574,24 @@ const MapBrowser = { // should set back to 0 at some points??
                 // Needs to do indexing stuff to get names of map selected (like in playMap Button)
                 ctx.fillText("Custom Map " + (this.selectedMapIndex + 1), canvasArea.canvas.width - 475, 110)
             } else {
-                ctx.font = "25px BAHNSCHRIFT";
-                ctx.fillText("Import or create custom", canvasArea.canvas.width - 475, 100)
-                ctx.fillText("maps in the Map Editor", canvasArea.canvas.width - 475, 130)
+                ctx.font = "30px BAHNSCHRIFT";
+                ctx.fillText("Import, Edit, & Create", canvasArea.canvas.width - 475, 100)
+                ctx.fillText("Custom Maps in the", canvasArea.canvas.width - 475, 140)
+                ctx.fillText("Map Editor", canvasArea.canvas.width - 475, 180)
+
             }
         }
 
 
-
         // Map BROWSER DEBUG TEXT
-        ctx.font = "15px BAHNSCHRIFT";
-        ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1: UserInterface.lightColor_1;
-        ctx.fillText("MapIndex: " + this.selectedMapIndex, 80, 200)
-        ctx.fillText("scrollAmount: " + this.scrollAmount, 80, 220)
-        ctx.fillText("scrollY: " + this.scrollY, 80, 240)
-        ctx.fillText("scrollVel: " + this.scrollVel, 80, 260)
-        ctx.fillText("scrollVelAverager: " + this.scrollVelAverager.frames, 80, 280)
-
-
-        ctx.fillText("maxScroll: " + this.maxScroll, 80, 300)
+        // ctx.font = "15px BAHNSCHRIFT";
+        // ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1: UserInterface.lightColor_1;
+        // ctx.fillText("MapIndex: " + this.selectedMapIndex, 80, 200)
+        // ctx.fillText("scrollAmount: " + this.scrollAmount, 80, 220)
+        // ctx.fillText("scrollY: " + this.scrollY, 80, 240)
+        // ctx.fillText("scrollVel: " + this.scrollVel, 80, 260)
+        // ctx.fillText("scrollVelAverager: " + this.scrollVelAverager.frames, 80, 280)
+        // ctx.fillText("maxScroll: " + this.maxScroll, 80, 300)
 
     }
 }
@@ -4034,7 +4030,7 @@ const MapEditor = {
             UserInterface.renderedButtons = UserInterface.btnGroup_mapEditorMenu
         }
 
-        function sortPlatforms(platforms) {  // returns array of sorted platforms
+        function sortPlatformsBACKUP(platforms) {  // returns array of sorted platforms
             const millis = Date.now()
 
             // create all generated properties for each platform
@@ -4171,6 +4167,174 @@ const MapEditor = {
             return sortedPlatforms
 
         }
+
+
+        function sortPlatforms(platforms) {  // returns array of sorted platforms
+            const millis = Date.now()
+
+            // create all generated properties for each platform
+            platforms.forEach( platform => {
+                platform.hypotenuse = Math.sqrt(platform.width * platform.width + platform.height * platform.height)/2
+                platform.angleRad = platform.angle * (Math.PI/180)
+                platform.corners = [ // order: BL BR TR TL
+                    // bot left corner        
+                    [
+                    -((platform.width / 2) * Math.cos(platform.angleRad)) - ((platform.height / 2) * Math.sin(platform.angleRad)),
+                    -((platform.width / 2) * Math.sin(platform.angleRad)) + ((platform.height / 2) * Math.cos(platform.angleRad))
+                    ],
+        
+                    // bot right corner
+                    [
+                    ((platform.width / 2) * Math.cos(platform.angleRad)) - ((platform.height / 2) * Math.sin(platform.angleRad)),
+                    ((platform.width / 2) * Math.sin(platform.angleRad)) + ((platform.height / 2) * Math.cos(platform.angleRad))
+                    ],
+        
+                    // top right corner
+                    [
+                    ((platform.width / 2) * Math.cos(platform.angleRad)) + ((platform.height / 2) * Math.sin(platform.angleRad)),
+                    ((platform.width / 2) * Math.sin(platform.angleRad)) - ((platform.height / 2) * Math.cos(platform.angleRad))
+                    ],
+                
+                    // top left corner
+                    [
+                    -((platform.width / 2) * Math.cos(platform.angleRad)) + ((platform.height / 2) * Math.sin(platform.angleRad)),
+                    -((platform.width / 2) * Math.sin(platform.angleRad)) - ((platform.height / 2) * Math.cos(platform.angleRad))
+                    ]
+                ]
+
+                function sortCornersX(a, b) {
+                    // if return is negative ... a comes first 
+                    // if return is positive ... b comes first
+                    // return is 0... nothing is changed
+                    if (a[0] < b[0]) {return -1;}
+                    if (a[0] > b[0]) {return 1;}
+                    return 0;
+                }
+
+                // toSorted() isnt supported by old safari i guess?
+                platform.cornersSorted = [...platform.corners]
+                platform.cornersSorted.sort(sortCornersX)
+
+                // Global coordinates of left and rightmost corners
+                platform.leftMostCornerX = platform.cornersSorted[0][0] + platform.x + platform.width/2
+                platform.leftMostCornerY = platform.cornersSorted[0][1] + platform.y + platform.height/2
+                
+                platform.rightMostCornerX = platform.cornersSorted[3][0] + platform.x + platform.width/2
+                platform.rightMostCornerY = platform.cornersSorted[3][1] + platform.y + platform.height/2
+
+
+                // Get global coordinates of top and bot corners
+                if (platform.cornersSorted[1][1] < platform.cornersSorted[2][1]) {
+                    platform.topCornerX = platform.cornersSorted[1][0] + platform.x + platform.width / 2
+                    platform.topCornerY = platform.cornersSorted[1][1] + platform.y + platform.height / 2
+                    platform.botCornerX = platform.cornersSorted[2][0] + platform.x + platform.width / 2
+                    platform.botCornerY = platform.cornersSorted[2][1] + platform.y + platform.height / 2
+                } else {
+                    platform.topCornerX = platform.cornersSorted[2][0] + platform.x + platform.width / 2
+                    platform.topCornerY = platform.cornersSorted[2][1] + platform.y + platform.height / 2
+                    platform.botCornerX = platform.cornersSorted[1][0] + platform.x + platform.width / 2
+                    platform.botCornerY = platform.cornersSorted[1][1] + platform.y + platform.height / 2
+                }
+
+
+                platform.getSplitLineY = function(x) {
+                    // y = mx + b
+                    // m = rise over run
+                    const slope = (this.rightMostCornerY - this.leftMostCornerY) / (this.rightMostCornerX - this.leftMostCornerX)
+                    // b = y - mx
+                    const b = this.rightMostCornerY - (slope * this.rightMostCornerX) 
+                    const y = slope * x + b
+
+                    if (x > this.rightMostCornerX) {return this.rightMostCornerY} // keeps y value within the platform's bounds...
+                    if (x < this.leftMostCornerX) {return this.leftMostCornerY} // ...doesnt extend the function past the corners
+                    return y
+
+                }
+
+
+            })
+
+
+            console.log("platforms.length = " + platforms.length)
+
+
+            function test_A_below_B(a, b) {
+                if (
+                    (a.x + a.width/2 <= b.x + b.width/2 && a.rightMostCornerY > b.getSplitLineY(a.rightMostCornerX)) ||  // a is to the left && a's rightCorner is below/infront of b
+                    (a.x + a.width/2 > b.x + b.width/2 && a.leftMostCornerY > b.getSplitLineY(a.leftMostCornerX)) // a is to the right && a's leftCorner is below/infront of b
+                ) {
+                    return true // a is below/infront of b
+                } else {
+                    return false // a is NOT below/infront of b
+                }
+            }
+
+
+            // CREATE ADJACENCY (occludes) LIST WITHIN PLATFORM OBJECTS
+
+            platforms.forEach((platform1, i) => {
+                platform1.occludes = []
+                const platform1_adjustedHeight = platform1.wall ? downloadMap.style.wallHeight : 0
+
+                platforms.forEach((platform2, i) => {
+
+                    const platform2_adjustedHeight = platform2.wall ? downloadMap.style.wallHeight : 0
+
+                    // CLOSE ENOUGH TO TEST FOR OCCLUSION 
+                    if ( // also should exclude checking if platform2 is already occluding platform1 -- they cant occlude each other
+                        (platform1 !== platform2) &&
+                        (platform1.rightMostCornerX >= platform2.leftMostCornerX && platform1.leftMostCornerX <= platform2.rightMostCornerX) && // infront of each other horizontally
+
+                        (platform1.topCornerY - platform1_adjustedHeight <= platform2.botCornerY + downloadMap.style.platformHeight) &&
+                        (platform1.botCornerY + downloadMap.style.platformHeight >= platform2.topCornerY - platform2_adjustedHeight)
+                    ) {
+                        if (test_A_below_B(platform1, platform2)) {
+                            platform1.occludes.push(platforms.indexOf(platform2))
+                        }
+
+                    }
+                })
+            })
+
+
+
+            function topologicalSort(platforms) {
+                const visited = new Set(); // list of all the already visited platforms. Set is quick to search through and prevents duplicates
+                const sorted = [];
+
+
+
+                function dfs(platform) { // Depth-First Search
+                    visited.add(platform);
+
+                    platform.occludes.forEach((occluded_platform_index) => { // loop through each platform that is occluded by this "key" platform
+                        if (!visited.has(platforms[occluded_platform_index])) { // if havent visited this constraint_platform
+                            dfs(platforms[occluded_platform_index]); // recursive call of dfs to go deeper into the tree
+                        }
+                    })
+
+                    sorted.push(platform); // if cant go deeper then add this platform to the sorted array
+                }
+
+
+                platforms.forEach((platform, i) => { // loop through each platform in platforms array
+                    if (!visited.has(platform)) {
+                        dfs(platform);
+                    }
+                })
+
+                return sorted;
+            }
+
+
+            const sortedPlatforms = topologicalSort(platforms);
+
+            console.log("finished sort in: " + (Date.now() - millis) + "ms")
+
+            // sort the actual platforms based on these sorted indexes
+            return sortedPlatforms
+        }
+
 
         function writeCustomMap(exportObj, exportName) {
             console.log("WRITING MAP NOW!")
@@ -4494,35 +4658,6 @@ const Map = {
             clipToUse.closePath()
 
 
-            /* KILL KILL
-            // SORT CORNERS AFTER CREATING SHADOW and behindWall CLIP. called bellow
-            function sortCornersX(a, b) {
-                // if return is negative ... a comes first 
-                // if return is positive ... b comes first
-                // return is 0... nothing is changed
-                if (a[0] < b[0]) {return -1;}
-                if (a[0] > b[0]) {return 1;}
-                return 0;
-            }
-
-            // platform.corners stays the same(counterclockwise order) for use later is extending the sides. order: BL BR TR TL
-            // Line below used toSorted which isnt supported by old safari i guess?..
-            // platform.cornersSorted = platform.corners.toSorted(sortCornersX)
-            platform.cornersSorted = platform.corners
-            platform.cornersSorted.sort(sortCornersX)
-
-
-            // GETTING FURTHEST RIGHT/LEFT CORNERS
-            // get platform.corner x for LEFT MOST corner (start of corners array) NOTE: corner array is in local space
-            platform.leftMostPlatformCornerX = platform.cornersSorted[0][0] + platform.x + platform.width/2 // platform corners are relative to the platforms middle
-            platform.leftMostPlatformCornerY = platform.cornersSorted[0][1] + platform.y + platform.height/2
-            
-            // get platform.corner x for RIGHT MOST corner (end of corners array) NOTE: corner array is in local space
-            platform.rightMostPlatformCornerX = platform.cornersSorted[3][0] + platform.x + platform.width/2 // platform corners are relative to the platforms middle
-            platform.rightMostPlatformCornerY = platform.cornersSorted[3][1] + platform.y + platform.height/2
-
-            */
-
             platform.getSplitLineY = function(x) {
                 // y = mx + b
                 // m = rise over run
@@ -4740,19 +4875,22 @@ const Map = {
             ctx.fill();
         }
 
+
         // PLAFORM RENDERING DEBUG TEXT
-        ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1 :  UserInterface.lightColor_1;
-        ctx.font = "12px BAHNSCHRIFT"
-        ctx.fillText("index: " + platform.index, 0, 0);
-        // ctx.fillText("renderIndex: " + this.renderedPlatforms.indexOf(platform), 0, 0)
-        // ctx.fillText("angle: " + platform.angle, 0, 20);
-        ctx.fillText("position: " + platform.x + ", " + platform.y, 0 , 20)
-        // ctx.fillText("width / height: " + platform.width + ", " + platform.height, 0 , 40)
+        if (UserInterface.debugText) {
+            ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1 :  UserInterface.lightColor_1;
+            ctx.font = "12px BAHNSCHRIFT"
+            ctx.fillText(platform.index, 0 - canvasArea.ctx.measureText(platform.index).width / 2, 0);
+            // ctx.fillText("renderIndex: " + this.renderedPlatforms.indexOf(platform), 0, 0)
+            // ctx.fillText("angle: " + platform.angle, 0, 20);
+            // ctx.fillText("position: " + platform.x + ", " + platform.y, 0 , 20)
+            // ctx.fillText("width / height: " + platform.width + ", " + platform.height, 0 , 40)
+        }
 
         
         ctx.restore(); // #18 back to map origin translation
         
-        // Drawing wall split line for testing player behind wall
+        // Drawing wall split line
         // if (platform.wall) {
         //     ctx.fillStyle = "#00FF00"
         //     ctx.fillRect(player.x, platform.getSplitLineY(player.x), 5, 5)
@@ -4760,12 +4898,12 @@ const Map = {
         
 
         // Drawing split line
-        ctx.strokeStyle = "#00FF00"
-        ctx.lineWidth = 1
-        ctx.beginPath()
-        ctx.moveTo(platform.leftMostCornerX, platform.leftMostCornerY)
-        ctx.lineTo(platform.rightMostCornerX, platform.rightMostCornerY)
-        ctx.stroke()
+        // ctx.strokeStyle = "#00FF00"
+        // ctx.lineWidth = 1
+        // ctx.beginPath()
+        // ctx.moveTo(platform.leftMostCornerX, platform.leftMostCornerY)
+        // ctx.lineTo(platform.rightMostCornerX, platform.rightMostCornerY)
+        // ctx.stroke()
 
     },
 
