@@ -1,6 +1,6 @@
 {
     "Awakening": {
-        "yourRecord": -1,
+        "yourRecord": null,
         "leaderboard": {
         
             "Eva": 12200,
@@ -8,25 +8,19 @@
             "Kiwi": 15999,
             "Wes": 16244,
             "Philip": 19283,
-            "Randy": 21033,
             "Goknak": 22330,
-            "Gordon": 23898,
-            "Arcane": 24666,
             "Phoon": 30203
 
         }
     },
 
     "Cavern Abyss": {
-        "yourRecord": -1,
+        "yourRecord": null,
         "leaderboard": {
         
             "Philip": 30283,
-            "Kiwi": 34999,
             "Quincy": 42142,
             "Randy": 48033,
-            "Eva": 55200,
-            "Phoon": 70203,
             "Wes": 71244,
             "Gordon": 80898,
             "Arcane": 81666,

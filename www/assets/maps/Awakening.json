@@ -25,9 +25,9 @@
         },
         {
             "triggerX1": -500,
-            "triggerY1": 2260,
+            "triggerY1": 2330,
             "triggerX2": 530,
-            "triggerY2": 2260,
+            "triggerY2": 2330,
             "x": 10,
             "y": 2250,
             "angle": 270
@@ -67,15 +67,6 @@
             "x": -504,
             "y": 4186,
             "angle": 316
-        },
-        {
-            "triggerX1": 0,
-            "triggerY1": 5600,
-            "triggerX2": 200,
-            "triggerY2": 5600,
-            "x": 110,
-            "y": 5610,
-            "angle": 270
         }
     ],
     "style": {
@@ -86,13 +77,12 @@
         "endZoneTopColor": "rgba(255,218,98,1)",
         "endZoneSideColor": "rgba(255,218,98,1)",
         "backgroundColor": "rgba(96,178,195,1)",
-        "shadowColor": "rgba(7,7,10,0.25)",
         "playerColor": "rgba(239,238,236,1)",
+        "directLight": "rba(255,255,255)",
+        "ambientLight": "rba(140,184,198)",
         "platformHeight": 15,
         "wallHeight": 50,
         "lightAngle": 190,
-        "shadowContrastLight": -0.005,
-        "shadowContrastDark": -0.4,
         "shadowLength": 13
     },
     "platforms": [
@@ -104,7 +94,27 @@
             "angle": 0,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 28.284271247461902,
+            "angleRad": 0,
             "corners": [
+                [
+                    -20,
+                    20
+                ],
+                [
+                    20,
+                    20
+                ],
+                [
+                    20,
+                    -20
+                ],
+                [
+                    -20,
+                    -20
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -20,
                     20
@@ -122,37 +132,15 @@
                     -20
                 ]
             ],
-            "rightMostPlatformCornerX": 360,
-            "rightMostPlatformCornerY": 60
-        },
-        {
-            "x": 320,
-            "y": 120,
-            "width": 40,
-            "height": 40,
-            "angle": 0,
-            "endzone": 0,
-            "wall": 0,
-            "corners": [
-                [
-                    -20,
-                    20
-                ],
-                [
-                    -20,
-                    -20
-                ],
-                [
-                    20,
-                    20
-                ],
-                [
-                    20,
-                    -20
-                ]
-            ],
-            "rightMostPlatformCornerX": 360,
-            "rightMostPlatformCornerY": 120
+            "leftMostCornerX": 320,
+            "leftMostCornerY": 100,
+            "rightMostCornerX": 360,
+            "rightMostCornerY": 60,
+            "topCornerX": 320,
+            "topCornerY": 60,
+            "botCornerX": 360,
+            "botCornerY": 100,
+            "occludes": []
         },
         {
             "x": 380,
@@ -162,7 +150,27 @@
             "angle": 0,
             "endzone": 1,
             "wall": 0,
+            "hypotenuse": 120.41594578792295,
+            "angleRad": 0,
             "corners": [
+                [
+                    -90,
+                    80
+                ],
+                [
+                    90,
+                    80
+                ],
+                [
+                    90,
+                    -80
+                ],
+                [
+                    -90,
+                    -80
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -90,
                     80
@@ -180,10 +188,15 @@
                     -80
                 ]
             ],
-            "leftMostPlatformCornerX": 380,
-            "leftMostPlatformCornerY": 160,
-            "rightMostPlatformCornerX": 560,
-            "rightMostPlatformCornerY": 0
+            "leftMostCornerX": 380,
+            "leftMostCornerY": 160,
+            "rightMostCornerX": 560,
+            "rightMostCornerY": 0,
+            "topCornerX": 380,
+            "topCornerY": 0,
+            "botCornerX": 560,
+            "botCornerY": 160,
+            "occludes": []
         },
         {
             "x": 580,
@@ -193,7 +206,27 @@
             "angle": 0,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 28.284271247461902,
+            "angleRad": 0,
             "corners": [
+                [
+                    -20,
+                    20
+                ],
+                [
+                    20,
+                    20
+                ],
+                [
+                    20,
+                    -20
+                ],
+                [
+                    -20,
+                    -20
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -20,
                     20
@@ -211,8 +244,71 @@
                     -20
                 ]
             ],
-            "leftMostPlatformCornerX": 580,
-            "leftMostPlatformCornerY": 100
+            "leftMostCornerX": 580,
+            "leftMostCornerY": 100,
+            "rightMostCornerX": 620,
+            "rightMostCornerY": 60,
+            "topCornerX": 580,
+            "topCornerY": 60,
+            "botCornerX": 620,
+            "botCornerY": 100,
+            "occludes": []
+        },
+        {
+            "x": 320,
+            "y": 120,
+            "width": 40,
+            "height": 40,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "hypotenuse": 28.284271247461902,
+            "angleRad": 0,
+            "corners": [
+                [
+                    -20,
+                    20
+                ],
+                [
+                    20,
+                    20
+                ],
+                [
+                    20,
+                    -20
+                ],
+                [
+                    -20,
+                    -20
+                ]
+            ],
+            "cornersSorted": [
+                [
+                    -20,
+                    20
+                ],
+                [
+                    -20,
+                    -20
+                ],
+                [
+                    20,
+                    20
+                ],
+                [
+                    20,
+                    -20
+                ]
+            ],
+            "leftMostCornerX": 320,
+            "leftMostCornerY": 160,
+            "rightMostCornerX": 360,
+            "rightMostCornerY": 120,
+            "topCornerX": 320,
+            "topCornerY": 120,
+            "botCornerX": 360,
+            "botCornerY": 160,
+            "occludes": []
         },
         {
             "x": 580,
@@ -222,7 +318,27 @@
             "angle": 0,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 28.284271247461902,
+            "angleRad": 0,
             "corners": [
+                [
+                    -20,
+                    20
+                ],
+                [
+                    20,
+                    20
+                ],
+                [
+                    20,
+                    -20
+                ],
+                [
+                    -20,
+                    -20
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -20,
                     20
@@ -240,8 +356,15 @@
                     -20
                 ]
             ],
-            "leftMostPlatformCornerX": 580,
-            "leftMostPlatformCornerY": 160
+            "leftMostCornerX": 580,
+            "leftMostCornerY": 160,
+            "rightMostCornerX": 620,
+            "rightMostCornerY": 120,
+            "topCornerX": 580,
+            "topCornerY": 120,
+            "botCornerX": 620,
+            "botCornerY": 160,
+            "occludes": []
         },
         {
             "x": 640,
@@ -251,7 +374,27 @@
             "angle": 0,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 28.284271247461902,
+            "angleRad": 0,
             "corners": [
+                [
+                    -20,
+                    20
+                ],
+                [
+                    20,
+                    20
+                ],
+                [
+                    20,
+                    -20
+                ],
+                [
+                    -20,
+                    -20
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -20,
                     20
@@ -269,8 +412,15 @@
                     -20
                 ]
             ],
-            "leftMostPlatformCornerX": 640,
-            "leftMostPlatformCornerY": 160
+            "leftMostCornerX": 640,
+            "leftMostCornerY": 160,
+            "rightMostCornerX": 680,
+            "rightMostCornerY": 120,
+            "topCornerX": 640,
+            "topCornerY": 120,
+            "botCornerX": 680,
+            "botCornerY": 160,
+            "occludes": []
         },
         {
             "x": 260,
@@ -280,7 +430,27 @@
             "angle": 0,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 28.284271247461902,
+            "angleRad": 0,
             "corners": [
+                [
+                    -20,
+                    20
+                ],
+                [
+                    20,
+                    20
+                ],
+                [
+                    20,
+                    -20
+                ],
+                [
+                    -20,
+                    -20
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -20,
                     20
@@ -298,8 +468,15 @@
                     -20
                 ]
             ],
-            "rightMostPlatformCornerX": 300,
-            "rightMostPlatformCornerY": 120
+            "leftMostCornerX": 260,
+            "leftMostCornerY": 160,
+            "rightMostCornerX": 300,
+            "rightMostCornerY": 120,
+            "topCornerX": 260,
+            "topCornerY": 120,
+            "botCornerX": 300,
+            "botCornerY": 160,
+            "occludes": []
         },
         {
             "x": 210,
@@ -309,7 +486,27 @@
             "angle": 0,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 268.79360111431225,
+            "angleRad": 0,
             "corners": [
+                [
+                    -255,
+                    85
+                ],
+                [
+                    255,
+                    85
+                ],
+                [
+                    255,
+                    -85
+                ],
+                [
+                    -255,
+                    -85
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -255,
                     85
@@ -327,10 +524,15 @@
                     -85
                 ]
             ],
-            "leftMostPlatformCornerX": 210,
-            "leftMostPlatformCornerY": 360,
-            "rightMostPlatformCornerX": 720,
-            "rightMostPlatformCornerY": 190
+            "leftMostCornerX": 210,
+            "leftMostCornerY": 360,
+            "rightMostCornerX": 720,
+            "rightMostCornerY": 190,
+            "topCornerX": 210,
+            "topCornerY": 190,
+            "botCornerX": 720,
+            "botCornerY": 360,
+            "occludes": []
         },
         {
             "x": 210,
@@ -340,7 +542,27 @@
             "angle": 0,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 178.88543819998318,
+            "angleRad": 0,
             "corners": [
+                [
+                    -160,
+                    80
+                ],
+                [
+                    160,
+                    80
+                ],
+                [
+                    160,
+                    -80
+                ],
+                [
+                    -160,
+                    -80
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -160,
                     80
@@ -358,8 +580,15 @@
                     -80
                 ]
             ],
-            "rightMostPlatformCornerX": 530,
-            "rightMostPlatformCornerY": 380
+            "leftMostCornerX": 210,
+            "leftMostCornerY": 540,
+            "rightMostCornerX": 530,
+            "rightMostCornerY": 380,
+            "topCornerX": 210,
+            "topCornerY": 380,
+            "botCornerX": 530,
+            "botCornerY": 540,
+            "occludes": []
         },
         {
             "x": 550,
@@ -369,7 +598,27 @@
             "angle": 0,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 116.72617529928752,
+            "angleRad": 0,
             "corners": [
+                [
+                    -85,
+                    80
+                ],
+                [
+                    85,
+                    80
+                ],
+                [
+                    85,
+                    -80
+                ],
+                [
+                    -85,
+                    -80
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -85,
                     80
@@ -387,41 +636,15 @@
                     -80
                 ]
             ],
-            "leftMostPlatformCornerX": 550,
-            "leftMostPlatformCornerY": 540,
-            "rightMostPlatformCornerX": 720,
-            "rightMostPlatformCornerY": 380
-        },
-        {
-            "x": 370,
-            "y": 560,
-            "width": 80,
-            "height": 280,
-            "angle": 0,
-            "endzone": 0,
-            "wall": 1,
-            "corners": [
-                [
-                    -40,
-                    140
-                ],
-                [
-                    -40,
-                    -140
-                ],
-                [
-                    40,
-                    140
-                ],
-                [
-                    40,
-                    -140
-                ]
-            ],
-            "rightMostPlatformCornerX": 450,
-            "rightMostPlatformCornerY": 560,
-            "leftMostPlatformCornerX": 370,
-            "leftMostPlatformCornerY": 840
+            "leftMostCornerX": 550,
+            "leftMostCornerY": 540,
+            "rightMostCornerX": 720,
+            "rightMostCornerY": 380,
+            "topCornerX": 550,
+            "topCornerY": 380,
+            "botCornerX": 720,
+            "botCornerY": 540,
+            "occludes": []
         },
         {
             "x": 470,
@@ -431,7 +654,27 @@
             "angle": 0,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 187.41664813991312,
+            "angleRad": 0,
             "corners": [
+                [
+                    -130,
+                    135
+                ],
+                [
+                    130,
+                    135
+                ],
+                [
+                    130,
+                    -135
+                ],
+                [
+                    -130,
+                    -135
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -130,
                     135
@@ -449,10 +692,73 @@
                     -135
                 ]
             ],
-            "leftMostPlatformCornerX": 470,
-            "leftMostPlatformCornerY": 830,
-            "rightMostPlatformCornerX": 730,
-            "rightMostPlatformCornerY": 560
+            "leftMostCornerX": 470,
+            "leftMostCornerY": 830,
+            "rightMostCornerX": 730,
+            "rightMostCornerY": 560,
+            "topCornerX": 470,
+            "topCornerY": 560,
+            "botCornerX": 730,
+            "botCornerY": 830,
+            "occludes": []
+        },
+        {
+            "x": 370,
+            "y": 560,
+            "width": 80,
+            "height": 280,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 1,
+            "hypotenuse": 145.60219778561037,
+            "angleRad": 0,
+            "corners": [
+                [
+                    -40,
+                    140
+                ],
+                [
+                    40,
+                    140
+                ],
+                [
+                    40,
+                    -140
+                ],
+                [
+                    -40,
+                    -140
+                ]
+            ],
+            "cornersSorted": [
+                [
+                    -40,
+                    140
+                ],
+                [
+                    -40,
+                    -140
+                ],
+                [
+                    40,
+                    140
+                ],
+                [
+                    40,
+                    -140
+                ]
+            ],
+            "leftMostCornerX": 370,
+            "leftMostCornerY": 840,
+            "rightMostCornerX": 450,
+            "rightMostCornerY": 560,
+            "topCornerX": 370,
+            "topCornerY": 560,
+            "botCornerX": 450,
+            "botCornerY": 840,
+            "occludes": [
+                8
+            ]
         },
         {
             "x": 750,
@@ -462,7 +768,27 @@
             "angle": 0,
             "endzone": 0,
             "wall": 1,
+            "hypotenuse": 147.05441169852742,
+            "angleRad": 0,
             "corners": [
+                [
+                    -45,
+                    140
+                ],
+                [
+                    45,
+                    140
+                ],
+                [
+                    45,
+                    -140
+                ],
+                [
+                    -45,
+                    -140
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -45,
                     140
@@ -480,8 +806,15 @@
                     -140
                 ]
             ],
-            "leftMostPlatformCornerX": 750,
-            "leftMostPlatformCornerY": 840
+            "leftMostCornerX": 750,
+            "leftMostCornerY": 840,
+            "rightMostCornerX": 840,
+            "rightMostCornerY": 560,
+            "topCornerX": 750,
+            "topCornerY": 560,
+            "botCornerX": 840,
+            "botCornerY": 840,
+            "occludes": []
         },
         {
             "x": 476,
@@ -491,7 +824,27 @@
             "angle": 22,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 22.102036105300343,
+            "angleRad": 0.3839724354387525,
             "corners": [
+                [
+                    -19.07259742143009,
+                    11.168528443803968
+                ],
+                [
+                    5.96136665187317,
+                    21.28290646603359
+                ],
+                [
+                    19.07259742143009,
+                    -11.168528443803968
+                ],
+                [
+                    -5.96136665187317,
+                    -21.28290646603359
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -19.07259742143009,
                     11.168528443803968
@@ -509,8 +862,15 @@
                     -11.168528443803968
                 ]
             ],
-            "rightMostPlatformCornerX": 508.5725974214301,
-            "rightMostPlatformCornerY": 857.331471556196
+            "leftMostCornerX": 470.4274025785699,
+            "leftMostCornerY": 879.668528443804,
+            "rightMostCornerX": 508.5725974214301,
+            "rightMostCornerY": 857.331471556196,
+            "topCornerX": 483.53863334812684,
+            "topCornerY": 847.2170935339664,
+            "botCornerX": 495.46136665187316,
+            "botCornerY": 889.7829064660336,
+            "occludes": []
         },
         {
             "x": 518,
@@ -520,7 +880,27 @@
             "angle": 22,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 42.38513890504548,
+            "angleRad": 0.3839724354387525,
             "corners": [
+                [
+                    -26.76136521542928,
+                    32.86836369225599
+                ],
+                [
+                    -3.581768851259593,
+                    42.233528527653796
+                ],
+                [
+                    26.76136521542928,
+                    -32.86836369225599
+                ],
+                [
+                    3.581768851259593,
+                    -42.233528527653796
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -26.76136521542928,
                     32.86836369225599
@@ -538,10 +918,17 @@
                     -32.86836369225599
                 ]
             ],
-            "rightMostPlatformCornerX": 557.2613652154292,
-            "rightMostPlatformCornerY": 857.631636307744,
-            "leftMostPlatformCornerX": 503.7386347845707,
-            "leftMostPlatformCornerY": 923.368363692256
+            "leftMostCornerX": 503.7386347845707,
+            "leftMostCornerY": 923.368363692256,
+            "rightMostCornerX": 557.2613652154292,
+            "rightMostCornerY": 857.631636307744,
+            "topCornerX": 534.0817688512595,
+            "topCornerY": 848.2664714723462,
+            "botCornerX": 526.9182311487405,
+            "botCornerY": 932.7335285276538,
+            "occludes": [
+                13
+            ]
         },
         {
             "x": 562,
@@ -551,7 +938,27 @@
             "angle": 22,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 62.93846200853656,
+            "angleRad": 0.3839724354387525,
             "corners": [
+                [
+                    -37.22235194415584,
+                    50.751812930627395
+                ],
+                [
+                    -8.479652452585428,
+                    62.36461732652067
+                ],
+                [
+                    37.22235194415584,
+                    -50.751812930627395
+                ],
+                [
+                    8.479652452585428,
+                    -62.36461732652067
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -37.22235194415584,
                     50.751812930627395
@@ -569,10 +976,17 @@
                     -50.751812930627395
                 ]
             ],
-            "leftMostPlatformCornerX": 540.2776480558441,
-            "leftMostPlatformCornerY": 958.7518129306274,
-            "rightMostPlatformCornerX": 614.7223519441559,
-            "rightMostPlatformCornerY": 857.2481870693726
+            "leftMostCornerX": 540.2776480558441,
+            "leftMostCornerY": 958.7518129306274,
+            "rightMostCornerX": 614.7223519441559,
+            "rightMostCornerY": 857.2481870693726,
+            "topCornerX": 585.9796524525855,
+            "topCornerY": 845.6353826734793,
+            "botCornerX": 569.0203475474145,
+            "botCornerY": 970.3646173265207,
+            "occludes": [
+                14
+            ]
         },
         {
             "x": 612,
@@ -582,7 +996,27 @@
             "angle": 22,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 80.9027193609708,
+            "angleRad": 0.3839724354387525,
             "corners": [
+                [
+                    -43.68898199506681,
+                    68.09201753682092
+                ],
+                [
+                    -15.873466358063194,
+                    79.33021533929829
+                ],
+                [
+                    43.68898199506681,
+                    -68.09201753682092
+                ],
+                [
+                    15.873466358063194,
+                    -79.33021533929829
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -43.68898199506681,
                     68.09201753682092
@@ -600,10 +1034,17 @@
                     -68.09201753682092
                 ]
             ],
-            "leftMostPlatformCornerX": 583.3110180049332,
-            "leftMostPlatformCornerY": 993.5920175368209,
-            "rightMostPlatformCornerX": 670.6889819950668,
-            "rightMostPlatformCornerY": 857.4079824631791
+            "leftMostCornerX": 583.3110180049332,
+            "leftMostCornerY": 993.5920175368209,
+            "rightMostCornerX": 670.6889819950668,
+            "rightMostCornerY": 857.4079824631791,
+            "topCornerX": 642.8734663580632,
+            "topCornerY": 846.1697846607017,
+            "botCornerX": 611.1265336419368,
+            "botCornerY": 1004.8302153392983,
+            "occludes": [
+                15
+            ]
         },
         {
             "x": 282,
@@ -613,7 +1054,27 @@
             "angle": 45,
             "endzone": 0,
             "wall": 1,
+            "hypotenuse": 108.08908363012428,
+            "angleRad": 0.7853981633974483,
             "corners": [
+                [
+                    -98.64139597552338,
+                    44.194173824159236
+                ],
+                [
+                    -44.19417382415921,
+                    98.64139597552338
+                ],
+                [
+                    98.64139597552338,
+                    -44.194173824159236
+                ],
+                [
+                    44.19417382415921,
+                    -98.64139597552338
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -98.64139597552338,
                     44.194173824159236
@@ -631,8 +1092,17 @@
                     -44.194173824159236
                 ]
             ],
-            "rightMostPlatformCornerX": 419.1413959755234,
-            "rightMostPlatformCornerY": 903.8058261758408
+            "leftMostCornerX": 221.85860402447662,
+            "leftMostCornerY": 992.1941738241592,
+            "rightMostCornerX": 419.1413959755234,
+            "rightMostCornerY": 903.8058261758408,
+            "topCornerX": 364.6941738241592,
+            "topCornerY": 849.3586040244766,
+            "botCornerX": 276.3058261758408,
+            "botCornerY": 1046.6413959755234,
+            "occludes": [
+                11
+            ]
         },
         {
             "x": 656,
@@ -642,7 +1112,27 @@
             "angle": 22,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 107.77870847249933,
+            "angleRad": 0.3839724354387525,
             "corners": [
+                [
+                    -57.78838406613903,
+                    90.97666001246918
+                ],
+                [
+                    -21.62821373803432,
+                    105.58631715568976
+                ],
+                [
+                    57.78838406613903,
+                    -90.97666001246918
+                ],
+                [
+                    21.62821373803432,
+                    -105.58631715568976
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -57.78838406613903,
                     90.97666001246918
@@ -660,41 +1150,17 @@
                     -90.97666001246918
                 ]
             ],
-            "leftMostPlatformCornerX": 617.7116159338609,
-            "leftMostPlatformCornerY": 1042.9766600124692,
-            "rightMostPlatformCornerX": 733.2883840661391,
-            "rightMostPlatformCornerY": 861.0233399875308
-        },
-        {
-            "x": 330,
-            "y": 950,
-            "width": 250,
-            "height": 230,
-            "angle": 45,
-            "endzone": 0,
-            "wall": 0,
-            "corners": [
-                [
-                    -169.7056274847714,
-                    -7.071067811865461
-                ],
-                [
-                    -7.07106781186549,
-                    -169.7056274847714
-                ],
-                [
-                    7.07106781186549,
-                    169.7056274847714
-                ],
-                [
-                    169.7056274847714,
-                    7.071067811865461
-                ]
-            ],
-            "rightMostPlatformCornerX": 624.7056274847714,
-            "rightMostPlatformCornerY": 1072.0710678118653,
-            "leftMostPlatformCornerX": 285.2943725152286,
-            "leftMostPlatformCornerY": 1057.9289321881347
+            "leftMostCornerX": 617.7116159338609,
+            "leftMostCornerY": 1042.9766600124692,
+            "rightMostCornerX": 733.2883840661391,
+            "rightMostCornerY": 861.0233399875308,
+            "topCornerX": 697.1282137380343,
+            "topCornerY": 846.4136828443102,
+            "botCornerX": 653.8717862619657,
+            "botCornerY": 1057.5863171556898,
+            "occludes": [
+                16
+            ]
         },
         {
             "x": 704,
@@ -704,7 +1170,27 @@
             "angle": 22,
             "endzone": 0,
             "wall": 1,
+            "hypotenuse": 136.59154439422667,
+            "angleRad": 0.3839724354387525,
             "corners": [
+                [
+                    -93.19434953430135,
+                    99.86021837988571
+                ],
+                [
+                    -2.3303317867561972,
+                    136.5716645346451
+                ],
+                [
+                    93.19434953430135,
+                    -99.86021837988571
+                ],
+                [
+                    2.3303317867561972,
+                    -136.5716645346451
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -93.19434953430135,
                     99.86021837988571
@@ -722,41 +1208,83 @@
                     -99.86021837988571
                 ]
             ],
-            "leftMostPlatformCornerX": 659.8056504656986,
-            "leftMostPlatformCornerY": 1090.3602183798857,
-            "rightMostPlatformCornerX": 846.1943495343014,
-            "rightMostPlatformCornerY": 890.6397816201143
+            "leftMostCornerX": 659.8056504656986,
+            "leftMostCornerY": 1090.3602183798857,
+            "rightMostCornerX": 846.1943495343014,
+            "rightMostCornerY": 890.6397816201143,
+            "topCornerX": 755.3303317867562,
+            "topCornerY": 853.9283354653548,
+            "botCornerX": 750.6696682132438,
+            "botCornerY": 1127.0716645346452,
+            "occludes": [
+                10,
+                12,
+                16,
+                18
+            ]
         },
         {
-            "x": 110,
-            "y": 1130,
-            "width": 430,
-            "height": 120,
+            "x": 330,
+            "y": 950,
+            "width": 250,
+            "height": 230,
             "angle": 45,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 169.85287751463028,
+            "angleRad": 0.7853981633974483,
             "corners": [
                 [
-                    -194.45436482630058,
-                    -109.60155108391484
+                    -169.7056274847714,
+                    -7.071067811865461
                 ],
                 [
-                    -109.60155108391487,
-                    -194.45436482630055
+                    7.07106781186549,
+                    169.7056274847714
                 ],
                 [
-                    109.60155108391487,
-                    194.45436482630055
+                    169.7056274847714,
+                    7.071067811865461
                 ],
                 [
-                    194.45436482630058,
-                    109.60155108391484
+                    -7.07106781186549,
+                    -169.7056274847714
                 ]
             ],
-            "rightMostPlatformCornerX": 519.4543648263005,
-            "rightMostPlatformCornerY": 1299.6015510839147,
-            "leftMostPlatformCornerX": 130.54563517369942,
-            "leftMostPlatformCornerY": 1080.3984489160853
+            "cornersSorted": [
+                [
+                    -169.7056274847714,
+                    -7.071067811865461
+                ],
+                [
+                    -7.07106781186549,
+                    -169.7056274847714
+                ],
+                [
+                    7.07106781186549,
+                    169.7056274847714
+                ],
+                [
+                    169.7056274847714,
+                    7.071067811865461
+                ]
+            ],
+            "leftMostCornerX": 285.2943725152286,
+            "leftMostCornerY": 1057.9289321881347,
+            "rightMostCornerX": 624.7056274847714,
+            "rightMostCornerY": 1072.0710678118653,
+            "topCornerX": 447.9289321881345,
+            "topCornerY": 895.2943725152286,
+            "botCornerX": 462.0710678118655,
+            "botCornerY": 1234.7056274847714,
+            "occludes": [
+                13,
+                14,
+                15,
+                16,
+                17,
+                18
+            ]
         },
         {
             "x": 546,
@@ -766,7 +1294,27 @@
             "angle": 45,
             "endzone": 0,
             "wall": 1,
+            "hypotenuse": 115.5995242204742,
+            "angleRad": 0.7853981633974483,
             "corners": [
+                [
+                    -104.29825022501576,
+                    49.85102807365162
+                ],
+                [
+                    -49.85102807365159,
+                    104.29825022501576
+                ],
+                [
+                    104.29825022501576,
+                    -49.85102807365162
+                ],
+                [
+                    49.85102807365159,
+                    -104.29825022501576
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -104.29825022501576,
                     49.85102807365162
@@ -784,10 +1332,79 @@
                     -49.85102807365162
                 ]
             ],
-            "rightMostPlatformCornerX": 688.7982502250157,
-            "rightMostPlatformCornerY": 1139.1489719263484,
-            "leftMostPlatformCornerX": 480.20174977498425,
-            "leftMostPlatformCornerY": 1238.8510280736516
+            "leftMostCornerX": 480.20174977498425,
+            "leftMostCornerY": 1238.8510280736516,
+            "rightMostCornerX": 688.7982502250157,
+            "rightMostCornerY": 1139.1489719263484,
+            "topCornerX": 634.3510280736516,
+            "topCornerY": 1084.7017497749844,
+            "botCornerX": 534.6489719263484,
+            "botCornerY": 1293.2982502250159,
+            "occludes": [
+                18,
+                19,
+                20
+            ]
+        },
+        {
+            "x": 110,
+            "y": 1130,
+            "width": 430,
+            "height": 120,
+            "angle": 45,
+            "endzone": 0,
+            "wall": 0,
+            "hypotenuse": 223.21514285549716,
+            "angleRad": 0.7853981633974483,
+            "corners": [
+                [
+                    -194.45436482630058,
+                    -109.60155108391484
+                ],
+                [
+                    109.60155108391487,
+                    194.45436482630055
+                ],
+                [
+                    194.45436482630058,
+                    109.60155108391484
+                ],
+                [
+                    -109.60155108391487,
+                    -194.45436482630055
+                ]
+            ],
+            "cornersSorted": [
+                [
+                    -194.45436482630058,
+                    -109.60155108391484
+                ],
+                [
+                    -109.60155108391487,
+                    -194.45436482630055
+                ],
+                [
+                    109.60155108391487,
+                    194.45436482630055
+                ],
+                [
+                    194.45436482630058,
+                    109.60155108391484
+                ]
+            ],
+            "leftMostCornerX": 130.54563517369942,
+            "leftMostCornerY": 1080.3984489160853,
+            "rightMostCornerX": 519.4543648263005,
+            "rightMostCornerY": 1299.6015510839147,
+            "topCornerX": 215.39844891608513,
+            "topCornerY": 995.5456351736995,
+            "botCornerX": 434.60155108391484,
+            "botCornerY": 1384.4543648263007,
+            "occludes": [
+                17,
+                20,
+                22
+            ]
         },
         {
             "x": 60,
@@ -797,7 +1414,27 @@
             "angle": 45,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 88.45903006477066,
+            "angleRad": 0.7853981633974483,
             "corners": [
+                [
+                    -88.38834764831844,
+                    -3.5355339059327306
+                ],
+                [
+                    3.535533905932745,
+                    88.38834764831844
+                ],
+                [
+                    88.38834764831844,
+                    3.5355339059327306
+                ],
+                [
+                    -3.535533905932745,
+                    -88.38834764831844
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -88.38834764831844,
                     -3.5355339059327306
@@ -815,10 +1452,17 @@
                     3.5355339059327306
                 ]
             ],
-            "rightMostPlatformCornerX": 213.38834764831844,
-            "rightMostPlatformCornerY": 1173.5355339059327,
-            "leftMostPlatformCornerX": 36.611652351681556,
-            "leftMostPlatformCornerY": 1166.4644660940673
+            "leftMostCornerX": 36.611652351681556,
+            "leftMostCornerY": 1166.4644660940673,
+            "rightMostCornerX": 213.38834764831844,
+            "rightMostCornerY": 1173.5355339059327,
+            "topCornerX": 121.46446609406726,
+            "topCornerY": 1081.6116523516816,
+            "botCornerX": 128.53553390593274,
+            "botCornerY": 1258.3883476483184,
+            "occludes": [
+                23
+            ]
         },
         {
             "x": 180,
@@ -828,7 +1472,27 @@
             "angle": 45,
             "endzone": 0,
             "wall": 1,
+            "hypotenuse": 49.49747468305833,
+            "angleRad": 0.7853981633974483,
             "corners": [
+                [
+                    -49.49747468305833,
+                    3.552713678800501e-15
+                ],
+                [
+                    3.552713678800501e-15,
+                    49.49747468305833
+                ],
+                [
+                    49.49747468305833,
+                    -3.552713678800501e-15
+                ],
+                [
+                    -3.552713678800501e-15,
+                    -49.49747468305833
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -49.49747468305833,
                     3.552713678800501e-15
@@ -846,10 +1510,18 @@
                     -3.552713678800501e-15
                 ]
             ],
-            "rightMostPlatformCornerX": 264.49747468305833,
-            "rightMostPlatformCornerY": 1265,
-            "leftMostPlatformCornerX": 165.50252531694167,
-            "leftMostPlatformCornerY": 1265
+            "leftMostCornerX": 165.50252531694167,
+            "leftMostCornerY": 1265,
+            "rightMostCornerX": 264.49747468305833,
+            "rightMostCornerY": 1265,
+            "topCornerX": 215,
+            "topCornerY": 1215.5025253169417,
+            "botCornerX": 215,
+            "botCornerY": 1314.4974746830583,
+            "occludes": [
+                21,
+                23
+            ]
         },
         {
             "x": 238,
@@ -859,7 +1531,27 @@
             "angle": 45,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 103.31747190093262,
+            "angleRad": 0.7853981633974483,
             "corners": [
+                [
+                    -101.11626970967629,
+                    -21.21320343559642
+                ],
+                [
+                    21.213203435596434,
+                    101.11626970967629
+                ],
+                [
+                    101.11626970967629,
+                    21.21320343559642
+                ],
+                [
+                    -21.213203435596434,
+                    -101.11626970967629
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -101.11626970967629,
                     -21.21320343559642
@@ -877,10 +1569,18 @@
                     21.21320343559642
                 ]
             ],
-            "rightMostPlatformCornerX": 425.6162697096763,
-            "rightMostPlatformCornerY": 1391.7132034355964,
-            "leftMostPlatformCornerX": 223.3837302903237,
-            "leftMostPlatformCornerY": 1349.2867965644036
+            "leftMostCornerX": 223.3837302903237,
+            "leftMostCornerY": 1349.2867965644036,
+            "rightMostCornerX": 425.6162697096763,
+            "rightMostCornerY": 1391.7132034355964,
+            "topCornerX": 303.2867965644036,
+            "topCornerY": 1269.3837302903237,
+            "botCornerX": 345.7132034355964,
+            "botCornerY": 1471.6162697096763,
+            "occludes": [
+                23,
+                24
+            ]
         },
         {
             "x": -90,
@@ -890,7 +1590,27 @@
             "angle": 45,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 231.19256043393784,
+            "angleRad": 0.7853981633974483,
             "corners": [
+                [
+                    -212.13203435596427,
+                    -91.92388155425115
+                ],
+                [
+                    91.92388155425118,
+                    212.13203435596424
+                ],
+                [
+                    212.13203435596427,
+                    91.92388155425115
+                ],
+                [
+                    -91.92388155425118,
+                    -212.13203435596424
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -212.13203435596427,
                     -91.92388155425115
@@ -908,10 +1628,21 @@
                     91.92388155425115
                 ]
             ],
-            "rightMostPlatformCornerX": 337.13203435596427,
-            "rightMostPlatformCornerY": 1476.9238815542512,
-            "leftMostPlatformCornerX": -87.13203435596427,
-            "leftMostPlatformCornerY": 1293.0761184457488
+            "leftMostCornerX": -87.13203435596427,
+            "leftMostCornerY": 1293.0761184457488,
+            "rightMostCornerX": 337.13203435596427,
+            "rightMostCornerY": 1476.9238815542512,
+            "topCornerX": 33.07611844574882,
+            "topCornerY": 1172.8679656440358,
+            "botCornerX": 216.92388155425118,
+            "botCornerY": 1597.1320343559642,
+            "occludes": [
+                20,
+                21,
+                23,
+                24,
+                25
+            ]
         },
         {
             "x": -120,
@@ -921,7 +1652,27 @@
             "angle": 0,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 136.4734406395618,
+            "angleRad": 0,
             "corners": [
+                [
+                    -20,
+                    135
+                ],
+                [
+                    20,
+                    135
+                ],
+                [
+                    20,
+                    -135
+                ],
+                [
+                    -20,
+                    -135
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -20,
                     135
@@ -939,10 +1690,17 @@
                     -135
                 ]
             ],
-            "rightMostPlatformCornerX": -80,
-            "rightMostPlatformCornerY": 1340,
-            "leftMostPlatformCornerX": -120,
-            "leftMostPlatformCornerY": 1610
+            "leftMostCornerX": -120,
+            "leftMostCornerY": 1610,
+            "rightMostCornerX": -80,
+            "rightMostCornerY": 1340,
+            "topCornerX": -120,
+            "topCornerY": 1340,
+            "botCornerX": -80,
+            "botCornerY": 1610,
+            "occludes": [
+                26
+            ]
         },
         {
             "x": -60,
@@ -952,7 +1710,27 @@
             "angle": 0,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 106.88779163215975,
+            "angleRad": 0,
             "corners": [
+                [
+                    -20,
+                    105
+                ],
+                [
+                    20,
+                    105
+                ],
+                [
+                    20,
+                    -105
+                ],
+                [
+                    -20,
+                    -105
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -20,
                     105
@@ -970,10 +1748,17 @@
                     -105
                 ]
             ],
-            "rightMostPlatformCornerX": -20,
-            "rightMostPlatformCornerY": 1400,
-            "leftMostPlatformCornerX": -60,
-            "leftMostPlatformCornerY": 1610
+            "leftMostCornerX": -60,
+            "leftMostCornerY": 1610,
+            "rightMostCornerX": -20,
+            "rightMostCornerY": 1400,
+            "topCornerX": -60,
+            "topCornerY": 1400,
+            "botCornerX": -20,
+            "botCornerY": 1610,
+            "occludes": [
+                26
+            ]
         },
         {
             "x": 0,
@@ -983,7 +1768,27 @@
             "angle": 0,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 77.62087348130012,
+            "angleRad": 0,
             "corners": [
+                [
+                    -20,
+                    75
+                ],
+                [
+                    20,
+                    75
+                ],
+                [
+                    20,
+                    -75
+                ],
+                [
+                    -20,
+                    -75
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -20,
                     75
@@ -1001,10 +1806,17 @@
                     -75
                 ]
             ],
-            "rightMostPlatformCornerX": 40,
-            "rightMostPlatformCornerY": 1460,
-            "leftMostPlatformCornerX": 0,
-            "leftMostPlatformCornerY": 1610
+            "leftMostCornerX": 0,
+            "leftMostCornerY": 1610,
+            "rightMostCornerX": 40,
+            "rightMostCornerY": 1460,
+            "topCornerX": 0,
+            "topCornerY": 1460,
+            "botCornerX": 40,
+            "botCornerY": 1610,
+            "occludes": [
+                26
+            ]
         },
         {
             "x": 60,
@@ -1014,7 +1826,27 @@
             "angle": 0,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 49.24428900898052,
+            "angleRad": 0,
             "corners": [
+                [
+                    -20,
+                    45
+                ],
+                [
+                    20,
+                    45
+                ],
+                [
+                    20,
+                    -45
+                ],
+                [
+                    -20,
+                    -45
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -20,
                     45
@@ -1032,10 +1864,17 @@
                     -45
                 ]
             ],
-            "rightMostPlatformCornerX": 100,
-            "rightMostPlatformCornerY": 1520,
-            "leftMostPlatformCornerX": 60,
-            "leftMostPlatformCornerY": 1610
+            "leftMostCornerX": 60,
+            "leftMostCornerY": 1610,
+            "rightMostCornerX": 100,
+            "rightMostCornerY": 1520,
+            "topCornerX": 60,
+            "topCornerY": 1520,
+            "botCornerX": 100,
+            "botCornerY": 1610,
+            "occludes": [
+                26
+            ]
         },
         {
             "x": 120,
@@ -1045,7 +1884,27 @@
             "angle": 0,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 28.284271247461902,
+            "angleRad": 0,
             "corners": [
+                [
+                    -20,
+                    20
+                ],
+                [
+                    20,
+                    20
+                ],
+                [
+                    20,
+                    -20
+                ],
+                [
+                    -20,
+                    -20
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -20,
                     20
@@ -1063,41 +1922,75 @@
                     -20
                 ]
             ],
-            "leftMostPlatformCornerX": 120,
-            "leftMostPlatformCornerY": 1610,
-            "rightMostPlatformCornerX": 160,
-            "rightMostPlatformCornerY": 1570
+            "leftMostCornerX": 120,
+            "leftMostCornerY": 1610,
+            "rightMostCornerX": 160,
+            "rightMostCornerY": 1570,
+            "topCornerX": 120,
+            "topCornerY": 1570,
+            "botCornerX": 160,
+            "botCornerY": 1610,
+            "occludes": [
+                26
+            ]
         },
         {
-            "x": -230,
+            "x": 180,
             "y": 1610,
-            "width": 100,
-            "height": 380,
+            "width": 90,
+            "height": 400,
             "angle": 0,
             "endzone": 0,
             "wall": 1,
+            "hypotenuse": 205,
+            "angleRad": 0,
             "corners": [
                 [
-                    -50,
-                    190
+                    -45,
+                    200
                 ],
                 [
-                    -50,
-                    -190
+                    45,
+                    200
                 ],
                 [
-                    50,
-                    190
+                    45,
+                    -200
                 ],
                 [
-                    50,
-                    -190
+                    -45,
+                    -200
                 ]
             ],
-            "rightMostPlatformCornerX": -130,
-            "rightMostPlatformCornerY": 1610,
-            "leftMostPlatformCornerX": -230,
-            "leftMostPlatformCornerY": 1990
+            "cornersSorted": [
+                [
+                    -45,
+                    200
+                ],
+                [
+                    -45,
+                    -200
+                ],
+                [
+                    45,
+                    200
+                ],
+                [
+                    45,
+                    -200
+                ]
+            ],
+            "leftMostCornerX": 180,
+            "leftMostCornerY": 2010,
+            "rightMostCornerX": 270,
+            "rightMostCornerY": 1610,
+            "topCornerX": 180,
+            "topCornerY": 1610,
+            "botCornerX": 270,
+            "botCornerY": 2010,
+            "occludes": [
+                26
+            ]
         },
         {
             "x": -120,
@@ -1107,7 +2000,27 @@
             "angle": 0,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 244.13111231467406,
+            "angleRad": 0,
             "corners": [
+                [
+                    -140,
+                    200
+                ],
+                [
+                    140,
+                    200
+                ],
+                [
+                    140,
+                    -200
+                ],
+                [
+                    -140,
+                    -200
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -140,
                     200
@@ -1125,161 +2038,134 @@
                     -200
                 ]
             ],
-            "rightMostPlatformCornerX": 160,
-            "rightMostPlatformCornerY": 1610,
-            "leftMostPlatformCornerX": -120,
-            "leftMostPlatformCornerY": 2010
+            "leftMostCornerX": -120,
+            "leftMostCornerY": 2010,
+            "rightMostCornerX": 160,
+            "rightMostCornerY": 1610,
+            "topCornerX": -120,
+            "topCornerY": 1610,
+            "botCornerX": 160,
+            "botCornerY": 2010,
+            "occludes": [
+                26,
+                27,
+                28,
+                29,
+                30,
+                31
+            ]
         },
         {
-            "x": 170,
-            "y": 1610,
-            "width": 110,
-            "height": 380,
+            "x": 280,
+            "y": 1940,
+            "width": 70,
+            "height": 70,
             "angle": 0,
             "endzone": 0,
             "wall": 1,
+            "hypotenuse": 49.49747468305833,
+            "angleRad": 0,
             "corners": [
                 [
-                    -55,
-                    190
+                    -35,
+                    35
                 ],
                 [
-                    -55,
-                    -190
+                    35,
+                    35
                 ],
                 [
-                    55,
-                    190
+                    35,
+                    -35
                 ],
                 [
-                    55,
-                    -190
+                    -35,
+                    -35
                 ]
             ],
-            "leftMostPlatformCornerX": 170,
-            "leftMostPlatformCornerY": 1990,
-            "rightMostPlatformCornerX": 280,
-            "rightMostPlatformCornerY": 1610
+            "cornersSorted": [
+                [
+                    -35,
+                    35
+                ],
+                [
+                    -35,
+                    -35
+                ],
+                [
+                    35,
+                    35
+                ],
+                [
+                    35,
+                    -35
+                ]
+            ],
+            "leftMostCornerX": 280,
+            "leftMostCornerY": 2010,
+            "rightMostCornerX": 350,
+            "rightMostCornerY": 1940,
+            "topCornerX": 280,
+            "topCornerY": 1940,
+            "botCornerX": 350,
+            "botCornerY": 2010,
+            "occludes": []
         },
         {
-            "x": -350,
-            "y": 1900,
-            "width": 100,
-            "height": 100,
-            "angle": -10,
+            "x": 360,
+            "y": 1940,
+            "width": 50,
+            "height": 70,
+            "angle": 0,
             "endzone": 0,
             "wall": 1,
+            "hypotenuse": 43.01162633521314,
+            "angleRad": 0,
             "corners": [
                 [
-                    -57.92279653395692,
-                    -40.55797876726388
+                    -25,
+                    35
                 ],
                 [
-                    -40.55797876726388,
-                    57.92279653395692
+                    25,
+                    35
                 ],
                 [
-                    40.55797876726388,
-                    -57.92279653395692
+                    25,
+                    -35
                 ],
                 [
-                    57.92279653395692,
-                    40.55797876726388
+                    -25,
+                    -35
                 ]
             ],
-            "rightMostPlatformCornerX": -242.0772034660431,
-            "rightMostPlatformCornerY": 1990.5579787672639,
-            "leftMostPlatformCornerX": -357.9227965339569,
-            "leftMostPlatformCornerY": 1909.4420212327361
-        },
-        {
-            "x": 300,
-            "y": 1900,
-            "width": 100,
-            "height": 100,
-            "angle": 10,
-            "endzone": 0,
-            "wall": 1,
-            "corners": [
+            "cornersSorted": [
                 [
-                    -57.92279653395692,
-                    40.55797876726388
+                    -25,
+                    35
                 ],
                 [
-                    -40.55797876726388,
-                    -57.92279653395692
+                    -25,
+                    -35
                 ],
                 [
-                    40.55797876726388,
-                    57.92279653395692
+                    25,
+                    35
                 ],
                 [
-                    57.92279653395692,
-                    -40.55797876726388
+                    25,
+                    -35
                 ]
             ],
-            "leftMostPlatformCornerX": 292.0772034660431,
-            "leftMostPlatformCornerY": 1990.5579787672639,
-            "rightMostPlatformCornerX": 407.9227965339569,
-            "rightMostPlatformCornerY": 1909.4420212327361
-        },
-        {
-            "x": -460,
-            "y": 1920,
-            "width": 100,
-            "height": 100,
-            "angle": -10,
-            "endzone": 0,
-            "wall": 1,
-            "corners": [
-                [
-                    -57.92279653395692,
-                    -40.55797876726388
-                ],
-                [
-                    -40.55797876726388,
-                    57.92279653395692
-                ],
-                [
-                    40.55797876726388,
-                    -57.92279653395692
-                ],
-                [
-                    57.92279653395692,
-                    40.55797876726388
-                ]
-            ],
-            "rightMostPlatformCornerX": -352.0772034660431,
-            "rightMostPlatformCornerY": 2010.5579787672639
-        },
-        {
-            "x": 410,
-            "y": 1920,
-            "width": 100,
-            "height": 100,
-            "angle": 10,
-            "endzone": 0,
-            "wall": 1,
-            "corners": [
-                [
-                    -57.92279653395692,
-                    40.55797876726388
-                ],
-                [
-                    -40.55797876726388,
-                    -57.92279653395692
-                ],
-                [
-                    40.55797876726388,
-                    57.92279653395692
-                ],
-                [
-                    57.92279653395692,
-                    -40.55797876726388
-                ]
-            ],
-            "leftMostPlatformCornerX": 402.0772034660431,
-            "leftMostPlatformCornerY": 2010.5579787672639
+            "leftMostCornerX": 360,
+            "leftMostCornerY": 2010,
+            "rightMostCornerX": 410,
+            "rightMostCornerY": 1940,
+            "topCornerX": 360,
+            "topCornerY": 1940,
+            "botCornerX": 410,
+            "botCornerY": 2010,
+            "occludes": []
         },
         {
             "x": -340,
@@ -1289,7 +2175,27 @@
             "angle": 0,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 400.5621050473946,
+            "angleRad": 0,
             "corners": [
+                [
+                    -365,
+                    165
+                ],
+                [
+                    365,
+                    165
+                ],
+                [
+                    365,
+                    -165
+                ],
+                [
+                    -365,
+                    -165
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -365,
                     165
@@ -1307,10 +2213,15 @@
                     -165
                 ]
             ],
-            "leftMostPlatformCornerX": -340,
-            "leftMostPlatformCornerY": 2360,
-            "rightMostPlatformCornerX": 390,
-            "rightMostPlatformCornerY": 2030
+            "leftMostCornerX": -340,
+            "leftMostCornerY": 2360,
+            "rightMostCornerX": 390,
+            "rightMostCornerY": 2030,
+            "topCornerX": -340,
+            "topCornerY": 2030,
+            "botCornerX": 390,
+            "botCornerY": 2360,
+            "occludes": []
         },
         {
             "x": -240,
@@ -1320,7 +2231,27 @@
             "angle": 0,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 276.5863337187866,
+            "angleRad": 0,
             "corners": [
+                [
+                    -270,
+                    60
+                ],
+                [
+                    270,
+                    60
+                ],
+                [
+                    270,
+                    -60
+                ],
+                [
+                    -270,
+                    -60
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -270,
                     60
@@ -1338,10 +2269,15 @@
                     -60
                 ]
             ],
-            "leftMostPlatformCornerX": -240,
-            "leftMostPlatformCornerY": 2640,
-            "rightMostPlatformCornerX": 300,
-            "rightMostPlatformCornerY": 2520
+            "leftMostCornerX": -240,
+            "leftMostCornerY": 2640,
+            "rightMostCornerX": 300,
+            "rightMostCornerY": 2520,
+            "topCornerX": -240,
+            "topCornerY": 2520,
+            "botCornerX": 300,
+            "botCornerY": 2640,
+            "occludes": []
         },
         {
             "x": 310,
@@ -1351,7 +2287,27 @@
             "angle": 0,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 22.360679774997898,
+            "angleRad": 0,
             "corners": [
+                [
+                    -20,
+                    10
+                ],
+                [
+                    20,
+                    10
+                ],
+                [
+                    20,
+                    -10
+                ],
+                [
+                    -20,
+                    -10
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -20,
                     10
@@ -1369,39 +2325,15 @@
                     -10
                 ]
             ],
-            "leftMostPlatformCornerX": 310,
-            "leftMostPlatformCornerY": 2670
-        },
-        {
-            "x": -240,
-            "y": 2650,
-            "width": 200,
-            "height": 170,
-            "angle": 0,
-            "endzone": 0,
-            "wall": 0,
-            "corners": [
-                [
-                    -100,
-                    85
-                ],
-                [
-                    -100,
-                    -85
-                ],
-                [
-                    100,
-                    85
-                ],
-                [
-                    100,
-                    -85
-                ]
-            ],
-            "rightMostPlatformCornerX": -40,
-            "rightMostPlatformCornerY": 2650,
-            "leftMostPlatformCornerX": -240,
-            "leftMostPlatformCornerY": 2820
+            "leftMostCornerX": 310,
+            "leftMostCornerY": 2670,
+            "rightMostCornerX": 350,
+            "rightMostCornerY": 2650,
+            "topCornerX": 310,
+            "topCornerY": 2650,
+            "botCornerX": 350,
+            "botCornerY": 2670,
+            "occludes": []
         },
         {
             "x": -30,
@@ -1411,7 +2343,27 @@
             "angle": 0,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 168.67127793433,
+            "angleRad": 0,
             "corners": [
+                [
+                    -165,
+                    35
+                ],
+                [
+                    165,
+                    35
+                ],
+                [
+                    165,
+                    -35
+                ],
+                [
+                    -165,
+                    -35
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -165,
                     35
@@ -1429,10 +2381,17 @@
                     -35
                 ]
             ],
-            "leftMostPlatformCornerX": -30,
-            "leftMostPlatformCornerY": 2720,
-            "rightMostPlatformCornerX": 300,
-            "rightMostPlatformCornerY": 2650
+            "leftMostCornerX": -30,
+            "leftMostCornerY": 2720,
+            "rightMostCornerX": 300,
+            "rightMostCornerY": 2650,
+            "topCornerX": -30,
+            "topCornerY": 2650,
+            "botCornerX": 300,
+            "botCornerY": 2720,
+            "occludes": [
+                37
+            ]
         },
         {
             "x": 310,
@@ -1442,7 +2401,27 @@
             "angle": 0,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 28.284271247461902,
+            "angleRad": 0,
             "corners": [
+                [
+                    -20,
+                    20
+                ],
+                [
+                    20,
+                    20
+                ],
+                [
+                    20,
+                    -20
+                ],
+                [
+                    -20,
+                    -20
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -20,
                     20
@@ -1460,70 +2439,75 @@
                     -20
                 ]
             ],
-            "leftMostPlatformCornerX": 310,
-            "leftMostPlatformCornerY": 2720,
-            "rightMostPlatformCornerX": 350,
-            "rightMostPlatformCornerY": 2680
-        },
-        {
-            "x": -290,
-            "y": 2830,
-            "width": 40,
-            "height": 110,
-            "angle": 0,
-            "endzone": 0,
-            "wall": 0,
-            "corners": [
-                [
-                    -20,
-                    55
-                ],
-                [
-                    -20,
-                    -55
-                ],
-                [
-                    20,
-                    55
-                ],
-                [
-                    20,
-                    -55
-                ]
-            ],
-            "rightMostPlatformCornerX": -250,
-            "rightMostPlatformCornerY": 2830
+            "leftMostCornerX": 310,
+            "leftMostCornerY": 2720,
+            "rightMostCornerX": 350,
+            "rightMostCornerY": 2680,
+            "topCornerX": 310,
+            "topCornerY": 2680,
+            "botCornerX": 350,
+            "botCornerY": 2720,
+            "occludes": [
+                38
+            ]
         },
         {
             "x": -240,
-            "y": 2830,
+            "y": 2650,
             "width": 200,
-            "height": 110,
+            "height": 170,
             "angle": 0,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 131.24404748406687,
+            "angleRad": 0,
             "corners": [
                 [
                     -100,
-                    55
+                    85
+                ],
+                [
+                    100,
+                    85
+                ],
+                [
+                    100,
+                    -85
                 ],
                 [
                     -100,
-                    -55
-                ],
-                [
-                    100,
-                    55
-                ],
-                [
-                    100,
-                    -55
+                    -85
                 ]
             ],
-            "rightMostPlatformCornerX": -40,
-            "rightMostPlatformCornerY": 2830,
-            "leftMostPlatformCornerX": -240,
-            "leftMostPlatformCornerY": 2940
+            "cornersSorted": [
+                [
+                    -100,
+                    85
+                ],
+                [
+                    -100,
+                    -85
+                ],
+                [
+                    100,
+                    85
+                ],
+                [
+                    100,
+                    -85
+                ]
+            ],
+            "leftMostCornerX": -240,
+            "leftMostCornerY": 2820,
+            "rightMostCornerX": -40,
+            "rightMostCornerY": 2650,
+            "topCornerX": -240,
+            "topCornerY": 2650,
+            "botCornerX": -40,
+            "botCornerY": 2820,
+            "occludes": [
+                37
+            ]
         },
         {
             "x": -30,
@@ -1533,7 +2517,27 @@
             "angle": 0,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 132.00378782444085,
+            "angleRad": 0,
             "corners": [
+                [
+                    -80,
+                    105
+                ],
+                [
+                    80,
+                    105
+                ],
+                [
+                    80,
+                    -105
+                ],
+                [
+                    -80,
+                    -105
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -80,
                     105
@@ -1551,10 +2555,17 @@
                     -105
                 ]
             ],
-            "leftMostPlatformCornerX": -30,
-            "leftMostPlatformCornerY": 2940,
-            "rightMostPlatformCornerX": 130,
-            "rightMostPlatformCornerY": 2730
+            "leftMostCornerX": -30,
+            "leftMostCornerY": 2940,
+            "rightMostCornerX": 130,
+            "rightMostCornerY": 2730,
+            "topCornerX": -30,
+            "topCornerY": 2730,
+            "botCornerX": 130,
+            "botCornerY": 2940,
+            "occludes": [
+                39
+            ]
         },
         {
             "x": 140,
@@ -1564,7 +2575,27 @@
             "angle": 0,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 132.00378782444085,
+            "angleRad": 0,
             "corners": [
+                [
+                    -80,
+                    105
+                ],
+                [
+                    80,
+                    105
+                ],
+                [
+                    80,
+                    -105
+                ],
+                [
+                    -80,
+                    -105
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -80,
                     105
@@ -1582,10 +2613,17 @@
                     -105
                 ]
             ],
-            "leftMostPlatformCornerX": 140,
-            "leftMostPlatformCornerY": 2940,
-            "rightMostPlatformCornerX": 300,
-            "rightMostPlatformCornerY": 2730
+            "leftMostCornerX": 140,
+            "leftMostCornerY": 2940,
+            "rightMostCornerX": 300,
+            "rightMostCornerY": 2730,
+            "topCornerX": 140,
+            "topCornerY": 2730,
+            "botCornerX": 300,
+            "botCornerY": 2940,
+            "occludes": [
+                39
+            ]
         },
         {
             "x": 310,
@@ -1595,7 +2633,27 @@
             "angle": 0,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 106.88779163215975,
+            "angleRad": 0,
             "corners": [
+                [
+                    -20,
+                    105
+                ],
+                [
+                    20,
+                    105
+                ],
+                [
+                    20,
+                    -105
+                ],
+                [
+                    -20,
+                    -105
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -20,
                     105
@@ -1613,70 +2671,131 @@
                     -105
                 ]
             ],
-            "leftMostPlatformCornerX": 310,
-            "leftMostPlatformCornerY": 2940,
-            "rightMostPlatformCornerX": 350,
-            "rightMostPlatformCornerY": 2730
+            "leftMostCornerX": 310,
+            "leftMostCornerY": 2940,
+            "rightMostCornerX": 350,
+            "rightMostCornerY": 2730,
+            "topCornerX": 310,
+            "topCornerY": 2730,
+            "botCornerX": 350,
+            "botCornerY": 2940,
+            "occludes": [
+                40
+            ]
         },
         {
-            "x": -80,
-            "y": 3130,
-            "width": 50,
-            "height": 50,
+            "x": -290,
+            "y": 2830,
+            "width": 40,
+            "height": 110,
             "angle": 0,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 58.52349955359813,
+            "angleRad": 0,
             "corners": [
                 [
-                    -25,
-                    25
+                    -20,
+                    55
                 ],
                 [
-                    -25,
-                    -25
+                    20,
+                    55
                 ],
                 [
-                    25,
-                    25
+                    20,
+                    -55
                 ],
                 [
-                    25,
-                    -25
+                    -20,
+                    -55
                 ]
             ],
-            "rightMostPlatformCornerX": -30,
-            "rightMostPlatformCornerY": 3130,
-            "leftMostPlatformCornerX": -80,
-            "leftMostPlatformCornerY": 3180
+            "cornersSorted": [
+                [
+                    -20,
+                    55
+                ],
+                [
+                    -20,
+                    -55
+                ],
+                [
+                    20,
+                    55
+                ],
+                [
+                    20,
+                    -55
+                ]
+            ],
+            "leftMostCornerX": -290,
+            "leftMostCornerY": 2940,
+            "rightMostCornerX": -250,
+            "rightMostCornerY": 2830,
+            "topCornerX": -290,
+            "topCornerY": 2830,
+            "botCornerX": -250,
+            "botCornerY": 2940,
+            "occludes": []
         },
         {
-            "x": -340,
-            "y": 3200,
-            "width": 310,
-            "height": 310,
+            "x": -240,
+            "y": 2830,
+            "width": 200,
+            "height": 110,
             "angle": 0,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 114.12712210513327,
+            "angleRad": 0,
             "corners": [
                 [
-                    -155,
-                    155
+                    -100,
+                    55
                 ],
                 [
-                    -155,
-                    -155
+                    100,
+                    55
                 ],
                 [
-                    155,
-                    155
+                    100,
+                    -55
                 ],
                 [
-                    155,
-                    -155
+                    -100,
+                    -55
                 ]
             ],
-            "rightMostPlatformCornerX": -30,
-            "rightMostPlatformCornerY": 3200
+            "cornersSorted": [
+                [
+                    -100,
+                    55
+                ],
+                [
+                    -100,
+                    -55
+                ],
+                [
+                    100,
+                    55
+                ],
+                [
+                    100,
+                    -55
+                ]
+            ],
+            "leftMostCornerX": -240,
+            "leftMostCornerY": 2940,
+            "rightMostCornerX": -40,
+            "rightMostCornerY": 2830,
+            "topCornerX": -240,
+            "topCornerY": 2830,
+            "botCornerX": -40,
+            "botCornerY": 2940,
+            "occludes": [
+                41
+            ]
         },
         {
             "x": -10,
@@ -1686,7 +2805,27 @@
             "angle": 0,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 212.24985276791125,
+            "angleRad": 0,
             "corners": [
+                [
+                    -155,
+                    145
+                ],
+                [
+                    155,
+                    145
+                ],
+                [
+                    155,
+                    -145
+                ],
+                [
+                    -155,
+                    -145
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -155,
                     145
@@ -1704,10 +2843,71 @@
                     -145
                 ]
             ],
-            "leftMostPlatformCornerX": -10,
-            "leftMostPlatformCornerY": 3260,
-            "rightMostPlatformCornerX": 300,
-            "rightMostPlatformCornerY": 2970
+            "leftMostCornerX": -10,
+            "leftMostCornerY": 3260,
+            "rightMostCornerX": 300,
+            "rightMostCornerY": 2970,
+            "topCornerX": -10,
+            "topCornerY": 2970,
+            "botCornerX": 300,
+            "botCornerY": 3260,
+            "occludes": []
+        },
+        {
+            "x": -80,
+            "y": 3130,
+            "width": 50,
+            "height": 50,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "hypotenuse": 35.35533905932738,
+            "angleRad": 0,
+            "corners": [
+                [
+                    -25,
+                    25
+                ],
+                [
+                    25,
+                    25
+                ],
+                [
+                    25,
+                    -25
+                ],
+                [
+                    -25,
+                    -25
+                ]
+            ],
+            "cornersSorted": [
+                [
+                    -25,
+                    25
+                ],
+                [
+                    -25,
+                    -25
+                ],
+                [
+                    25,
+                    25
+                ],
+                [
+                    25,
+                    -25
+                ]
+            ],
+            "leftMostCornerX": -80,
+            "leftMostCornerY": 3180,
+            "rightMostCornerX": -30,
+            "rightMostCornerY": 3130,
+            "topCornerX": -80,
+            "topCornerY": 3130,
+            "botCornerX": -30,
+            "botCornerY": 3180,
+            "occludes": []
         },
         {
             "x": -10,
@@ -1717,7 +2917,27 @@
             "angle": 0,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 35.35533905932738,
+            "angleRad": 0,
             "corners": [
+                [
+                    -25,
+                    25
+                ],
+                [
+                    25,
+                    25
+                ],
+                [
+                    25,
+                    -25
+                ],
+                [
+                    -25,
+                    -25
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -25,
                     25
@@ -1735,101 +2955,71 @@
                     -25
                 ]
             ],
-            "rightMostPlatformCornerX": 40,
-            "rightMostPlatformCornerY": 3280
+            "leftMostCornerX": -10,
+            "leftMostCornerY": 3330,
+            "rightMostCornerX": 40,
+            "rightMostCornerY": 3280,
+            "topCornerX": -10,
+            "topCornerY": 3280,
+            "botCornerX": 40,
+            "botCornerY": 3330,
+            "occludes": []
         },
         {
-            "x": -250,
-            "y": 3530,
-            "width": 220,
-            "height": 40,
+            "x": -340,
+            "y": 3200,
+            "width": 310,
+            "height": 310,
             "angle": 0,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 219.20310216782974,
+            "angleRad": 0,
             "corners": [
                 [
-                    -110,
-                    20
+                    -155,
+                    155
                 ],
                 [
-                    -110,
-                    -20
+                    155,
+                    155
                 ],
                 [
-                    110,
-                    20
+                    155,
+                    -155
                 ],
                 [
-                    110,
-                    -20
+                    -155,
+                    -155
                 ]
             ],
-            "leftMostPlatformCornerX": -250,
-            "leftMostPlatformCornerY": 3570,
-            "rightMostPlatformCornerX": -30,
-            "rightMostPlatformCornerY": 3530
-        },
-        {
-            "x": -130,
-            "y": 3590,
-            "width": 100,
-            "height": 100,
-            "angle": 0,
-            "endzone": 0,
-            "wall": 0,
-            "corners": [
+            "cornersSorted": [
                 [
-                    -50,
-                    50
+                    -155,
+                    155
                 ],
                 [
-                    -50,
-                    -50
+                    -155,
+                    -155
                 ],
                 [
-                    50,
-                    50
+                    155,
+                    155
                 ],
                 [
-                    50,
-                    -50
+                    155,
+                    -155
                 ]
             ],
-            "leftMostPlatformCornerX": -130,
-            "leftMostPlatformCornerY": 3690,
-            "rightMostPlatformCornerX": -30,
-            "rightMostPlatformCornerY": 3590
-        },
-        {
-            "x": -190,
-            "y": 3590,
-            "width": 40,
-            "height": 40,
-            "angle": 0,
-            "endzone": 0,
-            "wall": 0,
-            "corners": [
-                [
-                    -20,
-                    20
-                ],
-                [
-                    -20,
-                    -20
-                ],
-                [
-                    20,
-                    20
-                ],
-                [
-                    20,
-                    -20
-                ]
-            ],
-            "rightMostPlatformCornerX": -150,
-            "rightMostPlatformCornerY": 3590,
-            "leftMostPlatformCornerX": -190,
-            "leftMostPlatformCornerY": 3630
+            "leftMostCornerX": -340,
+            "leftMostCornerY": 3510,
+            "rightMostCornerX": -30,
+            "rightMostCornerY": 3200,
+            "topCornerX": -340,
+            "topCornerY": 3200,
+            "botCornerX": -30,
+            "botCornerY": 3510,
+            "occludes": []
         },
         {
             "x": -10,
@@ -1839,7 +3029,27 @@
             "angle": 0,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 208.62646045025065,
+            "angleRad": 0,
             "corners": [
+                [
+                    -150,
+                    145
+                ],
+                [
+                    150,
+                    145
+                ],
+                [
+                    150,
+                    -145
+                ],
+                [
+                    -150,
+                    -145
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -150,
                     145
@@ -1857,8 +3067,183 @@
                     -145
                 ]
             ],
-            "leftMostPlatformCornerX": -10,
-            "leftMostPlatformCornerY": 3690
+            "leftMostCornerX": -10,
+            "leftMostCornerY": 3690,
+            "rightMostCornerX": 290,
+            "rightMostCornerY": 3400,
+            "topCornerX": -10,
+            "topCornerY": 3400,
+            "botCornerX": 290,
+            "botCornerY": 3690,
+            "occludes": []
+        },
+        {
+            "x": -250,
+            "y": 3530,
+            "width": 220,
+            "height": 40,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "hypotenuse": 111.80339887498948,
+            "angleRad": 0,
+            "corners": [
+                [
+                    -110,
+                    20
+                ],
+                [
+                    110,
+                    20
+                ],
+                [
+                    110,
+                    -20
+                ],
+                [
+                    -110,
+                    -20
+                ]
+            ],
+            "cornersSorted": [
+                [
+                    -110,
+                    20
+                ],
+                [
+                    -110,
+                    -20
+                ],
+                [
+                    110,
+                    20
+                ],
+                [
+                    110,
+                    -20
+                ]
+            ],
+            "leftMostCornerX": -250,
+            "leftMostCornerY": 3570,
+            "rightMostCornerX": -30,
+            "rightMostCornerY": 3530,
+            "topCornerX": -250,
+            "topCornerY": 3530,
+            "botCornerX": -30,
+            "botCornerY": 3570,
+            "occludes": []
+        },
+        {
+            "x": -190,
+            "y": 3590,
+            "width": 40,
+            "height": 40,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "hypotenuse": 28.284271247461902,
+            "angleRad": 0,
+            "corners": [
+                [
+                    -20,
+                    20
+                ],
+                [
+                    20,
+                    20
+                ],
+                [
+                    20,
+                    -20
+                ],
+                [
+                    -20,
+                    -20
+                ]
+            ],
+            "cornersSorted": [
+                [
+                    -20,
+                    20
+                ],
+                [
+                    -20,
+                    -20
+                ],
+                [
+                    20,
+                    20
+                ],
+                [
+                    20,
+                    -20
+                ]
+            ],
+            "leftMostCornerX": -190,
+            "leftMostCornerY": 3630,
+            "rightMostCornerX": -150,
+            "rightMostCornerY": 3590,
+            "topCornerX": -190,
+            "topCornerY": 3590,
+            "botCornerX": -150,
+            "botCornerY": 3630,
+            "occludes": []
+        },
+        {
+            "x": -130,
+            "y": 3590,
+            "width": 100,
+            "height": 100,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "hypotenuse": 70.71067811865476,
+            "angleRad": 0,
+            "corners": [
+                [
+                    -50,
+                    50
+                ],
+                [
+                    50,
+                    50
+                ],
+                [
+                    50,
+                    -50
+                ],
+                [
+                    -50,
+                    -50
+                ]
+            ],
+            "cornersSorted": [
+                [
+                    -50,
+                    50
+                ],
+                [
+                    -50,
+                    -50
+                ],
+                [
+                    50,
+                    50
+                ],
+                [
+                    50,
+                    -50
+                ]
+            ],
+            "leftMostCornerX": -130,
+            "leftMostCornerY": 3690,
+            "rightMostCornerX": -30,
+            "rightMostCornerY": 3590,
+            "topCornerX": -130,
+            "topCornerY": 3590,
+            "botCornerX": -30,
+            "botCornerY": 3690,
+            "occludes": []
         },
         {
             "x": -70,
@@ -1868,7 +3253,27 @@
             "angle": 0,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 28.284271247461902,
+            "angleRad": 0,
             "corners": [
+                [
+                    -20,
+                    20
+                ],
+                [
+                    20,
+                    20
+                ],
+                [
+                    20,
+                    -20
+                ],
+                [
+                    -20,
+                    -20
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -20,
                     20
@@ -1886,41 +3291,15 @@
                     -20
                 ]
             ],
-            "leftMostPlatformCornerX": -70,
-            "leftMostPlatformCornerY": 3750,
-            "rightMostPlatformCornerX": -30,
-            "rightMostPlatformCornerY": 3710
-        },
-        {
-            "x": -10,
-            "y": 3710,
-            "width": 100,
-            "height": 100,
-            "angle": 0,
-            "endzone": 0,
-            "wall": 0,
-            "corners": [
-                [
-                    -50,
-                    50
-                ],
-                [
-                    -50,
-                    -50
-                ],
-                [
-                    50,
-                    50
-                ],
-                [
-                    50,
-                    -50
-                ]
-            ],
-            "leftMostPlatformCornerX": -10,
-            "leftMostPlatformCornerY": 3810,
-            "rightMostPlatformCornerX": 90,
-            "rightMostPlatformCornerY": 3710
+            "leftMostCornerX": -70,
+            "leftMostCornerY": 3750,
+            "rightMostCornerX": -30,
+            "rightMostCornerY": 3710,
+            "topCornerX": -70,
+            "topCornerY": 3710,
+            "botCornerX": -30,
+            "botCornerY": 3750,
+            "occludes": []
         },
         {
             "x": 110,
@@ -1930,7 +3309,27 @@
             "angle": 0,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 28.284271247461902,
+            "angleRad": 0,
             "corners": [
+                [
+                    -20,
+                    20
+                ],
+                [
+                    20,
+                    20
+                ],
+                [
+                    20,
+                    -20
+                ],
+                [
+                    -20,
+                    -20
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -20,
                     20
@@ -1948,10 +3347,71 @@
                     -20
                 ]
             ],
-            "rightMostPlatformCornerX": 150,
-            "rightMostPlatformCornerY": 3710,
-            "leftMostPlatformCornerX": 110,
-            "leftMostPlatformCornerY": 3750
+            "leftMostCornerX": 110,
+            "leftMostCornerY": 3750,
+            "rightMostCornerX": 150,
+            "rightMostCornerY": 3710,
+            "topCornerX": 110,
+            "topCornerY": 3710,
+            "botCornerX": 150,
+            "botCornerY": 3750,
+            "occludes": []
+        },
+        {
+            "x": -10,
+            "y": 3710,
+            "width": 100,
+            "height": 100,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "hypotenuse": 70.71067811865476,
+            "angleRad": 0,
+            "corners": [
+                [
+                    -50,
+                    50
+                ],
+                [
+                    50,
+                    50
+                ],
+                [
+                    50,
+                    -50
+                ],
+                [
+                    -50,
+                    -50
+                ]
+            ],
+            "cornersSorted": [
+                [
+                    -50,
+                    50
+                ],
+                [
+                    -50,
+                    -50
+                ],
+                [
+                    50,
+                    50
+                ],
+                [
+                    50,
+                    -50
+                ]
+            ],
+            "leftMostCornerX": -10,
+            "leftMostCornerY": 3810,
+            "rightMostCornerX": 90,
+            "rightMostCornerY": 3710,
+            "topCornerX": -10,
+            "topCornerY": 3710,
+            "botCornerX": 90,
+            "botCornerY": 3810,
+            "occludes": []
         },
         {
             "x": 50,
@@ -1961,7 +3421,27 @@
             "angle": 0,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 28.284271247461902,
+            "angleRad": 0,
             "corners": [
+                [
+                    -20,
+                    20
+                ],
+                [
+                    20,
+                    20
+                ],
+                [
+                    20,
+                    -20
+                ],
+                [
+                    -20,
+                    -20
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -20,
                     20
@@ -1979,8 +3459,15 @@
                     -20
                 ]
             ],
-            "leftMostPlatformCornerX": 50,
-            "leftMostPlatformCornerY": 3870
+            "leftMostCornerX": 50,
+            "leftMostCornerY": 3870,
+            "rightMostCornerX": 90,
+            "rightMostCornerY": 3830,
+            "topCornerX": 50,
+            "topCornerY": 3830,
+            "botCornerX": 90,
+            "botCornerY": 3870,
+            "occludes": []
         },
         {
             "x": -400,
@@ -1990,7 +3477,27 @@
             "angle": 45,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 265.75364531836624,
+            "angleRad": 0.7853981633974483,
             "corners": [
+                [
+                    -265.1650429449553,
+                    17.677669529663703
+                ],
+                [
+                    -17.67766952966366,
+                    265.1650429449553
+                ],
+                [
+                    265.1650429449553,
+                    -17.677669529663703
+                ],
+                [
+                    17.67766952966366,
+                    -265.1650429449553
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -265.1650429449553,
                     17.677669529663703
@@ -2008,10 +3515,21 @@
                     -17.677669529663703
                 ]
             ],
-            "rightMostPlatformCornerX": 40.1650429449553,
-            "rightMostPlatformCornerY": 3882.3223304703365,
-            "leftMostPlatformCornerX": -490.1650429449553,
-            "leftMostPlatformCornerY": 3917.6776695296635
+            "leftMostCornerX": -490.1650429449553,
+            "leftMostCornerY": 3917.6776695296635,
+            "rightMostCornerX": 40.1650429449553,
+            "rightMostCornerY": 3882.3223304703365,
+            "topCornerX": -207.32233047033634,
+            "topCornerY": 3634.8349570550445,
+            "botCornerX": -242.67766952966366,
+            "botCornerY": 4165.1650429449555,
+            "occludes": [
+                51,
+                53,
+                54,
+                55,
+                57
+            ]
         },
         {
             "x": -670,
@@ -2021,7 +3539,27 @@
             "angle": 45,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 240.52026941611388,
+            "angleRad": 0.7853981633974483,
             "corners": [
+                [
+                    -240.41630560342617,
+                    -7.071067811865461
+                ],
+                [
+                    7.07106781186549,
+                    240.41630560342617
+                ],
+                [
+                    240.41630560342617,
+                    7.071067811865461
+                ],
+                [
+                    -7.07106781186549,
+                    -240.41630560342617
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -240.41630560342617,
                     -7.071067811865461
@@ -2039,8 +3577,17 @@
                     7.071067811865461
                 ]
             ],
-            "rightMostPlatformCornerX": -254.58369439657383,
-            "rightMostPlatformCornerY": 4172.071067811865
+            "leftMostCornerX": -735.4163056034262,
+            "leftMostCornerY": 4157.928932188135,
+            "rightMostCornerX": -254.58369439657383,
+            "rightMostCornerY": 4172.071067811865,
+            "topCornerX": -502.07106781186553,
+            "topCornerY": 3924.5836943965737,
+            "botCornerX": -487.92893218813447,
+            "botCornerY": 4405.416305603426,
+            "occludes": [
+                59
+            ]
         },
         {
             "x": -420,
@@ -2050,7 +3597,27 @@
             "angle": 45,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 279.0161285660741,
+            "angleRad": 0.7853981633974483,
             "corners": [
+                [
+                    -275.77164466275354,
+                    -42.426406871192825
+                ],
+                [
+                    42.42640687119287,
+                    275.7716446627535
+                ],
+                [
+                    275.77164466275354,
+                    42.426406871192825
+                ],
+                [
+                    -42.42640687119287,
+                    -275.7716446627535
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -275.77164466275354,
                     -42.426406871192825
@@ -2068,10 +3635,17 @@
                     42.426406871192825
                 ]
             ],
-            "leftMostPlatformCornerX": -470.7716446627535,
-            "leftMostPlatformCornerY": 4422.573593128807,
-            "rightMostPlatformCornerX": 80.77164466275354,
-            "rightMostPlatformCornerY": 4507.426406871193
+            "leftMostCornerX": -470.7716446627535,
+            "leftMostCornerY": 4422.573593128807,
+            "rightMostCornerX": 80.77164466275354,
+            "rightMostCornerY": 4507.426406871193,
+            "topCornerX": -237.42640687119285,
+            "topCornerY": 4189.228355337246,
+            "botCornerX": -152.57359312880715,
+            "botCornerY": 4740.771644662754,
+            "occludes": [
+                60
+            ]
         },
         {
             "x": -67,
@@ -2081,7 +3655,27 @@
             "angle": 45,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 230.67292862405853,
+            "angleRad": 0.7853981633974483,
             "corners": [
+                [
+                    -229.1025971044414,
+                    -26.87005768508878
+                ],
+                [
+                    26.870057685088824,
+                    229.10259710444137
+                ],
+                [
+                    229.1025971044414,
+                    26.87005768508878
+                ],
+                [
+                    -26.870057685088824,
+                    -229.10259710444137
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -229.1025971044414,
                     -26.87005768508878
@@ -2099,10 +3693,17 @@
                     26.87005768508878
                 ]
             ],
-            "leftMostPlatformCornerX": -115.10259710444143,
-            "leftMostPlatformCornerY": 4729.129942314911,
-            "rightMostPlatformCornerX": 343.10259710444143,
-            "rightMostPlatformCornerY": 4782.870057685089
+            "leftMostCornerX": -115.10259710444143,
+            "leftMostCornerY": 4729.129942314911,
+            "rightMostCornerX": 343.10259710444143,
+            "rightMostCornerY": 4782.870057685089,
+            "topCornerX": 87.12994231491118,
+            "topCornerY": 4526.897402895559,
+            "botCornerX": 140.87005768508882,
+            "botCornerY": 4985.102597104441,
+            "occludes": [
+                61
+            ]
         },
         {
             "x": -150,
@@ -2112,7 +3713,27 @@
             "angle": 0,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 35.35533905932738,
+            "angleRad": 0,
             "corners": [
+                [
+                    -25,
+                    25
+                ],
+                [
+                    25,
+                    25
+                ],
+                [
+                    25,
+                    -25
+                ],
+                [
+                    -25,
+                    -25
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -25,
                     25
@@ -2130,8 +3751,17 @@
                     -25
                 ]
             ],
-            "rightMostPlatformCornerX": -100,
-            "rightMostPlatformCornerY": 4775
+            "leftMostCornerX": -150,
+            "leftMostCornerY": 4825,
+            "rightMostCornerX": -100,
+            "rightMostCornerY": 4775,
+            "topCornerX": -150,
+            "topCornerY": 4775,
+            "botCornerX": -100,
+            "botCornerY": 4825,
+            "occludes": [
+                62
+            ]
         },
         {
             "x": -80,
@@ -2141,7 +3771,27 @@
             "angle": 0,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 14.142135623730951,
+            "angleRad": 0,
             "corners": [
+                [
+                    -10,
+                    10
+                ],
+                [
+                    10,
+                    10
+                ],
+                [
+                    10,
+                    -10
+                ],
+                [
+                    -10,
+                    -10
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -10,
                     10
@@ -2159,8 +3809,17 @@
                     -10
                 ]
             ],
-            "rightMostPlatformCornerX": -60,
-            "rightMostPlatformCornerY": 4800
+            "leftMostCornerX": -80,
+            "leftMostCornerY": 4820,
+            "rightMostCornerX": -60,
+            "rightMostCornerY": 4800,
+            "topCornerX": -80,
+            "topCornerY": 4800,
+            "botCornerX": -60,
+            "botCornerY": 4820,
+            "occludes": [
+                62
+            ]
         },
         {
             "x": 330,
@@ -2170,7 +3829,27 @@
             "angle": 0,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 14.142135623730951,
+            "angleRad": 0,
             "corners": [
+                [
+                    -10,
+                    10
+                ],
+                [
+                    10,
+                    10
+                ],
+                [
+                    10,
+                    -10
+                ],
+                [
+                    -10,
+                    -10
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -10,
                     10
@@ -2188,8 +3867,17 @@
                     -10
                 ]
             ],
-            "leftMostPlatformCornerX": 330,
-            "leftMostPlatformCornerY": 4830
+            "leftMostCornerX": 330,
+            "leftMostCornerY": 4830,
+            "rightMostCornerX": 350,
+            "rightMostCornerY": 4810,
+            "topCornerX": 330,
+            "topCornerY": 4810,
+            "botCornerX": 350,
+            "botCornerY": 4830,
+            "occludes": [
+                62
+            ]
         },
         {
             "x": 300,
@@ -2199,7 +3887,27 @@
             "angle": 0,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 35.35533905932738,
+            "angleRad": 0,
             "corners": [
+                [
+                    -25,
+                    25
+                ],
+                [
+                    25,
+                    25
+                ],
+                [
+                    25,
+                    -25
+                ],
+                [
+                    -25,
+                    -25
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -25,
                     25
@@ -2217,8 +3925,17 @@
                     -25
                 ]
             ],
-            "leftMostPlatformCornerX": 300,
-            "leftMostPlatformCornerY": 4900
+            "leftMostCornerX": 300,
+            "leftMostCornerY": 4900,
+            "rightMostCornerX": 350,
+            "rightMostCornerY": 4850,
+            "topCornerX": 300,
+            "topCornerY": 4850,
+            "botCornerX": 350,
+            "botCornerY": 4900,
+            "occludes": [
+                62
+            ]
         },
         {
             "x": -150,
@@ -2228,7 +3945,27 @@
             "angle": 0,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 35.35533905932738,
+            "angleRad": 0,
             "corners": [
+                [
+                    -25,
+                    25
+                ],
+                [
+                    25,
+                    25
+                ],
+                [
+                    25,
+                    -25
+                ],
+                [
+                    -25,
+                    -25
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -25,
                     25
@@ -2246,8 +3983,17 @@
                     -25
                 ]
             ],
-            "rightMostPlatformCornerX": -100,
-            "rightMostPlatformCornerY": 4850
+            "leftMostCornerX": -150,
+            "leftMostCornerY": 4900,
+            "rightMostCornerX": -100,
+            "rightMostCornerY": 4850,
+            "topCornerX": -150,
+            "topCornerY": 4850,
+            "botCornerX": -100,
+            "botCornerY": 4900,
+            "occludes": [
+                62
+            ]
         },
         {
             "x": -75,
@@ -2257,7 +4003,27 @@
             "angle": 0,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 35.35533905932738,
+            "angleRad": 0,
             "corners": [
+                [
+                    -25,
+                    25
+                ],
+                [
+                    25,
+                    25
+                ],
+                [
+                    25,
+                    -25
+                ],
+                [
+                    -25,
+                    -25
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -25,
                     25
@@ -2275,8 +4041,17 @@
                     -25
                 ]
             ],
-            "rightMostPlatformCornerX": -25,
-            "rightMostPlatformCornerY": 4850
+            "leftMostCornerX": -75,
+            "leftMostCornerY": 4900,
+            "rightMostCornerX": -25,
+            "rightMostCornerY": 4850,
+            "topCornerX": -75,
+            "topCornerY": 4850,
+            "botCornerX": -25,
+            "botCornerY": 4900,
+            "occludes": [
+                62
+            ]
         },
         {
             "x": 0,
@@ -2286,7 +4061,27 @@
             "angle": 0,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 14.142135623730951,
+            "angleRad": 0,
             "corners": [
+                [
+                    -10,
+                    10
+                ],
+                [
+                    10,
+                    10
+                ],
+                [
+                    10,
+                    -10
+                ],
+                [
+                    -10,
+                    -10
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -10,
                     10
@@ -2304,8 +4099,17 @@
                     -10
                 ]
             ],
-            "rightMostPlatformCornerX": 20,
-            "rightMostPlatformCornerY": 4880
+            "leftMostCornerX": 0,
+            "leftMostCornerY": 4900,
+            "rightMostCornerX": 20,
+            "rightMostCornerY": 4880,
+            "topCornerX": 0,
+            "topCornerY": 4880,
+            "botCornerX": 20,
+            "botCornerY": 4900,
+            "occludes": [
+                62
+            ]
         },
         {
             "x": 260,
@@ -2315,7 +4119,27 @@
             "angle": 0,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 14.142135623730951,
+            "angleRad": 0,
             "corners": [
+                [
+                    -10,
+                    10
+                ],
+                [
+                    10,
+                    10
+                ],
+                [
+                    10,
+                    -10
+                ],
+                [
+                    -10,
+                    -10
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -10,
                     10
@@ -2333,8 +4157,17 @@
                     -10
                 ]
             ],
-            "leftMostPlatformCornerX": 260,
-            "leftMostPlatformCornerY": 4910
+            "leftMostCornerX": 260,
+            "leftMostCornerY": 4910,
+            "rightMostCornerX": 280,
+            "rightMostCornerY": 4890,
+            "topCornerX": 260,
+            "topCornerY": 4890,
+            "botCornerX": 280,
+            "botCornerY": 4910,
+            "occludes": [
+                62
+            ]
         },
         {
             "x": 225,
@@ -2344,7 +4177,27 @@
             "angle": 0,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 35.35533905932738,
+            "angleRad": 0,
             "corners": [
+                [
+                    -25,
+                    25
+                ],
+                [
+                    25,
+                    25
+                ],
+                [
+                    25,
+                    -25
+                ],
+                [
+                    -25,
+                    -25
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -25,
                     25
@@ -2362,8 +4215,18 @@
                     -25
                 ]
             ],
-            "leftMostPlatformCornerX": 225,
-            "leftMostPlatformCornerY": 4975
+            "leftMostCornerX": 225,
+            "leftMostCornerY": 4975,
+            "rightMostCornerX": 275,
+            "rightMostCornerY": 4925,
+            "topCornerX": 225,
+            "topCornerY": 4925,
+            "botCornerX": 275,
+            "botCornerY": 4975,
+            "occludes": [
+                62,
+                70
+            ]
         },
         {
             "x": 300,
@@ -2373,7 +4236,27 @@
             "angle": 0,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 35.35533905932738,
+            "angleRad": 0,
             "corners": [
+                [
+                    -25,
+                    25
+                ],
+                [
+                    25,
+                    25
+                ],
+                [
+                    25,
+                    -25
+                ],
+                [
+                    -25,
+                    -25
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -25,
                     25
@@ -2391,8 +4274,17 @@
                     -25
                 ]
             ],
-            "leftMostPlatformCornerX": 300,
-            "leftMostPlatformCornerY": 4975
+            "leftMostCornerX": 300,
+            "leftMostCornerY": 4975,
+            "rightMostCornerX": 350,
+            "rightMostCornerY": 4925,
+            "topCornerX": 300,
+            "topCornerY": 4925,
+            "botCornerX": 350,
+            "botCornerY": 4975,
+            "occludes": [
+                62
+            ]
         },
         {
             "x": -150,
@@ -2402,7 +4294,27 @@
             "angle": 0,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 35.35533905932738,
+            "angleRad": 0,
             "corners": [
+                [
+                    -25,
+                    25
+                ],
+                [
+                    25,
+                    25
+                ],
+                [
+                    25,
+                    -25
+                ],
+                [
+                    -25,
+                    -25
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -25,
                     25
@@ -2420,8 +4332,17 @@
                     -25
                 ]
             ],
-            "rightMostPlatformCornerX": -100,
-            "rightMostPlatformCornerY": 4925
+            "leftMostCornerX": -150,
+            "leftMostCornerY": 4975,
+            "rightMostCornerX": -100,
+            "rightMostCornerY": 4925,
+            "topCornerX": -150,
+            "topCornerY": 4925,
+            "botCornerX": -100,
+            "botCornerY": 4975,
+            "occludes": [
+                62
+            ]
         },
         {
             "x": -75,
@@ -2431,7 +4352,27 @@
             "angle": 0,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 35.35533905932738,
+            "angleRad": 0,
             "corners": [
+                [
+                    -25,
+                    25
+                ],
+                [
+                    25,
+                    25
+                ],
+                [
+                    25,
+                    -25
+                ],
+                [
+                    -25,
+                    -25
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -25,
                     25
@@ -2449,8 +4390,17 @@
                     -25
                 ]
             ],
-            "rightMostPlatformCornerX": -25,
-            "rightMostPlatformCornerY": 4925
+            "leftMostCornerX": -75,
+            "leftMostCornerY": 4975,
+            "rightMostCornerX": -25,
+            "rightMostCornerY": 4925,
+            "topCornerX": -75,
+            "topCornerY": 4925,
+            "botCornerX": -25,
+            "botCornerY": 4975,
+            "occludes": [
+                62
+            ]
         },
         {
             "x": 0,
@@ -2460,7 +4410,27 @@
             "angle": 0,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 35.35533905932738,
+            "angleRad": 0,
             "corners": [
+                [
+                    -25,
+                    25
+                ],
+                [
+                    25,
+                    25
+                ],
+                [
+                    25,
+                    -25
+                ],
+                [
+                    -25,
+                    -25
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -25,
                     25
@@ -2478,8 +4448,17 @@
                     -25
                 ]
             ],
-            "rightMostPlatformCornerX": 50,
-            "rightMostPlatformCornerY": 4925
+            "leftMostCornerX": 0,
+            "leftMostCornerY": 4975,
+            "rightMostCornerX": 50,
+            "rightMostCornerY": 4925,
+            "topCornerX": 0,
+            "topCornerY": 4925,
+            "botCornerX": 50,
+            "botCornerY": 4975,
+            "occludes": [
+                62
+            ]
         },
         {
             "x": 180,
@@ -2489,7 +4468,27 @@
             "angle": 0,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 14.142135623730951,
+            "angleRad": 0,
             "corners": [
+                [
+                    -10,
+                    10
+                ],
+                [
+                    10,
+                    10
+                ],
+                [
+                    10,
+                    -10
+                ],
+                [
+                    -10,
+                    -10
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -10,
                     10
@@ -2507,8 +4506,17 @@
                     -10
                 ]
             ],
-            "leftMostPlatformCornerX": 180,
-            "leftMostPlatformCornerY": 4980
+            "leftMostCornerX": 180,
+            "leftMostCornerY": 4980,
+            "rightMostCornerX": 200,
+            "rightMostCornerY": 4960,
+            "topCornerX": 180,
+            "topCornerY": 4960,
+            "botCornerX": 200,
+            "botCornerY": 4980,
+            "occludes": [
+                62
+            ]
         },
         {
             "x": 80,
@@ -2518,7 +4526,27 @@
             "angle": 0,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 14.142135623730951,
+            "angleRad": 0,
             "corners": [
+                [
+                    -10,
+                    10
+                ],
+                [
+                    10,
+                    10
+                ],
+                [
+                    10,
+                    -10
+                ],
+                [
+                    -10,
+                    -10
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -10,
                     10
@@ -2536,8 +4564,17 @@
                     -10
                 ]
             ],
-            "rightMostPlatformCornerX": 100,
-            "rightMostPlatformCornerY": 4960
+            "leftMostCornerX": 80,
+            "leftMostCornerY": 4980,
+            "rightMostCornerX": 100,
+            "rightMostCornerY": 4960,
+            "topCornerX": 80,
+            "topCornerY": 4960,
+            "botCornerX": 100,
+            "botCornerY": 4980,
+            "occludes": [
+                62
+            ]
         },
         {
             "x": 225,
@@ -2547,7 +4584,27 @@
             "angle": 0,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 35.35533905932738,
+            "angleRad": 0,
             "corners": [
+                [
+                    -25,
+                    25
+                ],
+                [
+                    25,
+                    25
+                ],
+                [
+                    25,
+                    -25
+                ],
+                [
+                    -25,
+                    -25
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -25,
                     25
@@ -2565,8 +4622,17 @@
                     -25
                 ]
             ],
-            "leftMostPlatformCornerX": 225,
-            "leftMostPlatformCornerY": 5050
+            "leftMostCornerX": 225,
+            "leftMostCornerY": 5050,
+            "rightMostCornerX": 275,
+            "rightMostCornerY": 5000,
+            "topCornerX": 225,
+            "topCornerY": 5000,
+            "botCornerX": 275,
+            "botCornerY": 5050,
+            "occludes": [
+                62
+            ]
         },
         {
             "x": -150,
@@ -2576,7 +4642,27 @@
             "angle": 0,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 35.35533905932738,
+            "angleRad": 0,
             "corners": [
+                [
+                    -25,
+                    25
+                ],
+                [
+                    25,
+                    25
+                ],
+                [
+                    25,
+                    -25
+                ],
+                [
+                    -25,
+                    -25
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -25,
                     25
@@ -2594,8 +4680,17 @@
                     -25
                 ]
             ],
-            "rightMostPlatformCornerX": -100,
-            "rightMostPlatformCornerY": 5000
+            "leftMostCornerX": -150,
+            "leftMostCornerY": 5050,
+            "rightMostCornerX": -100,
+            "rightMostCornerY": 5000,
+            "topCornerX": -150,
+            "topCornerY": 5000,
+            "botCornerX": -100,
+            "botCornerY": 5050,
+            "occludes": [
+                62
+            ]
         },
         {
             "x": 0,
@@ -2605,7 +4700,27 @@
             "angle": 0,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 35.35533905932738,
+            "angleRad": 0,
             "corners": [
+                [
+                    -25,
+                    25
+                ],
+                [
+                    25,
+                    25
+                ],
+                [
+                    25,
+                    -25
+                ],
+                [
+                    -25,
+                    -25
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -25,
                     25
@@ -2623,8 +4738,17 @@
                     -25
                 ]
             ],
-            "rightMostPlatformCornerX": 50,
-            "rightMostPlatformCornerY": 5000
+            "leftMostCornerX": 0,
+            "leftMostCornerY": 5050,
+            "rightMostCornerX": 50,
+            "rightMostCornerY": 5000,
+            "topCornerX": 0,
+            "topCornerY": 5000,
+            "botCornerX": 50,
+            "botCornerY": 5050,
+            "occludes": [
+                62
+            ]
         },
         {
             "x": 150,
@@ -2634,7 +4758,27 @@
             "angle": 0,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 35.35533905932738,
+            "angleRad": 0,
             "corners": [
+                [
+                    -25,
+                    25
+                ],
+                [
+                    25,
+                    25
+                ],
+                [
+                    25,
+                    -25
+                ],
+                [
+                    -25,
+                    -25
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -25,
                     25
@@ -2652,8 +4796,17 @@
                     -25
                 ]
             ],
-            "leftMostPlatformCornerX": 150,
-            "leftMostPlatformCornerY": 5050
+            "leftMostCornerX": 150,
+            "leftMostCornerY": 5050,
+            "rightMostCornerX": 200,
+            "rightMostCornerY": 5000,
+            "topCornerX": 150,
+            "topCornerY": 5000,
+            "botCornerX": 200,
+            "botCornerY": 5050,
+            "occludes": [
+                62
+            ]
         },
         {
             "x": -75,
@@ -2663,7 +4816,27 @@
             "angle": 0,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 35.35533905932738,
+            "angleRad": 0,
             "corners": [
+                [
+                    -25,
+                    25
+                ],
+                [
+                    25,
+                    25
+                ],
+                [
+                    25,
+                    -25
+                ],
+                [
+                    -25,
+                    -25
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -25,
                     25
@@ -2681,8 +4854,17 @@
                     -25
                 ]
             ],
-            "rightMostPlatformCornerX": -25,
-            "rightMostPlatformCornerY": 5000
+            "leftMostCornerX": -75,
+            "leftMostCornerY": 5050,
+            "rightMostCornerX": -25,
+            "rightMostCornerY": 5000,
+            "topCornerX": -75,
+            "topCornerY": 5000,
+            "botCornerX": -25,
+            "botCornerY": 5050,
+            "occludes": [
+                62
+            ]
         },
         {
             "x": 75,
@@ -2692,7 +4874,27 @@
             "angle": 0,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 35.35533905932738,
+            "angleRad": 0,
             "corners": [
+                [
+                    -25,
+                    25
+                ],
+                [
+                    25,
+                    25
+                ],
+                [
+                    25,
+                    -25
+                ],
+                [
+                    -25,
+                    -25
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -25,
                     25
@@ -2710,10 +4912,17 @@
                     -25
                 ]
             ],
-            "leftMostPlatformCornerX": 75,
-            "leftMostPlatformCornerY": 5050,
-            "rightMostPlatformCornerX": 125,
-            "rightMostPlatformCornerY": 5000
+            "leftMostCornerX": 75,
+            "leftMostCornerY": 5050,
+            "rightMostCornerX": 125,
+            "rightMostCornerY": 5000,
+            "topCornerX": 75,
+            "topCornerY": 5000,
+            "botCornerX": 125,
+            "botCornerY": 5050,
+            "occludes": [
+                62
+            ]
         },
         {
             "x": 300,
@@ -2723,7 +4932,27 @@
             "angle": 0,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 35.35533905932738,
+            "angleRad": 0,
             "corners": [
+                [
+                    -25,
+                    25
+                ],
+                [
+                    25,
+                    25
+                ],
+                [
+                    25,
+                    -25
+                ],
+                [
+                    -25,
+                    -25
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -25,
                     25
@@ -2741,8 +4970,17 @@
                     -25
                 ]
             ],
-            "leftMostPlatformCornerX": 300,
-            "leftMostPlatformCornerY": 5050
+            "leftMostCornerX": 300,
+            "leftMostCornerY": 5050,
+            "rightMostCornerX": 350,
+            "rightMostCornerY": 5000,
+            "topCornerX": 300,
+            "topCornerY": 5000,
+            "botCornerX": 350,
+            "botCornerY": 5050,
+            "occludes": [
+                62
+            ]
         },
         {
             "x": -150,
@@ -2752,7 +4990,27 @@
             "angle": 0,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 262.48809496813374,
+            "angleRad": 0,
             "corners": [
+                [
+                    -250,
+                    80
+                ],
+                [
+                    250,
+                    80
+                ],
+                [
+                    250,
+                    -80
+                ],
+                [
+                    -250,
+                    -80
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -250,
                     80
@@ -2770,10 +5028,15 @@
                     -80
                 ]
             ],
-            "rightMostPlatformCornerX": 350,
-            "rightMostPlatformCornerY": 5070,
-            "leftMostPlatformCornerX": -150,
-            "leftMostPlatformCornerY": 5230
+            "leftMostCornerX": -150,
+            "leftMostCornerY": 5230,
+            "rightMostCornerX": 350,
+            "rightMostCornerY": 5070,
+            "topCornerX": -150,
+            "topCornerY": 5070,
+            "botCornerX": 350,
+            "botCornerY": 5230,
+            "occludes": []
         },
         {
             "x": 360,
@@ -2783,7 +5046,27 @@
             "angle": 0,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 39.05124837953327,
+            "angleRad": 0,
             "corners": [
+                [
+                    -30,
+                    25
+                ],
+                [
+                    30,
+                    25
+                ],
+                [
+                    30,
+                    -25
+                ],
+                [
+                    -30,
+                    -25
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -30,
                     25
@@ -2801,101 +5084,127 @@
                     -25
                 ]
             ],
-            "leftMostPlatformCornerX": 360,
-            "leftMostPlatformCornerY": 5230,
-            "rightMostPlatformCornerX": 420,
-            "rightMostPlatformCornerY": 5180
+            "leftMostCornerX": 360,
+            "leftMostCornerY": 5230,
+            "rightMostCornerX": 420,
+            "rightMostCornerY": 5180,
+            "topCornerX": 360,
+            "topCornerY": 5180,
+            "botCornerX": 420,
+            "botCornerY": 5230,
+            "occludes": []
         },
         {
             "x": -180,
-            "y": 5240,
+            "y": 5250,
             "width": 600,
-            "height": 70,
+            "height": 50,
             "angle": 0,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 301.0398644698074,
+            "angleRad": 0,
             "corners": [
                 [
                     -300,
-                    35
+                    25
+                ],
+                [
+                    300,
+                    25
+                ],
+                [
+                    300,
+                    -25
                 ],
                 [
                     -300,
-                    -35
-                ],
-                [
-                    300,
-                    35
-                ],
-                [
-                    300,
-                    -35
+                    -25
                 ]
             ],
-            "leftMostPlatformCornerX": -180,
-            "leftMostPlatformCornerY": 5310,
-            "rightMostPlatformCornerX": 420,
-            "rightMostPlatformCornerY": 5240
+            "cornersSorted": [
+                [
+                    -300,
+                    25
+                ],
+                [
+                    -300,
+                    -25
+                ],
+                [
+                    300,
+                    25
+                ],
+                [
+                    300,
+                    -25
+                ]
+            ],
+            "leftMostCornerX": -180,
+            "leftMostCornerY": 5300,
+            "rightMostCornerX": 420,
+            "rightMostCornerY": 5250,
+            "topCornerX": -180,
+            "topCornerY": 5250,
+            "botCornerX": 420,
+            "botCornerY": 5300,
+            "occludes": []
         },
         {
             "x": 430,
-            "y": 5240,
+            "y": 5250,
             "width": 40,
-            "height": 70,
+            "height": 50,
             "angle": 0,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 32.01562118716424,
+            "angleRad": 0,
             "corners": [
                 [
                     -20,
-                    35
+                    25
+                ],
+                [
+                    20,
+                    25
+                ],
+                [
+                    20,
+                    -25
                 ],
                 [
                     -20,
-                    -35
+                    -25
+                ]
+            ],
+            "cornersSorted": [
+                [
+                    -20,
+                    25
+                ],
+                [
+                    -20,
+                    -25
                 ],
                 [
                     20,
-                    35
+                    25
                 ],
                 [
                     20,
-                    -35
+                    -25
                 ]
             ],
-            "leftMostPlatformCornerX": 430,
-            "leftMostPlatformCornerY": 5310
-        },
-        {
-            "x": -180,
-            "y": 5320,
-            "width": 600,
-            "height": 70,
-            "angle": 0,
-            "endzone": 0,
-            "wall": 0,
-            "corners": [
-                [
-                    -300,
-                    35
-                ],
-                [
-                    -300,
-                    -35
-                ],
-                [
-                    300,
-                    35
-                ],
-                [
-                    300,
-                    -35
-                ]
-            ],
-            "rightMostPlatformCornerX": 420,
-            "rightMostPlatformCornerY": 5320,
-            "leftMostPlatformCornerX": -180,
-            "leftMostPlatformCornerY": 5390
+            "leftMostCornerX": 430,
+            "leftMostCornerY": 5300,
+            "rightMostCornerX": 470,
+            "rightMostCornerY": 5250,
+            "topCornerX": 430,
+            "topCornerY": 5250,
+            "botCornerX": 470,
+            "botCornerY": 5300,
+            "occludes": []
         },
         {
             "x": 430,
@@ -2905,7 +5214,27 @@
             "angle": 0,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 36.05551275463989,
+            "angleRad": 0,
             "corners": [
+                [
+                    -20,
+                    30
+                ],
+                [
+                    20,
+                    30
+                ],
+                [
+                    20,
+                    -30
+                ],
+                [
+                    -20,
+                    -30
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -20,
                     30
@@ -2923,39 +5252,71 @@
                     -30
                 ]
             ],
-            "leftMostPlatformCornerX": 430,
-            "leftMostPlatformCornerY": 5380,
-            "rightMostPlatformCornerX": 470,
-            "rightMostPlatformCornerY": 5320
+            "leftMostCornerX": 430,
+            "leftMostCornerY": 5380,
+            "rightMostCornerX": 470,
+            "rightMostCornerY": 5320,
+            "topCornerX": 430,
+            "topCornerY": 5320,
+            "botCornerX": 470,
+            "botCornerY": 5380,
+            "occludes": []
         },
         {
-            "x": -280,
-            "y": 5500,
-            "width": 40,
-            "height": 240,
+            "x": -180,
+            "y": 5320,
+            "width": 600,
+            "height": 70,
             "angle": 0,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 302.03476621077914,
+            "angleRad": 0,
             "corners": [
                 [
-                    -20,
-                    120
+                    -300,
+                    35
                 ],
                 [
-                    -20,
-                    -120
+                    300,
+                    35
                 ],
                 [
-                    20,
-                    120
+                    300,
+                    -35
                 ],
                 [
-                    20,
-                    -120
+                    -300,
+                    -35
                 ]
             ],
-            "rightMostPlatformCornerX": -240,
-            "rightMostPlatformCornerY": 5500
+            "cornersSorted": [
+                [
+                    -300,
+                    35
+                ],
+                [
+                    -300,
+                    -35
+                ],
+                [
+                    300,
+                    35
+                ],
+                [
+                    300,
+                    -35
+                ]
+            ],
+            "leftMostCornerX": -180,
+            "leftMostCornerY": 5390,
+            "rightMostCornerX": 420,
+            "rightMostCornerY": 5320,
+            "topCornerX": -180,
+            "topCornerY": 5320,
+            "botCornerX": 420,
+            "botCornerY": 5390,
+            "occludes": []
         },
         {
             "x": -230,
@@ -2965,7 +5326,27 @@
             "angle": 0,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 413.40053217188773,
+            "angleRad": 0,
             "corners": [
+                [
+                    -350,
+                    220
+                ],
+                [
+                    350,
+                    220
+                ],
+                [
+                    350,
+                    -220
+                ],
+                [
+                    -350,
+                    -220
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -350,
                     220
@@ -2983,10 +5364,18 @@
                     -220
                 ]
             ],
-            "leftMostPlatformCornerX": -230,
-            "leftMostPlatformCornerY": 5830,
-            "rightMostPlatformCornerX": 470,
-            "rightMostPlatformCornerY": 5390
+            "leftMostCornerX": -230,
+            "leftMostCornerY": 5830,
+            "rightMostCornerX": 470,
+            "rightMostCornerY": 5390,
+            "topCornerX": -230,
+            "topCornerY": 5390,
+            "botCornerX": 470,
+            "botCornerY": 5830,
+            "occludes": [
+                89,
+                90
+            ]
         },
         {
             "x": 470,
@@ -2996,7 +5385,27 @@
             "angle": 0,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 42.42640687119285,
+            "angleRad": 0,
             "corners": [
+                [
+                    -30,
+                    30
+                ],
+                [
+                    30,
+                    30
+                ],
+                [
+                    30,
+                    -30
+                ],
+                [
+                    -30,
+                    -30
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -30,
                     30
@@ -3014,20 +5423,47 @@
                     -30
                 ]
             ],
-            "leftMostPlatformCornerX": 470,
-            "leftMostPlatformCornerY": 5510,
-            "rightMostPlatformCornerX": 530,
-            "rightMostPlatformCornerY": 5450
+            "leftMostCornerX": 470,
+            "leftMostCornerY": 5510,
+            "rightMostCornerX": 530,
+            "rightMostCornerY": 5450,
+            "topCornerX": 470,
+            "topCornerY": 5450,
+            "botCornerX": 530,
+            "botCornerY": 5510,
+            "occludes": [
+                93
+            ]
         },
         {
             "x": 470,
-            "y": 5520,
+            "y": 5530,
             "width": 60,
             "height": 60,
             "angle": 0,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 42.42640687119285,
+            "angleRad": 0,
             "corners": [
+                [
+                    -30,
+                    30
+                ],
+                [
+                    30,
+                    30
+                ],
+                [
+                    30,
+                    -30
+                ],
+                [
+                    -30,
+                    -30
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -30,
                     30
@@ -3045,20 +5481,103 @@
                     -30
                 ]
             ],
-            "rightMostPlatformCornerX": 530,
-            "rightMostPlatformCornerY": 5520,
-            "leftMostPlatformCornerX": 470,
-            "leftMostPlatformCornerY": 5580
+            "leftMostCornerX": 470,
+            "leftMostCornerY": 5590,
+            "rightMostCornerX": 530,
+            "rightMostCornerY": 5530,
+            "topCornerX": 470,
+            "topCornerY": 5530,
+            "botCornerX": 530,
+            "botCornerY": 5590,
+            "occludes": [
+                93
+            ]
+        },
+        {
+            "x": -280,
+            "y": 5500,
+            "width": 40,
+            "height": 240,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "hypotenuse": 121.6552506059644,
+            "angleRad": 0,
+            "corners": [
+                [
+                    -20,
+                    120
+                ],
+                [
+                    20,
+                    120
+                ],
+                [
+                    20,
+                    -120
+                ],
+                [
+                    -20,
+                    -120
+                ]
+            ],
+            "cornersSorted": [
+                [
+                    -20,
+                    120
+                ],
+                [
+                    -20,
+                    -120
+                ],
+                [
+                    20,
+                    120
+                ],
+                [
+                    20,
+                    -120
+                ]
+            ],
+            "leftMostCornerX": -280,
+            "leftMostCornerY": 5740,
+            "rightMostCornerX": -240,
+            "rightMostCornerY": 5500,
+            "topCornerX": -280,
+            "topCornerY": 5500,
+            "botCornerX": -240,
+            "botCornerY": 5740,
+            "occludes": []
         },
         {
             "x": 470,
-            "y": 5590,
+            "y": 5610,
             "width": 60,
             "height": 60,
             "angle": 0,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 42.42640687119285,
+            "angleRad": 0,
             "corners": [
+                [
+                    -30,
+                    30
+                ],
+                [
+                    30,
+                    30
+                ],
+                [
+                    30,
+                    -30
+                ],
+                [
+                    -30,
+                    -30
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -30,
                     30
@@ -3076,20 +5595,47 @@
                     -30
                 ]
             ],
-            "leftMostPlatformCornerX": 470,
-            "leftMostPlatformCornerY": 5650,
-            "rightMostPlatformCornerX": 530,
-            "rightMostPlatformCornerY": 5590
+            "leftMostCornerX": 470,
+            "leftMostCornerY": 5670,
+            "rightMostCornerX": 530,
+            "rightMostCornerY": 5610,
+            "topCornerX": 470,
+            "topCornerY": 5610,
+            "botCornerX": 530,
+            "botCornerY": 5670,
+            "occludes": [
+                93
+            ]
         },
         {
             "x": 470,
-            "y": 5660,
+            "y": 5690,
             "width": 60,
             "height": 60,
             "angle": 0,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 42.42640687119285,
+            "angleRad": 0,
             "corners": [
+                [
+                    -30,
+                    30
+                ],
+                [
+                    30,
+                    30
+                ],
+                [
+                    30,
+                    -30
+                ],
+                [
+                    -30,
+                    -30
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -30,
                     30
@@ -3107,20 +5653,47 @@
                     -30
                 ]
             ],
-            "leftMostPlatformCornerX": 470,
-            "leftMostPlatformCornerY": 5720,
-            "rightMostPlatformCornerX": 530,
-            "rightMostPlatformCornerY": 5660
+            "leftMostCornerX": 470,
+            "leftMostCornerY": 5750,
+            "rightMostCornerX": 530,
+            "rightMostCornerY": 5690,
+            "topCornerX": 470,
+            "topCornerY": 5690,
+            "botCornerX": 530,
+            "botCornerY": 5750,
+            "occludes": [
+                93
+            ]
         },
         {
             "x": 470,
-            "y": 5730,
+            "y": 5770,
             "width": 60,
             "height": 60,
             "angle": 0,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 42.42640687119285,
+            "angleRad": 0,
             "corners": [
+                [
+                    -30,
+                    30
+                ],
+                [
+                    30,
+                    30
+                ],
+                [
+                    30,
+                    -30
+                ],
+                [
+                    -30,
+                    -30
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -30,
                     30
@@ -3138,41 +5711,17 @@
                     -30
                 ]
             ],
-            "leftMostPlatformCornerX": 470,
-            "leftMostPlatformCornerY": 5790,
-            "rightMostPlatformCornerX": 530,
-            "rightMostPlatformCornerY": 5730
-        },
-        {
-            "x": -140,
-            "y": 5830,
-            "width": 510,
-            "height": 100,
-            "angle": 0,
-            "endzone": 0,
-            "wall": 0,
-            "corners": [
-                [
-                    -255,
-                    50
-                ],
-                [
-                    -255,
-                    -50
-                ],
-                [
-                    255,
-                    50
-                ],
-                [
-                    255,
-                    -50
-                ]
-            ],
-            "rightMostPlatformCornerX": 370,
-            "rightMostPlatformCornerY": 5830,
-            "leftMostPlatformCornerX": -140,
-            "leftMostPlatformCornerY": 5930
+            "leftMostCornerX": 470,
+            "leftMostCornerY": 5830,
+            "rightMostCornerX": 530,
+            "rightMostCornerY": 5770,
+            "topCornerX": 470,
+            "topCornerY": 5770,
+            "botCornerX": 530,
+            "botCornerY": 5830,
+            "occludes": [
+                93
+            ]
         },
         {
             "x": -190,
@@ -3182,7 +5731,27 @@
             "angle": 0,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 35.35533905932738,
+            "angleRad": 0,
             "corners": [
+                [
+                    -25,
+                    25
+                ],
+                [
+                    25,
+                    25
+                ],
+                [
+                    25,
+                    -25
+                ],
+                [
+                    -25,
+                    -25
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -25,
                     25
@@ -3200,37 +5769,135 @@
                     -25
                 ]
             ],
-            "rightMostPlatformCornerX": -140,
-            "rightMostPlatformCornerY": 5830
+            "leftMostCornerX": -190,
+            "leftMostCornerY": 5880,
+            "rightMostCornerX": -140,
+            "rightMostCornerY": 5830,
+            "topCornerX": -190,
+            "topCornerY": 5830,
+            "botCornerX": -140,
+            "botCornerY": 5880,
+            "occludes": [
+                93
+            ]
+        },
+        {
+            "x": -140,
+            "y": 5830,
+            "width": 510,
+            "height": 100,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 0,
+            "hypotenuse": 259.8557292037257,
+            "angleRad": 0,
+            "corners": [
+                [
+                    -255,
+                    50
+                ],
+                [
+                    255,
+                    50
+                ],
+                [
+                    255,
+                    -50
+                ],
+                [
+                    -255,
+                    -50
+                ]
+            ],
+            "cornersSorted": [
+                [
+                    -255,
+                    50
+                ],
+                [
+                    -255,
+                    -50
+                ],
+                [
+                    255,
+                    50
+                ],
+                [
+                    255,
+                    -50
+                ]
+            ],
+            "leftMostCornerX": -140,
+            "leftMostCornerY": 5930,
+            "rightMostCornerX": 370,
+            "rightMostCornerY": 5830,
+            "topCornerX": -140,
+            "topCornerY": 5830,
+            "botCornerX": 370,
+            "botCornerY": 5930,
+            "occludes": [
+                93,
+                98
+            ]
         },
         {
             "x": 370,
             "y": 5830,
-            "width": 50,
-            "height": 50,
+            "width": 100,
+            "height": 60,
             "angle": 0,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 58.309518948453004,
+            "angleRad": 0,
             "corners": [
                 [
-                    -25,
-                    25
+                    -50,
+                    30
                 ],
                 [
-                    -25,
-                    -25
+                    50,
+                    30
                 ],
                 [
-                    25,
-                    25
+                    50,
+                    -30
                 ],
                 [
-                    25,
-                    -25
+                    -50,
+                    -30
                 ]
             ],
-            "leftMostPlatformCornerX": 370,
-            "leftMostPlatformCornerY": 5880
+            "cornersSorted": [
+                [
+                    -50,
+                    30
+                ],
+                [
+                    -50,
+                    -30
+                ],
+                [
+                    50,
+                    30
+                ],
+                [
+                    50,
+                    -30
+                ]
+            ],
+            "leftMostCornerX": 370,
+            "leftMostCornerY": 5890,
+            "rightMostCornerX": 470,
+            "rightMostCornerY": 5830,
+            "topCornerX": 370,
+            "topCornerY": 5830,
+            "botCornerX": 470,
+            "botCornerY": 5890,
+            "occludes": [
+                93,
+                100
+            ]
         },
         {
             "x": -60,
@@ -3240,7 +5907,27 @@
             "angle": 0,
             "endzone": 0,
             "wall": 0,
+            "hypotenuse": 170.66048165876012,
+            "angleRad": 0,
             "corners": [
+                [
+                    -170,
+                    15
+                ],
+                [
+                    170,
+                    15
+                ],
+                [
+                    170,
+                    -15
+                ],
+                [
+                    -170,
+                    -15
+                ]
+            ],
+            "cornersSorted": [
                 [
                     -170,
                     15
@@ -3258,8 +5945,297 @@
                     -15
                 ]
             ],
-            "rightMostPlatformCornerX": 280,
-            "rightMostPlatformCornerY": 5930
+            "leftMostCornerX": -60,
+            "leftMostCornerY": 5960,
+            "rightMostCornerX": 280,
+            "rightMostCornerY": 5930,
+            "topCornerX": -60,
+            "topCornerY": 5930,
+            "botCornerX": 280,
+            "botCornerY": 5960,
+            "occludes": [
+                100
+            ]
+        },
+        {
+            "x": -230,
+            "y": 1610,
+            "width": 90,
+            "height": 400,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 1,
+            "hypotenuse": 205,
+            "angleRad": 0,
+            "corners": [
+                [
+                    -45,
+                    200
+                ],
+                [
+                    45,
+                    200
+                ],
+                [
+                    45,
+                    -200
+                ],
+                [
+                    -45,
+                    -200
+                ]
+            ],
+            "cornersSorted": [
+                [
+                    -45,
+                    200
+                ],
+                [
+                    -45,
+                    -200
+                ],
+                [
+                    45,
+                    200
+                ],
+                [
+                    45,
+                    -200
+                ]
+            ],
+            "leftMostCornerX": -230,
+            "leftMostCornerY": 2010,
+            "rightMostCornerX": -140,
+            "rightMostCornerY": 1610,
+            "topCornerX": -230,
+            "topCornerY": 1610,
+            "botCornerX": -140,
+            "botCornerY": 2010,
+            "occludes": []
+        },
+        {
+            "x": 420,
+            "y": 1940,
+            "width": 30,
+            "height": 70,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 1,
+            "hypotenuse": 38.07886552931954,
+            "angleRad": 0,
+            "corners": [
+                [
+                    -15,
+                    35
+                ],
+                [
+                    15,
+                    35
+                ],
+                [
+                    15,
+                    -35
+                ],
+                [
+                    -15,
+                    -35
+                ]
+            ],
+            "cornersSorted": [
+                [
+                    -15,
+                    35
+                ],
+                [
+                    -15,
+                    -35
+                ],
+                [
+                    15,
+                    35
+                ],
+                [
+                    15,
+                    -35
+                ]
+            ],
+            "leftMostCornerX": 420,
+            "leftMostCornerY": 2010,
+            "rightMostCornerX": 450,
+            "rightMostCornerY": 1940,
+            "topCornerX": 420,
+            "topCornerY": 1940,
+            "botCornerX": 450,
+            "botCornerY": 2010,
+            "occludes": []
+        },
+        {
+            "x": -310,
+            "y": 1940,
+            "width": 70,
+            "height": 70,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 1,
+            "hypotenuse": 49.49747468305833,
+            "angleRad": 0,
+            "corners": [
+                [
+                    -35,
+                    35
+                ],
+                [
+                    35,
+                    35
+                ],
+                [
+                    35,
+                    -35
+                ],
+                [
+                    -35,
+                    -35
+                ]
+            ],
+            "cornersSorted": [
+                [
+                    -35,
+                    35
+                ],
+                [
+                    -35,
+                    -35
+                ],
+                [
+                    35,
+                    35
+                ],
+                [
+                    35,
+                    -35
+                ]
+            ],
+            "leftMostCornerX": -310,
+            "leftMostCornerY": 2010,
+            "rightMostCornerX": -240,
+            "rightMostCornerY": 1940,
+            "topCornerX": -310,
+            "topCornerY": 1940,
+            "botCornerX": -240,
+            "botCornerY": 2010,
+            "occludes": []
+        },
+        {
+            "x": -370,
+            "y": 1940,
+            "width": 50,
+            "height": 70,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 1,
+            "hypotenuse": 43.01162633521314,
+            "angleRad": 0,
+            "corners": [
+                [
+                    -25,
+                    35
+                ],
+                [
+                    25,
+                    35
+                ],
+                [
+                    25,
+                    -35
+                ],
+                [
+                    -25,
+                    -35
+                ]
+            ],
+            "cornersSorted": [
+                [
+                    -25,
+                    35
+                ],
+                [
+                    -25,
+                    -35
+                ],
+                [
+                    25,
+                    35
+                ],
+                [
+                    25,
+                    -35
+                ]
+            ],
+            "leftMostCornerX": -370,
+            "leftMostCornerY": 2010,
+            "rightMostCornerX": -320,
+            "rightMostCornerY": 1940,
+            "topCornerX": -370,
+            "topCornerY": 1940,
+            "botCornerX": -320,
+            "botCornerY": 2010,
+            "occludes": []
+        },
+        {
+            "x": -410,
+            "y": 1940,
+            "width": 30,
+            "height": 70,
+            "angle": 0,
+            "endzone": 0,
+            "wall": 1,
+            "hypotenuse": 38.07886552931954,
+            "angleRad": 0,
+            "corners": [
+                [
+                    -15,
+                    35
+                ],
+                [
+                    15,
+                    35
+                ],
+                [
+                    15,
+                    -35
+                ],
+                [
+                    -15,
+                    -35
+                ]
+            ],
+            "cornersSorted": [
+                [
+                    -15,
+                    35
+                ],
+                [
+                    -15,
+                    -35
+                ],
+                [
+                    15,
+                    35
+                ],
+                [
+                    15,
+                    -35
+                ]
+            ],
+            "leftMostCornerX": -410,
+            "leftMostCornerY": 2010,
+            "rightMostCornerX": -380,
+            "rightMostCornerY": 1940,
+            "topCornerX": -410,
+            "topCornerY": 1940,
+            "botCornerX": -380,
+            "botCornerY": 2010,
+            "occludes": []
         }
     ],
     "name": "Awakening"

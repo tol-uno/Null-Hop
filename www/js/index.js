@@ -521,7 +521,7 @@ const canvasArea = { //Canvas Object
         this.interval = setInterval(updateGameArea, 10); // Number sets the taget frame rate. 1000/# = FPS
 
         UserInterface.start(); // need to be ran after canvas is resized in canvasArea.start()
-
+        UserInterface.getRecords();
     },
 
 
@@ -705,6 +705,8 @@ const UserInterface = {
     timerStart : null, // set by jump button
     levelState : 1, // 1 = pre-start, 2 = playing level, 3 = in endzone
 
+    records : {},
+
     showVerticalWarning : false,
     showOverstrafeWarning : false,
 
@@ -730,6 +732,14 @@ const UserInterface = {
     start : function() { // where all buttons are created
 
         // Retreaving settings from local storage OR setting them
+        
+        // TEMP OVERIDE OF THIS SYSTEM
+        this.sensitivity = 0.5
+        this.debugText = 1
+        this.strafeHUD = 1
+        this.volume = 0
+
+        /*
         this.sensitivity = window.localStorage.getItem("sensitivity_storage")
         if (this.sensitivity == null) {
             this.sensitivity = 1
@@ -754,7 +764,7 @@ const UserInterface = {
             this.volume = 0.5
             window.localStorage.setItem("volume_storage", 0.5)
         }
-
+        */
 
 
         // CREATING THE BUTTONS []  []  [] 
@@ -1922,16 +1932,53 @@ const UserInterface = {
         UserInterface.renderedButtons = this.btnGroup_inLevel;
     },
 
+    getRecords : function() {
+            
+        // GET RECORDS DIRECTLY THROUGH CORDOVA LOCAL STORAGE (www)       
+        const assetsURL = cordova.file.applicationDirectory + "www/assets/"
+        
+        window.resolveLocalFileSystemURL(assetsURL, (dirEntry) => {
+
+            dirEntry.getFile("records.json", {create: false, exclusive: false}, (fileEntry) => {
+                console.log(fileEntry)
+
+                fileEntry.file( (file) => {
+
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        
+                        this.records = JSON.parse(e.target.result)
+                        const rawText = e.target.result
+                        // const byteOffset = rawText.indexOf("" + key + ": " + value);
+                        const byteOffset = rawText.indexOf("Eva");
+                        console.log("====== file raw ===")
+                        console.log(rawText)
+                        console.log("byte Offset: " + byteOffset)
+                        console.log(this.records)
+
+                    };
+                    reader.onerror = (e) => alert(e.target.error.name);
+        
+                    reader.readAsText(file)
+                })
+            })
+        })
+    },
+
     handleRecord : function() {
-        if (Map.record) {
-            if (UserInterface.timer < Map.record) {
-                window.localStorage.setItem("record_" + Map.name, UserInterface.timer)
-                Map.record = UserInterface.timer
-            }
-        } else { // IF THERE'S NO RECORD
-            window.localStorage.setItem("record_" + Map.name, UserInterface.timer)
-            Map.record = UserInterface.timer
-        }
+        const yourRecord = this.records[Map.name].yourRecord
+
+        if (yourRecord == null || (yourRecord !== null && this.timer < yourRecord)) {
+            this.records[Map.name].yourRecord = this.timer
+            
+            // Write this.timer to yourRecord in records.json
+            // APPENDING and SEEKING TO SPECIFIC PART OF FILE SEEMS HARD
+            // probably just need to rewrite records file fully every time
+
+            // THIS WILL BE AN ASYC TASK SO I NEED TO DO SOMETHING DIFFERENT TO DISPLAY RECORD IMEDIETLY ON END SCREEN
+        } 
+
+        function getByteOffset(rawRecordsFile, stringToFind) {}
     },
 
     determineButtonColor : function() {
@@ -2141,7 +2188,7 @@ const UserInterface = {
                 canvasArea.ctx.fillStyle = !UserInterface.darkMode ? UserInterface.darkColor_1: UserInterface.lightColor_1;
 
                 canvasArea.ctx.fillText("Time: " + UserInterface.secondsToMinutes(this.timer), canvasArea.canvas.width - 240, 60)
-                canvasArea.ctx.fillText("Record: " + UserInterface.secondsToMinutes(Map.record), canvasArea.canvas.width - 240, 90);
+                //canvasArea.ctx.fillText("Record: " + UserInterface.secondsToMinutes(this.records[Map.name].yourRecord), canvasArea.canvas.width - 240, 90);
             }
 
 
@@ -2312,7 +2359,7 @@ const UserInterface = {
             }
 
 
-            if (player.endSlow == 0) { // level name, your time, best time, strafe efficiency
+            if (player.endSlow == 0) { // level name, your time, best time, strafe efficiency, leaderboards
 
                 // END SCREEN BOX
                 canvasArea.ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
@@ -2335,9 +2382,52 @@ const UserInterface = {
 
                 canvasArea.ctx.fillText("Level: " + Map.name, midX - 120, midY - 50);
                 canvasArea.ctx.fillText("Time: " + UserInterface.secondsToMinutes(UserInterface.timer), midX - 120, midY - 0);
-                canvasArea.ctx.fillText("Record: " + UserInterface.secondsToMinutes(Map.record), midX - 120, midY + 30);
+                canvasArea.ctx.fillText("Record: " + UserInterface.secondsToMinutes(this.records[Map.name].yourRecord), midX - 120, midY + 30);
 
-                if (UserInterface.timer == Map.record) {canvasArea.ctx.fillText("New Record!", midX - 120, midY + 65)}
+                if (this.timer == this.records[Map.name].yourRecord) {canvasArea.ctx.fillText("New Record!", midX - 120, midY + 65)}
+
+                // LEADERBOARDS IF AVAILABLE
+                if (this.records[Map.name] !== undefined) {
+                    // RIGHT SIDE BOX
+                    canvasArea.ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
+
+                    canvasArea.roundedRect(midX + 200, midY - 200, 300, 400, 25)
+
+                    canvasArea.ctx.save(); // save 3.5
+                    
+                    canvasArea.ctx.shadowColor = "rgba(0, 0, 0, 0.3)"; 
+                    canvasArea.ctx.shadowBlur = 20;
+                    canvasArea.ctx.fill();
+
+                    canvasArea.ctx.restore(); // restore 3.5
+
+                    // LEADERBOARD TEXT
+                    canvasArea.ctx.font = "25px BAHNSCHRIFT";
+
+                    canvasArea.ctx.fillStyle = (!UserInterface.darkMode) ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
+    
+                    canvasArea.ctx.fillText("Leaderboard", midX + 220, midY - 150);
+                    let lineSpacing = 30;
+                    let placedInLeaderboard = false;
+                    for (const [key, value] of Object.entries(this.records[Map.name].leaderboard)) {
+                        if (!placedInLeaderboard && this.records[Map.name].yourRecord <= value) {
+                            canvasArea.ctx.fillText(Null + ": " + UserInterface.secondsToMinutes(this.records[Map.name].yourRecord), midX + 220, midY - 120 + lineSpacing);
+                            lineSpacing += 30;
+                            placedInLeaderboard = true;
+                        }
+                        
+                        canvasArea.ctx.fillText(key + ": " + UserInterface.secondsToMinutes(value), midX + 220, midY - 120 + lineSpacing);
+                        lineSpacing += 30;
+                    }
+                    if (!placedInLeaderboard) { // drawing yourRecord in last place
+                        canvasArea.ctx.fillText(Null + ": " + UserInterface.secondsToMinutes(this.records[Map.name].yourRecord), midX + 220, midY - 120 + lineSpacing);
+                    }
+
+
+                    // NULL'S RECORD IS NOT BEING DRAWN
+                    // TEST DRAW IT SOMEWHERE TO MAKE SURE ITS ACCESSING THE RIGHT INFORMATION
+
+                }
 
             }
         }
@@ -2609,6 +2699,7 @@ const Tutorial = {
     animateVel : 0,
     decalLoadState : -1, // -1 no, 0 started load, 4 finished load (number of decals loaded)
     decalList : ["horizontal_finger", "vertical_finger", "finger", "arrow"],
+    timeoutToCancel : null,
 
     reset : function() { // called on restart and when leaving level
         this.state = 0;
@@ -2618,6 +2709,7 @@ const Tutorial = {
         this.pausePlayer = false;
         this.animatePos = 0;
         this.animateVel = 0;
+        clearTimeout(this.timeoutToCancel)
     },
 
 
@@ -2628,6 +2720,8 @@ const Tutorial = {
                 this.isActive = false;
             }
         } 
+
+        // ONLY DO THESE CHECKS IF this.isActive
 
         if (this.state == 0) {
             if ((UserInterface.gamestate == 5 || UserInterface.gamestate == 6) && this.decalLoadState == -1) { // decals havnt started loading yet
@@ -2695,7 +2789,7 @@ const Tutorial = {
             this.state == 16 ||
             this.state == 18
         )) {
-            setTimeout(() => {UserInterface.renderedButtons = UserInterface.renderedButtons.concat(btn_next)}, 1500);
+            this.timeoutToCancel = setTimeout(() => {UserInterface.renderedButtons = UserInterface.renderedButtons.concat(btn_next)}, 1500);
             this.timerStarted = true;
         }
 
@@ -2729,13 +2823,13 @@ const Tutorial = {
         }
 
         if (!this.timerStarted && this.state == 6) { // jumping for 2 seconds
-            setTimeout(() => {this.timerStarted = false; this.state ++; this.pausePlayer = true}, 2000);
+            this.timeoutToCancel = setTimeout(() => {this.timerStarted = false; this.state ++; this.pausePlayer = true}, 2000);
             this.timerStarted = true;
         }
 
         if (this.state == 8 || this.state == 12) { // wait for a second then allow player to progess by swiping
             if (!this.timerStarted && !this.timerCompleted) {
-                setTimeout(() => {this.timerStarted = false; this.timerCompleted = true}, 1200);
+                this.timeoutToCancel = setTimeout(() => {this.timerStarted = false; this.timerCompleted = true}, 1200);
                 this.timerStarted = true;
             }
 
@@ -3554,6 +3648,7 @@ const MapEditor = {
 
             // RENDER PLATFORMS
             this.renderedPlatforms.forEach(platform => {
+                
                 // DRAW PLATFORM TOP
                 ctx.save(); // ROTATING for Platforms
                 ctx.translate(platform.x + platform.width/2, platform.y + platform.height/2);
@@ -3568,7 +3663,9 @@ const MapEditor = {
                     ctx.fillStyle = this.loadedMap.style.platformTopColor;
                 }
                 
+
                 ctx.fillRect(-platform.width/2, -platform.height/2, platform.width, platform.height);
+
 
 
 
@@ -3589,9 +3686,26 @@ const MapEditor = {
 
                 ctx.restore(); // restoring platform rotation and translation
 
+                if (UserInterface.debugText == 1) { // draw platform height indicators
+
+                    ctx.strokeStyle = "#FF0000"
+                    ctx.lineWidth = 4
+                    ctx.lineCap = "butt"
+                    ctx.beginPath()
+                    ctx.moveTo(platform.x + platform.width/2, platform.y + platform.height/2)
+                    ctx.lineTo(platform.x + platform.width/2, platform.y + platform.height/2 + this.loadedMap.style.platformHeight)
+                    if (platform.wall) {
+                        ctx.strokeStyle = "#0000FF"
+                        ctx.lineTo(platform.x + platform.width/2, platform.y + platform.height/2 - this.loadedMap.style.wallHeight)
+                    }
+                    ctx.stroke()
+                
+                    //origin
+                    ctx.fillStyle = "#00FF00";
+                    ctx.fillRect(platform.x + platform.width/2 - 3, platform.y + platform.height/2 - 3, 6, 6)
+                }
+
                 // Draw platform corner and origin debug points
-                // ctx.fillStyle = "#00FF00";
-                // ctx.fillRect(platform.x, platform.y, 5, 5)
                 // const angleRad = platform.angle * (Math.PI/180);
                 // const pinCornerX = -((platform.width / 2) * Math.cos(angleRad)) + ((platform.height / 2) * Math.sin(angleRad))
                 // const pinCornerY = -((platform.width / 2) * Math.sin(angleRad)) - ((platform.height / 2) * Math.cos(angleRad))
@@ -3792,7 +3906,7 @@ const MapEditor = {
             }
 
 
-            if (this.debugText) {
+            if (this.debugText == 1) {
                 
                 // GENERAL MAP EDITOR DEBUG TEXT
                 const textX = 150;
@@ -4028,144 +4142,6 @@ const MapEditor = {
             btn_snappingSlider.updateState(0);
             
             UserInterface.renderedButtons = UserInterface.btnGroup_mapEditorMenu
-        }
-
-        function sortPlatformsBACKUP(platforms) {  // returns array of sorted platforms
-            const millis = Date.now()
-
-            // create all generated properties for each platform
-            platforms.forEach( platform => {
-                platform.hypotenuse = Math.sqrt(platform.width * platform.width + platform.height * platform.height)/2
-                platform.angleRad = platform.angle * (Math.PI/180)
-                platform.corners = [ // order: BL BR TR TL
-                    // bot left corner        
-                    [
-                    -((platform.width / 2) * Math.cos(platform.angleRad)) - ((platform.height / 2) * Math.sin(platform.angleRad)),
-                    -((platform.width / 2) * Math.sin(platform.angleRad)) + ((platform.height / 2) * Math.cos(platform.angleRad))
-                    ],
-        
-                    // bot right corner
-                    [
-                    ((platform.width / 2) * Math.cos(platform.angleRad)) - ((platform.height / 2) * Math.sin(platform.angleRad)),
-                    ((platform.width / 2) * Math.sin(platform.angleRad)) + ((platform.height / 2) * Math.cos(platform.angleRad))
-                    ],
-        
-                    // top right corner
-                    [
-                    ((platform.width / 2) * Math.cos(platform.angleRad)) + ((platform.height / 2) * Math.sin(platform.angleRad)),
-                    ((platform.width / 2) * Math.sin(platform.angleRad)) - ((platform.height / 2) * Math.cos(platform.angleRad))
-                    ],
-                
-                    // top left corner
-                    [
-                    -((platform.width / 2) * Math.cos(platform.angleRad)) + ((platform.height / 2) * Math.sin(platform.angleRad)),
-                    -((platform.width / 2) * Math.sin(platform.angleRad)) - ((platform.height / 2) * Math.cos(platform.angleRad))
-                    ]
-                ]
-
-                function sortCornersX(a, b) {
-                    // if return is negative ... a comes first 
-                    // if return is positive ... b comes first
-                    // return is 0... nothing is changed
-                    if (a[0] < b[0]) {return -1;}
-                    if (a[0] > b[0]) {return 1;}
-                    return 0;
-                }
-
-                // toSorted() isnt supported by old safari i guess?
-                platform.cornersSorted = [...platform.corners]
-                platform.cornersSorted.sort(sortCornersX)
-
-                // global coordinates of left and rightmost corners
-                platform.leftMostCornerX = platform.cornersSorted[0][0] + platform.x + platform.width/2
-                platform.leftMostCornerY = platform.cornersSorted[0][1] + platform.y + platform.height/2
-                
-                platform.rightMostCornerX = platform.cornersSorted[3][0] + platform.x + platform.width/2
-                platform.rightMostCornerY = platform.cornersSorted[3][1] + platform.y + platform.height/2
-
-
-                platform.getSplitLineY = function(x) {
-                    // y = mx + b
-                    // m = rise over run
-                    const slope = (this.rightMostCornerY - this.leftMostCornerY) / (this.rightMostCornerX - this.leftMostCornerX)
-                    // b = y - mx
-                    const b = this.rightMostCornerY - (slope * this.rightMostCornerX) 
-                    const y = slope * x + b
-
-                    if (x > this.rightMostCornerX) {return this.rightMostCornerY} // keeps y value within the platform's bounds...
-                    if (x < this.leftMostCornerX) {return this.leftMostCornerY} // ...doesnt extend the function past the corners
-                    return y
-
-                }
-
-
-            })
-
-
-            console.log("platforms.length = " + platforms.length)
-
-            /*
-            function sortY(a, b) {
-                // if return is negative ... a comes first 
-                // if return is positive ... b comes first
-                // return is 0... nothing is changed
-                if (a.y + a.height/2 < b.y + b.height/2) {return -1;}
-                if (a.y + a.height/2 > b.y + b.height/2) {return 1;}
-                return 0;
-            }
-            */
-
-            function test_A_below_B(a, b) {
-                if (
-                    (a.x + a.width/2 <= b.x + b.width/2 && a.rightMostCornerY > b.getSplitLineY(a.rightMostCornerX)) ||  // a is to the left && a's rightCorner is below/infront of b
-                    (a.x + a.width/2 > b.x + b.width/2 && a.leftMostCornerY > b.getSplitLineY(a.leftMostCornerX)) // a is to the right && a's leftCorner is below/infront of b
-                ) {
-                    return true // a is below/infront of b
-                } else {
-                    return false // a is NOT below/infront of b
-                }
-            }
-
-
-            // take unsorted platforms array
-            // select 2 platforms and place them sorted into new array
-            // select platform from unsorted array
-            // compare this platform with each platform in the sorted array
-            // if this platform needs to be in front of a platform in the sorted array, record that index
-            // after comparing this platform to every platform in the sorted array, move it into the highest recorded index(needs to be in front of this index) within the sorted array
-
-
-            let sortedPlatforms = []
-            console.log(platforms)
-
-            platforms.forEach( platform => {
-                let deepestIndex = 0
-                let indexBeingChecked = 0
-                
-                sortedPlatforms.forEach( sortedPlatform => {        
-
-                    if (test_A_below_B(platform, sortedPlatform)) {
-                        deepestIndex = indexBeingChecked + 1
-
-                        // console.log("v infront of platform " + sortedPlatform.y)
-                    } else {
-                        // console.log("^ NOT it front of " + sortedPlatform.y)
-                    }    
-
-                    indexBeingChecked ++
-                })
-
-                sortedPlatforms.splice(deepestIndex, 0, platform) // array.splice(start, deleteCount, item1);
-
-                console.log("[][][] SPLICED " + platform.y + " to index " + deepestIndex + ". indexes checked: " + indexBeingChecked)
-            })
-
-
-            console.log("finished sort in: " + (Date.now() - millis) + "ms")
-
-
-            return sortedPlatforms
-
         }
 
 
@@ -4438,7 +4414,7 @@ const Map = {
     wallsToCheck : [],
     endZoneIsRendered : false,
     name : null,
-    record : null,
+    // record : null, kill kill
     upperShadowClip : new Path2D(),
     endZoneShadowClip : new Path2D(),
     playerClip : new Path2D(), // calculated every frame
@@ -4684,8 +4660,8 @@ const Map = {
         document.body.style.backgroundColor = this.style.shaded_backgroundColor;
         player = new Player(this.playerStart.x, this.playerStart.y, this.playerStart.angle);
 
-        // Get map record from local storage
-        this.record = window.localStorage.getItem("record_" + this.name)
+        // Get map record from local storage KILL KILL KILL
+        //this.record = window.localStorage.getItem("record_" + this.name)
 
         UserInterface.determineButtonColor();
         UserInterface.mapLoaded(); // moves onto gamestate 6
@@ -4812,7 +4788,7 @@ const Map = {
     },
 
 
-    renderPlatform : function(platform) { // seperate function to render platforms so that it can be called at different times (ex. called after drawing player inorder to render infront)
+    renderPlatformOLD : function(platform) { // seperate function to render platforms so that it can be called at different times (ex. called after drawing player inorder to render infront)
         
         const ctx = canvasArea.ctx;        
         
@@ -4877,7 +4853,7 @@ const Map = {
 
 
         // PLAFORM RENDERING DEBUG TEXT
-        if (UserInterface.debugText) {
+        if (UserInterface.debugText == 1) {
             ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1 :  UserInterface.lightColor_1;
             ctx.font = "12px BAHNSCHRIFT"
             ctx.fillText(platform.index, 0 - canvasArea.ctx.measureText(platform.index).width / 2, 0);
@@ -4907,6 +4883,103 @@ const Map = {
 
     },
 
+
+    renderPlatform : function(platform) { // seperate function to render platforms so that it can be called at different times (ex. called after drawing player inorder to render infront)
+        
+        const ctx = canvasArea.ctx;        
+        
+        // DRAW PLATFORM TOP
+        ctx.save(); // #17 GO TO PLATFORMs MIDDLE AND ROTATING 
+        const adjustedHeight = platform.wall ? this.style.wallHeight : 0 // for adding height to walls
+        ctx.translate(platform.x, platform.y - adjustedHeight);
+        ctx.rotate(platform.angle * Math.PI/180);
+
+        ctx.fillStyle = platform.shaded_topColor;        
+        
+        ctx.fillRect(-platform.width/2, -platform.height/2, platform.width, platform.height);
+
+        ctx.restore(); // #17 restores platform translation and rotation
+
+
+        // SIDES OF PLATFORMS
+        ctx.save(); // #18
+        ctx.translate(platform.x, platform.y);
+
+        const angleRad = platform.angle * (Math.PI/180);
+        
+        // platform angles should only be max of 90 and -90 in mapData
+        // calculating shading works with any angle but sides arent draw because drawing "if statements" are hardcoded to 90 degrees
+
+        // OPTIMIZE could use the platform.corners array istead of calculating every frame
+
+        if (-90 < platform.angle && platform.angle < 90) { // ALMOST ALWAYS RENDER BOTTOM SIDE. side2
+            
+            ctx.fillStyle = platform.shaded_sideColor2;
+            ctx.beginPath();
+            ctx.moveTo(platform.width/2 * Math.cos(angleRad) - (platform.height/2 * Math.sin(angleRad)), platform.width/2 * Math.sin(angleRad) + (platform.height/2 * Math.cos(angleRad)) - adjustedHeight); // bot right
+            ctx.lineTo(-platform.width/2 * Math.cos(angleRad) - (platform.height/2 * Math.sin(angleRad)), -platform.width/2 * Math.sin(angleRad) + (platform.height/2 * Math.cos(angleRad)) - adjustedHeight); // bot left
+            ctx.lineTo(-platform.width/2 * Math.cos(angleRad) - (platform.height/2 * Math.sin(angleRad)), -platform.width/2 * Math.sin(angleRad) + (platform.height/2 * Math.cos(angleRad)) + this.style.platformHeight);
+            ctx.lineTo(platform.width/2 * Math.cos(angleRad) - (platform.height/2 * Math.sin(angleRad)), platform.width/2 * Math.sin(angleRad) + (platform.height/2 * Math.cos(angleRad)) + this.style.platformHeight);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+
+        if (0 < platform.angle && platform.angle <= 90) { // side3
+
+            ctx.fillStyle = platform.shaded_sideColor3; // sideColor3
+            ctx.beginPath();
+            ctx.moveTo(platform.width/2 * Math.cos(angleRad) - (platform.height/2 * Math.sin(angleRad)), platform.width/2 * Math.sin(angleRad) + (platform.height/2 * Math.cos(angleRad)) - adjustedHeight); // bot right
+            ctx.lineTo(platform.width/2 * Math.cos(angleRad) + (platform.height/2 * Math.sin(angleRad)), platform.width/2 * Math.sin(angleRad) - (platform.height/2 * Math.cos(angleRad)) - adjustedHeight); // top right
+            ctx.lineTo(platform.width/2 * Math.cos(angleRad) + (platform.height/2 * Math.sin(angleRad)), platform.width/2 * Math.sin(angleRad) - (platform.height/2 * Math.cos(angleRad)) + this.style.platformHeight);
+            ctx.lineTo(platform.width/2 * Math.cos(angleRad) - (platform.height/2 * Math.sin(angleRad)), platform.width/2 * Math.sin(angleRad) + (platform.height/2 * Math.cos(angleRad)) + this.style.platformHeight);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        if (-90 <= platform.angle && platform.angle < 0) { // side1
+
+            ctx.fillStyle = platform.shaded_sideColor1; // sideColor1  
+            ctx.beginPath();
+            ctx.moveTo(-platform.width/2 * Math.cos(angleRad) - (platform.height/2 * Math.sin(angleRad)), -platform.width/2 * Math.sin(angleRad) + (platform.height/2 * Math.cos(angleRad)) - adjustedHeight); // bot left
+            ctx.lineTo(-platform.width/2 * Math.cos(angleRad) + (platform.height/2 * Math.sin(angleRad)), -platform.width/2 * Math.sin(angleRad) - (platform.height/2 * Math.cos(angleRad)) - adjustedHeight); // top left
+            ctx.lineTo(-platform.width/2 * Math.cos(angleRad) + (platform.height/2 * Math.sin(angleRad)), -platform.width/2 * Math.sin(angleRad) - (platform.height/2 * Math.cos(angleRad)) + this.style.platformHeight);
+            ctx.lineTo(-platform.width/2 * Math.cos(angleRad) - (platform.height/2 * Math.sin(angleRad)), -platform.width/2 * Math.sin(angleRad) + (platform.height/2 * Math.cos(angleRad)) + this.style.platformHeight);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+
+        // PLAFORM RENDERING DEBUG TEXT
+        if (UserInterface.debugText == 1) {
+            ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1 :  UserInterface.lightColor_1;
+            ctx.font = "12px BAHNSCHRIFT"
+            ctx.fillText(platform.index, 0 - canvasArea.ctx.measureText(platform.index).width / 2, 0);
+            // ctx.fillText("renderIndex: " + this.renderedPlatforms.indexOf(platform), 0, 0)
+            // ctx.fillText("angle: " + platform.angle, 0, 20);
+            // ctx.fillText("position: " + platform.x + ", " + platform.y, 0 , 20)
+            // ctx.fillText("width / height: " + platform.width + ", " + platform.height, 0 , 40)
+        }
+
+        
+        ctx.restore(); // #18 back to map origin translation
+        
+        // Drawing wall split line
+        // if (platform.wall) {
+        //     ctx.fillStyle = "#00FF00"
+        //     ctx.fillRect(player.x, platform.getSplitLineY(player.x), 5, 5)
+        // }
+        
+
+        // Drawing split line
+        // ctx.strokeStyle = "#00FF00"
+        // ctx.lineWidth = 1
+        // ctx.beginPath()
+        // ctx.moveTo(platform.leftMostCornerX, platform.leftMostCornerY)
+        // ctx.lineTo(platform.rightMostCornerX, platform.rightMostCornerY)
+        // ctx.stroke()
+
+    },
 
     render : function() { // Renders player lower shadow, platforms shadows, platforms, and checkpoints
 
@@ -4957,7 +5030,7 @@ const Map = {
 
 
         // Draw checkpoints
-        if (UserInterface.debugText == true) {
+        if (UserInterface.debugText == 1) {
             this.checkpoints.forEach(checkpoint => { 
                 ctx.strokeStyle = UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1 
                 ctx.lineWidth = 4
@@ -5102,6 +5175,10 @@ class Player {
     endSlow = 1;
     gain = 0;
     checkpointIndex = -1;
+
+    // debug
+    collisionPointDebug = {x: 0, y: 0}
+    collisionNormalDebug = {x: 0, y: 0}
 
     currentSpeedProjected = 0;
     addSpeed = 0; // initialized here so that userInterface can access for debug
@@ -5313,11 +5390,25 @@ class Player {
             ctx.strokeStyle = Map.style.shaded_playerColor
             ctx.lineWidth = 2
             ctx.beginPath()
-            ctx.strokeRect(-15, -15, 30, 30)
+            ctx.strokeRect(-16, -16, 32, 32)
             ctx.stroke()
         }
 
         ctx.restore() // #24.5
+
+        // draw wall collision debug stuff
+        ctx.strokeStyle = "green"
+        ctx.lineWidth = 2
+
+        ctx.beginPath();
+        ctx.arc(this.collisionPointDebug.x, this.collisionPointDebug.y, 2, 0, 2 * Math.PI);
+        ctx.stroke();
+        ctx.fillText(Math.round(this.collisionPointDebug.x) + ", " + Math.round(this.collisionPointDebug.y), this.collisionPointDebug.x + 5, this.collisionPointDebug.y)
+
+        ctx.beginPath()
+        ctx.moveTo(this.collisionPointDebug.x, this.collisionPointDebug.y)
+        ctx.lineTo(this.collisionPointDebug.x + this.collisionNormalDebug.x * 25, this.collisionPointDebug.y + this.collisionNormalDebug.y * 25)
+        ctx.stroke()
     
     }
 
@@ -5326,7 +5417,7 @@ class Player {
         this.velocity = this.velocity.rotate(this.lookAngle.getAngle());
     }
 
-    updatePos() {  // NEEDS TO BE FPS INDEPENDENT
+    updatePos() {
         
         if (UserInterface.levelState == 1 || UserInterface.levelState == 2) { // if NOT at end screen
 
@@ -5370,11 +5461,7 @@ class Player {
             this.velocity.y += (this.wishDir.y * this.addSpeed)
             // addSpeed needs to be adjusted by dt. Bigger dt, less fps, bigger addSpeed
 
-
-            // APPLYING VELOCITY
-            this.x += this.velocity.x / 5 * dt;
-            this.y += this.velocity.y / 5 * dt;
-
+            // velocity applied to player coords after checking wall collisions
 
 
             
@@ -5393,17 +5480,149 @@ class Player {
             }
 
 
+
             // CHECK IF COLLIDING WITH WALLS
+            Map.wallsToCheck.forEach(wall => {
+
+                function isColliding(player, wall) {
+                    // Calculate relative position of player to the top-left corner of the wall
+                    const relativeX = player.x - wall.x;
+                    const relativeY = player.y - wall.y;
+
+                    // Rotate the relative position of the player around the origin (top-left corner of the wall)
+                    const rotatedX = relativeX * Math.cos(-wall.angleRad) - relativeY * Math.sin(-wall.angleRad);
+                    const rotatedY = relativeX * Math.sin(-wall.angleRad) + relativeY * Math.cos(-wall.angleRad);
+
+                    // Calculate closest point on the rotated rectangle to the player
+                    let closestX = Math.max(0, Math.min(rotatedX, wall.width));
+                    let closestY = Math.max(0, Math.min(rotatedY, wall.height));
+
+                    // Check if the closest point is within the player's circle
+                    const distanceX = rotatedX - closestX;
+                    const distanceY = rotatedY - closestY;
+                    const distanceSquared = distanceX * distanceX + distanceY * distanceY;
+
+                    if (distanceSquared <= (18 * 18)) {  // 16 is the player's collision radius
+                        // Collision detected
+
+                        let collisionX, collisionY;
+                        let playerInsideWall = false;
+
+                        // Check if the center of player is inside the wall
+                        if (rotatedX >= 0 && rotatedX <= wall.width && rotatedY >= 0 && rotatedY <= wall.height) {
+                            playerInsideWall = true;
+
+                            // If inside, find the nearest edge
+                            const dxLeft = rotatedX;
+                            const dxRight = wall.width - rotatedX;
+                            const dyTop = rotatedY;
+                            const dyBottom = wall.height - rotatedY;
+                            const minDx = Math.min(dxLeft, dxRight);
+                            const minDy = Math.min(dyTop, dyBottom);
+
+                            if (minDx < minDy) {
+                                // Nearest edge is left or right
+                                if (dxLeft < dxRight) {
+                                    // Left edge
+                                    closestX = 0;
+                                } else {
+                                    // Right edge
+                                    closestX = wall.width;
+                                }
+                                collisionY = -closestX * Math.sin(-wall.angleRad) + closestY * Math.cos(-wall.angleRad) + wall.y;
+                            } else {
+                                // Nearest edge is top or bottom
+                                if (dyTop < dyBottom) {
+                                    // Top edge
+                                    closestY = 0;
+                                } else {
+                                    // Bottom edge
+                                    closestY = wall.height;
+                                }
+                                collisionX = closestX * Math.cos(-wall.angleRad) + closestY * Math.sin(-wall.angleRad) + wall.x;
+                            }
+                        }
+
+                        // Calculate global collision point by moving closestX/Y into global coords by rotating and translating it
+                        collisionX = closestX * Math.cos(-wall.angleRad) + closestY * Math.sin(-wall.angleRad) + wall.x;
+                        collisionY = -closestX * Math.sin(-wall.angleRad) + closestY * Math.cos(-wall.angleRad) + wall.y;
+
+                        // Calculate normal vector of collision
+                        const normalVector = new Vector(player.x - collisionX, player.y - collisionY);
+                        if (playerInsideWall) { // if inside the wall the vector needs to be flipped to point the right way
+                            normalVector.x *= -1;
+                            normalVector.y *= -1;
+                        }
+                        normalVector.normalize(1); // Normalize the vector
+
+                        return {
+                            collided: true,
+                            normal: normalVector,
+                            collisionPoint: {
+                                x: collisionX,
+                                y: collisionY
+                            }
+                        };
+                    }
+
+                    // No collision detected
+                    return {
+                        collided: false
+                    };
+                }
+
+
+                function adjustVelocity(playerMovementVector, wallNormalVector) {
+                    // Calculate the dot product of player movement vector and wall normal vector
+                    const dotProduct = playerMovementVector.x * wallNormalVector.x + playerMovementVector.y * wallNormalVector.y;
+
+                    // If the dot product is negative, it means the player is moving towards the wall
+                    if (dotProduct < 0) {
+                        // Remove the component of player movement vector that's in the direction of the wall
+                        playerMovementVector.x -= dotProduct * wallNormalVector.x;
+                        playerMovementVector.y -= dotProduct * wallNormalVector.y;
+                    }
+                }
+
+                
+
+                const collisionData = isColliding(player, wall)
+                if (collisionData.collided) {
+                    //console.log("collided!")
+
+                    adjustVelocity(this.velocity, collisionData.normal)
+
+                    // bounce player backwards from being inside wall
+                    player.x = collisionData.collisionPoint.x + collisionData.normal.x * 18
+                    player.y = collisionData.collisionPoint.y + collisionData.normal.y * 18
+
+                    // DEBUG	
+                    //normalNormalDebug = collisionData.normal
+                    //collisionPointDebug = collisionData.collisionPoint
+                    //wall.color = "purple"
+
+                }
+        
+            })
+
+            /* OLD
             if (this.checkCollision(Map.wallsToCheck)) {
 
                 // new wall collision that doesnt instakill
                 // get walls normal
                 // subtract that normals direction
-
+        
                 AudioHandler.splashAudio.play();
                 this.teleport();
             }
+            */
     
+
+
+            // APPLYING VELOCITY
+            this.x += this.velocity.x / 5 * dt;
+            this.y += this.velocity.y / 5 * dt;
+
 
 
             // CHECK if colliding with checkpoint triggers
@@ -5461,6 +5680,7 @@ class Player {
                 }
             }
         }
+
 
         if (UserInterface.levelState == 3) { // SLOW DOWN MOVEMENT AFTER HITTING END ZONE
             // if (this.endSlow > 0.02) {this.endSlow = (this.endSlow * 0.95);} else {this.endSlow = 0} // THIS NEEDS TO BE FPS INDEPENDENT
