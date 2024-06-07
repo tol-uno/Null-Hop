@@ -1087,8 +1087,8 @@ const UserInterface = {
                 }
 
 
-                this.x =  MapEditor.screenX + platform.x + (platform.width ? platform.width/2 : 32) - this.width/2
-                this.y =  MapEditor.screenY + platform.y + (platform.height ? platform.height/2 : 32) - this.height/2
+                this.x =  MapEditor.screenX + platform.x + (platform.width ? 0 : 32) - this.width/2
+                this.y =  MapEditor.screenY + platform.y + (platform.height ? 0 : 32) - this.height/2
 
             }
 
@@ -1151,8 +1151,6 @@ const UserInterface = {
             const cornerY = ((platform.width / 2) * Math.sin(angleRad)) + ((platform.height / 2) * Math.cos(angleRad))
             
             if (this.isPressed) {
-                const oldMidX = platform.x + platform.width/2
-                const oldMidY = platform.y + platform.height/2
 
                 // transform drag amount to match with platform angle
                 let drag = new Vector(touchHandler.dragAmountX, touchHandler.dragAmountY).rotate(-platform.angle)
@@ -1162,13 +1160,7 @@ const UserInterface = {
 
                 platform.height += Math.round(drag.y) * 2
                 if (platform.height < 10) {platform.height = 10}
-
-
-                const newMidX = platform.x + platform.width/2
-                const newMidY = platform.y + platform.height/2
-
-                platform.x += Math.round(oldMidX - newMidX)
-                platform.y += Math.round(oldMidY - newMidY)
+            
             }
 
             if (!updateFrame && MapEditor.snapAmount > 0) {
@@ -1176,8 +1168,8 @@ const UserInterface = {
                 platform.height = Math.round(platform.height / MapEditor.snapAmount) * MapEditor.snapAmount
             }
 
-            this.x = platform.x + platform.width/2 + cornerX + MapEditor.screenX
-            this.y = platform.y + platform.height/2 + cornerY + MapEditor.screenY
+            this.x = platform.x + cornerX + MapEditor.screenX
+            this.y = platform.y + cornerY + MapEditor.screenY
             
         })
 
@@ -3198,8 +3190,8 @@ const PreviewWindow = {
 
                 // top left SHADOW
                 [
-                    -((platform.width / 2) * Math.cos(angleRad)) + ((platform.height / 2) * Math.sin(angleRad)) + shadowX * wallShadowMultiplier,
-                    -((platform.width / 2) * Math.sin(angleRad)) - ((platform.height / 2) * Math.cos(angleRad)) + MapEditor.loadedMap.style.platformHeight + shadowY * wallShadowMultiplier
+                -((platform.width / 2) * Math.cos(angleRad)) + ((platform.height / 2) * Math.sin(angleRad)) + shadowX * wallShadowMultiplier,
+                -((platform.width / 2) * Math.sin(angleRad)) - ((platform.height / 2) * Math.cos(angleRad)) + MapEditor.loadedMap.style.platformHeight + shadowY * wallShadowMultiplier
                 ],
                 
             ]; // end of shadowPoints array
@@ -3232,7 +3224,7 @@ const PreviewWindow = {
         
         function renderPreviewItemShadow(platform) { // render lower shadows
             ctx.save();
-            ctx.translate(PreviewWindow.x + platform.x + platform.width/2, PreviewWindow.y + platform.y + platform.height/2);
+            ctx.translate(PreviewWindow.x + platform.x, PreviewWindow.y + platform.y);
 
             ctx.fillStyle = MapEditor.loadedMap.style.backgroundShadow;
 
@@ -3255,7 +3247,7 @@ const PreviewWindow = {
 
             // DRAW PLATFORM TOP
             ctx.save(); // ROTATING 
-            ctx.translate(PreviewWindow.x + platform.x + platform.width/2, PreviewWindow.y + platform.y + platform.height/2 - adjustedHeight);
+            ctx.translate(PreviewWindow.x + platform.x, PreviewWindow.y + platform.y - adjustedHeight);
             ctx.rotate(platform.angle * Math.PI/180);
 
 
@@ -3269,7 +3261,7 @@ const PreviewWindow = {
 
             // SIDES OF PLATFORMS
             ctx.save();
-            ctx.translate(PreviewWindow.x + platform.x + platform.width/2, PreviewWindow.y + platform.y + platform.height/2);
+            ctx.translate(PreviewWindow.x + platform.x, PreviewWindow.y + platform.y);
 
             const angleRad = platform.angle * (Math.PI/180);
             
@@ -3651,10 +3643,10 @@ const MapEditor = {
                 
                 // DRAW PLATFORM TOP
                 ctx.save(); // ROTATING for Platforms
-                ctx.translate(platform.x + platform.width/2, platform.y + platform.height/2);
+                ctx.translate(platform.x, platform.y);
                 ctx.rotate(platform.angle * Math.PI/180);
 
-                // Change to endzone color if needed. Also where its determined if endzone is being rendered
+                // Change to endzone color if needed
                 if (platform.wall) {
                     ctx.fillStyle = this.loadedMap.style.wallTopColor;
                 } else if (platform.endzone) {
@@ -3681,7 +3673,7 @@ const MapEditor = {
                 // ctx.fillStyle = "#FFFFFF";
                 // ctx.fillText("angle: " + platform.angle, 0,-20);
                 // ctx.fillText("position: " + platform.x + ", " + platform.y, 0, 0);
-                // ctx.fillText("screen Loc X mid: " + (platform.x + platform.width/2 + this.screenX), 0, 20);
+                // ctx.fillText("screen Loc X mid: " + (platform.x + this.screenX), 0, 20);
                 // ctx.fillText("screen Loc Y: " + (platform.y + platform.height/2 + this.screenY), 0, 40);
 
                 ctx.restore(); // restoring platform rotation and translation
@@ -3692,25 +3684,19 @@ const MapEditor = {
                     ctx.lineWidth = 4
                     ctx.lineCap = "butt"
                     ctx.beginPath()
-                    ctx.moveTo(platform.x + platform.width/2, platform.y + platform.height/2)
-                    ctx.lineTo(platform.x + platform.width/2, platform.y + platform.height/2 + this.loadedMap.style.platformHeight)
+                    ctx.moveTo(platform.x, platform.y)
+                    ctx.lineTo(platform.x, platform.y + this.loadedMap.style.platformHeight)
                     if (platform.wall) {
                         ctx.strokeStyle = "#0000FF"
-                        ctx.lineTo(platform.x + platform.width/2, platform.y + platform.height/2 - this.loadedMap.style.wallHeight)
+                        ctx.lineTo(platform.x, platform.y - this.loadedMap.style.wallHeight)
                     }
                     ctx.stroke()
                 
                     //origin
                     ctx.fillStyle = "#00FF00";
-                    ctx.fillRect(platform.x + platform.width/2 - 3, platform.y + platform.height/2 - 3, 6, 6)
+                    ctx.fillRect(platform.x - 3, platform.y - 3, 6, 6)
                 }
 
-                // Draw platform corner and origin debug points
-                // const angleRad = platform.angle * (Math.PI/180);
-                // const pinCornerX = -((platform.width / 2) * Math.cos(angleRad)) + ((platform.height / 2) * Math.sin(angleRad))
-                // const pinCornerY = -((platform.width / 2) * Math.sin(angleRad)) - ((platform.height / 2) * Math.cos(angleRad))
-                // ctx.fillStyle = "#0000FF";
-                // ctx.fillRect(pinCornerX + platform.x + platform.width/2, pinCornerY + platform.y + platform.height/2, 5, 5)
             })
 
 
@@ -4005,10 +3991,10 @@ const MapEditor = {
                 if (!platform.hypotenuse) {platform.hypotenuse = Math.sqrt(platform.width * platform.width + platform.height * platform.height)/2}
 
                 if (
-                    (platform.x + platform.width/2 + platform.hypotenuse + this.screenX > 0) && // coming into frame on left side
-                    (platform.x + platform.width/2 - platform.hypotenuse + this.screenX < canvasArea.canvas.width) && // right side
-                    (platform.y + platform.height/2 + platform.hypotenuse + this.screenY > 0) && // top side
-                    (platform.y + platform.height/2 - platform.hypotenuse + this.screenY < canvasArea.canvas.height) // bottom side
+                    (platform.x + platform.hypotenuse + this.screenX > 0) && // coming into frame on left side
+                    (platform.x - platform.hypotenuse + this.screenX < canvasArea.canvas.width) && // right side
+                    (platform.y + platform.hypotenuse + this.screenY > 0) && // top side
+                    (platform.y - platform.hypotenuse + this.screenY < canvasArea.canvas.height) // bottom side
                 ) {
                     this.renderedPlatforms.push(platform); // ADD platform to renderedPlatforms
                 }
@@ -4192,24 +4178,24 @@ const MapEditor = {
                 platform.cornersSorted.sort(sortCornersX)
 
                 // Global coordinates of left and rightmost corners
-                platform.leftMostCornerX = platform.cornersSorted[0][0] + platform.x + platform.width/2
-                platform.leftMostCornerY = platform.cornersSorted[0][1] + platform.y + platform.height/2
+                platform.leftMostCornerX = platform.cornersSorted[0][0] + platform.x
+                platform.leftMostCornerY = platform.cornersSorted[0][1] + platform.y
                 
-                platform.rightMostCornerX = platform.cornersSorted[3][0] + platform.x + platform.width/2
-                platform.rightMostCornerY = platform.cornersSorted[3][1] + platform.y + platform.height/2
+                platform.rightMostCornerX = platform.cornersSorted[3][0] + platform.x
+                platform.rightMostCornerY = platform.cornersSorted[3][1] + platform.y
 
 
                 // Get global coordinates of top and bot corners
                 if (platform.cornersSorted[1][1] < platform.cornersSorted[2][1]) {
-                    platform.topCornerX = platform.cornersSorted[1][0] + platform.x + platform.width / 2
-                    platform.topCornerY = platform.cornersSorted[1][1] + platform.y + platform.height / 2
-                    platform.botCornerX = platform.cornersSorted[2][0] + platform.x + platform.width / 2
-                    platform.botCornerY = platform.cornersSorted[2][1] + platform.y + platform.height / 2
+                    platform.topCornerX = platform.cornersSorted[1][0] + platform.x 
+                    platform.topCornerY = platform.cornersSorted[1][1] + platform.y
+                    platform.botCornerX = platform.cornersSorted[2][0] + platform.x
+                    platform.botCornerY = platform.cornersSorted[2][1] + platform.y
                 } else {
-                    platform.topCornerX = platform.cornersSorted[2][0] + platform.x + platform.width / 2
-                    platform.topCornerY = platform.cornersSorted[2][1] + platform.y + platform.height / 2
-                    platform.botCornerX = platform.cornersSorted[1][0] + platform.x + platform.width / 2
-                    platform.botCornerY = platform.cornersSorted[1][1] + platform.y + platform.height / 2
+                    platform.topCornerX = platform.cornersSorted[2][0] + platform.x
+                    platform.topCornerY = platform.cornersSorted[2][1] + platform.y
+                    platform.botCornerX = platform.cornersSorted[1][0] + platform.x
+                    platform.botCornerY = platform.cornersSorted[1][1] + platform.y
                 }
 
 
@@ -4346,6 +4332,12 @@ const MapEditor = {
         }
     },
 
+    adjustPlatforms : function() {
+        this.loadedMap.platforms.forEach(platform => {
+            platform.x += platform.width/2
+            platform.y += platform.height/2
+        })
+    }
 }
 
 
@@ -4523,7 +4515,7 @@ const Map = {
             const angleRad = platform.angle * (Math.PI/180);
             const wallShadowMultiplier = platform.wall ? (this.style.wallHeight + this.style.platformHeight) / this.style.platformHeight : 1 // makes sure shadows are longer for taller walls
 
-            platform.shadowPoints = [ // ALL THE POSSIBLE POINTS TO INPUT IN CONVEX HULL FUNCTION
+            platform.shadowPoints = [ // ALL THE POSSIBLE POINTS TO INPUT IN CONVEX HULL FUNCTION. OPTIMIZE already have come of these points saved to map
             
                 // bot left corner
                 [
@@ -4569,8 +4561,8 @@ const Map = {
 
                 // top left SHADOW
                 [
-                    -((platform.width / 2) * Math.cos(angleRad)) + ((platform.height / 2) * Math.sin(angleRad)) + shadowX * wallShadowMultiplier,
-                    -((platform.width / 2) * Math.sin(angleRad)) - ((platform.height / 2) * Math.cos(angleRad)) + this.style.platformHeight + shadowY * wallShadowMultiplier
+                -((platform.width / 2) * Math.cos(angleRad)) + ((platform.height / 2) * Math.sin(angleRad)) + shadowX * wallShadowMultiplier,
+                -((platform.width / 2) * Math.sin(angleRad)) - ((platform.height / 2) * Math.cos(angleRad)) + this.style.platformHeight + shadowY * wallShadowMultiplier
                 ],
             
             ]; // end of shadowPoints array
@@ -4612,23 +4604,23 @@ const Map = {
 
             // SHADOW CLIP FOR UPPER PLAYER SHADOW
             clipToUse.moveTo( // bot left
-                platform.x + platform.width/2 + platform.corners[0][0], // x
-                platform.y + platform.height/2 + platform.corners[0][1] // y
+                platform.x + platform.corners[0][0], // x
+                platform.y + platform.corners[0][1] // y
             )
             
             clipToUse.lineTo( // bot right
-                platform.x + platform.width/2 + platform.corners[1][0],
-                platform.y + platform.height/2 + platform.corners[1][1]
+                platform.x + platform.corners[1][0],
+                platform.y + platform.corners[1][1]
             )
 
             clipToUse.lineTo( // top right
-                platform.x + platform.width/2 + platform.corners[2][0],
-                platform.y + platform.height/2 + platform.corners[2][1]
+                platform.x + platform.corners[2][0],
+                platform.y + platform.corners[2][1]
             )
 
             clipToUse.lineTo( // top left
-                platform.x + platform.width/2 + platform.corners[3][0],
-                platform.y + platform.height/2 + platform.corners[3][1]
+                platform.x + platform.corners[3][0],
+                platform.y + platform.corners[3][1]
             )
 
             clipToUse.closePath()
@@ -4682,10 +4674,10 @@ const Map = {
             const wallShadowMultiplier = platform.wall ? (this.style.wallHeight + this.style.platformHeight) / this.style.platformHeight : 1 // makes sure shadows are longer for taller walls
 
             if (
-                (platform.x + platform.width/2 + platform.hypotenuse + (this.style.shadowLength * wallShadowMultiplier) > player.x - midX) && // coming into frame on left side
-                (platform.x + platform.width/2 - platform.hypotenuse - (this.style.shadowLength * wallShadowMultiplier) < player.x + midX) && // right side
-                (platform.y + platform.height/2 + platform.hypotenuse + (this.style.shadowLength * wallShadowMultiplier) + this.style.platformHeight > player.y - midY) && // top side
-                (platform.y + platform.height/2 - platform.hypotenuse - (this.style.shadowLength * wallShadowMultiplier) - adjustedHeight < player.y + midY) // bottom side
+                (platform.x + platform.hypotenuse + (this.style.shadowLength * wallShadowMultiplier) > player.x - midX) && // coming into frame on left side
+                (platform.x - platform.hypotenuse - (this.style.shadowLength * wallShadowMultiplier) < player.x + midX) && // right side
+                (platform.y + platform.hypotenuse + (this.style.shadowLength * wallShadowMultiplier) + this.style.platformHeight > player.y - midY) && // top side
+                (platform.y - platform.hypotenuse - (this.style.shadowLength * wallShadowMultiplier) - adjustedHeight < player.y + midY) // bottom side
             ) {
                 this.renderedPlatforms.push(platform); // ADD platform to renderedPlatforms
             }
@@ -4701,10 +4693,10 @@ const Map = {
             if (platform.wall) {
                 
                 if ( // if wall is close enough to player that it needs to be checked with player rotation
-                    (platform.x + platform.width/2 + platform.hypotenuse > player.x - 25) && // colliding with player from left
-                    (platform.x + platform.width/2 - platform.hypotenuse < player.x + 25) && // right side
-                    (platform.y + platform.height/2 + platform.hypotenuse > player.y - 73) && // top side
-                    (platform.y + platform.height/2 - platform.hypotenuse - this.style.wallHeight < player.y + 25) // bottom side
+                    (platform.x + platform.hypotenuse > player.x - 25) && // colliding with player from left
+                    (platform.x - platform.hypotenuse < player.x + 25) && // right side
+                    (platform.y + platform.hypotenuse > player.y - 73) && // top side
+                    (platform.y - platform.hypotenuse - this.style.wallHeight < player.y + 25) // bottom side
                 ) { // test for player overlap and rendering z-order tests
                     
                     this.wallsToCheck.push(platform) // for checking if player is colliding with walls in player.updatePos()
@@ -4747,8 +4739,8 @@ const Map = {
 
                     // NEW TEST FOR WHETHER OR NOT TO ADD WALL PLATFORM TO CLIP
                     if (
-                        (player.x <= platform.x + platform.width/2 && player.rightMostPlayerCornerY < platform.getSplitLineY(player.rightMostPlayerCornerX)) ||  
-                        (player.x > platform.x + platform.width/2 && player.leftMostPlayerCornerY < platform.getSplitLineY(player.leftMostPlayerCornerX))
+                        (player.x <= platform.x && player.rightMostPlayerCornerY < platform.getSplitLineY(player.rightMostPlayerCornerX)) ||  
+                        (player.x > platform.x && player.leftMostPlayerCornerY < platform.getSplitLineY(player.leftMostPlayerCornerX))
                     ) {
                         addToPlayerClip()
                     }
@@ -4763,13 +4755,13 @@ const Map = {
                                 // -player.x + midX, -player.y + midY
 
                                 Map.playerClip.moveTo(
-                                    platform.x + platform.width / 2 + platform.clipPoints[i][0], // x
-                                    platform.y + platform.height / 2 + platform.clipPoints[i][1] // y
+                                    platform.x + platform.clipPoints[i][0], // x
+                                    platform.y + platform.clipPoints[i][1] // y
                                 )
                             } else { // its not the first point in the hull so use lineTo
                                 Map.playerClip.lineTo(
-                                    platform.x + platform.width / 2 + platform.clipPoints[i][0], // x
-                                    platform.y + platform.height / 2 + platform.clipPoints[i][1] // y
+                                    platform.x + platform.clipPoints[i][0], // x
+                                    platform.y + platform.clipPoints[i][1] // y
                                 )
                             }
                         }
@@ -4784,102 +4776,6 @@ const Map = {
                 this.endZoneIsRendered = true;
             }
         }); // end of looping through each rendered platform
-
-    },
-
-
-    renderPlatformOLD : function(platform) { // seperate function to render platforms so that it can be called at different times (ex. called after drawing player inorder to render infront)
-        
-        const ctx = canvasArea.ctx;        
-        
-        // DRAW PLATFORM TOP
-        ctx.save(); // #17 GO TO PLATFORMs MIDDLE AND ROTATING 
-        const adjustedHeight = platform.wall ? this.style.wallHeight : 0 // for adding height to walls
-        ctx.translate(platform.x + platform.width/2, platform.y + platform.height/2 - adjustedHeight);
-        ctx.rotate(platform.angle * Math.PI/180);
-
-        ctx.fillStyle = platform.shaded_topColor;        
-        
-        ctx.fillRect(-platform.width/2, -platform.height/2, platform.width, platform.height);
-
-        ctx.restore(); // #17 restores platform translation and rotation
-
-
-        // SIDES OF PLATFORMS
-        ctx.save(); // #18
-        ctx.translate(platform.x + platform.width/2, platform.y + platform.height/2);
-
-        const angleRad = platform.angle * (Math.PI/180);
-        
-        // platform angles should only be max of 90 and -90 in mapData
-        // calculating shading works with any angle but sides arent draw because drawing "if statements" are hardcoded to 90 degrees
-
-        if (-90 < platform.angle && platform.angle < 90) { // ALMOST ALWAYS RENDER BOTTOM SIDE. side2
-            
-            ctx.fillStyle = platform.shaded_sideColor2;
-            ctx.beginPath();
-            ctx.moveTo(platform.width/2 * Math.cos(angleRad) - (platform.height/2 * Math.sin(angleRad)), platform.width/2 * Math.sin(angleRad) + (platform.height/2 * Math.cos(angleRad)) - adjustedHeight); // bot right
-            ctx.lineTo(-platform.width/2 * Math.cos(angleRad) - (platform.height/2 * Math.sin(angleRad)), -platform.width/2 * Math.sin(angleRad) + (platform.height/2 * Math.cos(angleRad)) - adjustedHeight); // bot left
-            ctx.lineTo(-platform.width/2 * Math.cos(angleRad) - (platform.height/2 * Math.sin(angleRad)), -platform.width/2 * Math.sin(angleRad) + (platform.height/2 * Math.cos(angleRad)) + this.style.platformHeight);
-            ctx.lineTo(platform.width/2 * Math.cos(angleRad) - (platform.height/2 * Math.sin(angleRad)), platform.width/2 * Math.sin(angleRad) + (platform.height/2 * Math.cos(angleRad)) + this.style.platformHeight);
-            ctx.closePath();
-            ctx.fill();
-        }
-
-
-        if (0 < platform.angle && platform.angle <= 90) { // side3
-
-            ctx.fillStyle = platform.shaded_sideColor3; // sideColor3
-            ctx.beginPath();
-            ctx.moveTo(platform.width/2 * Math.cos(angleRad) - (platform.height/2 * Math.sin(angleRad)), platform.width/2 * Math.sin(angleRad) + (platform.height/2 * Math.cos(angleRad)) - adjustedHeight); // bot right
-            ctx.lineTo(platform.width/2 * Math.cos(angleRad) + (platform.height/2 * Math.sin(angleRad)), platform.width/2 * Math.sin(angleRad) - (platform.height/2 * Math.cos(angleRad)) - adjustedHeight); // top right
-            ctx.lineTo(platform.width/2 * Math.cos(angleRad) + (platform.height/2 * Math.sin(angleRad)), platform.width/2 * Math.sin(angleRad) - (platform.height/2 * Math.cos(angleRad)) + this.style.platformHeight);
-            ctx.lineTo(platform.width/2 * Math.cos(angleRad) - (platform.height/2 * Math.sin(angleRad)), platform.width/2 * Math.sin(angleRad) + (platform.height/2 * Math.cos(angleRad)) + this.style.platformHeight);
-            ctx.closePath();
-            ctx.fill();
-        }
-
-        if (-90 <= platform.angle && platform.angle < 0) { // side1
-
-            ctx.fillStyle = platform.shaded_sideColor1; // sideColor1  
-            ctx.beginPath();
-            ctx.moveTo(-platform.width/2 * Math.cos(angleRad) - (platform.height/2 * Math.sin(angleRad)), -platform.width/2 * Math.sin(angleRad) + (platform.height/2 * Math.cos(angleRad)) - adjustedHeight); // bot left
-            ctx.lineTo(-platform.width/2 * Math.cos(angleRad) + (platform.height/2 * Math.sin(angleRad)), -platform.width/2 * Math.sin(angleRad) - (platform.height/2 * Math.cos(angleRad)) - adjustedHeight); // top left
-            ctx.lineTo(-platform.width/2 * Math.cos(angleRad) + (platform.height/2 * Math.sin(angleRad)), -platform.width/2 * Math.sin(angleRad) - (platform.height/2 * Math.cos(angleRad)) + this.style.platformHeight);
-            ctx.lineTo(-platform.width/2 * Math.cos(angleRad) - (platform.height/2 * Math.sin(angleRad)), -platform.width/2 * Math.sin(angleRad) + (platform.height/2 * Math.cos(angleRad)) + this.style.platformHeight);
-            ctx.closePath();
-            ctx.fill();
-        }
-
-
-        // PLAFORM RENDERING DEBUG TEXT
-        if (UserInterface.debugText == 1) {
-            ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1 :  UserInterface.lightColor_1;
-            ctx.font = "12px BAHNSCHRIFT"
-            ctx.fillText(platform.index, 0 - canvasArea.ctx.measureText(platform.index).width / 2, 0);
-            // ctx.fillText("renderIndex: " + this.renderedPlatforms.indexOf(platform), 0, 0)
-            // ctx.fillText("angle: " + platform.angle, 0, 20);
-            // ctx.fillText("position: " + platform.x + ", " + platform.y, 0 , 20)
-            // ctx.fillText("width / height: " + platform.width + ", " + platform.height, 0 , 40)
-        }
-
-        
-        ctx.restore(); // #18 back to map origin translation
-        
-        // Drawing wall split line
-        // if (platform.wall) {
-        //     ctx.fillStyle = "#00FF00"
-        //     ctx.fillRect(player.x, platform.getSplitLineY(player.x), 5, 5)
-        // }
-        
-
-        // Drawing split line
-        // ctx.strokeStyle = "#00FF00"
-        // ctx.lineWidth = 1
-        // ctx.beginPath()
-        // ctx.moveTo(platform.leftMostCornerX, platform.leftMostCornerY)
-        // ctx.lineTo(platform.rightMostCornerX, platform.rightMostCornerY)
-        // ctx.stroke()
 
     },
 
@@ -5000,11 +4896,11 @@ const Map = {
 
 
 
-        // LOOP THROUGHT TO DRAW PLATFORMS SHADOWS
+        // LOOP THROUGH TO DRAW PLATFORMS SHADOWS
         this.renderedPlatforms.forEach(platform => { 
 
             ctx.save(); // #21
-            ctx.translate(platform.x + platform.width/2, platform.y + platform.height/2);
+            ctx.translate(platform.x, platform.y);
 
             ctx.fillStyle = this.style.shadow_backgroundColor;
 
@@ -5485,17 +5381,17 @@ class Player {
             Map.wallsToCheck.forEach(wall => {
 
                 function isColliding(player, wall) {
-                    // Calculate relative position of player to the top-left corner of the wall
+                    // Calculate relative position of player to the center of the wall
                     const relativeX = player.x - wall.x;
                     const relativeY = player.y - wall.y;
 
-                    // Rotate the relative position of the player around the origin (top-left corner of the wall)
+                    // Rotate the relative position of the player around the origin (center of the wall)
                     const rotatedX = relativeX * Math.cos(-wall.angleRad) - relativeY * Math.sin(-wall.angleRad);
                     const rotatedY = relativeX * Math.sin(-wall.angleRad) + relativeY * Math.cos(-wall.angleRad);
 
                     // Calculate closest point on the rotated rectangle to the player
-                    let closestX = Math.max(0, Math.min(rotatedX, wall.width));
-                    let closestY = Math.max(0, Math.min(rotatedY, wall.height));
+                    let closestX = Math.max(-wall.width / 2, Math.min(rotatedX, wall.width / 2));
+                    let closestY = Math.max(-wall.height / 2, Math.min(rotatedY, wall.height / 2));
 
                     // Check if the closest point is within the player's circle
                     const distanceX = rotatedX - closestX;
@@ -5509,14 +5405,17 @@ class Player {
                         let playerInsideWall = false;
 
                         // Check if the center of player is inside the wall
-                        if (rotatedX >= 0 && rotatedX <= wall.width && rotatedY >= 0 && rotatedY <= wall.height) {
+                        if (rotatedX >= -wall.width / 2 && rotatedX <= wall.width / 2 && rotatedY >= -wall.height / 2 && rotatedY <= wall.height / 2) {
                             playerInsideWall = true;
 
+
                             // If inside, find the nearest edge
-                            const dxLeft = rotatedX;
-                            const dxRight = wall.width - rotatedX;
-                            const dyTop = rotatedY;
-                            const dyBottom = wall.height - rotatedY;
+                            const halfWidth = wall.width / 2;
+                            const halfHeight = wall.height / 2;
+                            const dxLeft = halfWidth + rotatedX; // Distance to the left edge
+                            const dxRight = halfWidth - rotatedX; // Distance to the right edge
+                            const dyTop = halfHeight + rotatedY; // Distance to the top edge
+                            const dyBottom = halfHeight - rotatedY; // Distance to the bottom edge
                             const minDx = Math.min(dxLeft, dxRight);
                             const minDy = Math.min(dyTop, dyBottom);
 
@@ -5524,20 +5423,20 @@ class Player {
                                 // Nearest edge is left or right
                                 if (dxLeft < dxRight) {
                                     // Left edge
-                                    closestX = 0;
+                                    closestX = -wall.width / 2;
                                 } else {
                                     // Right edge
-                                    closestX = wall.width;
+                                    closestX = wall.width / 2;
                                 }
                                 collisionY = -closestX * Math.sin(-wall.angleRad) + closestY * Math.cos(-wall.angleRad) + wall.y;
                             } else {
                                 // Nearest edge is top or bottom
                                 if (dyTop < dyBottom) {
                                     // Top edge
-                                    closestY = 0;
+                                    closestY = -wall.height / 2;
                                 } else {
                                     // Bottom edge
-                                    closestY = wall.height;
+                                    closestY = wall.height / 2;
                                 }
                                 collisionX = closestX * Math.cos(-wall.angleRad) + closestY * Math.sin(-wall.angleRad) + wall.x;
                             }
@@ -5570,7 +5469,7 @@ class Player {
                         collided: false
                     };
                 }
-
+                  
 
                 function adjustVelocity(playerMovementVector, wallNormalVector) {
                     // Calculate the dot product of player movement vector and wall normal vector
@@ -5593,13 +5492,9 @@ class Player {
                     adjustVelocity(this.velocity, collisionData.normal)
 
                     // bounce player backwards from being inside wall
-                    player.x = collisionData.collisionPoint.x + collisionData.normal.x * 18
-                    player.y = collisionData.collisionPoint.y + collisionData.normal.y * 18
+                    player.x = collisionData.collisionPoint.x + collisionData.normal.x * 20
+                    player.y = collisionData.collisionPoint.y + collisionData.normal.y * 20
 
-                    // DEBUG	
-                    //normalNormalDebug = collisionData.normal
-                    //collisionPointDebug = collisionData.collisionPoint
-                    //wall.color = "purple"
 
                 }
         
@@ -5699,7 +5594,7 @@ class Player {
         }
     }
 
-    checkCollision(arrayOfPlatformsToCheck) { // called every time player hits the floor ALSO used to check endzone collision
+    checkCollisionOLD(arrayOfPlatformsToCheck) { // called every time player hits the floor ALSO used to check endzone collision
         let collision = 0;
         arrayOfPlatformsToCheck.forEach(platform => { // LOOP THROUGH PLATFORMS
 
@@ -5902,6 +5797,212 @@ class Player {
         
         if (collision > 0) {return true} else {return false}
     }
+
+    checkCollision(arrayOfPlatformsToCheck) { // called every time player hits the floor ALSO used to check endzone collision
+        let collision = 0;
+        arrayOfPlatformsToCheck.forEach(platform => { // LOOP THROUGH PLATFORMS
+
+            class Rectangle {
+                constructor(cx, cy, width, height, angle) {
+                    this.cx = cx; // Center X coordinate
+                    this.cy = cy; // Center Y coordinate
+                    this.width = width;
+                    this.height = height;
+                    this.angle = angle;
+                }
+            }
+
+            const rectangleStore = [
+                new Rectangle(player.x, player.y, 32, 32, player.lookAngle.getAngle()),
+                new Rectangle(platform.x, platform.y, platform.width, platform.height, platform.angleRad)
+            ]
+
+
+            function workOutNewPoints(cx, cy, vx, vy, rotatedAngle) {
+                //rotatedAngle = rotatedAngle * Math.PI / 180;
+                const dx = vx - cx;
+                const dy = vy - cy;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                const originalAngle = Math.atan2(dy, dx);
+                const rotatedX = cx + distance * Math.cos(originalAngle + rotatedAngle);
+                const rotatedY = cy + distance * Math.sin(originalAngle + rotatedAngle);
+
+                return {
+                    x: rotatedX,
+                    y: rotatedY
+                }
+            }
+
+            //Get the rotated coordinates for the square
+            function getRotatedSquareCoordinates(square) {
+                const centerX = square.cx;
+                const centerY = square.cy;
+                const halfWidth = square.width / 2;
+                const halfHeight = square.height / 2;
+
+                const topLeft = workOutNewPoints(centerX, centerY, centerX - halfWidth, centerY - halfHeight, square.angle);
+                const topRight = workOutNewPoints(centerX, centerY, centerX + halfWidth, centerY - halfHeight, square.angle);
+                const bottomLeft = workOutNewPoints(centerX, centerY, centerX - halfWidth, centerY + halfHeight, square.angle);
+                const bottomRight = workOutNewPoints(centerX, centerY, centerX + halfWidth, centerY + halfHeight, square.angle);
+                return {
+                    tl: topLeft,
+                    tr: topRight,
+                    bl: bottomLeft,
+                    br: bottomRight
+                }
+            }
+
+            //Functional objects for the Seperate Axis Theorum (SAT)
+            //Single vertex
+            function xy(x, y) {
+                this.x = x;
+                this.y = y;
+            };
+            //The polygon that is formed from vertices and edges.
+            function polygon(vertices, edges) {
+                this.vertex = vertices;
+                this.edge = edges;
+            };
+
+            //The actual Seperate Axis Theorum function
+            function sat(polygonA, polygonB) {
+                let perpendicularLine = null;
+                let dot = 0;
+                const perpendicularStack = [];
+                let amin = null;
+                let amax = null;
+                let bmin = null;
+                let bmax = null;
+                //Work out all perpendicular vectors on each edge for polygonA
+                for (let i = 0; i < polygonA.edge.length; i++) {
+                    perpendicularLine = new xy(-polygonA.edge[i].y,
+                        polygonA.edge[i].x);
+                    perpendicularStack.push(perpendicularLine);
+                }
+                //Work out all perpendicular vectors on each edge for polygonB
+                for (let i = 0; i < polygonB.edge.length; i++) {
+                    perpendicularLine = new xy(-polygonB.edge[i].y,
+                        polygonB.edge[i].x);
+                    perpendicularStack.push(perpendicularLine);
+                }
+                //Loop through each perpendicular vector for both polygons
+                for (let i = 0; i < perpendicularStack.length; i++) {
+                    //These dot products will return different values each time
+                    amin = null;
+                    amax = null;
+                    bmin = null;
+                    bmax = null;
+                    /*Work out all of the dot products for all of the vertices in PolygonA against the perpendicular vector
+                    that is currently being looped through*/
+                    for (let j = 0; j < polygonA.vertex.length; j++) {
+                        dot = polygonA.vertex[j].x *
+                            perpendicularStack[i].x +
+                            polygonA.vertex[j].y *
+                            perpendicularStack[i].y;
+                        //Then find the dot products with the highest and lowest values from polygonA.
+                        if (amax === null || dot > amax) {
+                            amax = dot;
+                        }
+                        if (amin === null || dot < amin) {
+                            amin = dot;
+                        }
+                    }
+                    /*Work out all of the dot products for all of the vertices in PolygonB against the perpendicular vector
+                    that is currently being looped through*/
+                    for (let j = 0; j < polygonB.vertex.length; j++) {
+                        dot = polygonB.vertex[j].x *
+                            perpendicularStack[i].x +
+                            polygonB.vertex[j].y *
+                            perpendicularStack[i].y;
+                        //Then find the dot products with the highest and lowest values from polygonB.
+                        if (bmax === null || dot > bmax) {
+                            bmax = dot;
+                        }
+                        if (bmin === null || dot < bmin) {
+                            bmin = dot;
+                        }
+                    }
+                    //If there is no gap between the dot products projection then we will continue onto evaluating the next perpendicular edge.
+                    if ((amin < bmax && amin > bmin) ||
+                        (bmin < amax && bmin > amin)) {
+                        continue;
+                    }
+                    //Otherwise, we know that there is no collision for definite.
+                    else {
+                        return false;
+                    }
+                }
+                /*If we have gotten this far. Where we have looped through all of the perpendicular edges and not a single one of there projections had
+                a gap in them. Then we know that the 2 polygons are colliding for definite then.*/
+                return true;
+            }
+
+            //Detect for a collision between the 2 rectangles
+            function detectRectangleCollision(index) {
+
+                const thisRect = rectangleStore[0];
+                const otherRect = rectangleStore[1];
+
+                //Get rotated coordinates for both rectangles
+                const tRR = getRotatedSquareCoordinates(thisRect);
+                const oRR = getRotatedSquareCoordinates(otherRect);
+                //Vertices & Edges are listed in clockwise order. Starting from the top right
+                const thisTankVertices = [
+                    new xy(tRR.tr.x, tRR.tr.y),
+                    new xy(tRR.br.x, tRR.br.y),
+                    new xy(tRR.bl.x, tRR.bl.y),
+                    new xy(tRR.tl.x, tRR.tl.y),
+                ];
+                const thisTankEdges = [
+                    new xy(tRR.br.x - tRR.tr.x, tRR.br.y - tRR.tr.y),
+                    new xy(tRR.bl.x - tRR.br.x, tRR.bl.y - tRR.br.y),
+                    new xy(tRR.tl.x - tRR.bl.x, tRR.tl.y - tRR.bl.y),
+                    new xy(tRR.tr.x - tRR.tl.x, tRR.tr.y - tRR.tl.y)
+                ];
+                const otherTankVertices = [
+                    new xy(oRR.tr.x, oRR.tr.y),
+                    new xy(oRR.br.x, oRR.br.y),
+                    new xy(oRR.bl.x, oRR.bl.y),
+                    new xy(oRR.tl.x, oRR.tl.y),
+                ];
+                const otherTankEdges = [
+                    new xy(oRR.br.x - oRR.tr.x, oRR.br.y - oRR.tr.y),
+                    new xy(oRR.bl.x - oRR.br.x, oRR.bl.y - oRR.br.y),
+                    new xy(oRR.tl.x - oRR.bl.x, oRR.tl.y - oRR.bl.y),
+                    new xy(oRR.tr.x - oRR.tl.x, oRR.tr.y - oRR.tl.y)
+                ];
+                const thisRectPolygon = new polygon(thisTankVertices, thisTankEdges);
+                const otherRectPolygon = new polygon(otherTankVertices, otherTankEdges);
+
+                if (sat(thisRectPolygon, otherRectPolygon)) {
+                    collision += 1;
+
+                } else {
+
+                    //Because we are working with vertices and edges. This algorithm does not cover the normal un-rotated rectangle
+                    //algorithm which just deals with sides
+                    if (thisRect.angle === 0 && otherRect.angle === 0) {
+                        if (!(
+                            thisRect.x > otherRect.x + otherRect.width ||
+                            thisRect.x + thisRect.width < otherRect.x ||
+                            thisRect.y > otherRect.y + otherRect.height ||
+                            thisRect.y + thisRect.height < otherRect.y
+                        )) {
+                            collision += 1;
+                        }
+                    }
+                }
+            }
+
+            detectRectangleCollision(platform);
+
+        });
+
+        return collision > 0;
+
+    }
+
+
 
     teleport() { // Called when player hits the water
         if (this.checkpointIndex !== -1) {
