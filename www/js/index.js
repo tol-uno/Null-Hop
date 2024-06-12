@@ -521,7 +521,7 @@ const canvasArea = { //Canvas Object
         this.interval = setInterval(updateGameArea, 10); // Number sets the taget frame rate. 1000/# = FPS
 
         UserInterface.start(); // need to be ran after canvas is resized in canvasArea.start()
-        UserInterface.getRecords();
+        UserInterface.getLeaderboards();
     },
 
 
@@ -693,19 +693,22 @@ const UserInterface = {
     // 6: in level
     // 7: in map editor
 
-    sensitivity : null,
-    debugText : null,
-    strafeHUD : null,
-    showVelocity : true,
-    volume : null,
+    settings : {
+        sensitivity : null,
+        volume : null,
+        debugText : null,
+        strafeHUD : null,
+    },
     
+    showVelocity : true,
+
     playTutorial : true,
 
     timer : 0,
     timerStart : null, // set by jump button
     levelState : 1, // 1 = pre-start, 2 = playing level, 3 = in endzone
 
-    records : {},
+    leaderboards : {},
 
     showVerticalWarning : false,
     showOverstrafeWarning : false,
@@ -731,40 +734,9 @@ const UserInterface = {
 
     start : function() { // where all buttons are created
 
-        // Retreaving settings from local storage OR setting them
-        
-        // TEMP OVERIDE OF THIS SYSTEM
-        this.sensitivity = 0.5
-        this.debugText = 1
-        this.strafeHUD = 1
-        this.volume = 0
+        // getting settings.json from wwww
+        this.getSettings()
 
-        /*
-        this.sensitivity = window.localStorage.getItem("sensitivity_storage")
-        if (this.sensitivity == null) {
-            this.sensitivity = 1
-            window.localStorage.setItem("sensitivity_storage", 1)
-        }
-
-        this.debugText = window.localStorage.getItem("debugText_storage")
-        if (this.debugText == null) {
-            this.debugText = 0
-            window.localStorage.setItem("debugText_storage", 0)
-        }
-
-        this.strafeHUD = window.localStorage.getItem("strafeHUD_storage")
-        if (this.strafeHUD == null) {
-            this.strafeHUD = 0
-            window.localStorage.setItem("strafeHUD_storage", 0)
-        }
-
-        this.volume = window.localStorage.getItem("volume_storage")
-        console.log("volume " + this.volume)
-        if (this.volume == null) {
-            this.volume = 0.5
-            window.localStorage.setItem("volume_storage", 0.5)
-        }
-        */
 
 
         // CREATING THE BUTTONS []  []  [] 
@@ -796,70 +768,61 @@ const UserInterface = {
             const reset = confirm("Reset All Settings and Records?");
             if (reset) {
 
-                window.localStorage.removeItem("record_original") // loop through all maps here
-                window.localStorage.removeItem("record_noob")
-                window.localStorage.removeItem("record_hellscape")
-                
-                UserInterface.sensitivity = 1
-                window.localStorage.setItem("sensitivity_storage", 1)
-                btn_sensitivitySlider.updateState(1)
-            
-                UserInterface.debugText = 0
-                window.localStorage.setItem("debugText_storage", 0)
-                btn_debugText.func(true)
-                
-                UserInterface.strafeHUD = 0
-                window.localStorage.setItem("strafeHUD_storage", 0)
-                btn_strafeHUD.func(true)
-                
-                UserInterface.volume = 0.5
-                window.localStorage.setItem("volume_storage", 0.5)
-                btn_volumeSlider.updateState(0.5)
+                // CLEAR records.json too
+
+                this.settings = {
+                    "sensitivity": 0.5,
+                    "volume": 0.1,
+                    "debugText": 0,
+                    "strafeHUD": 1
+                }
+
+                UserInterface.writeSettings()
                 
                 console.log("records and settings cleared")
             }
 
         })
 
-        btn_sensitivitySlider = new SliderUI(180, 100, 300, 0.1, 3, 10, "Sensitivity", UserInterface.sensitivity, function() { 
-            UserInterface.sensitivity = this.value
-            window.localStorage.setItem("sensitivity_storage", this.value)
+        btn_sensitivitySlider = new SliderUI(180, 100, 300, 0.1, 3, 10, "Sensitivity", UserInterface.settings.sensitivity, function() { 
+            UserInterface.settings.sensitivity = this.value
+            UserInterface.writeSettings()
         })
 
-        btn_volumeSlider = new SliderUI(180, 200, 300, 0, 1, 10, "Volume", UserInterface.volume, function() { 
-            UserInterface.volume = this.value
-            window.localStorage.setItem("volume_storage", this.value)
+        btn_volumeSlider = new SliderUI(180, 200, 300, 0, 1, 10, "Volume", UserInterface.settings.volume, function() { 
+            UserInterface.settings.volume = this.value
+            UserInterface.writeSettings()
             AudioHandler.setVolumes();
         })
 
         btn_debugText = new Button(310, 240, 80, "toggle_button", "toggle_button_pressed", 1, "", function(sync) {
             if (sync) {
-                    this.toggle = UserInterface.debugText;
+                    this.toggle = UserInterface.settings.debugText;
             } else {
                 if (this.toggle == 1) {
                     this.toggle = 0;
-                    UserInterface.debugText = 0
-                    window.localStorage.setItem("debugText_storage", 0)
+                    UserInterface.settings.debugText = 0
+                    UserInterface.writeSettings()
                 } else {
                     this.toggle = 1;
-                    UserInterface.debugText = 1
-                    window.localStorage.setItem("debugText_storage", 1)
+                    UserInterface.settings.debugText = 1
+                    UserInterface.writeSettings()
                 }
             }
         })
 
         btn_strafeHUD = new Button(310, 300, 80, "toggle_button", "toggle_button_pressed", 1, "", function(sync) {
             if (sync) {
-                this.toggle = UserInterface.strafeHUD;
+                this.toggle = UserInterface.settings.strafeHUD;
             } else {
                 if (this.toggle == 1) {
                     this.toggle = 0;
-                    UserInterface.strafeHUD = 0
-                    window.localStorage.setItem("strafeHUD_storage", 0)
+                    UserInterface.settings.strafeHUD = 0
+                    UserInterface.writeSettings()
                 } else {
                     this.toggle = 1;
-                    UserInterface.strafeHUD = 1
-                    window.localStorage.setItem("strafeHUD_storage", 1)
+                    UserInterface.settings.strafeHUD = 1
+                    UserInterface.writeSettings()
                 }
             }
         })
@@ -895,8 +858,8 @@ const UserInterface = {
                     },
                     "platforms": [
                         {
-                            "x": 300,
-                            "y": 10,
+                            "x": 350,
+                            "y": 60,
                             "width": 100,
                             "height": 100,
                             "angle": 0,
@@ -904,8 +867,8 @@ const UserInterface = {
                             "wall": 0
                         },
                         {
-                            "x": 300,
-                            "y": 200,
+                            "x": 350,
+                            "y": 250,
                             "width": 100,
                             "height": 100,
                             "angle": 45,
@@ -1924,14 +1887,14 @@ const UserInterface = {
         UserInterface.renderedButtons = this.btnGroup_inLevel;
     },
 
-    getRecords : function() {
+    getLeaderboards : function() {
             
-        // GET RECORDS DIRECTLY THROUGH CORDOVA LOCAL STORAGE (www)       
+        // GET leaderboards DIRECTLY THROUGH CORDOVA LOCAL STORAGE (www)       
         const assetsURL = cordova.file.applicationDirectory + "www/assets/"
         
         window.resolveLocalFileSystemURL(assetsURL, (dirEntry) => {
 
-            dirEntry.getFile("records.json", {create: false, exclusive: false}, (fileEntry) => {
+            dirEntry.getFile("leaderboards.json", {create: false, exclusive: false}, (fileEntry) => {
                 console.log(fileEntry)
 
                 fileEntry.file( (file) => {
@@ -1939,14 +1902,14 @@ const UserInterface = {
                     const reader = new FileReader();
                     reader.onload = (e) => {
                         
-                        this.records = JSON.parse(e.target.result)
+                        this.leaderboards = JSON.parse(e.target.result)
                         const rawText = e.target.result
                         // const byteOffset = rawText.indexOf("" + key + ": " + value);
                         const byteOffset = rawText.indexOf("Eva");
                         console.log("====== file raw ===")
                         console.log(rawText)
                         console.log("byte Offset: " + byteOffset)
-                        console.log(this.records)
+                        console.log(this.leaderboards)
 
                     };
                     reader.onerror = (e) => alert(e.target.error.name);
@@ -1957,20 +1920,116 @@ const UserInterface = {
         })
     },
 
-    handleRecord : function() {
-        const yourRecord = this.records[Map.name].yourRecord
-
-        if (yourRecord == null || (yourRecord !== null && this.timer < yourRecord)) {
-            this.records[Map.name].yourRecord = this.timer
+    getSettingsOLD : function() {
             
-            // Write this.timer to yourRecord in records.json
+        // GET leaderboards DIRECTLY THROUGH CORDOVA LOCAL STORAGE (www)       
+        const assetsURL = cordova.file.applicationDirectory + "www/assets/"
+        
+        window.resolveLocalFileSystemURL(assetsURL, (dirEntry) => {
+
+            dirEntry.getFile("settings.json", {create: false, exclusive: false}, (fileEntry) => {
+                console.log(fileEntry)
+
+                fileEntry.file( (file) => {
+
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        
+                        this.settings = JSON.parse(e.target.result)
+                        
+                        // reading this file completes after the buttons are initially set
+                        // need to sync them to the read data here:
+                        btn_sensitivitySlider.updateState(UserInterface.settings.sensitivity)
+                        btn_volumeSlider.updateState(UserInterface.settings.volume)
+                        btn_debugText.func(true)
+                        btn_strafeHUD.func(true)
+
+                    };
+                    reader.onerror = (e) => alert(e.target.error.name);
+        
+                    reader.readAsText(file)
+                })
+            })
+        })
+    },
+
+
+    getSettings : function() {
+        
+        // Check if the settings.json file exists in dataDirectory
+        window.resolveLocalFileSystemURL(cordova.file.dataDirectory + "settings.json", (fileEntry) => {
+            // settings file exists -- read it
+            fileEntry.file((file) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    this.settings = JSON.parse(e.target.result)
+
+                    // reading this file completes after the buttons are initially set so
+                    // need to sync them to the read data here:
+                    btn_sensitivitySlider.updateState(UserInterface.settings.sensitivity)
+                    btn_volumeSlider.updateState(UserInterface.settings.volume)
+                    btn_debugText.func(true)
+                    btn_strafeHUD.func(true)
+                };
+                reader.onerror = (e) => {alert(e.target.error.name)};
+
+                reader.readAsText(file);
+            });
+
+        }, function(err) {
+            // File doesn't already exist -- create settings file
+            this.settings = {
+                "sensitivity": 0.5,
+                "volume": 0.1,
+                "debugText": 0,
+                "strafeHUD": 1
+            }
+            writeSettings()
+        });
+    },
+
+    writeSettings : function () {
+
+
+        function writeFile(dataObj) {
+            // create directory and empty file
+            window.resolveLocalFileSystemURL(cordova.file.dataDirectory, (directoryEntry) => {
+                directoryEntry.getFile("settings.json", { create: true, exclusive: false }, (logFileEntry) => {
+                    // addding to the empty file
+                    logFileEntry.createWriter(function (writer) {
+                        writer.onwriteend = function () {
+
+                            console.log("Wrote to settings");
+                        };
+
+                        writer.onerror = function (e) {
+                            console.log("Writer Error in writeSettings", e);
+                        };
+
+                        writer.write(dataObj);
+                    });
+                });
+            }, error => { console.log(error) });
+        }
+
+        const blob = new Blob([JSON.stringify(this.settings, null, 2)], { type: "application/json" });
+
+        writeFile(blob)
+    },
+
+    handleRecord : function() {
+        //const yourRecord = this.leaderboards[Map.name].yourRecord
+
+        //if (yourRecord == null || (yourRecord !== null && this.timer < yourRecord)) {
+            //this.leaderboards[Map.name].yourRecord = this.timer
+            
+            // Write this.timer to yourRecord in leaderboards.json
             // APPENDING and SEEKING TO SPECIFIC PART OF FILE SEEMS HARD
-            // probably just need to rewrite records file fully every time
+            // probably just need to rewrite leaderboards file fully every time
 
             // THIS WILL BE AN ASYC TASK SO I NEED TO DO SOMETHING DIFFERENT TO DISPLAY RECORD IMEDIETLY ON END SCREEN
-        } 
+        //} 
 
-        function getByteOffset(rawRecordsFile, stringToFind) {}
     },
 
     determineButtonColor : function() {
@@ -2061,8 +2120,8 @@ const UserInterface = {
             // RELEASED ON PLATFORM
             MapEditor.renderedPlatforms.forEach(platform => {
                 if (// if x and y touch is within platform (NOT ROTATED THOUGH)
-                    x >= platform.x + MapEditor.screenX && x <= platform.x + platform.width + MapEditor.screenX &&
-                    y >= platform.y + MapEditor.screenY && y <= platform.y + platform.height + MapEditor.screenY
+                    x >= platform.x - platform.width/2 + MapEditor.screenX && x <= platform.x + platform.width/2 + MapEditor.screenX &&
+                    y >= platform.y - platform.height/2 + MapEditor.screenY && y <= platform.y + platform.height/2 + MapEditor.screenY
                 ) {
                     MapEditor.selectedPlatformIndex = MapEditor.loadedMap.platforms.indexOf(platform)
                     MapEditor.selectedCheckpointIndex = [-1,1]
@@ -2192,7 +2251,7 @@ const UserInterface = {
             }
 
 
-            if (this.debugText == 1) { // DRAWING DEBUG TEXT
+            if (this.settings.debugText == 1) { // DRAWING DEBUG TEXT
                 const textX = 200; 
                 canvasArea.ctx.font = "15px BAHNSCHRIFT";
                 canvasArea.ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1: UserInterface.lightColor_1;
@@ -2200,7 +2259,7 @@ const UserInterface = {
                 canvasArea.ctx.fillText("fps: " + Math.round(100/dt), textX, 60);
                 canvasArea.ctx.fillText("rounded dt: " + Math.round(dt * 10) / 10 + " milliseconds", textX, 80);
                 canvasArea.ctx.fillText("renderedPlatforms Count: " + Map.renderedPlatforms.length, textX, 100);
-                canvasArea.ctx.fillText("endZoneIsRendered: " + Map.endZoneIsRendered, textX, 120);
+                canvasArea.ctx.fillText("endZonesToCheck: " + Map.endZonesToCheck, textX, 120);
                 canvasArea.ctx.fillText("dragging: " + touchHandler.dragging, textX, 140);
                 canvasArea.ctx.fillText("touchStartX: " + touchHandler.touchStartX, textX, 160);
                 canvasArea.ctx.fillText("touchStartY: " + touchHandler.touchStartY, textX, 180);
@@ -2243,10 +2302,10 @@ const UserInterface = {
 
             }
     
-            if (this.strafeHUD == 1) { // STRAFE OPTIMIZER HUD
+            if (this.settings.strafeHUD == 1) { // STRAFE OPTIMIZER HUD
 
                 /* DRAW THE OLD LITTLE GRAPHS UNDER PLAYER
-                canvasArea.ctx.fillRect(midX - 18, midY + 28, 8, 4 * Math.abs(touchHandler.dragAmountX) * UserInterface.sensitivity); // YOUR STRAFE
+                canvasArea.ctx.fillRect(midX - 18, midY + 28, 8, 4 * Math.abs(touchHandler.dragAmountX) * UserInterface.settings.sensitivity); // YOUR STRAFE
                 canvasArea.ctx.fillRect(midX - 4, midY + 28, 8, 10 * player.currentSpeedProjected); // THE THRESHOLD
                 canvasArea.ctx.fillRect(midX + 12, midY + 28 + 10 * airAcceleration * dt , 8, 2); // ADDSPEED LIMIT
                 canvasArea.ctx.fillRect(midX + 10, midY + 28, 8, 10 * player.addSpeed ); // GAIN
@@ -2379,7 +2438,7 @@ const UserInterface = {
                 if (this.timer == this.records[Map.name].yourRecord) {canvasArea.ctx.fillText("New Record!", midX - 120, midY + 65)}
 
                 // LEADERBOARDS IF AVAILABLE
-                if (this.records[Map.name] !== undefined) {
+                if (this.leaderboards[Map.name] !== undefined) {
                     // RIGHT SIDE BOX
                     canvasArea.ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
 
@@ -2401,9 +2460,9 @@ const UserInterface = {
                     canvasArea.ctx.fillText("Leaderboard", midX + 220, midY - 150);
                     let lineSpacing = 30;
                     let placedInLeaderboard = false;
-                    for (const [key, value] of Object.entries(this.records[Map.name].leaderboard)) {
-                        if (!placedInLeaderboard && this.records[Map.name].yourRecord <= value) {
-                            canvasArea.ctx.fillText(Null + ": " + UserInterface.secondsToMinutes(this.records[Map.name].yourRecord), midX + 220, midY - 120 + lineSpacing);
+                    for (const [key, value] of Object.entries(this.leaderboards[Map.name].leaderboard)) {
+                        if (!placedInLeaderboard && this.leaderboards[Map.name].yourRecord <= value) {
+                            canvasArea.ctx.fillText(Null + ": " + UserInterface.secondsToMinutes(this.leaderboards[Map.name].yourRecord), midX + 220, midY - 120 + lineSpacing);
                             lineSpacing += 30;
                             placedInLeaderboard = true;
                         }
@@ -2412,7 +2471,7 @@ const UserInterface = {
                         lineSpacing += 30;
                     }
                     if (!placedInLeaderboard) { // drawing yourRecord in last place
-                        canvasArea.ctx.fillText(Null + ": " + UserInterface.secondsToMinutes(this.records[Map.name].yourRecord), midX + 220, midY - 120 + lineSpacing);
+                        canvasArea.ctx.fillText(Null + ": " + UserInterface.secondsToMinutes(this.leaderboards[Map.name].yourRecord), midX + 220, midY - 120 + lineSpacing);
                     }
 
 
@@ -3071,8 +3130,8 @@ const PreviewWindow = {
 
     // OBJECTS TO DRAW
     platform : {
-        "x": 130,
-        "y": 125,
+        "x": 165,
+        "y": 160,
         "width": 70,
         "height": 70,
         "angle": 45,
@@ -3081,8 +3140,8 @@ const PreviewWindow = {
     },
 
     wall : {
-        "x": 45,
-        "y": 60,
+        "x": 70,
+        "y": 110,
         "width": 50,
         "height": 100,
         "angle": 45,
@@ -3091,8 +3150,8 @@ const PreviewWindow = {
     },
 
     endzone : {
-        "x": 215,
-        "y": 60,
+        "x": 240,
+        "y": 85,
         "width": 50,
         "height": 50,
         "angle": 45,
@@ -3678,7 +3737,7 @@ const MapEditor = {
 
                 ctx.restore(); // restoring platform rotation and translation
 
-                if (UserInterface.debugText == 1) { // draw platform height indicators
+                if (this.debugText == 1) { // draw platform height indicators
 
                     ctx.strokeStyle = "#FF0000"
                     ctx.lineWidth = 4
@@ -4388,14 +4447,11 @@ const AudioHandler = {
 
 
     setVolumes : function() {
-        // this.successAudio.volume = 0.5 * UserInterface.volume;
-        // this.splashAudio.volume = 0.4 * UserInterface.volume;
-        // this.jumpAudio.volume = 0.5 * UserInterface.volume;
 
-        this.menuMusic.setVolume(UserInterface.volume);
-        this.successAudio.setVolume(UserInterface.volume);
-        this.jumpAudio.setVolume(UserInterface.volume);
-        this.splashAudio.setVolume(UserInterface.volume);
+        this.menuMusic.setVolume(UserInterface.settings.volume);
+        this.successAudio.setVolume(UserInterface.settings.volume);
+        this.jumpAudio.setVolume(UserInterface.settings.volume);
+        this.splashAudio.setVolume(UserInterface.settings.volume);
     },
 }
 
@@ -4404,13 +4460,13 @@ const Map = {
     walls : [],
     renderedPlatforms : [],
     wallsToCheck : [],
-    endZoneIsRendered : false,
+    endZonesToCheck : [],
     name : null,
     // record : null, kill kill
     upperShadowClip : new Path2D(),
     endZoneShadowClip : new Path2D(),
     playerClip : new Path2D(), // calculated every frame
-    endZone : null,
+    // endZone : null,
 
     initMap : function (name) {
         this.platforms = [];
@@ -4486,7 +4542,7 @@ const Map = {
             if (platform.endzone) {
                 colorToUse1 = this.style.endZoneTopColor;
                 colorToUse2 = this.style.endZoneSideColor;
-                this.endZone = platform;
+                // this.endZone = platform;
             }
             if (platform.wall) {
                 colorToUse1 = this.style.wallTopColor;
@@ -4600,9 +4656,9 @@ const Map = {
             platform.shadowPoints = canvasArea.convexHull(platform.shadowPoints)
 
 
+            // SETS EITHER OF THE TWO SHADOW CLIPS FOR UPPER PLAYER SHADOW
             const clipToUse = platform.endzone ? this.endZoneShadowClip : this.upperShadowClip // get shadow clip to add this platform to
 
-            // SHADOW CLIP FOR UPPER PLAYER SHADOW
             clipToUse.moveTo( // bot left
                 platform.x + platform.corners[0][0], // x
                 platform.y + platform.corners[0][1] // y
@@ -4661,12 +4717,11 @@ const Map = {
     },
 
 
-    update : function() {  // Figure out which platforms are in view. Update Map.playerClip
-        // checks if endZoneIsRendered at the bottom
+    update : function() {  // Figure out which platforms are in view. Updates playerClip, wallsToCheck, and endZonesToCheck
 
         this.renderedPlatforms = [];
         this.wallsToCheck = [];
-
+        this.endZonesToCheck = [];
 
         this.platforms.forEach(platform => { // Loop through ALL platforms to get renderedPlatforms
 
@@ -4686,7 +4741,7 @@ const Map = {
 
         this.playerClip = new Path2D() // resets the clip every frame. when it is used there must be an counter clockwise rectangle drawn first to invert clip
 
-        this.endZoneIsRendered = false; // resets every frame. if one of renderedPlatforms is an endzone then its made true
+        //this.endZoneIsRendered = false; // resets every frame. if one of renderedPlatforms is an endzone then its made true
 
         this.renderedPlatforms.forEach(platform => { // Loop through RENDERED platforms (will loop through in order of index)
                                     
@@ -4773,7 +4828,8 @@ const Map = {
             }
 
             if (platform.endzone) {
-                this.endZoneIsRendered = true;
+                this.endZonesToCheck.push(platform);
+                //this.endZoneIsRendered = true;
             }
         }); // end of looping through each rendered platform
 
@@ -4847,7 +4903,7 @@ const Map = {
 
 
         // PLAFORM RENDERING DEBUG TEXT
-        if (UserInterface.debugText == 1) {
+        if (UserInterface.settings.debugText == 1) {
             ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1 :  UserInterface.lightColor_1;
             ctx.font = "12px BAHNSCHRIFT"
             ctx.fillText(platform.index, 0 - canvasArea.ctx.measureText(platform.index).width / 2, 0);
@@ -4926,7 +4982,7 @@ const Map = {
 
 
         // Draw checkpoints
-        if (UserInterface.debugText == 1) {
+        if (UserInterface.settings.debugText == 1) {
             this.checkpoints.forEach(checkpoint => { 
                 ctx.strokeStyle = UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1 
                 ctx.lineWidth = 4
@@ -5152,7 +5208,7 @@ class Player {
 
         ctx.restore() // #23 clears upperShadowClip
 
-        if (Map.endZoneIsRendered) { // draw a clipped version of the players shadow over endzone
+        if (Map.endZonesToCheck.length > 0) { // draw a clipped version of the players shadow over endzone
             ctx.save() // #23.5
             
             ctx.translate(-player.x, -player.y)
@@ -5317,7 +5373,7 @@ class Player {
         
         if (UserInterface.levelState == 1 || UserInterface.levelState == 2) { // if NOT at end screen
 
-            this.lookAngle = this.lookAngle.rotate(touchHandler.dragAmountX * UserInterface.sensitivity)
+            this.lookAngle = this.lookAngle.rotate(touchHandler.dragAmountX * UserInterface.settings.sensitivity)
             
             // Setting wishDir
             if (touchHandler.dragAmountX > 0) {
@@ -5366,7 +5422,7 @@ class Player {
                 this.jumpValue = 0;
                 this.jumpVelocity = 2;
                 AudioHandler.jumpAudio.play();
-                if (!this.checkCollision(Map.renderedPlatforms)) {
+                if (!this.checkCollision(Map.renderedPlatforms.filter(platform => platform.wall == 0))) { // checkCollision on an array of just platforms (no walls)
                     AudioHandler.splashAudio.play();
                     this.teleport();
                 }
@@ -5500,19 +5556,7 @@ class Player {
         
             })
 
-            /* OLD
-            if (this.checkCollision(Map.wallsToCheck)) {
-
-                // new wall collision that doesnt instakill
-                // get walls normal
-                // subtract that normals direction
-        
-                AudioHandler.splashAudio.play();
-                this.teleport();
-            }
-            */
     
-
 
             // APPLYING VELOCITY
             this.x += this.velocity.x / 5 * dt;
@@ -5566,9 +5610,10 @@ class Player {
                 }
             });
 
-            // CHECK IF COLLIDING WITH ENDZONE
-            if (Map.endZoneIsRendered) { 
-                if (this.checkCollision([Map.endZone])) {
+
+            // CHECK IF COLLIDING WITH ANY ENDZONES
+            if (Map.endZonesToCheck.length > 0) { 
+                if (this.checkCollision(Map.endZonesToCheck)) {
                     AudioHandler.successAudio.play();
                     UserInterface.handleRecord();
                     UserInterface.levelState = 3;
@@ -5594,211 +5639,8 @@ class Player {
         }
     }
 
-    checkCollisionOLD(arrayOfPlatformsToCheck) { // called every time player hits the floor ALSO used to check endzone collision
-        let collision = 0;
-        arrayOfPlatformsToCheck.forEach(platform => { // LOOP THROUGH PLATFORMS
 
-            class Rectangle{
-                constructor(x,y,width,height,angle){
-                    this.x = x;
-                    this.y = y;
-                    this.width = width;
-                    this.height = height;
-                    this.angle = angle;
-                }
-            }
-
-            const rectangleStore = [
-                new Rectangle(player.x-16, player.y-16, 32, 32, player.lookAngle.getAngle()),
-                new Rectangle(platform.x, platform.y, platform.width, platform.height, platform.angle)
-            ]
-
-            canvasArea.ctx.fillRect(rectangleStore[0].x, rectangleStore[0].y, rectangleStore[0].width, rectangleStore[0].height)
-
-            function workOutNewPoints(cx, cy, vx, vy, rotatedAngle){ //From a rotated object
-                //cx,cy are the centre coordinates, vx,vy is the point to be measured against the center point
-                    //Convert rotated angle into radians
-                    rotatedAngle = rotatedAngle * Math.PI / 180;
-                    const dx = vx - cx;
-                    const dy = vy - cy;
-                    const distance = Math.sqrt(dx * dx + dy * dy);
-                    const originalAngle = Math.atan2(dy,dx);
-                    const rotatedX = cx + distance * Math.cos(originalAngle + rotatedAngle);
-                    const rotatedY = cy + distance * Math.sin(originalAngle + rotatedAngle);
-                
-                    return {
-                        x: rotatedX,
-                        y: rotatedY
-                    }
-            }
-            
-            //Get the rotated coordinates for the square
-            function getRotatedSquareCoordinates(square){
-                const centerX = square.x + (square.width / 2);
-                const centerY = square.y + (square.height / 2);
-                //Work out the new locations
-                const topLeft = workOutNewPoints(centerX, centerY, square.x, square.y, square.angle);
-                const topRight = workOutNewPoints(centerX, centerY, square.x + square.width, square.y, square.angle);
-                const bottomLeft = workOutNewPoints(centerX, centerY, square.x, square.y + square.height, square.angle);
-                const bottomRight = workOutNewPoints(centerX, centerY, square.x + square.width, square.y + square.height, square.angle);
-                return{
-                    tl: topLeft,
-                    tr: topRight,
-                    bl: bottomLeft,
-                    br: bottomRight
-                }
-            }
-            
-            //Functional objects for the Seperate Axis Theorum (SAT)
-            //Single vertex
-            function xy(x,y){
-                this.x = x;
-                this.y = y;
-            };
-            //The polygon that is formed from vertices and edges.
-            function polygon(vertices, edges){
-                this.vertex = vertices;
-                this.edge = edges;
-            };
-
-            //The actual Seperate Axis Theorum function
-            function sat(polygonA, polygonB){
-                let perpendicularLine = null;
-                let dot = 0;
-                const perpendicularStack = [];
-                let amin = null;
-                let amax = null;
-                let bmin = null;
-                let bmax = null;
-                //Work out all perpendicular vectors on each edge for polygonA
-                for(let i = 0; i < polygonA.edge.length; i++){
-                    perpendicularLine = new xy(-polygonA.edge[i].y,
-                                                polygonA.edge[i].x);
-                    perpendicularStack.push(perpendicularLine);
-                }
-                //Work out all perpendicular vectors on each edge for polygonB
-                for(let i = 0; i < polygonB.edge.length; i++){
-                    perpendicularLine = new xy(-polygonB.edge[i].y,
-                                                polygonB.edge[i].x);
-                    perpendicularStack.push(perpendicularLine);
-                }
-                //Loop through each perpendicular vector for both polygons
-                for(let i = 0; i < perpendicularStack.length; i++){
-                    //These dot products will return different values each time
-                    amin = null;
-                    amax = null;
-                    bmin = null;
-                    bmax = null;
-                    /*Work out all of the dot products for all of the vertices in PolygonA against the perpendicular vector
-                    that is currently being looped through*/
-                    for(let j = 0; j < polygonA.vertex.length; j++){
-                        dot = polygonA.vertex[j].x *
-                                perpendicularStack[i].x +
-                                polygonA.vertex[j].y *
-                                perpendicularStack[i].y;
-                        //Then find the dot products with the highest and lowest values from polygonA.
-                        if(amax === null || dot > amax){
-                            amax = dot;
-                        }
-                        if(amin === null || dot < amin){
-                            amin = dot;
-                        }
-                    }
-                    /*Work out all of the dot products for all of the vertices in PolygonB against the perpendicular vector
-                    that is currently being looped through*/
-                    for(let j = 0; j < polygonB.vertex.length; j++){
-                        dot = polygonB.vertex[j].x *
-                                perpendicularStack[i].x +
-                                polygonB.vertex[j].y *
-                                perpendicularStack[i].y;
-                        //Then find the dot products with the highest and lowest values from polygonB.
-                        if(bmax === null || dot > bmax){
-                            bmax = dot;
-                        }
-                        if(bmin === null || dot < bmin){
-                            bmin = dot;
-                        }
-                    }
-                    //If there is no gap between the dot products projection then we will continue onto evaluating the next perpendicular edge.
-                    if((amin < bmax && amin > bmin) ||
-                        (bmin < amax && bmin > amin)){
-                        continue;
-                    }
-                    //Otherwise, we know that there is no collision for definite.
-                    else {
-                        return false;
-                    }
-                }
-                /*If we have gotten this far. Where we have looped through all of the perpendicular edges and not a single one of there projections had
-                a gap in them. Then we know that the 2 polygons are colliding for definite then.*/
-                return true;
-            }
-
-            //Detect for a collision between the 2 rectangles
-            function detectRectangleCollision(index){
-
-                const thisRect = rectangleStore[0];
-                const otherRect = rectangleStore[1];
-
-                //Get rotated coordinates for both rectangles
-                const tRR = getRotatedSquareCoordinates(thisRect);
-                const oRR = getRotatedSquareCoordinates(otherRect);
-                //Vertices & Edges are listed in clockwise order. Starting from the top right
-                const thisTankVertices = [
-                    new xy(tRR.tr.x, tRR.tr.y),
-                    new xy(tRR.br.x, tRR.br.y),
-                    new xy(tRR.bl.x, tRR.bl.y),
-                    new xy(tRR.tl.x, tRR.tl.y),
-                ];
-                const thisTankEdges = [
-                    new xy(tRR.br.x - tRR.tr.x, tRR.br.y - tRR.tr.y),
-                    new xy(tRR.bl.x - tRR.br.x, tRR.bl.y - tRR.br.y),
-                    new xy(tRR.tl.x - tRR.bl.x, tRR.tl.y - tRR.bl.y),
-                    new xy(tRR.tr.x - tRR.tl.x, tRR.tr.y - tRR.tl.y)
-                ];
-                const otherTankVertices = [
-                    new xy(oRR.tr.x, oRR.tr.y),
-                    new xy(oRR.br.x, oRR.br.y),
-                    new xy(oRR.bl.x, oRR.bl.y),
-                    new xy(oRR.tl.x, oRR.tl.y),
-                ];
-                const otherTankEdges = [
-                    new xy(oRR.br.x - oRR.tr.x, oRR.br.y - oRR.tr.y),
-                    new xy(oRR.bl.x - oRR.br.x, oRR.bl.y - oRR.br.y),
-                    new xy(oRR.tl.x - oRR.bl.x, oRR.tl.y - oRR.bl.y),
-                    new xy(oRR.tr.x - oRR.tl.x, oRR.tr.y - oRR.tl.y)
-                ];
-                const thisRectPolygon = new polygon(thisTankVertices, thisTankEdges);
-                const otherRectPolygon = new polygon(otherTankVertices, otherTankEdges);
-
-                if(sat(thisRectPolygon, otherRectPolygon)){
-                    collision += 1;
-                    
-                }else{
-                    
-                    //Because we are working with vertices and edges. This algorithm does not cover the normal un-rotated rectangle
-                    //algorithm which just deals with sides
-                    if(thisRect.angle === 0 && otherRect.angle === 0){
-                        if(!(
-                            thisRect.x>otherRect.x+otherRect.width || 
-                            thisRect.x+thisRect.width<otherRect.x || 
-                            thisRect.y>otherRect.y+otherRect.height || 
-                            thisRect.y+thisRect.height<otherRect.y
-                        )){
-                            collision += 1;
-                        }
-                    }
-                }
-            }
-
-            detectRectangleCollision(platform);
-        
-        });
-        
-        if (collision > 0) {return true} else {return false}
-    }
-
-    checkCollision(arrayOfPlatformsToCheck) { // called every time player hits the floor ALSO used to check endzone collision
+    checkCollisionOLDIE(arrayOfPlatformsToCheck) { // called every time player hits the floor ALSO used to check endzone collision
         let collision = 0;
         arrayOfPlatformsToCheck.forEach(platform => { // LOOP THROUGH PLATFORMS
 
@@ -5813,7 +5655,7 @@ class Player {
             }
 
             const rectangleStore = [
-                new Rectangle(player.x, player.y, 32, 32, player.lookAngle.getAngle()),
+                new Rectangle(player.x, player.y, 32, 32, player.lookAngle.getAngle() * Math.PI / 180), // convert player angle to rads
                 new Rectangle(platform.x, platform.y, platform.width, platform.height, platform.angleRad)
             ]
 
@@ -5998,8 +5840,129 @@ class Player {
 
         });
 
+        console.log("collisions: " + collision)
         return collision > 0;
 
+    }
+
+
+
+    checkCollision(arrayOfPlatformsToCheck) {
+
+        let collisions = 0;
+
+        // takes a rectangle defined by center coordinates (x, y), width, height, and angle in radians
+        // returns an array of corner points in clockwise order, starting from the top-left corner
+        function createPoligon(x, y, width, height, angle) {
+            // Calculate half width and half height
+            var hw = width / 2;
+            var hh = height / 2;
+
+            // Calculate the cos and sin of the angle
+            var cosAngle = Math.cos(angle);
+            var sinAngle = Math.sin(angle);
+
+            // Calculate the corner points relative to the center
+            var topLeft = {
+                x: x - (hw * cosAngle) - (hh * sinAngle),
+                y: y - (hw * sinAngle) + (hh * cosAngle)
+            };
+
+            var topRight = {
+                x: x + (hw * cosAngle) - (hh * sinAngle),
+                y: y + (hw * sinAngle) + (hh * cosAngle)
+            };
+
+            var bottomRight = {
+                x: x + (hw * cosAngle) + (hh * sinAngle),
+                y: y + (hw * sinAngle) - (hh * cosAngle)
+            };
+
+            var bottomLeft = {
+                x: x - (hw * cosAngle) + (hh * sinAngle),
+                y: y - (hw * sinAngle) - (hh * cosAngle)
+            };
+
+
+            // Return the corner points in clockwise order
+            return [topLeft, topRight, bottomRight, bottomLeft];
+        }
+
+        const playerPoligon = createPoligon(player.x, player.y, 32, 32, player.lookAngle.getAngle() * Math.PI / 180) // player angle converted to rads
+
+        // check player against every platform
+        arrayOfPlatformsToCheck.forEach(platform => {
+            const platformPoligon = createPoligon(platform.x, platform.y, platform.width, platform.height, platform.angleRad)
+
+            // @param a an array of connected points [{x:, y:}, {x:, y:},...] that form a closed polygon
+            // @param b an array of connected points [{x:, y:}, {x:, y:},...] that form a closed polygon
+            // @return true if there is any intersection between the 2 polygons, false otherwise
+            // https://stackoverflow.com/questions/10962379/how-to-check-intersection-between-2-rotated-rectangles
+            function doPolygonsIntersect(a, b) {
+                const polygons = [a, b];
+                let minA, maxA, projected, i, i1, j, minB, maxB;
+
+                for (i = 0; i < polygons.length; i++) {
+
+                    // for each polygon, look at each edge of the polygon, and determine if it separates
+                    // the two shapes
+                    const polygon = polygons[i];
+                    for (i1 = 0; i1 < polygon.length; i1++) {
+
+                        // grab 2 vertices to create an edge
+                        const i2 = (i1 + 1) % polygon.length;
+                        const p1 = polygon[i1];
+                        const p2 = polygon[i2];
+
+                        // find the line perpendicular to this edge
+                        const normal = {
+                            x: p2.y - p1.y,
+                            y: p1.x - p2.x
+                        };
+
+                        minA = maxA = undefined;
+                        // for each vertex in the first shape, project it onto the line perpendicular to the edge
+                        // and keep track of the min and max of these values
+                        for (j = 0; j < a.length; j++) {
+                            projected = normal.x * a[j].x + normal.y * a[j].y;
+                            if (minA == null || projected < minA) {
+                                minA = projected;
+                            }
+                            if (maxA == null || projected > maxA) {
+                                maxA = projected;
+                            }
+                        }
+
+                        // for each vertex in the second shape, project it onto the line perpendicular to the edge
+                        // and keep track of the min and max of these values
+                        minB = maxB = undefined;
+                        for (j = 0; j < b.length; j++) {
+                            projected = normal.x * b[j].x + normal.y * b[j].y;
+                            if (minB == null || projected < minB) {
+                                minB = projected;
+                            }
+                            if (maxB == null || projected > maxB) {
+                                maxB = projected;
+                            }
+                        }
+
+                        // if there is no overlap between the projects, the edge we are looking at separates the two
+                        // polygons, and we know there is no overlap
+                        if (maxA < minB || maxB < minA) {
+                            return false;
+                        }
+                    }
+                }
+                return true;
+            };
+
+
+            if (doPolygonsIntersect(playerPoligon, platformPoligon)) {
+                collisions++
+            }
+        })
+
+        return (collisions > 0)
     }
 
 
