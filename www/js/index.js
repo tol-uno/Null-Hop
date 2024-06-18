@@ -146,7 +146,6 @@ class Button {
                     reader.readAsText(file)
                 })
             }, () => {
-                // console.log(image + ": no svg for this button. set height to 75");
                 this.width = width;
                 this.height = this.width > 75 ? 75 : this.width
 
@@ -165,7 +164,7 @@ class Button {
 
 
             // GETTING IMAGE_PRESSED. messy to do most of this code twice but... 
-            if (image_pressed != "") {
+            if (image_pressed !== "") {
                 dirEntry.getFile(image_pressed + ".svg", {create: false, exclusive: false}, (fileEntry) => {
 
                     fileEntry.file( (file) => {
@@ -709,6 +708,7 @@ const UserInterface = {
     levelState : 1, // 1 = pre-start, 2 = playing level, 3 = in endzone
 
     leaderboards : {},
+    records : {},
 
     showVerticalWarning : false,
     showOverstrafeWarning : false,
@@ -729,16 +729,15 @@ const UserInterface = {
     // lightColor_2 : "#dcd8d6", // darker
     // darkColor_1 : "#36393d",
     // darkColor_2 : "#292d30",
-    
 
 
     start : function() { // where all buttons are created
-
-        // getting settings.json from wwww
+        
+        // moving this to below creating all buttons to avoid errors
         this.getSettings()
+        this.getRecords()
 
-
-
+        
         // CREATING THE BUTTONS []  []  [] 
 
         // Main Menu BUTTONS
@@ -768,7 +767,11 @@ const UserInterface = {
             const reset = confirm("Reset All Settings and Records?");
             if (reset) {
 
-                // CLEAR records.json too
+                this.records = {
+                    "unlocked": this.records.unlocked
+                };
+                this.writeRecords();
+
 
                 this.settings = {
                     "sensitivity": 0.5,
@@ -776,7 +779,6 @@ const UserInterface = {
                     "debugText": 0,
                     "strafeHUD": 1
                 }
-
                 UserInterface.writeSettings()
                 
                 console.log("records and settings cleared")
@@ -1312,7 +1314,7 @@ const UserInterface = {
         btn_custom_maps = new Button(50, "canvasArea.canvas.height - 150", 175, "custom_maps_button", "", 0, "", function() { 
             UserInterface.gamestate = 2;
             
-            // loop through each button (including non-maps eww) and untoggle it
+            // loop through each button (including non-maps eww) and untoggle it. Could be an issue once I add a "play tutorial" toggle / button idk
             UserInterface.renderedButtons.forEach(button => {
                 if (button.toggle == 1) {button.toggle = 0}
             })
@@ -1703,7 +1705,9 @@ const UserInterface = {
                 Tutorial.state ++; // going into STATE 3
                 UserInterface.renderedButtons = [btn_mainMenu]
 
-                player.lookAngle.set(0,-1) // so that ur not already looking at a target
+                player.lookAngle.set(0,-1) // so that ur NOT already looking at a target
+                //player.lookAngle.set(1,0) // so that player is already looking at a target
+                //player.lookAngle = player.lookAngle.rotate(240)
                 return
             }
 
@@ -1855,7 +1859,6 @@ const UserInterface = {
 
 
         this.renderedButtons = this.btnGroup_mainMenu; 
-
     },
 
     update : function() {
@@ -1887,6 +1890,92 @@ const UserInterface = {
         UserInterface.renderedButtons = this.btnGroup_inLevel;
     },
 
+    readFile: function(fileName, subDirectory = "") {
+        return new Promise((resolve, reject) => {
+            // Resolve dataDirectory URL
+            window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function(dataDirectoryEntry) {
+                if (subDirectory !== "") {
+                    // Access given subDirectory in dataDirectory
+                    dataDirectoryEntry.getDirectory(subDirectory, { create: false }, function(subDirectoryEntry) {
+                        readFileAsText(subDirectoryEntry);
+                    }, function(error) {
+                        reject("Failed to get subDirectory: " + error.code);
+                    });
+                } else {
+                    // Read from main dataDirectory
+                    readFileAsText(dataDirectoryEntry);
+                }
+            }, function(error) {
+                reject("Failed to resolve dataDirectory: " + error.code);
+            });
+    
+            // Function to read file as text
+            function readFileAsText(directoryEntry) {
+                directoryEntry.getFile(fileName, { create: false }, function(fileEntry) {
+                    fileEntry.file(function(file) {
+                        const reader = new FileReader();
+                        reader.onloadend = function() {
+                            console.log("Successfully read file: " + fileName);
+                            resolve(this.result);
+                        };
+                        reader.onerror = function() {
+                            reject("Failed to read file: " + fileName);
+                        };
+                        reader.readAsText(file);
+                    }, function(error) {
+                        reject("Failed to get fileEntry.file: " + error.code);
+                    });
+                }, function(error) {
+                    reject("Failed to getFile: " + error.code);
+                });
+            }
+        });
+    },    
+
+    writeFile : function(fileName, blobData, subDirectory = "") {
+
+        // fileName is a string with file extension EX: settings.json
+        // blobData = new Blob([JSON.stringify(exportObj, null, 2)], { type: "application/json" });
+        // subDirectory is a string. no need for first \ EX: maps\bad_maps OR just customMaps
+
+        // DEAL WITH OPTIONAL subDirectory
+        window.resolveLocalFileSystemURL(cordova.file.dataDirectory, (dataDirectoryEntry) => {
+            if (subDirectory !== "") {
+                // Create or access given subDirectory in dataDirectory
+                dataDirectoryEntry.getDirectory(subDirectory, {create : true}, subDirectoryEntry => {
+                    saveFile(subDirectoryEntry);
+                }, throwError);
+            } else {
+                // save to straight to main dataDirectory
+                saveFile(dataDirectoryEntry)
+            }
+        }, throwError);
+
+        // ACTUALLY WRITE blobData TO FILE
+        function saveFile(directoryEntry) {
+            // Create or acces the file
+            directoryEntry.getFile(fileName, {create : true, exclusive : false}, (fileEntry) => {
+                // Write to file
+                fileEntry.createWriter( (fileWriter) => {
+                    fileWriter.onwriteend = function() {
+                        console.log("successfully wrote file: " + fileName)
+                    };
+
+                    fileWriter.onerror = (error) => {
+                        console.log("failed to write file: " + fileName, error)
+                    };
+
+                    fileWriter.write(blobData);
+                }, throwError)
+            }, throwError)
+        }
+
+        // FUNCTION CALLED ON ERRORS
+        function throwError(error) {
+            console.log("File system error for: " + fileName + " Error Code: ", error.code)
+        }         
+    },
+
     getLeaderboards : function() {
             
         // GET leaderboards DIRECTLY THROUGH CORDOVA LOCAL STORAGE (www)       
@@ -1895,22 +1984,13 @@ const UserInterface = {
         window.resolveLocalFileSystemURL(assetsURL, (dirEntry) => {
 
             dirEntry.getFile("leaderboards.json", {create: false, exclusive: false}, (fileEntry) => {
-                console.log(fileEntry)
 
                 fileEntry.file( (file) => {
 
                     const reader = new FileReader();
                     reader.onload = (e) => {
-                        
+                        console.log("successfully read leaderboards.json")
                         this.leaderboards = JSON.parse(e.target.result)
-                        const rawText = e.target.result
-                        // const byteOffset = rawText.indexOf("" + key + ": " + value);
-                        const byteOffset = rawText.indexOf("Eva");
-                        console.log("====== file raw ===")
-                        console.log(rawText)
-                        console.log("byte Offset: " + byteOffset)
-                        console.log(this.leaderboards)
-
                     };
                     reader.onerror = (e) => alert(e.target.error.name);
         
@@ -1920,115 +2000,84 @@ const UserInterface = {
         })
     },
 
-    getSettingsOLD : function() {
-            
-        // GET leaderboards DIRECTLY THROUGH CORDOVA LOCAL STORAGE (www)       
-        const assetsURL = cordova.file.applicationDirectory + "www/assets/"
+    getSettings: async function() {
+        try {
+            const settingsData = await this.readFile("settings.json");
+            this.settings = JSON.parse(settingsData);
+
+            // readFile completes after initiating buttons so need to sync them
+            btn_sensitivitySlider.updateState(UserInterface.settings.sensitivity)
+            btn_volumeSlider.updateState(UserInterface.settings.volume)
+            btn_debugText.func(true)
+            btn_strafeHUD.func(true)
+
+            AudioHandler.setVolumes();
         
-        window.resolveLocalFileSystemURL(assetsURL, (dirEntry) => {
-
-            dirEntry.getFile("settings.json", {create: false, exclusive: false}, (fileEntry) => {
-                console.log(fileEntry)
-
-                fileEntry.file( (file) => {
-
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        
-                        this.settings = JSON.parse(e.target.result)
-                        
-                        // reading this file completes after the buttons are initially set
-                        // need to sync them to the read data here:
-                        btn_sensitivitySlider.updateState(UserInterface.settings.sensitivity)
-                        btn_volumeSlider.updateState(UserInterface.settings.volume)
-                        btn_debugText.func(true)
-                        btn_strafeHUD.func(true)
-
-                    };
-                    reader.onerror = (e) => alert(e.target.error.name);
-        
-                    reader.readAsText(file)
-                })
-            })
-        })
-    },
-
-
-    getSettings : function() {
-        
-        // Check if the settings.json file exists in dataDirectory
-        window.resolveLocalFileSystemURL(cordova.file.dataDirectory + "settings.json", (fileEntry) => {
-            // settings file exists -- read it
-            fileEntry.file((file) => {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    this.settings = JSON.parse(e.target.result)
-
-                    // reading this file completes after the buttons are initially set so
-                    // need to sync them to the read data here:
-                    btn_sensitivitySlider.updateState(UserInterface.settings.sensitivity)
-                    btn_volumeSlider.updateState(UserInterface.settings.volume)
-                    btn_debugText.func(true)
-                    btn_strafeHUD.func(true)
+        } catch (error) {
+            if (error == "Failed to getFile: 1") { // file doesnt exist
+                
+                // If settings file doesn't exist or is empty, initialize default settings
+                this.settings = {
+                    "sensitivity": 0.5,
+                    "volume": 0.1,
+                    "debugText": 0,
+                    "strafeHUD": 1
                 };
-                reader.onerror = (e) => {alert(e.target.error.name)};
 
-                reader.readAsText(file);
-            });
+                this.writeSettings(); // Write the default settings to file
 
-        }, function(err) {
-            // File doesn't already exist -- create settings file
-            this.settings = {
-                "sensitivity": 0.5,
-                "volume": 0.1,
-                "debugText": 0,
-                "strafeHUD": 1
+                // readFile completes after initiating buttons so need to sync them
+                btn_sensitivitySlider.updateState(UserInterface.settings.sensitivity)
+                btn_volumeSlider.updateState(UserInterface.settings.volume)
+                btn_debugText.func(true)
+                btn_strafeHUD.func(true)
+
+                AudioHandler.setVolumes();
+
+            } else {
+                console.error("Error while getting settings:", error);   
             }
-            writeSettings()
-        });
+        }
     },
 
     writeSettings : function () {
+        const settingsBlob = new Blob([JSON.stringify(this.settings, null, 2)], { type: "application/json" });
+        this.writeFile("settings.json", settingsBlob)
+    },
 
+    getRecords: async function() {
+        try {
 
-        function writeFile(dataObj) {
-            // create directory and empty file
-            window.resolveLocalFileSystemURL(cordova.file.dataDirectory, (directoryEntry) => {
-                directoryEntry.getFile("settings.json", { create: true, exclusive: false }, (logFileEntry) => {
-                    // addding to the empty file
-                    logFileEntry.createWriter(function (writer) {
-                        writer.onwriteend = function () {
+            const recordsData = await this.readFile("records.json");    
+            this.records = JSON.parse(recordsData);
 
-                            console.log("Wrote to settings");
-                        };
+        } catch (error) { 
+            if (error == "Failed to getFile: 1") { // file doesnt exist
 
-                        writer.onerror = function (e) {
-                            console.log("Writer Error in writeSettings", e);
-                        };
+                // records.json doesn't exist , initialize empty records file
+                this.records = {
+                    "unlocked": 1
+                };
+                this.writeRecords(); // Write the default empty records to file
 
-                        writer.write(dataObj);
-                    });
-                });
-            }, error => { console.log(error) });
+            } else {
+                console.error("Error while getting records:", error);
+            }
         }
+    },
 
-        const blob = new Blob([JSON.stringify(this.settings, null, 2)], { type: "application/json" });
-
-        writeFile(blob)
+    writeRecords : function () {
+        const recordsBlob = new Blob([JSON.stringify(this.records, null, 2)], { type: "application/json" });
+        this.writeFile("records.json", recordsBlob)
     },
 
     handleRecord : function() {
-        //const yourRecord = this.leaderboards[Map.name].yourRecord
+        const record = this.records[Map.name]
 
-        //if (yourRecord == null || (yourRecord !== null && this.timer < yourRecord)) {
-            //this.leaderboards[Map.name].yourRecord = this.timer
-            
-            // Write this.timer to yourRecord in leaderboards.json
-            // APPENDING and SEEKING TO SPECIFIC PART OF FILE SEEMS HARD
-            // probably just need to rewrite leaderboards file fully every time
-
-            // THIS WILL BE AN ASYC TASK SO I NEED TO DO SOMETHING DIFFERENT TO DISPLAY RECORD IMEDIETLY ON END SCREEN
-        //} 
+        if (record == null || (record !== null && this.timer < record)) {
+            this.records[Map.name] = this.timer
+            this.writeRecords()         
+        } 
 
     },
 
@@ -2037,26 +2086,25 @@ const UserInterface = {
         
         bgColor = bgColor.replace(/[^\d,.]/g, '').split(',')
         
-        console.log(bgColor)
-
         const luminance = (0.299 * bgColor[0] + 0.587 * bgColor[1] + 0.114 * bgColor[2])/255
         // luminance = (0.299 * R + 0.587 * G + 0.114 * B)/255
         // console.log("luminance: " + luminance)
 
-        this.darkMode = (luminance > 0.7) ? true : false;
+        this.darkMode = (luminance > 0.8) ? true : false;
 
     },
 
-    secondsToMinutes : function(milliseconds) {
-        const seconds = milliseconds / 1000
-        // seconds = Math.round(seconds * 1000) / 1000
-
+    secondsToMinutes: function(milliseconds) {
+        const seconds = milliseconds / 1000;
         const minutes = Math.floor(seconds / 60);
         let extraSeconds = seconds % 60;
-        extraSeconds = Math.round((seconds % 60) * 1000) / 1000
-
-        // minutes = minutes < 10 ? "0" + minutes : minutes; // adds a zero before minutes number if less than 10 mins
-        extraSeconds = extraSeconds < 10 ? "0" + extraSeconds : extraSeconds;
+    
+        // Format extraSeconds with three decimal points
+        extraSeconds = extraSeconds.toFixed(3);
+    
+        // Pad extraSeconds with zeros if needed
+        extraSeconds = extraSeconds.padStart(6, "0");
+    
         return minutes + ":" + extraSeconds;
     },
 
@@ -2239,7 +2287,7 @@ const UserInterface = {
                 canvasArea.ctx.fillStyle = !UserInterface.darkMode ? UserInterface.darkColor_1: UserInterface.lightColor_1;
 
                 canvasArea.ctx.fillText("Time: " + UserInterface.secondsToMinutes(this.timer), canvasArea.canvas.width - 240, 60)
-                //canvasArea.ctx.fillText("Record: " + UserInterface.secondsToMinutes(this.records[Map.name].yourRecord), canvasArea.canvas.width - 240, 90);
+                canvasArea.ctx.fillText("Record: " + UserInterface.secondsToMinutes((this.records[Map.name] == null ? 0 : this.records[Map.name])), canvasArea.canvas.width - 240, 90);
             }
 
 
@@ -2412,15 +2460,23 @@ const UserInterface = {
 
             if (player.endSlow == 0) { // level name, your time, best time, strafe efficiency, leaderboards
 
+
+                const timeBox = {
+                    x : midX - 250,
+                    y : midY - 170,
+                    width : 300,
+                    height : 200,
+                }
+
                 // END SCREEN BOX
                 canvasArea.ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
 
-                canvasArea.roundedRect(midX - 150, midY - 100, 300, 200, 25)
+                canvasArea.roundedRect(timeBox.x, timeBox.y, timeBox.width, timeBox.height, 25)
 
                 canvasArea.ctx.save(); // save 3
                 
-                canvasArea.ctx.shadowColor = "rgba(0, 0, 0, 0.3)"; 
-                canvasArea.ctx.shadowBlur = 20;
+                canvasArea.ctx.shadowColor = "rgba(0, 0, 0, 0.4)"; 
+                canvasArea.ctx.shadowBlur = 30;
                 canvasArea.ctx.fill();
 
                 canvasArea.ctx.restore(); // restore 3
@@ -2431,55 +2487,110 @@ const UserInterface = {
 
                 canvasArea.ctx.fillStyle = (!UserInterface.darkMode) ? UserInterface.darkColor_1 : UserInterface.lightColor_1; // GRAY
 
-                canvasArea.ctx.fillText("Level: " + Map.name, midX - 120, midY - 50);
-                canvasArea.ctx.fillText("Time: " + UserInterface.secondsToMinutes(UserInterface.timer), midX - 120, midY - 0);
-                canvasArea.ctx.fillText("Record: " + UserInterface.secondsToMinutes(this.records[Map.name].yourRecord), midX - 120, midY + 30);
+                canvasArea.ctx.fillText("Level: " + Map.name, timeBox.x + 30, timeBox.y + 50);
+                canvasArea.ctx.fillText("Time: " + UserInterface.secondsToMinutes(UserInterface.timer), timeBox.x + 30, timeBox.y + 100);
+                canvasArea.ctx.fillText("Record: " + UserInterface.secondsToMinutes(this.records[Map.name]), timeBox.x + 30, timeBox.y + 130);
 
-                if (this.timer == this.records[Map.name].yourRecord) {canvasArea.ctx.fillText("New Record!", midX - 120, midY + 65)}
+                if (this.timer == this.records[Map.name]) {canvasArea.ctx.fillText("New Record!", timeBox.x + 30, timeBox.y + 160)}
+
+
+
+                // QUOTE BOX
+                const quoteBox = {
+                    x : midX - 250,
+                    y : midY + 80,
+                    width : 300,
+                    height : 120,
+                }
+
+                // QUOTE BOX BORDER
+                canvasArea.ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
+
+                canvasArea.roundedRect(quoteBox.x, quoteBox.y, quoteBox.width, quoteBox.height, 25)
+
+                canvasArea.ctx.save(); // save 3
+                
+                canvasArea.ctx.shadowColor = "rgba(0, 0, 0, 0.4)"; 
+                canvasArea.ctx.shadowBlur = 30;
+                canvasArea.ctx.fill();
+
+                canvasArea.ctx.restore(); // restore 3
+
+
 
                 // LEADERBOARDS IF AVAILABLE
                 if (this.leaderboards[Map.name] !== undefined) {
-                    // RIGHT SIDE BOX
+                    
+                    const board = {
+                        x : midX + 100,
+                        y : midY - 170,
+                        width : 300,
+                        height : 380,
+                    }
+
+                    // LEADERBOARD BOX
                     canvasArea.ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
 
-                    canvasArea.roundedRect(midX + 200, midY - 200, 300, 400, 25)
+                    canvasArea.roundedRect(board.x, board.y, board.width, board.height, 25)
 
                     canvasArea.ctx.save(); // save 3.5
                     
-                    canvasArea.ctx.shadowColor = "rgba(0, 0, 0, 0.3)"; 
-                    canvasArea.ctx.shadowBlur = 20;
+                    canvasArea.ctx.shadowColor = "rgba(0, 0, 0, 0.4)"; 
+                    canvasArea.ctx.shadowBlur = 30;
                     canvasArea.ctx.fill();
 
                     canvasArea.ctx.restore(); // restore 3.5
 
+
                     // LEADERBOARD TEXT
                     canvasArea.ctx.font = "25px BAHNSCHRIFT";
 
-                    canvasArea.ctx.fillStyle = (!UserInterface.darkMode) ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
-    
-                    canvasArea.ctx.fillText("Leaderboard", midX + 220, midY - 150);
-                    let lineSpacing = 30;
+                    canvasArea.ctx.fillStyle = canvasArea.ctx.strokeStyle = (!UserInterface.darkMode) ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
+
+
+                    //canvasArea.ctx.fillText("Leaderboard", board,x + 20, midY - 150);
+                    let lineSpacing = 20 + 30; // padding from top of box + one line height
                     let placedInLeaderboard = false;
-                    for (const [key, value] of Object.entries(this.leaderboards[Map.name].leaderboard)) {
-                        if (!placedInLeaderboard && this.leaderboards[Map.name].yourRecord <= value) {
-                            canvasArea.ctx.fillText(Null + ": " + UserInterface.secondsToMinutes(this.leaderboards[Map.name].yourRecord), midX + 220, midY - 120 + lineSpacing);
-                            lineSpacing += 30;
-                            placedInLeaderboard = true;
-                        }
+
+                    function drawNullTime(lineSpacing, rank) {
+                        // rank
+                        canvasArea.ctx.fillText(rank + ".", board.x + 20, board.y + lineSpacing);
+
+                        // NULL name + time
+                        canvasArea.ctx.fillText("Null", board.x + 60, board.y + lineSpacing);
+                        canvasArea.ctx.fillText(UserInterface.secondsToMinutes(UserInterface.records[Map.name]), board.x + board.width - 30 - canvasArea.ctx.measureText(UserInterface.secondsToMinutes(UserInterface.records[Map.name])).width, board.y + lineSpacing)
+
+                        // border around null's time
+                        canvasArea.roundedRect(board.x + 50, board.y + lineSpacing - 25, board.width - 70, 32, 10)
+                        canvasArea.ctx.lineWidth = 3
+                        canvasArea.ctx.stroke()
+                    }
+
+                    let rank = 1;
+                    for (const [key, value] of Object.entries(this.leaderboards[Map.name])) {
                         
-                        canvasArea.ctx.fillText(key + ": " + UserInterface.secondsToMinutes(value), midX + 220, midY - 120 + lineSpacing);
-                        lineSpacing += 30;
+                        if (!placedInLeaderboard && this.records[Map.name] <= value) { // if this line should be your record
+
+                            drawNullTime(lineSpacing, rank)                            
+                            lineSpacing += 40;
+                            placedInLeaderboard = true;
+                            rank ++;
+                        }
+
+                        // rank
+                        canvasArea.ctx.fillText(rank + ".", board.x + 20, board.y + lineSpacing);
+
+                        canvasArea.ctx.fillText(key, board.x + 60, board.y + lineSpacing);
+                        canvasArea.ctx.fillText(UserInterface.secondsToMinutes(value), board.x + board.width - 30 - canvasArea.ctx.measureText(UserInterface.secondsToMinutes(value)).width, board.y + lineSpacing)
+
+                        lineSpacing += 40;
+                        rank ++;
                     }
-                    if (!placedInLeaderboard) { // drawing yourRecord in last place
-                        canvasArea.ctx.fillText(Null + ": " + UserInterface.secondsToMinutes(this.leaderboards[Map.name].yourRecord), midX + 220, midY - 120 + lineSpacing);
+
+                    if (!placedInLeaderboard) { // drawing your record in last place if looped through entirely without being placed
+                        drawNullTime(lineSpacing, rank)
                     }
-
-
-                    // NULL'S RECORD IS NOT BEING DRAWN
-                    // TEST DRAW IT SOMEWHERE TO MAKE SURE ITS ACCESSING THE RIGHT INFORMATION
-
                 }
-
             }
         }
     }
@@ -2699,12 +2810,17 @@ const MapBrowser = { // should set back to 0 at some points??
         ctx.fill()
 
         // DRAW TEXT INFO BOX
-        ctx.font = "40px BAHNSCHRIFT";
+        ctx.font = "45px BAHNSCHRIFT";
         ctx.fillStyle = (!UserInterface.darkMode) ? UserInterface.darkColor_1: UserInterface.lightColor_1;
 
         if (this.state == 1) { // normal map browser
             if (this.selectedMapIndex != -1) {
-                ctx.fillText(this.selectedMapIndex, canvasArea.canvas.width - 475, 110)
+                ctx.fillText(this.selectedMapIndex, canvasArea.canvas.width - 475, 115)
+
+                ctx.font = "25px BAHNSCHRIFT";
+                const yourRecord = UserInterface.secondsToMinutes((UserInterface.records[this.selectedMapIndex] == undefined ? 0 : UserInterface.records[this.selectedMapIndex]))
+                ctx.fillText("Your Record: " + yourRecord, canvasArea.canvas.width - 475, 170)
+
             } else {
                 ctx.fillText("Select A Map", canvasArea.canvas.width - 475, 110)
             }
@@ -2974,26 +3090,27 @@ const Tutorial = {
         if (this.state == 3 && this.targets.length > 0) { // Targets
 
             const targetCounter = String(6 - this.targets.length + "/6")
-            drawTextPanel("Rotate the player to look at the targets: " + targetCounter)
+            drawTextPanel("Rotate the player to look at the rings: " + targetCounter)
             
             ctx.save() // #4
             
             ctx.translate(midX, midY)
             ctx.rotate(this.targets[0][0] * Math.PI / 180)
 
-            ctx.strokeStyle = Map.style.shadowColor
-            ctx.fillStyle = Map.style.shadowColor
+            ctx.strokeStyle = Map.style.shadow_platformColor
+            ctx.fillStyle = Map.style.shadow_platformColor
             ctx.lineWidth = 8
             ctx.lineCap = "round"
 
     
             // DRAW TARGET SHADOW
-            if (this.targets[0][1] > 0) { // these two blocks could be a function. theyre called twice
+            if (this.targets[0][1] > 0) { // these two blocks could be a function. theyre called twice. Translate the ctx between the two
                 ctx.beginPath()
                 ctx.arc(75, 0, 14, 0, (this.targets[0][1] / 50) * (2 * Math.PI));
                 ctx.stroke()
             }
 
+            // center dot that appears when looking at target
             if (this.targets[0][1] < 50 ) {
                 ctx.beginPath()
                 ctx.arc(75, 0, 5, 0, 2 * Math.PI);
@@ -3017,6 +3134,7 @@ const Tutorial = {
                 ctx.stroke()
             }
 
+            // center dot that appears when looking at target
             if (this.targets[0][1] < 50 ) {
                 ctx.beginPath()
                 ctx.arc(75, 0, 5, 0, 2 * Math.PI);
@@ -3064,7 +3182,7 @@ const Tutorial = {
 
 
         if (this.state == 10) {
-            drawTextPanel("Slow and smooth swipes increase speed")
+            drawTextPanel("Slow and steady swipes increase speed")
 
             // graphic showing smooth turn vs sharp turn?
         }
@@ -4391,7 +4509,7 @@ const MapEditor = {
         }
     },
 
-    adjustPlatforms : function() {
+    adjustPlatforms : function() { // DEBUG TOOL USED TO SHIFT EVERY PLATFORM OVER BY HALF ITS WIDTH AND HEIGHT kill once all are adjusted
         this.loadedMap.platforms.forEach(platform => {
             platform.x += platform.width/2
             platform.y += platform.height/2
@@ -4462,7 +4580,6 @@ const Map = {
     wallsToCheck : [],
     endZonesToCheck : [],
     name : null,
-    // record : null, kill kill
     upperShadowClip : new Path2D(),
     endZoneShadowClip : new Path2D(),
     playerClip : new Path2D(), // calculated every frame
@@ -4506,8 +4623,7 @@ const Map = {
             
         } else { // is an object (CUSTOM MAP)
             this.name = name.name;
-            console.log("passed an object. CUSTOM MAP below: ")
-            console.log(name)
+            console.log("passed a CUSTOM MAP object")
             this.parseMapData(name)
         }
     },
@@ -4707,9 +4823,6 @@ const Map = {
         canvasArea.canvas.style.backgroundColor = this.style.shaded_backgroundColor;
         document.body.style.backgroundColor = this.style.shaded_backgroundColor;
         player = new Player(this.playerStart.x, this.playerStart.y, this.playerStart.angle);
-
-        // Get map record from local storage KILL KILL KILL
-        //this.record = window.localStorage.getItem("record_" + this.name)
 
         UserInterface.determineButtonColor();
         UserInterface.mapLoaded(); // moves onto gamestate 6
@@ -5637,212 +5750,6 @@ class Player {
                 this.jumpVelocity -= gravity * dt * this.endSlow;
             }
         }
-    }
-
-
-    checkCollisionOLDIE(arrayOfPlatformsToCheck) { // called every time player hits the floor ALSO used to check endzone collision
-        let collision = 0;
-        arrayOfPlatformsToCheck.forEach(platform => { // LOOP THROUGH PLATFORMS
-
-            class Rectangle {
-                constructor(cx, cy, width, height, angle) {
-                    this.cx = cx; // Center X coordinate
-                    this.cy = cy; // Center Y coordinate
-                    this.width = width;
-                    this.height = height;
-                    this.angle = angle;
-                }
-            }
-
-            const rectangleStore = [
-                new Rectangle(player.x, player.y, 32, 32, player.lookAngle.getAngle() * Math.PI / 180), // convert player angle to rads
-                new Rectangle(platform.x, platform.y, platform.width, platform.height, platform.angleRad)
-            ]
-
-
-            function workOutNewPoints(cx, cy, vx, vy, rotatedAngle) {
-                //rotatedAngle = rotatedAngle * Math.PI / 180;
-                const dx = vx - cx;
-                const dy = vy - cy;
-                const distance = Math.sqrt(dx * dx + dy * dy);
-                const originalAngle = Math.atan2(dy, dx);
-                const rotatedX = cx + distance * Math.cos(originalAngle + rotatedAngle);
-                const rotatedY = cy + distance * Math.sin(originalAngle + rotatedAngle);
-
-                return {
-                    x: rotatedX,
-                    y: rotatedY
-                }
-            }
-
-            //Get the rotated coordinates for the square
-            function getRotatedSquareCoordinates(square) {
-                const centerX = square.cx;
-                const centerY = square.cy;
-                const halfWidth = square.width / 2;
-                const halfHeight = square.height / 2;
-
-                const topLeft = workOutNewPoints(centerX, centerY, centerX - halfWidth, centerY - halfHeight, square.angle);
-                const topRight = workOutNewPoints(centerX, centerY, centerX + halfWidth, centerY - halfHeight, square.angle);
-                const bottomLeft = workOutNewPoints(centerX, centerY, centerX - halfWidth, centerY + halfHeight, square.angle);
-                const bottomRight = workOutNewPoints(centerX, centerY, centerX + halfWidth, centerY + halfHeight, square.angle);
-                return {
-                    tl: topLeft,
-                    tr: topRight,
-                    bl: bottomLeft,
-                    br: bottomRight
-                }
-            }
-
-            //Functional objects for the Seperate Axis Theorum (SAT)
-            //Single vertex
-            function xy(x, y) {
-                this.x = x;
-                this.y = y;
-            };
-            //The polygon that is formed from vertices and edges.
-            function polygon(vertices, edges) {
-                this.vertex = vertices;
-                this.edge = edges;
-            };
-
-            //The actual Seperate Axis Theorum function
-            function sat(polygonA, polygonB) {
-                let perpendicularLine = null;
-                let dot = 0;
-                const perpendicularStack = [];
-                let amin = null;
-                let amax = null;
-                let bmin = null;
-                let bmax = null;
-                //Work out all perpendicular vectors on each edge for polygonA
-                for (let i = 0; i < polygonA.edge.length; i++) {
-                    perpendicularLine = new xy(-polygonA.edge[i].y,
-                        polygonA.edge[i].x);
-                    perpendicularStack.push(perpendicularLine);
-                }
-                //Work out all perpendicular vectors on each edge for polygonB
-                for (let i = 0; i < polygonB.edge.length; i++) {
-                    perpendicularLine = new xy(-polygonB.edge[i].y,
-                        polygonB.edge[i].x);
-                    perpendicularStack.push(perpendicularLine);
-                }
-                //Loop through each perpendicular vector for both polygons
-                for (let i = 0; i < perpendicularStack.length; i++) {
-                    //These dot products will return different values each time
-                    amin = null;
-                    amax = null;
-                    bmin = null;
-                    bmax = null;
-                    /*Work out all of the dot products for all of the vertices in PolygonA against the perpendicular vector
-                    that is currently being looped through*/
-                    for (let j = 0; j < polygonA.vertex.length; j++) {
-                        dot = polygonA.vertex[j].x *
-                            perpendicularStack[i].x +
-                            polygonA.vertex[j].y *
-                            perpendicularStack[i].y;
-                        //Then find the dot products with the highest and lowest values from polygonA.
-                        if (amax === null || dot > amax) {
-                            amax = dot;
-                        }
-                        if (amin === null || dot < amin) {
-                            amin = dot;
-                        }
-                    }
-                    /*Work out all of the dot products for all of the vertices in PolygonB against the perpendicular vector
-                    that is currently being looped through*/
-                    for (let j = 0; j < polygonB.vertex.length; j++) {
-                        dot = polygonB.vertex[j].x *
-                            perpendicularStack[i].x +
-                            polygonB.vertex[j].y *
-                            perpendicularStack[i].y;
-                        //Then find the dot products with the highest and lowest values from polygonB.
-                        if (bmax === null || dot > bmax) {
-                            bmax = dot;
-                        }
-                        if (bmin === null || dot < bmin) {
-                            bmin = dot;
-                        }
-                    }
-                    //If there is no gap between the dot products projection then we will continue onto evaluating the next perpendicular edge.
-                    if ((amin < bmax && amin > bmin) ||
-                        (bmin < amax && bmin > amin)) {
-                        continue;
-                    }
-                    //Otherwise, we know that there is no collision for definite.
-                    else {
-                        return false;
-                    }
-                }
-                /*If we have gotten this far. Where we have looped through all of the perpendicular edges and not a single one of there projections had
-                a gap in them. Then we know that the 2 polygons are colliding for definite then.*/
-                return true;
-            }
-
-            //Detect for a collision between the 2 rectangles
-            function detectRectangleCollision(index) {
-
-                const thisRect = rectangleStore[0];
-                const otherRect = rectangleStore[1];
-
-                //Get rotated coordinates for both rectangles
-                const tRR = getRotatedSquareCoordinates(thisRect);
-                const oRR = getRotatedSquareCoordinates(otherRect);
-                //Vertices & Edges are listed in clockwise order. Starting from the top right
-                const thisTankVertices = [
-                    new xy(tRR.tr.x, tRR.tr.y),
-                    new xy(tRR.br.x, tRR.br.y),
-                    new xy(tRR.bl.x, tRR.bl.y),
-                    new xy(tRR.tl.x, tRR.tl.y),
-                ];
-                const thisTankEdges = [
-                    new xy(tRR.br.x - tRR.tr.x, tRR.br.y - tRR.tr.y),
-                    new xy(tRR.bl.x - tRR.br.x, tRR.bl.y - tRR.br.y),
-                    new xy(tRR.tl.x - tRR.bl.x, tRR.tl.y - tRR.bl.y),
-                    new xy(tRR.tr.x - tRR.tl.x, tRR.tr.y - tRR.tl.y)
-                ];
-                const otherTankVertices = [
-                    new xy(oRR.tr.x, oRR.tr.y),
-                    new xy(oRR.br.x, oRR.br.y),
-                    new xy(oRR.bl.x, oRR.bl.y),
-                    new xy(oRR.tl.x, oRR.tl.y),
-                ];
-                const otherTankEdges = [
-                    new xy(oRR.br.x - oRR.tr.x, oRR.br.y - oRR.tr.y),
-                    new xy(oRR.bl.x - oRR.br.x, oRR.bl.y - oRR.br.y),
-                    new xy(oRR.tl.x - oRR.bl.x, oRR.tl.y - oRR.bl.y),
-                    new xy(oRR.tr.x - oRR.tl.x, oRR.tr.y - oRR.tl.y)
-                ];
-                const thisRectPolygon = new polygon(thisTankVertices, thisTankEdges);
-                const otherRectPolygon = new polygon(otherTankVertices, otherTankEdges);
-
-                if (sat(thisRectPolygon, otherRectPolygon)) {
-                    collision += 1;
-
-                } else {
-
-                    //Because we are working with vertices and edges. This algorithm does not cover the normal un-rotated rectangle
-                    //algorithm which just deals with sides
-                    if (thisRect.angle === 0 && otherRect.angle === 0) {
-                        if (!(
-                            thisRect.x > otherRect.x + otherRect.width ||
-                            thisRect.x + thisRect.width < otherRect.x ||
-                            thisRect.y > otherRect.y + otherRect.height ||
-                            thisRect.y + thisRect.height < otherRect.y
-                        )) {
-                            collision += 1;
-                        }
-                    }
-                }
-            }
-
-            detectRectangleCollision(platform);
-
-        });
-
-        console.log("collisions: " + collision)
-        return collision > 0;
-
     }
 
 

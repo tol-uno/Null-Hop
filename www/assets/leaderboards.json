@@ -1,31 +1,29 @@
 {
     "Awakening": {
-        "yourRecord": null,
-        "leaderboard": {
-        
-            "Eva": 12200,
-            "Quincy": 14142,
-            "Kiwi": 15999,
-            "Wes": 16244,
-            "Philip": 19283,
-            "Goknak": 22330,
-            "Phoon": 30203
-
-        }
+        "Eva": 12200,
+        "Quincy": 14142,
+        "Kiwi": 15999,
+        "Wes": 16244,
+        "Philip": 19283,
+        "Goknak": 22330,
+        "Phoon": 30203
     },
-
     "Cavern Abyss": {
-        "yourRecord": null,
-        "leaderboard": {
-        
-            "Philip": 30283,
-            "Quincy": 42142,
-            "Randy": 48033,
-            "Wes": 71244,
-            "Gordon": 80898,
-            "Arcane": 81666,
-            "Goknak": 110330
-
-        }
+        "Philip": 30283,
+        "Quincy": 42142,
+        "Randy": 48033,
+        "Wes": 71244,
+        "Gordon": 80898,
+        "Arcane": 81666,
+        "Goknak": 110330
+    },
+    "Turmoil": {
+        "Philip": 13283,
+        "Goknak": 14330,
+        "Wes": 15244,
+        "Gordon": 15898,
+        "Arcane": 16666,
+        "Eva": 21000,
+        "Randy": 28033
     }
 }
