@@ -715,15 +715,15 @@ const UserInterface = {
 
     darkMode : false,
 
-    lightColor_1 : "#fff8ea", // lighter
-    lightColor_2 : "#f7f1e4", // darker
-    darkColor_1 : "#503c4b",
-    darkColor_2 : "#412b3a",
+    // lightColor_1 : "#fff8ea", // lighter
+    // lightColor_2 : "#f7f1e4", // darker
+    // darkColor_1 : "#503c4b",
+    // darkColor_2 : "#412b3a",
     
-    // lightColor_1 : "rgb(244,243,240)", // lighter
-    // lightColor_2 : "rgb(231,230,223)", // darker
-    // darkColor_1 : "rgb(39,39,37)",
-    // darkColor_2 : "rgb(34,34,32)",
+    lightColor_1 : "#F5F5F5", // lighter
+    lightColor_2 : "#E0E0E0", // darker
+    darkColor_1 : "#454545",
+    darkColor_2 : "#363636",
 
     // lightColor_1 : "#f0f0f1", // lighter
     // lightColor_2 : "#dcd8d6", // darker
@@ -767,19 +767,26 @@ const UserInterface = {
             const reset = confirm("Reset All Settings and Records?");
             if (reset) {
 
-                this.records = {
-                    "unlocked": this.records.unlocked
+                UserInterface.records = {
+                    "unlocked": UserInterface.records.unlocked
                 };
-                this.writeRecords();
+                UserInterface.writeRecords();
 
 
-                this.settings = {
+                UserInterface.settings = {
                     "sensitivity": 0.5,
-                    "volume": 0.1,
+                    "volume": 0.5,
                     "debugText": 0,
                     "strafeHUD": 1
                 }
                 UserInterface.writeSettings()
+
+                // sync all settings button
+                btn_sensitivitySlider.updateState(UserInterface.settings.sensitivity)
+                btn_volumeSlider.updateState(UserInterface.settings.volume)
+                btn_debugText.func(true)
+                btn_strafeHUD.func(true)
+                AudioHandler.setVolumes();
                 
                 console.log("records and settings cleared")
             }
@@ -1890,7 +1897,7 @@ const UserInterface = {
         UserInterface.renderedButtons = this.btnGroup_inLevel;
     },
 
-    readFile: function(fileName, subDirectory = "") {
+    readFile: function(fileName, subDirectory = "") { // returns a promise
         return new Promise((resolve, reject) => {
             // Resolve dataDirectory URL
             window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function(dataDirectoryEntry) {
@@ -1932,48 +1939,49 @@ const UserInterface = {
         });
     },    
 
-    writeFile : function(fileName, blobData, subDirectory = "") {
-
+    writeFile : function(fileName, blobData, subDirectory = "") { // returns a promise
         // fileName is a string with file extension EX: settings.json
         // blobData = new Blob([JSON.stringify(exportObj, null, 2)], { type: "application/json" });
         // subDirectory is a string. no need for first \ EX: maps\bad_maps OR just customMaps
 
-        // DEAL WITH OPTIONAL subDirectory
-        window.resolveLocalFileSystemURL(cordova.file.dataDirectory, (dataDirectoryEntry) => {
-            if (subDirectory !== "") {
-                // Create or access given subDirectory in dataDirectory
-                dataDirectoryEntry.getDirectory(subDirectory, {create : true}, subDirectoryEntry => {
-                    saveFile(subDirectoryEntry);
-                }, throwError);
-            } else {
-                // save to straight to main dataDirectory
-                saveFile(dataDirectoryEntry)
-            }
-        }, throwError);
+        return new Promise((resolve, reject) => {
 
-        // ACTUALLY WRITE blobData TO FILE
-        function saveFile(directoryEntry) {
-            // Create or acces the file
-            directoryEntry.getFile(fileName, {create : true, exclusive : false}, (fileEntry) => {
-                // Write to file
-                fileEntry.createWriter( (fileWriter) => {
-                    fileWriter.onwriteend = function() {
-                        console.log("successfully wrote file: " + fileName)
-                    };
+            // DEAL WITH OPTIONAL subDirectory
+            window.resolveLocalFileSystemURL(cordova.file.dataDirectory, (dataDirectoryEntry) => {
+                if (subDirectory !== "") {
+                    // Create or access given subDirectory in dataDirectory
+                    dataDirectoryEntry.getDirectory(subDirectory, {create : true}, subDirectoryEntry => {
+                        saveFile(subDirectoryEntry);
+                    }, (error) => { reject("Failed to resolve subDirectory on writeFile. ERROR CODE: " + error.code)}
+                    );
+                } else {
+                    // save to straight to main dataDirectory
+                    saveFile(dataDirectoryEntry)
+                }
+            }, (error) => { reject("Failed to resolve dataDirectory on writeFile. ERROR CODE: " + error.code)}
+            );
 
-                    fileWriter.onerror = (error) => {
-                        console.log("failed to write file: " + fileName, error)
-                    };
+            // ACTUALLY WRITE blobData TO FILE
+            function saveFile(directoryEntry) {
+                // Create or acces the file
+                directoryEntry.getFile(fileName, {create : true, exclusive : false}, (fileEntry) => {
+                    // Write to file
+                    fileEntry.createWriter( (fileWriter) => {
+                        fileWriter.onwriteend = function() {
+                            console.log("successfully wrote file: " + fileName)
+                            resolve()
+                        };
 
-                    fileWriter.write(blobData);
-                }, throwError)
-            }, throwError)
-        }
+                        fileWriter.onerror = (error) => {
+                            reject("Failed to write file: " + fileName + "Error Code: " + error.code);
+                        };
 
-        // FUNCTION CALLED ON ERRORS
-        function throwError(error) {
-            console.log("File system error for: " + fileName + " Error Code: ", error.code)
-        }         
+                        fileWriter.write(blobData);
+                    }, (error) => { reject("Failed to createWriter: " + error.code) }
+                    )
+                }, (error) => { reject("Failed to getFile: " + error.code) })
+            }      
+        });
     },
 
     getLeaderboards : function() {
@@ -2076,7 +2084,7 @@ const UserInterface = {
 
         if (record == null || (record !== null && this.timer < record)) {
             this.records[Map.name] = this.timer
-            this.writeRecords()         
+            this.writeRecords()
         } 
 
     },
@@ -2597,7 +2605,7 @@ const UserInterface = {
 }
 
 
-const MapBrowser = { // should set back to 0 at some points?? 
+const MapBrowser = { // should set back to 0 at some points
     state : 0, // 0 = disabled, 1 = standard map browser, 2 = custom map browser
     scrollY: 0,
     scrollVel: 0,
@@ -2810,12 +2818,12 @@ const MapBrowser = { // should set back to 0 at some points??
         ctx.fill()
 
         // DRAW TEXT INFO BOX
-        ctx.font = "45px BAHNSCHRIFT";
+        ctx.font = "50px BAHNSCHRIFT";
         ctx.fillStyle = (!UserInterface.darkMode) ? UserInterface.darkColor_1: UserInterface.lightColor_1;
 
         if (this.state == 1) { // normal map browser
             if (this.selectedMapIndex != -1) {
-                ctx.fillText(this.selectedMapIndex, canvasArea.canvas.width - 475, 115)
+                ctx.fillText(this.selectedMapIndex, canvasArea.canvas.width - 475, 120)
 
                 ctx.font = "25px BAHNSCHRIFT";
                 const yourRecord = UserInterface.secondsToMinutes((UserInterface.records[this.selectedMapIndex] == undefined ? 0 : UserInterface.records[this.selectedMapIndex]))
