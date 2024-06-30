@@ -519,8 +519,7 @@ const canvasArea = { //Canvas Object
 
         this.interval = setInterval(updateGameArea, 10); // Number sets the taget frame rate. 1000/# = FPS
 
-        UserInterface.start(); // need to be ran after canvas is resized in canvasArea.start()
-        UserInterface.getLeaderboards();
+        UserInterface.start(); // need to be ran here after canvas is resized in canvasArea.start()
     },
 
 
@@ -725,17 +724,14 @@ const UserInterface = {
     darkColor_1 : "#454545",
     darkColor_2 : "#363636",
 
-    // lightColor_1 : "#f0f0f1", // lighter
-    // lightColor_2 : "#dcd8d6", // darker
-    // darkColor_1 : "#36393d",
-    // darkColor_2 : "#292d30",
-
 
     start : function() { // where all buttons are created
         
-        // moving this to below creating all buttons to avoid errors
+
         this.getSettings()
         this.getRecords()
+        this.getLeaderboards()
+        this.checkCustomMapsDirectoryExists()
 
         
         // CREATING THE BUTTONS []  []  [] 
@@ -1346,67 +1342,25 @@ const UserInterface = {
 
             } else { // in custom maps browser
 
-                let mapData = null;
-                // get appropriate mapData
-                window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function (fileSystem) {
-                    var reader = fileSystem.createReader();
-                    reader.readEntries((entries) => {
-                        fileSystem.getFile(entries[MapBrowser.selectedMapIndex].name, {create: false, exclusive: false}, (fileEntry) => {
-                            fileEntry.file( (file) => {
-                                console.log(file)
-                                const reader = new FileReader();
-                                reader.onload = (e) => {
-    
-                                    
-                                    mapData = JSON.parse(e.target.result)
-                                    mapData.name = String(fileEntry.name.split(".")[0]) // for getting the name of a custom map
-                                    console.log(mapData)
-                                    Map.initMap(mapData);
-                                    MapBrowser.selectedMapIndex = -1;
-    
-                                };
-                                reader.onerror = (e) => alert(e.target.error.name);
-                
-                                reader.readAsText(file)
-                            })
-                        })
-                    }, (error) => { console.log(error) });
-                }, (error) => { console.log(error) });    
+                Map.initCustomMap(MapBrowser.selectedMapIndex);
+         
             }
         })
 
-        btn_editMap = new Button("canvasArea.canvas.width - 300", "canvasArea.canvas.height - 110", 200, "", "", 0, "Edit Map", function() {
+        btn_editMap = new Button("canvasArea.canvas.width - 300", "canvasArea.canvas.height - 110", 200, "", "", 0, "Edit Map", async function() {
+                    
+            // delete shareDiv when leaving browser page
+            document.getElementById("shareDiv").remove()
+
+            MapBrowser.toggleAllButtons()
+            MapBrowser.scrollVel = 0;
+            MapBrowser.scrollY = 0;
+
+            const mapDataRaw = await UserInterface.readFile(MapBrowser.selectedMapIndex + ".json", "maps")
             
-            let mapData = null;
-            window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function (fileSystem) {
-                var reader = fileSystem.createReader();
-                reader.readEntries((entries) => {
-                    fileSystem.getFile(entries[MapBrowser.selectedMapIndex].name, {create: false, exclusive: false}, (fileEntry) => {
-                        fileEntry.file( (file) => {
-                            console.log(file)
-                            const reader = new FileReader();
-                            reader.onload = (e) => {
+            MapEditor.loadedMap = JSON.parse(mapDataRaw)
+            UserInterface.gamestate = 7;
 
-                                // delete shareDiv when leaving browser page
-                                document.getElementById("shareDiv").remove()
-
-                                MapBrowser.toggleAllButtons()
-                                MapBrowser.scrollVel = 0;
-                                MapBrowser.scrollY = 0;
-
-                                mapData = JSON.parse(e.target.result)
-                                mapData.name = String(fileEntry.name.split(".")[0]) // for getting the name of a custom map
-                                MapEditor.loadedMap = mapData
-                                UserInterface.gamestate = 7;
-
-                            };
-                            reader.onerror = (e) => alert(e.target.error.name);
-            
-                            reader.readAsText(file)
-                        })
-                    })
-                }, (error) => { console.log(error) });
-            }, (error) => { console.log(error) });    
         })
         
         btn_deleteMap = new Button("canvasArea.canvas.width - 300", "canvasArea.canvas.height - 200", 200, "", "", 0, "Delete Map", function() {
@@ -1414,10 +1368,10 @@ const UserInterface = {
             const deleteMap = confirm("Delete Map?");
             if (deleteMap) {
 
-                window.resolveLocalFileSystemURL(cordova.file.dataDirectory, (fileSystem) => {
+                window.resolveLocalFileSystemURL(cordova.file.dataDirectory + "maps", (fileSystem) => {
                     var reader = fileSystem.createReader();
                     reader.readEntries((entries) => {
-                        fileSystem.getFile(entries[MapBrowser.selectedMapIndex].name, {create: false}, (fileEntry) => {
+                        fileSystem.getFile(MapBrowser.selectedMapIndex + ".json", {create: false}, (fileEntry) => {
                             fileEntry.remove((file) => {
                                 alert("Map Deleted");
                                 // delete shareDiv (its created again by btn_load_map)
@@ -1456,46 +1410,24 @@ const UserInterface = {
 
                 shareDiv.addEventListener("click", async () => {
                     
-                    let mapData = null;
-                    window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function (fileSystem) {
-                        var reader = fileSystem.createReader();
-                        reader.readEntries((entries) => {
-                            fileSystem.getFile(entries[MapBrowser.selectedMapIndex].name, {create: false, exclusive: false}, (fileEntry) => {
-                                fileEntry.file( (file) => {
-                                    console.log(file)
-                                    const reader = new FileReader();
-                                    reader.onload = async(e) => {
-    
-                                        mapData = JSON.parse(e.target.result)
-                                        mapData.name = String(fileEntry.name.split(".")[0]) // for getting the name of a custom map
-                                        console.log(mapData)
-                                        mapData = JSON.stringify(mapData)
-
-                                        const share_data = {
-                                            title: mapData.name, // doesnt do anything on IOS
-                                            text: mapData,
-                                        }
-                                        
-                                        try {
-                                            await navigator.share(share_data);
-                                        } catch (err) {
-                                            console.log(err)
-                                        }
-        
-                                    };
-                                    reader.onerror = (e) => alert(e.target.error.name);
+                    const mapDataRaw = await UserInterface.readFile(MapBrowser.selectedMapIndex + ".json", "maps")
                     
-                                    reader.readAsText(file)
-                                })
-                            })
-                        }, (error) => { console.log(error) });
-                    }, (error) => { console.log(error) });                        
+                    const share_data = {
+                        title: MapBrowser.selectedMapIndex, // doesnt do anything on IOS
+                        text: mapDataRaw,
+                    }
+                    
+                    try {
+                        await navigator.share(share_data);
+                    } catch (err) {
+                        console.log(err)
+                    }
+
                 });
 
                 document.body.appendChild(shareDiv);
-    
-            }
-            
+
+            }            
 
         })
 
@@ -1897,7 +1829,7 @@ const UserInterface = {
         UserInterface.renderedButtons = this.btnGroup_inLevel;
     },
 
-    readFile: function(fileName, subDirectory = "") { // returns a promise
+    readFile: function(fileName, subDirectory = "") { // returns a promise that resolves to raw, unparsed (json usually)
         return new Promise((resolve, reject) => {
             // Resolve dataDirectory URL
             window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function(dataDirectoryEntry) {
@@ -1933,6 +1865,14 @@ const UserInterface = {
                         reject("Failed to get fileEntry.file: " + error.code);
                     });
                 }, function(error) {
+
+
+                    // Its not able to find the custom maps in the /maps directory for some reason
+
+
+
+                    console.log(directoryEntry)
+                    console.log("fileName " + fileName)
                     reject("Failed to getFile: " + error.code);
                 });
             }
@@ -2079,14 +2019,36 @@ const UserInterface = {
         this.writeFile("records.json", recordsBlob)
     },
 
-    handleRecord : function() {
+    handleRecord: function () {
         const record = this.records[Map.name]
 
         if (record == null || (record !== null && this.timer < record)) {
             this.records[Map.name] = this.timer
             this.writeRecords()
-        } 
+        }
 
+    },
+
+    checkCustomMapsDirectoryExists: function () {
+
+        window.resolveLocalFileSystemURL(cordova.file.dataDirectory + "maps", function (dirEntry) {
+            // Directory exists, you can now use dirEntry
+            console.log("Custom maps directory exists:", dirEntry);
+        }, function (err) {
+            // Directory doesn't exist, attempt to create it
+            console.error("Custom maps directory does NOT exist:", err);
+
+            // Create the directory
+            window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function (dirEntry) {
+                dirEntry.getDirectory("maps", { create: true }, function (newDirEntry) {
+                    console.log("Created maps directory:", newDirEntry);
+                }, function (err) {
+                    console.error("Error creating maps directory:", err);
+                });
+            }, function (err) {
+                console.error("Error resolving data directory for creating /maps:", err);
+            });
+        });
     },
 
     determineButtonColor : function() {
@@ -2611,7 +2573,7 @@ const MapBrowser = { // should set back to 0 at some points
     scrollVel: 0,
     scrollVelAverager : new Averager(10),
     scrollAmount: null,
-    selectedMapIndex: -1, // -1 == no map selected
+    selectedMapIndex: -1, // -1 == no map selected ... string of map name when a map is selected
     maxScroll: -50,
 
     init : function() {
@@ -2634,87 +2596,57 @@ const MapBrowser = { // should set back to 0 at some points
             setMaxScroll()
         }
 
-        // CUSTOM MAP BROWSER
-        if (this.state == 2) {
-            
+        if (this.state == 2) { // CUSTOM MAP BROWSER
+
             this.scrollY = 0
             this.scrollVel = 0
             this.selectedMapIndex = -1
 
             // access file system and set up all nessasary map buttons for the browser type
             // a horrible nested mess but it keeps everything firing in the right sequence
-            function initCustomMapBrowser(path){
-                
-                window.resolveLocalFileSystemURL(path, function (fileSystem) {
-                    var reader = fileSystem.createReader();
-                    reader.readEntries((entries) => { // entries is an array of all the maps
-                        
+            //function initCustomMapBrowser(path){
 
-                        // LOOP THROUGH EACH CUSTOM MAP
-                        let mapNumber = 0
-                        entries.forEach((mapEntry) => {
-                            
-                            let mapData = null;
+            window.resolveLocalFileSystemURL(cordova.file.dataDirectory + "maps", function (fileSystem) {
+                var reader = fileSystem.createReader();
+                reader.readEntries((entries) => { // entries is an array of all the maps
 
-                            // sets mapData by pulling from specific file
-                            fileSystem.getFile(mapEntry.name, {create: false, exclusive: false}, (fileEntry) => {
-                                fileEntry.file( (file) => {
-                                    console.log(file)
-                                    const reader = new FileReader();
-                                    reader.onload = (e) => {
+                    // LOOP THROUGH EACH CUSTOM MAP
+                    let mapNumber = 0
+                    entries.forEach((mapEntry) => {
 
-                                        mapData = JSON.parse(e.target.result)
-                                        mapData.name = String(fileEntry.name.split(".")[0]) // for getting the name of a custom map
-                                        // console.log(mapData)
-                                        
-                                    };
-                                    reader.onerror = (e) => alert(e.target.error.name);
-                                    
-                                    reader.readAsText(file)
-                                })
-                            })
-                            
-                            // create toggle buttons for each map. These can be selected to preview map info. seperate play button will play them 
+                        console.log(mapEntry.name)
 
-                            // create these with blank button icons. render() adds text ontop . ALSO CHANGE THE CHECK IN RENDER FUNC
-                            let button = new Button(300, 50 + (100 * mapNumber), 280, "", "", 1, String(mapEntry.name.split(".")[0]), function(sync) {
-                                // has access to mapEntry and .name
-                                
-                                // Use the buttons initial Y value to determine its index within all the maps. Silly but works
-                                // I could also add a data paramater to the button class and pass the mapNumber into that.
-                                // NEW SOLUTION? Use the label parameter. might just be more complicated
+                        // create toggle buttons for each map. These can be selected to preview map info. seperate play button will play them 
 
-                                if (sync) {
-                                    // doesnt need to sync toggle state
-                                    // used to detoggle map buttons when another one is selected
+                        // create these with blank button icons. render() adds text ontop . ALSO CHANGE THE CHECK IN RENDER FUNC
+                        let button = new Button(300, 50 + (100 * mapNumber), 280, "", "", 1, String(mapEntry.name.split(".")[0]), function (sync) {
+
+                            if (sync) {
+                                // doesnt need to sync toggle state
+                                // used to detoggle map buttons when another one is selected
+                                this.toggle = 0;
+                            } else {
+                                if (this.toggle) { // toggle off
                                     this.toggle = 0;
-                                } else {
-                                    if (this.toggle) { // toggle off
-                                        this.toggle = 0;
-                                        MapBrowser.selectedMapIndex = -1
-                                    } else { // toggle on
+                                    MapBrowser.selectedMapIndex = -1
+                                } else { // toggle on
 
-                                        MapBrowser.toggleAllButtons();
-                                        this.toggle = 1;
-                                        MapBrowser.selectedMapIndex = (this.savedY - 50)/100
-                                    }
+                                    MapBrowser.toggleAllButtons();
+                                    this.toggle = 1;
+                                    MapBrowser.selectedMapIndex = this.label
                                 }
+                            }
 
-                            })
-                            
-                            UserInterface.renderedButtons = UserInterface.renderedButtons.concat([button])
-                            mapNumber ++
-                            setMaxScroll()
+                        })
 
-                        }) // end of forEach loop                        
-                    }, (error) => { console.log(error) });
+                        UserInterface.renderedButtons = UserInterface.renderedButtons.concat([button])
+                        mapNumber++
+                        setMaxScroll()
+
+                    }) // end of forEach loop                        
                 }, (error) => { console.log(error) });
-            }
-        
-            initCustomMapBrowser(cordova.file.dataDirectory);
-        }
-        
-        
+            }, (error) => { console.log(error) });
+        }        
     },
     
     toggleAllButtons : function() {
@@ -2837,7 +2769,7 @@ const MapBrowser = { // should set back to 0 at some points
         if (this.state == 2) { // custom map browser
             if (this.selectedMapIndex != -1) {
                 // Needs to do indexing stuff to get names of map selected (like in playMap Button)
-                ctx.fillText("Custom Map " + (this.selectedMapIndex + 1), canvasArea.canvas.width - 475, 110)
+                ctx.fillText(this.selectedMapIndex, canvasArea.canvas.width - 475, 110)
             } else {
                 ctx.font = "30px BAHNSCHRIFT";
                 ctx.fillText("Import, Edit, & Create", canvasArea.canvas.width - 475, 100)
@@ -2849,9 +2781,9 @@ const MapBrowser = { // should set back to 0 at some points
 
 
         // Map BROWSER DEBUG TEXT
-        // ctx.font = "15px BAHNSCHRIFT";
+        ctx.font = "15px BAHNSCHRIFT";
         // ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1: UserInterface.lightColor_1;
-        // ctx.fillText("MapIndex: " + this.selectedMapIndex, 80, 200)
+        ctx.fillText("MapIndex: " + this.selectedMapIndex, 80, 200)
         // ctx.fillText("scrollAmount: " + this.scrollAmount, 80, 220)
         // ctx.fillText("scrollY: " + this.scrollY, 80, 240)
         // ctx.fillText("scrollVel: " + this.scrollVel, 80, 260)
@@ -4483,37 +4415,15 @@ const MapEditor = {
         }
 
 
-        function writeCustomMap(exportObj, exportName) {
+        async function writeCustomMap(exportObj, exportName) {
             console.log("WRITING MAP NOW!")
             exportName = prompt("Enter Map Name");
 
-            // writes (dataObj) to cordova.file.dataDirectory with specified (name)
-            function writeFile(exportName, dataObj) {
-                // create directory and empty file
-                window.resolveLocalFileSystemURL(cordova.file.dataDirectory, (directoryEntry) => {
-                    directoryEntry.getFile(exportName + ".json", {create: true, exclusive: false}, (logFileEntry) => {
-                        // addding to the empty file
-                        logFileEntry.createWriter(function(writer) {
-                            writer.onwriteend = function() {
-                                
-                                console.log("Successful Save");
-                                
-                                exitEdit()
-                            };
-                    
-                            writer.onerror = function(e) {
-                                console.log("Error :(", e);
-                            };
-                    
-                            writer.write(dataObj);
-                        });
-                    });
-                }, error => {console.log(error)});
-            }
-
-            const blob = new Blob([JSON.stringify(exportObj, null, 2)], { type: "application/json" });
-
-            writeFile(exportName, blob)
+            const mapBlob = new Blob([JSON.stringify(exportObj, null, 2)], { type: "application/json" });
+            await UserInterface.writeFile(exportName + ".json", mapBlob, "maps")
+            console.log("Successful Map Save");
+            exitEdit()
+            
         }
     },
 
@@ -4593,48 +4503,54 @@ const Map = {
     playerClip : new Path2D(), // calculated every frame
     // endZone : null,
 
-    initMap : function (name) {
+    initMap : function (name) { // initializing a normal map (not custom)
         this.platforms = [];
         this.playerStart = null;
         this.style = null;
         this.checkpoints = [];
         this.upperShadowClip = new Path2D()
         this.endZoneShadowClip = new Path2D()
-
+        this.name = name;
         
+        // GET MAP DIRECTLY THROUGH CORDOVA LOCAL STORAGE  (NORMAL MAP)          
+        const mapURL = cordova.file.applicationDirectory + "www/assets/maps/"
+        
+        window.resolveLocalFileSystemURL(mapURL, (dirEntry) => {
 
-        if (typeof name  === "string"){ // distinguishing between loading a normal map (string) OR a custom map (object)
-            this.name = name;
-            
-            // GET MAP DIRECTLY THROUGH CORDOVA LOCAL STORAGE  (NORMAL MAP)          
-            const mapURL = cordova.file.applicationDirectory + "www/assets/maps/"
-            
-            window.resolveLocalFileSystemURL(mapURL, (dirEntry) => {
+            dirEntry.getFile(name + ".json", {create: false, exclusive: false}, (fileEntry) => {
+                console.log("fileEntry:")
+                console.log(fileEntry)
 
-                dirEntry.getFile(name + ".json", {create: false, exclusive: false}, (fileEntry) => {
-                    console.log("fileEntry:")
-                    console.log(fileEntry)
+                fileEntry.file( (file) => {
 
-                    fileEntry.file( (file) => {
-
-                        const reader = new FileReader();
-                        reader.onload = (e) => {
-                            this.parseMapData(JSON.parse(e.target.result))
-                        };
-                        reader.onerror = (e) => alert(e.target.error.name);
-            
-                        reader.readAsText(file)
-                    })
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        this.parseMapData(JSON.parse(e.target.result))
+                    };
+                    reader.onerror = (e) => alert(e.target.error.name);
+        
+                    reader.readAsText(file)
                 })
             })
-        
-            
-        } else { // is an object (CUSTOM MAP)
-            this.name = name.name;
-            console.log("passed a CUSTOM MAP object")
-            this.parseMapData(name)
-        }
+        })  
+
     },
+
+    initCustomMap : async function (name) { // initializing a custom map
+        this.platforms = [];
+        this.playerStart = null;
+        this.style = null;
+        this.checkpoints = [];
+        this.upperShadowClip = new Path2D()
+        this.endZoneShadowClip = new Path2D()
+        this.name = name;
+
+        
+        const mapDataRaw = await UserInterface.readFile(name + ".json", "maps");
+        this.parseMapData(JSON.parse(mapDataRaw))
+        
+    },
+
 
 
     // Big function that parses the map data, sets up lighting, shadows, shadow clips, etc
