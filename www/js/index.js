@@ -149,16 +149,10 @@ class Button {
                 this.width = width;
                 this.height = this.width > 75 ? 75 : this.width
 
-                // TRUNCATE AND SET LABEL
+                // TRUNCATE LABEL
                 canvasArea.ctx.font = "22px BAHNSCHRIFT"; // for measuring text
-
-                if (canvasArea.ctx.measureText(label).width > this.width - 30) { // if needs to be truncated
-                    while (canvasArea.ctx.measureText(label + "...").width > this.width - 30) {
-                        label = label.slice(0, -1) // slice off last character
-                    }
-                    this.shortLabel = label + "..."
-                }
-
+                this.shortLabel = UserInterface.truncateText(label, this.width - 40) 
+                
                 
             });
 
@@ -322,11 +316,7 @@ class Button {
             canvasArea.ctx.font = "22px BAHNSCHRIFT";
             canvasArea.ctx.fillStyle = (!UserInterface.darkMode) ? UserInterface.darkColor_1: UserInterface.lightColor_1;
 
-            if (this.shortLabel != null) {
-                canvasArea.ctx.fillText(this.shortLabel, this.x + (this.width - canvasArea.ctx.measureText(this.shortLabel).width)/2, this.y + (this.height/2) + 7)
-            } else {
-                canvasArea.ctx.fillText(this.label, this.x + (this.width - canvasArea.ctx.measureText(this.label).width)/2, this.y + (this.height/2) + 7)
-            }
+            canvasArea.ctx.fillText(this.shortLabel, this.x + (this.width - canvasArea.ctx.measureText(this.shortLabel).width)/2, this.y + (this.height/2) + 7)
         }
      
     }
@@ -2076,6 +2066,17 @@ const UserInterface = {
         extraSeconds = extraSeconds.padStart(6, "0");
     
         return minutes + ":" + extraSeconds;
+    },
+
+    truncateText : function(text, clampToWidth) {
+        if (canvasArea.ctx.measureText(text).width > clampToWidth) {
+            while (canvasArea.ctx.measureText(text + "...").width > clampToWidth || text.endsWith(" ")) { // also removes end char if its a space
+                text = text.slice(0, -1) // slice off last character
+            }
+            return text + "..."
+        } else {
+            return text
+        }
     },
 
     touchStarted : function(x,y) { // TRIGGERED BY InputHandler
