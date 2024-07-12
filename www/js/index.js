@@ -151,7 +151,7 @@ class Button {
 
                 // TRUNCATE LABEL
                 canvasArea.ctx.font = "22px BAHNSCHRIFT"; // for measuring text
-                this.shortLabel = UserInterface.truncateText(label, this.width - 40) 
+                this.shortLabel = UserInterface.truncateText(label, this.width - 50) 
                 
                 
             });
@@ -1472,7 +1472,7 @@ const UserInterface = {
 
 
         // IN LEVEL Buttons
-        btn_mainMenu = new Button(50, 50, 100, "back_button", "", 0, "", function() { 
+        btn_mainMenu = new Button(50, 50, 100, "x_button", "", 0, "", function() { 
             
             // UserInterface.gamestate
             // 1: main menu
@@ -1623,6 +1623,12 @@ const UserInterface = {
             Tutorial.timerStarted = false; // easier to always set these here even if they arent always needed
             Tutorial.animatePos = 0;
             Tutorial.animateVel = 0;
+
+            // reset the position and scale because the button is being pulse animated
+            this.x = "canvasArea.canvas.width - 130"
+            this.y = 50
+            this.width = 80
+            this.height = 80
 
             if (Tutorial.state == 1) {
                 Tutorial.state ++;
@@ -2066,6 +2072,21 @@ const UserInterface = {
         extraSeconds = extraSeconds.padStart(6, "0");
     
         return minutes + ":" + extraSeconds;
+    },
+
+    getOrdinalSuffix: function (i) { // turns 1 into 1st, 2 into 2nd
+        let j = i % 10,
+            k = i % 100;
+        if (j === 1 && k !== 11) {
+            return i + "st";
+        }
+        if (j === 2 && k !== 12) {
+            return i + "nd";
+        }
+        if (j === 3 && k !== 13) {
+            return i + "rd";
+        }
+        return i + "th";
     },
 
     truncateText : function(text, clampToWidth) {
@@ -2746,45 +2767,60 @@ const MapBrowser = { // should set back to 0 at some points
 
         // DRAW INFO BOX BG
         ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1: UserInterface.lightColor_1;
-        const boxHeight = (MapEditor.editorState == 5) ? 150 : 300
+        const boxHeight = (MapEditor.editorState == 5) ? 160 : 300 // shorter map editor box to give room for 3 buttons
         canvasArea.roundedRect(canvasArea.canvas.width - 500, 50, 400, boxHeight, 25)
         ctx.fill()
-
+        
         // DRAW TEXT INFO BOX
-        ctx.font = "50px BAHNSCHRIFT";
+        ctx.font = "45px BAHNSCHRIFT";
         ctx.fillStyle = (!UserInterface.darkMode) ? UserInterface.darkColor_1: UserInterface.lightColor_1;
 
-        if (this.state == 1) { // normal map browser
-            if (this.selectedMapIndex != -1) {
-                ctx.fillText(this.selectedMapIndex, canvasArea.canvas.width - 475, 120)
+        if (this.selectedMapIndex != -1) { // Write map title and info
+            const mapTitle = UserInterface.truncateText(this.selectedMapIndex, 340)
+            ctx.fillText(mapTitle, canvasArea.canvas.width - 475, 120)
 
-                ctx.font = "25px BAHNSCHRIFT";
-                const yourRecord = UserInterface.secondsToMinutes((UserInterface.records[this.selectedMapIndex] == undefined ? 0 : UserInterface.records[this.selectedMapIndex]))
-                ctx.fillText("Your Record: " + yourRecord, canvasArea.canvas.width - 475, 170)
+            ctx.font = "25px BAHNSCHRIFT";
+            const yourRecord = UserInterface.secondsToMinutes((UserInterface.records[this.selectedMapIndex] == undefined ? 0 : UserInterface.records[this.selectedMapIndex]))
+            ctx.fillText("Your Time: " + yourRecord, canvasArea.canvas.width - 475, 170)
+            if (MapEditor.editorState !== 5 && UserInterface.leaderboards[this.selectedMapIndex] !== undefined) { // if not in MapEditor & leaderboards exist
+                let rank
+                if (UserInterface.records[this.selectedMapIndex] == undefined) {
+                    rank = "None"
+                } else {
 
-            } else {
+                    rank = 1
+                    for (const [key, value] of Object.entries(UserInterface.leaderboards[this.selectedMapIndex])) {
+                        
+                        if (UserInterface.records[this.selectedMapIndex] <= value) { // if your record is less than this leaderboard time
+                            break;
+                        } else {
+                            rank ++
+                        }
+                    }
+                    rank = UserInterface.getOrdinalSuffix(rank)
+                }
+                ctx.fillText("Leaderboard Rank: " + rank, canvasArea.canvas.width - 475, 220) // do this ranking stuff properly
+            }
+
+
+        } else { // no map is selected
+            if (this.state == 1) {
                 ctx.fillText("Select A Map", canvasArea.canvas.width - 475, 110)
             }
-        }
 
-        if (this.state == 2) { // custom map browser
-            if (this.selectedMapIndex != -1) {
-                // Needs to do indexing stuff to get names of map selected (like in playMap Button)
-                ctx.fillText(this.selectedMapIndex, canvasArea.canvas.width - 475, 110)
-            } else {
+            if (this.state == 2) {
                 ctx.font = "30px BAHNSCHRIFT";
-                ctx.fillText("Import, Edit, & Create", canvasArea.canvas.width - 475, 100)
+                ctx.fillText("Import, or Create", canvasArea.canvas.width - 475, 100)
                 ctx.fillText("Custom Maps in the", canvasArea.canvas.width - 475, 140)
                 ctx.fillText("Map Editor", canvasArea.canvas.width - 475, 180)
-
             }
         }
 
 
         // Map BROWSER DEBUG TEXT
-        ctx.font = "15px BAHNSCHRIFT";
+        // ctx.font = "15px BAHNSCHRIFT";
         // ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1: UserInterface.lightColor_1;
-        ctx.fillText("MapIndex: " + this.selectedMapIndex, 80, 200)
+        // ctx.fillText("MapIndex: " + this.selectedMapIndex, 80, 200)
         // ctx.fillText("scrollAmount: " + this.scrollAmount, 80, 220)
         // ctx.fillText("scrollY: " + this.scrollY, 80, 240)
         // ctx.fillText("scrollVel: " + this.scrollVel, 80, 260)
@@ -2995,36 +3031,52 @@ const Tutorial = {
             ctx.fillText(text, midX - textWidth/2, 100)
             
             btn_next.x = midX + textWidth/2 + 45
+            btn_next.y = 50
         }
 
 
         if (this.state == 1) {
             drawTextPanel("Slide horizontally to turn the player");
 
-            if (this.animatePos == 0 && this.animateVel == 0) {this.animateVel = 3} // STARTING ANIMATION
-            if (this.animatePos > 0) {this.animateVel -= 0.06 * dt}
-            if (this.animatePos < 0) {this.animateVel += 0.06 * dt}
-            this.animatePos += this.animateVel * dt
+            const speed = 0.002 // 0.002 makes it oscillate ~every second. smaller = faster, larger = slower.
+            // Use a sin wave to occilate between -1 and 1
+            const animValue = Math.sin(performance.now() * speed);
+            const animValueFast = Math.sin(performance.now() * speed * 3);
 
             if (touchHandler.dragging == false) {
                 const image = this.decalList[0]
-                ctx.drawImage(image, midX - image.width/2 + this.animatePos, canvasArea.canvas.height - image.height - 60)
+                ctx.drawImage(image, midX - image.width/2 + (animValue * 150), canvasArea.canvas.height - image.height - 60)
             }
+
+            // Pulse btn_next
+            btn_next.width = 80 + (-1 * animValueFast * 8)
+            btn_next.height = 80 + (-1 * animValueFast * 8)
+            // this relies on drawTextPanel reseting btn_next's position every frame
+            btn_next.x += (80 - btn_next.width) / 2
+            btn_next.y += (80 - btn_next.height) / 2
         }
 
 
         if (this.state == 2) {
             drawTextPanel("Sliding vertically does NOT turn the player")
 
-            if (this.animatePos == 0 && this.animateVel == 0) {this.animateVel = 2.5} // STARTING ANIMATION
-            if (this.animatePos > 0) {this.animateVel -= 0.05 * dt}
-            if (this.animatePos < 0) {this.animateVel += 0.05 * dt}
-            this.animatePos += this.animateVel * dt
+            const speed = 0.002 // 0.002 makes it oscillate ~every second. smaller = faster, larger = slower.
+            
+            // Use a sin wave to occilate between -1 and 1
+            const animValue = Math.sin(performance.now() * speed);
+            const animValueFast = Math.sin(performance.now() * speed * 3);
 
             if (touchHandler.dragging == false) {
                 const image = this.decalList[1]
-                ctx.drawImage(image, midX - 250, midY - 60 + this.animatePos)
+                ctx.drawImage(image, midX - 250, midY - 60 + (animValue * 50))
             }
+
+            // Pulse btn_next
+            btn_next.width = 80 + (-1 * animValueFast * 8)
+            btn_next.height = 80 + (-1 * animValueFast * 8)
+            // this relies on drawTextPanel reseting btn_next's position every frame
+            btn_next.x += (80 - btn_next.width) / 2
+            btn_next.y += (80 - btn_next.height) / 2
         }
 
 
@@ -3082,7 +3134,6 @@ const Tutorial = {
                 ctx.fill()
             }
 
-                
             ctx.restore() // #4
             
         }
@@ -3091,39 +3142,52 @@ const Tutorial = {
 
         if (this.state == 5) {
             drawTextPanel("Start jumping by pressing the jump button")
-            
-            if (this.animatePos == 0 && this.animateVel == 0) {this.animateVel = 1} // STARTING ANIMATION
-            if (this.animatePos > 0) {this.animateVel -= 0.03 * dt}
-            if (this.animatePos < 0) {this.animateVel += 0.03 * dt}
-            this.animatePos += this.animateVel * dt
+
+            const speed = 0.005 // 0.002 makes it oscillate ~every second. smaller = faster, larger = slower.
+            // Use a sin wave to occilate between -1 and 1
+            const animValue = Math.sin(performance.now() * speed);
 
             const image = this.decalList[3] // ARROW
-            ctx.drawImage(image, btn_jump.x + 150 + this.animatePos, btn_jump.y + btn_jump.width/2 - image.height/2)
+            ctx.drawImage(image, btn_jump.x + 150 + (animValue * 20), btn_jump.y + btn_jump.width/2 - image.height/2)
         }
 
 
         if (this.state == 7) {
-            drawTextPanel("Stay on the red platforms")  
+            drawTextPanel("Stay on the red platforms")
+
+            const speed = 0.006 // 0.002 makes it oscillate ~every second. smaller = faster, larger = slower.
+            // Use a sin wave to occilate between -1 and 1
+            const animValueFast = Math.sin(performance.now() * speed);
+            
+            // Pulse btn_next
+            btn_next.width = 80 + (-1 * animValueFast * 8)
+            btn_next.height = 80 + (-1 * animValueFast * 8)
+            // this relies on drawTextPanel reseting btn_next's position every frame
+            btn_next.x += (80 - btn_next.width) / 2
+            btn_next.y += (80 - btn_next.height) / 2
+
         }
 
         
         if (this.state == 8) {
             drawTextPanel("Slide horizontally to change the direction of the player")
 
-            if (this.animatePos == 0 && this.animateVel == 0) {this.animateVel = 3} // STARTING ANIMATION
-            if (this.animatePos > 20) {this.animateVel -= 0.06 * dt}
-            if (this.animatePos < -20) {this.animateVel += 0.06 * dt}
-            this.animatePos += this.animateVel * dt
+            const speed = 0.002 // 0.002 makes it oscillate ~every second. smaller = faster, larger = slower.
+            // Use a sin wave to occilate between -1 and 1
+            const animValue = Math.sin(performance.now() * speed);
 
+            
             if (touchHandler.dragging == false && this.timerCompleted) {
                 const image = this.decalList[0]
-                ctx.drawImage(image, midX - image.width/2 + this.animatePos, canvasArea.canvas.height - image.height - 60)
+                ctx.drawImage(image, midX - image.width/2 + (animValue * 150), canvasArea.canvas.height - image.height - 60)
             }
         }
 
 
         if (this.state == 10) {
             drawTextPanel("Slow and steady swipes increase speed")
+
+            // MAKE RENDERING THE HORIZONTAL FINGER A FUNCTION 
 
             // graphic showing smooth turn vs sharp turn?
         }
@@ -3132,20 +3196,19 @@ const Tutorial = {
         if (this.state == 12) {
             drawTextPanel("Turn smoothly to gain speed and clear the gap")
             
-            if (this.animatePos == 0 && this.animateVel == 0) {this.animateVel = 3} // STARTING ANIMATION
-            if (this.animatePos > 20) {this.animateVel -= 0.06 * dt}
-            if (this.animatePos < -20) {this.animateVel += 0.06 * dt}
-            this.animatePos += this.animateVel * dt
-
+            const speed = 0.002 // 0.002 makes it oscillate ~every second. smaller = faster, larger = slower.
+            // Use a sin wave to occilate between -1 and 1
+            const animValue = Math.sin(performance.now() * speed);
+            
             if (touchHandler.dragging == false && this.timerCompleted) {
                 const image = this.decalList[0]
-                ctx.drawImage(image, midX - image.width/2 + this.animatePos, canvasArea.canvas.height - image.height - 60)
+                ctx.drawImage(image, midX - image.width/2 + (animValue * 150), canvasArea.canvas.height - image.height - 60)
             }
         }
 
 
         if (this.state == 14) {
-            drawTextPanel("Don't touch the brown walls")
+            drawTextPanel("Don't touch the walls!")
         }
 
 
@@ -3158,20 +3221,30 @@ const Tutorial = {
             drawTextPanel("Finish levels faster to climb the leaderboards")
 
             // arrow to leaderboard??
+
+            const speed = 0.006 // 0.002 makes it oscillate ~every second. smaller = faster, larger = slower.
+            // Use a sin wave to occilate between -1 and 1
+            const animValueFast = Math.sin(performance.now() * speed);
+            
+            // Pulse btn_next
+            btn_next.width = 80 + (-1 * animValueFast * 8)
+            btn_next.height = 80 + (-1 * animValueFast * 8)
+            // this relies on drawTextPanel reseting btn_next's position every frame
+            btn_next.x += (80 - btn_next.width) / 2
+            btn_next.y += (80 - btn_next.height) / 2
+            
         }
 
 
         if (this.state == 19) {
             drawTextPanel("Click here to select a new level")
 
-            // arrow to back button
-            if (this.animatePos == 0 && this.animateVel == 0) {this.animateVel = 1} // STARTING ANIMATION
-            if (this.animatePos > 0) {this.animateVel -= 0.03 * dt}
-            if (this.animatePos < 0) {this.animateVel += 0.03 * dt}
-            this.animatePos += this.animateVel * dt
+            const speed = 0.005 // 0.002 makes it oscillate ~every second. smaller = faster, larger = slower.
+            // Use a sin wave to occilate between -1 and 1
+            const animValue = Math.sin(performance.now() * speed);
 
             const image = this.decalList[3] // ARROW
-            ctx.drawImage(image, btn_mainMenu.x + 150 + this.animatePos, btn_mainMenu.y + btn_mainMenu.width/2 - image.height/2)
+            ctx.drawImage(image, btn_mainMenu.x + 150 + (animValue * 20), btn_mainMenu.y + btn_mainMenu.width/2 - image.height/2)
         }
 
     },
