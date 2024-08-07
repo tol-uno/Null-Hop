@@ -464,8 +464,21 @@ class Vector {
         return new Vector(Math.round(10000*(this.x * cos - this.y * sin))/10000, Math.round(10000*(this.x * sin + this.y * cos))/10000);
     }
 
-    angleDifference = function(otherVec) { // returns radians. not sure why
-        return Math.acos((this.dotProduct(otherVec)) / (this.magnitude() * otherVec.magnitude()))
+    angleDifference = function(otherVec) { // returns radians between 0 and PI
+
+        // Calculate the angle of each vector relative to the positive x-axis
+        let angle1 = Math.atan2(this.y, this.x);
+        let angle2 = Math.atan2(otherVec.y, otherVec.x);
+
+        let angleDiff = Math.abs(angle1 - angle2);
+
+        // Normalize the angle to be between 0 and π
+        if (angleDiff > Math.PI) {
+            angleDiff = 2 * Math.PI - angleDiff;
+        }
+
+        // Round the angle difference to two decimal points
+        return angleDiff
     }
 
     getAngle = function() { // RETURNS ANGLE IN DEGREES. https://stackoverflow.com/questions/35271222/getting-the-angle-from-a-direction-vector
@@ -844,12 +857,12 @@ const UserInterface = {
                         "wallSideColor": "rgba(125, 94, 49, 1)",
                         "endZoneTopColor": "rgba(255,218,98,1)",
                         "endZoneSideColor": "rgba(255,218,98,1)",
-                        "directLight" : "rba(255,255,255)",
-                        "ambientLight" : "rba(140,184,198)",
+                        "directLight": "rba(255,255,255)",
+                        "ambientLight": "rba(140,184,198)",
                         "platformHeight": 25,
                         "wallHeight": 50,
-                        "lightAngle": 45,
-                        "shadowLength": 25
+                        "lightDirection": 45,
+                        "lightPitch": 45
                     },
                     "platforms": [
                         {
@@ -986,8 +999,8 @@ const UserInterface = {
 
             btn_platformHeightSlider.updateState(MapEditor.loadedMap.style.platformHeight) // value is set to 0 before we're in MapEditor
             btn_wallHeightSlider.updateState(MapEditor.loadedMap.style.wallHeight)
-            btn_lightAngleSlider.updateState(MapEditor.loadedMap.style.lightAngle)
-            btn_shadowLengthSlider.updateState(MapEditor.loadedMap.style.shadowLength)
+            btn_lightDirectionSlider.updateState(MapEditor.loadedMap.style.lightDirection)
+            btn_lightPitchSlider.updateState(MapEditor.loadedMap.style.lightPitch)
 
             UserInterface.renderedButtons = UserInterface.btnGroup_mapSettings
         })
@@ -1209,13 +1222,13 @@ const UserInterface = {
             PreviewWindow.update()
         })
 
-        btn_lightAngleSlider = new SliderUI("canvasArea.canvas.width - 650", "300", 460, 0, 360, 1, "Light Angle", MapEditor.loadedMap ? MapEditor.loadedMap.style.lightAngle : 0, function() { 
-            MapEditor.loadedMap.style.lightAngle = this.value
+        btn_lightDirectionSlider = new SliderUI("canvasArea.canvas.width - 650", "300", 460, 0, 360, 1, "Light Direction", MapEditor.loadedMap ? MapEditor.loadedMap.style.lightDirection : 0, function() { 
+            MapEditor.loadedMap.style.lightDirection = this.value
             PreviewWindow.update()
         })
 
-        btn_shadowLengthSlider = new SliderUI("canvasArea.canvas.width - 660", "400", 460, 0, 200, 1, "Shadow Length", MapEditor.loadedMap ? MapEditor.loadedMap.style.shadowLength : 0, function() { 
-            MapEditor.loadedMap.style.shadowLength = this.value
+        btn_lightPitchSlider = new SliderUI("canvasArea.canvas.width - 660", "400", 460, 0, 85, 1, "Light Pitch", MapEditor.loadedMap ? MapEditor.loadedMap.style.lightPitch : 0, function() { 
+            MapEditor.loadedMap.style.lightPitch = this.value
             PreviewWindow.update()
         })
 
@@ -1758,8 +1771,8 @@ const UserInterface = {
             btn_mainMenu, 
             btn_platformHeightSlider,
             btn_wallHeightSlider,
-            btn_lightAngleSlider,
-            btn_shadowLengthSlider
+            btn_lightDirectionSlider,
+            btn_lightPitchSlider
         ];
         this.btnGroup_editPlatform = [
             btn_exit_edit,
@@ -3303,9 +3316,8 @@ const PreviewWindow = {
         
         function updatePlatform(platform) { // Calculate lighting and shadows for whatever platform is passed as param
 
-            MapEditor.loadedMap.style.lightAngleVector =  new Vector(Math.cos(MapEditor.loadedMap.style.lightAngle * (Math.PI/180)), Math.sin(MapEditor.loadedMap.style.lightAngle * (Math.PI/180)))
-            const shadowX = MapEditor.loadedMap.style.lightAngleVector.x * MapEditor.loadedMap.style.shadowLength;
-            const shadowY = MapEditor.loadedMap.style.lightAngleVector.y * MapEditor.loadedMap.style.shadowLength;
+            // turning lightDirection integer into a Vector 
+            MapEditor.loadedMap.style.lightDirectionVector = new Vector(Math.cos(MapEditor.loadedMap.style.lightDirection * (Math.PI/180)), Math.sin(MapEditor.loadedMap.style.lightDirection * (Math.PI/180)))
 
             // Setting the colors for platforms, endzones, and walls
             let colorToUse = MapEditor.loadedMap.style.platformSideColor;
@@ -3321,10 +3333,11 @@ const PreviewWindow = {
             const side2Vec = new Vector(0,1).rotate(platform.angle)
             const side3Vec = new Vector(1,0).rotate(platform.angle)
 
-            const litPercent1 = (side1Vec.angleDifference(MapEditor.loadedMap.style.lightAngleVector)* (180/Math.PI)) / 180
-            const litPercent2 = (side2Vec.angleDifference(MapEditor.loadedMap.style.lightAngleVector)* (180/Math.PI)) / 180
-            const litPercent3 = (side3Vec.angleDifference(MapEditor.loadedMap.style.lightAngleVector)* (180/Math.PI)) / 180
-            
+            const litPercent1 = side1Vec.angleDifference(MapEditor.loadedMap.style.lightDirectionVector) / Math.PI
+            const litPercent2 = side2Vec.angleDifference(MapEditor.loadedMap.style.lightDirectionVector) / Math.PI
+            const litPercent3 = side3Vec.angleDifference(MapEditor.loadedMap.style.lightDirectionVector) / Math.PI
+
+
             platform.lit_topColor = canvasArea.getShadedColor(colorToUse2, 1)
             platform.sideColor1 = canvasArea.getShadedColor(colorToUse, litPercent1)
             platform.sideColor2 = canvasArea.getShadedColor(colorToUse, litPercent2)
@@ -3332,8 +3345,19 @@ const PreviewWindow = {
 
 
             // SHADOW POLYGON
+            // lightPitch is actually sun's angle between 0 -> 89
+            const sunAngle = MapEditor.loadedMap.style.lightPitch
+            const shadowX = MapEditor.loadedMap.style.lightDirectionVector.x * Math.tan(sunAngle * Math.PI / 180) * MapEditor.loadedMap.style.platformHeight
+            const shadowY = MapEditor.loadedMap.style.lightDirectionVector.y * Math.tan(sunAngle * Math.PI / 180) * MapEditor.loadedMap.style.platformHeight
+
             const angleRad = platform.angle * (Math.PI/180);
-            const wallShadowMultiplier = platform.wall ? (1 + (MapEditor.loadedMap.style.wallHeight / MapEditor.loadedMap.style.platformHeight)) : 1;
+            
+            let wallShadowMultiplier
+            if (platform.wall && MapEditor.loadedMap.style.platformHeight > 0) {
+                wallShadowMultiplier = 1 + (MapEditor.loadedMap.style.wallHeight / MapEditor.loadedMap.style.platformHeight)
+            } else {
+                wallShadowMultiplier = 1
+            }
 
             platform.shadowPoints = [ // ALL THE POSSIBLE POINTS TO INPUT IN CONVEX HULL FUNCTION
             
@@ -3396,7 +3420,7 @@ const PreviewWindow = {
 
 
         // update all other colors
-        MapEditor.loadedMap.style.lit_playerTop = canvasArea.getShadedColor(MapEditor.loadedMap.style.playerColor, 1) // 0.2 instead of 0 to pretend there's bounce lighting
+        MapEditor.loadedMap.style.lit_playerTop = canvasArea.getShadedColor(MapEditor.loadedMap.style.playerColor, 1)
         MapEditor.loadedMap.style.lit_background = canvasArea.getShadedColor(MapEditor.loadedMap.style.backgroundColor, 1)
 
         MapEditor.loadedMap.style.platformShadow = canvasArea.getShadedColor(MapEditor.loadedMap.style.platformTopColor, 0.2) // 0.2 instead of 0 to pretend there's bounce lighting
@@ -3440,7 +3464,6 @@ const PreviewWindow = {
             ctx.save(); // ROTATING 
             ctx.translate(PreviewWindow.x + platform.x, PreviewWindow.y + platform.y - adjustedHeight);
             ctx.rotate(platform.angle * Math.PI/180);
-
 
             
             ctx.fillStyle = platform.lit_topColor
@@ -3557,9 +3580,8 @@ const PreviewWindow = {
         if (loopedAngle > 270 || loopedAngle < 90) { // BOT WALL
 
             const sideVector = new Vector(0,1).rotate(this.player.angle)
-            const litPercent = (sideVector.angleDifference(MapEditor.loadedMap.style.lightAngleVector)* (180/Math.PI)) / 180
+            const litPercent = sideVector.angleDifference(MapEditor.loadedMap.style.lightDirectionVector) / Math.PI
             ctx.fillStyle = canvasArea.getShadedColor(MapEditor.loadedMap.style.playerColor, litPercent)
-
 
             ctx.beginPath();
             ctx.moveTo(originX - (16 * Math.cos(angleRad) + (16 * Math.sin(angleRad))), originY - 32 - this.player.jumpValue - (16 * Math.sin(angleRad) - (16 * Math.cos(angleRad))));
@@ -3573,7 +3595,7 @@ const PreviewWindow = {
         if (0 < loopedAngle && loopedAngle < 180) { // RIGHT WALL
 
             const sideVector = new Vector(1,0).rotate(this.player.angle)
-            const litPercent = (sideVector.angleDifference(MapEditor.loadedMap.style.lightAngleVector)* (180/Math.PI)) / 180
+            const litPercent = sideVector.angleDifference(MapEditor.loadedMap.style.lightDirectionVector) / Math.PI
             ctx.fillStyle = canvasArea.getShadedColor(MapEditor.loadedMap.style.playerColor, litPercent)
 
             ctx.beginPath();
@@ -3588,7 +3610,7 @@ const PreviewWindow = {
         if (90 < loopedAngle && loopedAngle < 270) { // TOP WALL
             
             const sideVector = new Vector(0,-1).rotate(this.player.angle)
-            const litPercent = (sideVector.angleDifference(MapEditor.loadedMap.style.lightAngleVector)* (180/Math.PI)) / 180
+            const litPercent = sideVector.angleDifference(MapEditor.loadedMap.style.lightDirectionVector) / Math.PI
             ctx.fillStyle = canvasArea.getShadedColor(MapEditor.loadedMap.style.playerColor, litPercent)
 
             ctx.beginPath();
@@ -3603,7 +3625,7 @@ const PreviewWindow = {
         if (180 < loopedAngle && loopedAngle < 360) { // LEFT WALL
             
             const sideVector = new Vector(-1,0).rotate(this.player.angle)
-            const litPercent = (sideVector.angleDifference(MapEditor.loadedMap.style.lightAngleVector)* (180/Math.PI)) / 180
+            const litPercent = sideVector.angleDifference(MapEditor.loadedMap.style.lightDirectionVector) / Math.PI
             ctx.fillStyle = canvasArea.getShadedColor(MapEditor.loadedMap.style.playerColor, litPercent)
 
             ctx.beginPath();
@@ -4212,13 +4234,13 @@ const MapEditor = {
                 PreviewWindow.update()
             }
 
-            if (!btn_lightAngleSlider.confirmed) {
-                this.loadedMap.style.lightAngle = btn_lightAngleSlider.value
+            if (!btn_lightDirectionSlider.confirmed) {
+                this.loadedMap.style.lightDirection = btn_lightDirectionSlider.value
                 PreviewWindow.update()
             }
 
-            if (!btn_shadowLengthSlider.confirmed) {
-                this.loadedMap.style.shadowLength = btn_shadowLengthSlider.value
+            if (!btn_lightPitchSlider.confirmed) {
+                this.loadedMap.style.lightPitch = btn_lightPitchSlider.value
                 PreviewWindow.update()
             }   
         }
@@ -4277,8 +4299,8 @@ const MapEditor = {
                     "ambientLight" : map.style.ambientLight ?? "rba(140,184,198)",
                     "platformHeight": map.style.platformHeight,
                     "wallHeight": map.style.wallHeight,
-                    "lightAngle": map.style.lightAngle,
-                    "shadowLength": map.style.shadowLength
+                    "lightDirection": map.style.lightDirection ?? 45, // kill 45
+                    "lightPitch": map.style.lightPitch ?? 45 // kill 45 
                 }
             downloadMap.platforms = [];
             map.platforms.forEach(platform => {
@@ -4506,6 +4528,11 @@ const MapEditor = {
             platform.x += platform.width/2
             platform.y += platform.height/2
         })
+    },
+
+    newLighting : function() { // debug kill
+        this.loadedMap.style.lightDirection = this.loadedMap.style.lightAngle ?? 90 
+        this.loadedMap.style.lightPitch = this.loadedMap.style.shadowLength ?? 89
     }
 }
 
@@ -4642,9 +4669,17 @@ const Map = {
 
 
         // Calculate lighting and shadows for each platform and the endzone
-        this.style.lightAngleVector =  new Vector(Math.cos(this.style.lightAngle * (Math.PI/180)), Math.sin(this.style.lightAngle * (Math.PI/180)))
-        const shadowX = this.style.lightAngleVector.x * this.style.shadowLength;
-        const shadowY = this.style.lightAngleVector.y * this.style.shadowLength;
+
+        // turning lightDirection integer into a Vector
+        this.style.lightDirectionVector = new Vector(Math.cos(this.style.lightDirection * (Math.PI/180)), Math.sin(this.style.lightDirection * (Math.PI/180)))
+        // const shadowX = this.style.lightDirectionVector.x * this.style.lightPitch; // kill
+        // const shadowY = this.style.lightDirectionVector.y * this.style.lightPitch;
+
+        // lightPitch is actually sun's angle between 0 -> 89
+        const sunAngle = this.style.lightPitch
+        const shadowX = this.style.lightDirectionVector.x * Math.tan(sunAngle * Math.PI / 180) * this.style.platformHeight
+        const shadowY = this.style.lightDirectionVector.y * Math.tan(sunAngle * Math.PI / 180) * this.style.platformHeight
+
 
         let platformIndex = 0 // set this so that it is z-order
         this.platforms.forEach(platform => { // CALCULATE PLATFORMS COLORS and SHADOW POLYGON
@@ -4672,9 +4707,9 @@ const Map = {
             side2Vec = new Vector(0,1).rotate(platform.angle)
             side3Vec = new Vector(1,0).rotate(platform.angle)
 
-            const litPercent1 = (side1Vec.angleDifference(this.style.lightAngleVector)* (180/Math.PI)) / 180
-            const litPercent2 = (side2Vec.angleDifference(this.style.lightAngleVector)* (180/Math.PI)) / 180
-            const litPercent3 = (side3Vec.angleDifference(this.style.lightAngleVector)* (180/Math.PI)) / 180
+            const litPercent1 = side1Vec.angleDifference(this.style.lightDirectionVector) / Math.PI // dividing by PI converts angleDiffernce to between 0->1
+            const litPercent2 = side2Vec.angleDifference(this.style.lightDirectionVector) / Math.PI            
+            const litPercent3 = side3Vec.angleDifference(this.style.lightDirectionVector) / Math.PI
 
             platform.shaded_topColor = canvasArea.getShadedColor(colorToUse1, 1)
             platform.shaded_sideColor1 = canvasArea.getShadedColor(colorToUse2, litPercent1)
@@ -4683,7 +4718,15 @@ const Map = {
 
             // SHADOW POLYGON
             const angleRad = platform.angle * (Math.PI/180);
-            const wallShadowMultiplier = platform.wall ? (this.style.wallHeight + this.style.platformHeight) / this.style.platformHeight : 1 // makes sure shadows are longer for taller walls
+            // kill \/
+            //const wallShadowMultiplier = platform.wall ? (this.style.wallHeight + this.style.platformHeight) / this.style.platformHeight : 1 // makes sure shadows are longer for taller walls
+
+            let wallShadowMultiplier
+            if (platform.wall && this.style.platformHeight > 0) {
+                wallShadowMultiplier = 1 + (this.style.wallHeight / this.style.platformHeight)
+            } else {
+                wallShadowMultiplier = 1
+            }
 
             platform.shadowPoints = [ // ALL THE POSSIBLE POINTS TO INPUT IN CONVEX HULL FUNCTION. OPTIMIZE already have come of these points saved to map
             
@@ -4810,7 +4853,7 @@ const Map = {
         }); // end of looping thrugh each platform
 
         // calculate all other map colors
-        this.style.shaded_playerColor = canvasArea.getShadedColor(this.style.playerColor, 1) // 0.2 instead of 0 to pretend there's bounce lighting
+        this.style.shaded_playerColor = canvasArea.getShadedColor(this.style.playerColor, 1)
         this.style.shaded_backgroundColor = canvasArea.getShadedColor(this.style.backgroundColor, 1)
 
         this.style.shadow_platformColor = canvasArea.getShadedColor(this.style.platformTopColor, 0.2) // 0.2 instead of 0 to pretend there's bounce lighting
@@ -4837,13 +4880,24 @@ const Map = {
         this.platforms.forEach(platform => { // Loop through ALL platforms to get renderedPlatforms
 
             const adjustedHeight = platform.wall ? this.style.wallHeight : 0 // for adding height to walls
-            const wallShadowMultiplier = platform.wall ? (this.style.wallHeight + this.style.platformHeight) / this.style.platformHeight : 1 // makes sure shadows are longer for taller walls
+            // kill
+            //const wallShadowMultiplier = platform.wall ? (this.style.wallHeight + this.style.platformHeight) / this.style.platformHeight : 1 // makes sure shadows are longer for taller walls
+
+            let wallShadowMultiplier
+            if (platform.wall && this.style.platformHeight > 0) {
+                wallShadowMultiplier = 1 + (this.style.wallHeight / this.style.platformHeight)
+            } else {
+                wallShadowMultiplier = 1
+            }
+
+
+            const shadowLength = Math.tan(this.style.lightPitch * Math.PI / 180) * this.style.platformHeight
 
             if (
-                (platform.x + platform.hypotenuse + (this.style.shadowLength * wallShadowMultiplier) > player.x - midX) && // coming into frame on left side
-                (platform.x - platform.hypotenuse - (this.style.shadowLength * wallShadowMultiplier) < player.x + midX) && // right side
-                (platform.y + platform.hypotenuse + (this.style.shadowLength * wallShadowMultiplier) + this.style.platformHeight > player.y - midY) && // top side
-                (platform.y - platform.hypotenuse - (this.style.shadowLength * wallShadowMultiplier) - adjustedHeight < player.y + midY) // bottom side
+                (platform.x - platform.hypotenuse - (shadowLength * wallShadowMultiplier) < player.x + midX) && // right side
+                (platform.x + platform.hypotenuse + (shadowLength * wallShadowMultiplier) > player.x - midX) && // coming into frame on left side
+                (platform.y + platform.hypotenuse + (shadowLength * wallShadowMultiplier) + this.style.platformHeight > player.y - midY) && // top side
+                (platform.y - platform.hypotenuse - (shadowLength * wallShadowMultiplier) - adjustedHeight < player.y + midY) // bottom side
             ) {
                 this.renderedPlatforms.push(platform); // ADD platform to renderedPlatforms
             }
@@ -5377,7 +5431,7 @@ class Player {
         if (loopedAngle > 270 || loopedAngle < 90) { // BOT WALL
 
             const sideVector = new Vector(0,1).rotate(this.lookAngle.getAngle())
-            const litPercent = (sideVector.angleDifference(Map.style.lightAngleVector)* (180/Math.PI)) / 180
+            const litPercent = sideVector.angleDifference(Map.style.lightDirectionVector) / Math.PI
             ctx.fillStyle = canvasArea.getShadedColor(Map.style.playerColor, litPercent)
 
             ctx.beginPath();
@@ -5392,7 +5446,7 @@ class Player {
         if (0 < loopedAngle && loopedAngle < 180) { // RIGHT WALL
 
             const sideVector = new Vector(1,0).rotate(this.lookAngle.getAngle())
-            const litPercent = (sideVector.angleDifference(Map.style.lightAngleVector)* (180/Math.PI)) / 180
+            const litPercent = sideVector.angleDifference(Map.style.lightDirectionVector) / Math.PI
             ctx.fillStyle = canvasArea.getShadedColor(Map.style.playerColor, litPercent)
 
             ctx.beginPath();
@@ -5407,7 +5461,7 @@ class Player {
         if (90 < loopedAngle && loopedAngle < 270) { // TOP WALL
             
             const sideVector = new Vector(0,-1).rotate(this.lookAngle.getAngle())
-            const litPercent = (sideVector.angleDifference(Map.style.lightAngleVector)* (180/Math.PI)) / 180
+            const litPercent = sideVector.angleDifference(Map.style.lightDirectionVector) / Math.PI
             ctx.fillStyle = canvasArea.getShadedColor(Map.style.playerColor, litPercent)
 
             ctx.beginPath();
@@ -5422,7 +5476,7 @@ class Player {
         if (180 < loopedAngle && loopedAngle < 360) { // LEFT WALL
 
             const sideVector = new Vector(-1,0).rotate(this.lookAngle.getAngle())
-            const litPercent = (sideVector.angleDifference(Map.style.lightAngleVector)* (180/Math.PI)) / 180
+            const litPercent = sideVector.angleDifference(Map.style.lightDirectionVector) / Math.PI
             ctx.fillStyle = canvasArea.getShadedColor(Map.style.playerColor, litPercent)
 
             ctx.beginPath();

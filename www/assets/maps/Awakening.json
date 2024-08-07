@@ -82,8 +82,8 @@
         "ambientLight": "rba(140,184,198)",
         "platformHeight": 15,
         "wallHeight": 50,
-        "lightAngle": 190,
-        "shadowLength": 13
+        "lightDirection": 190,
+        "lightPitch": 50
     },
     "platforms": [
         {
