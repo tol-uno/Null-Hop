@@ -13,15 +13,17 @@
         "endZoneTopColor": "rgba(255,218,98,1)",
         "endZoneSideColor": "rgba(255,218,98,1)",
         "backgroundColor": "#627962",
-        "shadowColor": "#07070a25",
         "playerColor": "rgba(226,206,235,1)",
 
         "platformHeight": 10,
 
-        "lightAngle": 45,
-        "shadowContrastLight": -0.005,
-        "shadowContrastDark": -0.2,
-        "shadowLength": 20
+        "wallTopColor": "rgba(125, 94, 49, 1)",
+        "wallSideColor": "rgba(125, 94, 49, 1)",
+        "directLight": "rba(255,255,255)",
+        "ambientLight": "rba(140,184,198)",
+        "wallHeight": 50,
+        "lightDirection": 45,
+        "lightPitch": 30
     },
 
     "platforms": [
@@ -32,6 +34,7 @@
             "height": 128,
             "angle": 0,
             "endzone": 1
+            
         },
 
         {

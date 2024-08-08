@@ -385,13 +385,21 @@ class SliderUI {
     }
 
     update() {
-        if (touchHandler.dragging) { // User is touching the screen
-            
-            if (Math.abs(touchHandler.touchX - this.sliderX) < 30 && Math.abs(touchHandler.touchY - this.y) < 30) {
-                
-                if (touchHandler.touchX > this.x && touchHandler.touchX < this.x + this.width) {
+        if (!this.confirmed) {
 
-                    this.sliderX = touchHandler.touchX
+            if (touchHandler.dragging) {
+
+                if (touchHandler.touchX < this.x) {
+                    // set to lowest
+                    this.sliderX = this.x
+                } else {
+                    if (touchHandler.touchX > this.x + this.width) {
+                        // set to highest
+                        this.sliderX = this.x + this.width
+                    } else {
+                        // within slider bounds
+                        this.sliderX = touchHandler.touchX
+                    }
                 }
 
                 // MAP TO RANGE: https://stackoverflow.com/questions/10756313/javascript-jquery-map-a-range-of-numbers-to-another-range-of-numbers
@@ -406,11 +414,7 @@ class SliderUI {
                 // this.value = Math.round(this.value / 10) * 10; // for snapping to nearest multiple of 10 
 
 
-                this.confirmed = false;
-            }
-        } else { // if not dragging (testing for a touch end on slider)
-            if (!this.confirmed) { // and if real values havent been updated
-
+            } else { // not dragging -- need to confirm slider
                 // map snapped value to pixels along slider. snapping the position of the visual slider
                 this.sliderX = (this.value - this.min) * (this.x + this.width - this.x) / (this.max - this.min) + this.x;
 
@@ -624,11 +628,8 @@ const canvasArea = { //Canvas Object
         let ambientLight;
 
         if (UserInterface.gamestate == 5 || UserInterface.gamestate == 6) {
-            //directLight = Map.style.directLight ?? "rba(255,255,255)"
-            //ambientLight = Map.style.ambientLight ?? "rba(140,184,198)"
-            directLight = Map.style.directLight ?? "rba(155,155,155)"
-            ambientLight = Map.style.ambientLight ?? "rba(40,84,98)"
-            
+            directLight = Map.style.directLight ?? "rba(255,255,255)"
+            ambientLight = Map.style.ambientLight ?? "rba(140,184,198)"
         } else {
             directLight = MapEditor.loadedMap.style.directLight ?? "rba(255,255,255)"
             ambientLight = MapEditor.loadedMap.style.ambientLight ?? "rba(140,184,198)"
@@ -659,6 +660,10 @@ const canvasArea = { //Canvas Object
         r = (litPercent) * (r * (directLight.r / 255)) + (1 - litPercent) * (r * (ambientLight.r / 255)) // left of + is color fully lit by sunlight
         g = (litPercent) * (g * (directLight.g / 255)) + (1 - litPercent) * (g * (ambientLight.g / 255)) // right of + is color fully lit by ambient light
         b = (litPercent) * (b * (directLight.b / 255)) + (1 - litPercent) * (b * (ambientLight.b / 255))
+
+        r = Math.round(r)
+        g = Math.round(g)
+        b = Math.round(b)
 
         return `rgb(${r},${g},${b})`
     },
@@ -2122,6 +2127,18 @@ const UserInterface = {
                     y >= button.y && y <= button.y + button.height
                 ) {
                     button.pressed();
+                }
+            }
+        });
+
+
+        this.renderedButtons.forEach(slider => {
+            if (slider.constructor.name == "SliderUI") { // only run on sliders
+                if ( // if x and y touch is near slider handle
+                    Math.abs(x - slider.sliderX) < 30 && 
+                    Math.abs(y - slider.y) < 30 
+                ) {
+                    slider.confirmed = false
                 }
             }
         });
