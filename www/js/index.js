@@ -704,11 +704,10 @@ const UserInterface = {
         volume : null,
         debugText : null,
         strafeHUD : null,
+        playTutorial : null,
     },
     
     showVelocity : true,
-
-    playTutorial : true,
 
     timer : 0,
     timerStart : null, // set by jump button
@@ -781,7 +780,8 @@ const UserInterface = {
                     "sensitivity": 0.5,
                     "volume": 0.5,
                     "debugText": 0,
-                    "strafeHUD": 1
+                    "strafeHUD": 1,
+                    "playTutorial": 1
                 }
                 UserInterface.writeSettings()
 
@@ -790,6 +790,7 @@ const UserInterface = {
                 btn_volumeSlider.updateState(UserInterface.settings.volume)
                 btn_debugText.func(true)
                 btn_strafeHUD.func(true)
+                btn_playTutorial.func(true)
                 AudioHandler.setVolumes();
                 
                 console.log("records and settings cleared")
@@ -1327,7 +1328,7 @@ const UserInterface = {
             
             // loop through each button (including non-maps eww) and untoggle it. Could be an issue once I add a "play tutorial" toggle / button idk
             UserInterface.renderedButtons.forEach(button => {
-                if (button.toggle == 1) {button.toggle = 0}
+                if (button.toggle == 1 && button != btn_playTutorial) {button.toggle = 0}
             })
             
             UserInterface.renderedButtons = UserInterface.btnGroup_customMapBrowser
@@ -1445,12 +1446,12 @@ const UserInterface = {
         btn_level_awakening = new Button(300, 50, 280, "", "", 0, "Awakening", function() {
             if (this.toggle) {
                 this.toggle = 0;
-                MapBrowser.selectedMapIndex = -1 
+                MapBrowser.selectedMapIndex = -1
             } else {
                 MapBrowser.toggleAllButtons()
                 this.toggle = 1;
                 MapBrowser.selectedMapIndex = "Awakening"
-                if (UserInterface.playTutorial == true) {Tutorial.isActive = true}
+                if (UserInterface.settings.playTutorial) {Tutorial.isActive = true}
             }
         })
 
@@ -1544,7 +1545,7 @@ const UserInterface = {
                     UserInterface.gamestate = 1
                     // loop through each button (including non-maps eww) and untoggle it
                     UserInterface.renderedButtons.forEach(button => {
-                        if (button.toggle == 1) {button.toggle = 0}
+                        if (button.toggle == 1 && button != btn_playTutorial) {button.toggle = 0}
                     })    
                     UserInterface.renderedButtons = UserInterface.btnGroup_mainMenu;
                     return
@@ -1650,7 +1651,7 @@ const UserInterface = {
 
             if (Tutorial.state == 1) {
                 Tutorial.state ++;
-                UserInterface.renderedButtons = [btn_mainMenu]
+                UserInterface.renderedButtons = [btn_mainMenu, btn_next]
                 return
             }
 
@@ -1664,55 +1665,37 @@ const UserInterface = {
                 return
             }
 
-
             // state 3 progresses to 5 when all targets are completed
 
             // state 5 uses jump button to progress
 
-            // state 6 doesnt have a next button. Progresses automatically
+            // state 6 progresses to 7 automatically after 2 secs
 
-
-            // CAN COMBINE A LOT OF THESE INTO ONE
             if (Tutorial.state == 7) {
                 Tutorial.state ++; // going into STATE 8
                 UserInterface.renderedButtons = UserInterface.btnGroup_inLevel
                 return
             }
 
-            // 8 progressed to 9 when user starts turning again.
+            // 8 to 9 on user swipe
 
-            // 9 progresses to 10 automatically
+            // 9 to 10 on checkpoint
+
+            // 10 to 11 on user swipe
             
-            if (Tutorial.state == 10) {
-                Tutorial.state ++; // going into STATE 11
-                Tutorial.pausePlayer = false;
-                UserInterface.renderedButtons = UserInterface.btnGroup_inLevel
-                return
-            }
+            // 11 to 12 on checkpoint
 
-            // 10 progresses to 12 automatically
+            // 12 to 13 on user swipe
 
-            // 12 progresses to 13 when user starts turning
+            // 13 to 14 on checkpoint
 
-            // 13 to 14 is automatic (by checkpoint)
+            // 14 to 15 on user swipe
 
-            if (Tutorial.state == 14) {
-                Tutorial.state ++; // going into STATE 15
-                Tutorial.pausePlayer = false;
-                UserInterface.renderedButtons = UserInterface.btnGroup_inLevel
-                return
-            }
+            // 15 to 16 on checkpoint
 
-            // 15 to 16 is automatic
+            // 16 to 17 on user swipe
 
-            if (Tutorial.state == 16) {
-                Tutorial.state ++; // going into STATE 15
-                Tutorial.pausePlayer = false;
-                UserInterface.renderedButtons = UserInterface.btnGroup_inLevel
-                return
-            }
-
-            // 17 to 18 automatic
+            // 17 to 18 on level end
 
             if (Tutorial.state == 18) {
                 Tutorial.state ++; // going into STATE 19
@@ -1722,17 +1705,21 @@ const UserInterface = {
 
         })
 
-        // not implemented
-        btn_tutorial = new Button("canvasArea.canvas.width - 420", "420", 80, "toggle_button", "toggle_button_pressed", 1, "", function(sync) { 
+        btn_playTutorial = new Button("canvasArea.canvas.width - 450", "canvasArea.canvas.height - 120", 80, "toggle_button", "toggle_button_pressed", 1, "", function(sync) { 
             if (sync) {
-                this.toggle = UserInterface.playTutorial // gets initial value of toggle
+                this.toggle = UserInterface.settings.playTutorial;
             } else {
-                if (this.toggle) {
+                console.log("PLAY TUT TOGGLED")
+                if (this.toggle == 1) {
                     this.toggle = 0;
-                    UserInterface.playTutorial = false
+                    Tutorial.isActive = false
+                    UserInterface.settings.playTutorial = 0
+                    UserInterface.writeSettings()
                 } else {
                     this.toggle = 1;
-                    UserInterface.playTutorial = true
+                    Tutorial.isActive = true
+                    UserInterface.settings.playTutorial = 1
+                    UserInterface.writeSettings()
                 }
             }
         })
@@ -1741,11 +1728,11 @@ const UserInterface = {
         this.btnGroup_mainMenu = [btn_play, btn_settings, btn_mapEditor]
         this.btnGroup_settings = [btn_mainMenu, btn_sensitivitySlider, btn_volumeSlider, btn_debugText, btn_strafeHUD, btn_reset_settings]
         this.btnGroup_standardMapBrowser = [
-            btn_mainMenu, btn_custom_maps,
+            btn_mainMenu, 
+            btn_custom_maps,
             btn_level_awakening,
             btn_level_pitfall,
             btn_level_below,
-
             btn_level_turmoil,
         ]
         this.btnGroup_customMapBrowser = [btn_mainMenu]
@@ -1972,6 +1959,7 @@ const UserInterface = {
             btn_volumeSlider.updateState(UserInterface.settings.volume)
             btn_debugText.func(true)
             btn_strafeHUD.func(true)
+            btn_playTutorial.func(true)
 
             AudioHandler.setVolumes();
         
@@ -1983,7 +1971,8 @@ const UserInterface = {
                     "sensitivity": 0.5,
                     "volume": 0.1,
                     "debugText": 0,
-                    "strafeHUD": 1
+                    "strafeHUD": 1,
+                    "playTutorial": 1
                 };
 
                 this.writeSettings(); // Write the default settings to file
@@ -1993,7 +1982,7 @@ const UserInterface = {
                 btn_volumeSlider.updateState(UserInterface.settings.volume)
                 btn_debugText.func(true)
                 btn_strafeHUD.func(true)
-
+                btn_playTutorial.func(true)
                 AudioHandler.setVolumes();
 
             } else {
@@ -2703,7 +2692,8 @@ const MapBrowser = { // should set back to 0 at some points
     
     toggleAllButtons : function() {
         UserInterface.renderedButtons.forEach(button => {
-            if (button.toggle == 1) {button.toggle = 0}
+            // dont toggle playTutorial
+            if (button.toggle == 1 && button != btn_playTutorial) {button.toggle = 0}
         })
     },
 
@@ -2751,21 +2741,27 @@ const MapBrowser = { // should set back to 0 at some points
 
 
 
-        // ENABLING and DISABLING btn_playMap in browsers BESIDES map editor's
+        // ENABLING and DISABLING btn_playMap and btn_playTutorial in browsers BESIDES map editor's
 
         if (MapEditor.editorState != 5) { // not in map editors browser
             
             // ADDING AND REMOVING btn_playmap
-            if (
-                this.selectedMapIndex != -1 &&
-                !UserInterface.renderedButtons.includes(btn_playMap)
-            ) {UserInterface.renderedButtons = UserInterface.renderedButtons.concat(btn_playMap)}
+            if (this.selectedMapIndex != -1 && !UserInterface.renderedButtons.includes(btn_playMap)) {
+                UserInterface.renderedButtons = UserInterface.renderedButtons.concat(btn_playMap)
+            }
             
-            if (
-                this.selectedMapIndex == -1 &&
-                UserInterface.renderedButtons.includes(btn_playMap)
-            ) {UserInterface.renderedButtons = UserInterface.renderedButtons.slice(0,-1)}
+            if (this.selectedMapIndex == -1 && UserInterface.renderedButtons.includes(btn_playMap)) {
+                UserInterface.renderedButtons = UserInterface.renderedButtons.filter(item => item !== btn_playMap);
+            }
 
+            // ADDING AND REMOVING btn_playTutorial
+            if (this.selectedMapIndex == "Awakening" && !UserInterface.renderedButtons.includes(btn_playTutorial)) {
+                UserInterface.renderedButtons = UserInterface.renderedButtons.concat(btn_playTutorial)
+            }
+
+            if (this.selectedMapIndex != "Awakening" && UserInterface.renderedButtons.includes(btn_playTutorial)) {
+                UserInterface.renderedButtons = UserInterface.renderedButtons.filter(item => item !== btn_playTutorial);
+            }
 
         } else {
             // in MapEditors browser
@@ -2868,6 +2864,7 @@ const Tutorial = {
     targets : [[240,50],[120,50],[180,50],[0,50],[60,50],[300,50]], // 1st number is target angle, 2nd is targets health
     timerStarted : false, // used to prevent multiple timers from being set every frame
     timerCompleted : false,
+    liftedFinger : false,
     pausePlayer : false,
     animatePos : 0,
     animateVel : 0,
@@ -2880,6 +2877,7 @@ const Tutorial = {
         this.targets = [[240,50],[120,50],[180,50],[0,50],[60,50],[300,50]];
         this.timerStarted = false;
         this.timerCompleted = false;
+        this.liftedFinger = false;
         this.pausePlayer = false;
         this.animatePos = 0;
         this.animateVel = 0;
@@ -2890,7 +2888,7 @@ const Tutorial = {
 
     update : function() {
         if (UserInterface.gamestate == 2) { // in map browser
-            if (MapBrowser.selectedMapIndex !== "Awakening" || UserInterface.playTutorial == false) { // tutorial level not selected
+            if (MapBrowser.selectedMapIndex !== "Awakening") { // tutorial level not selected
                 this.isActive = false;
             }
         } 
@@ -2947,6 +2945,8 @@ const Tutorial = {
         }
 
         if (this.state == 1) {
+            this.timerCompleted = true;
+
             if (
                 !UserInterface.renderedButtons.includes(btn_next) &&  
                 Math.abs(player.lookAngle.getAngle() - Map.playerStart.angle) > 45
@@ -2955,21 +2955,10 @@ const Tutorial = {
             }
         }
 
-        if (!this.timerStarted && (
-            this.state == 2 || 
-            this.state == 7 || 
-            this.state == 10 ||
-            this.state == 14 ||
-            this.state == 16 ||
-            this.state == 18
-        )) {
-            this.timeoutToCancel = setTimeout(() => {UserInterface.renderedButtons = UserInterface.renderedButtons.concat(btn_next)}, 1500);
-            this.timerStarted = true;
-        }
+        // state 2 has no wait timer on btn_next
 
         if (this.state == 3) {
 
-    
             if (this.targets.length > 0) {
 
                 if (this.targets[0][1] > 0) {
@@ -2984,8 +2973,6 @@ const Tutorial = {
                 this.state = 5; // skip state 4
                 UserInterface.renderedButtons = UserInterface.btnGroup_inLevel
             }
-
-            
         }
 
         if (this.state == 5) {
@@ -2996,18 +2983,26 @@ const Tutorial = {
             }
         }
 
-        if (!this.timerStarted && this.state == 6) { // jumping for 2 seconds
+        if (!this.timerStarted && this.state == 6) { // timer to jump for 2 seconds
             this.timeoutToCancel = setTimeout(() => {this.timerStarted = false; this.state ++; this.pausePlayer = true}, 2000);
             this.timerStarted = true;
         }
 
-        if (this.state == 8 || this.state == 12) { // wait for a second then allow player to progess by swiping
+        if (!this.timerStarted && ( this.state == 7 || this.state == 18 )) {
+            this.timeoutToCancel = setTimeout(() => {UserInterface.renderedButtons = UserInterface.renderedButtons.concat(btn_next)}, 1500);
+            this.timerStarted = true;
+        }
+
+        if (this.state == 8 || this.state == 10 || this.state == 12 || this.state == 14 || this.state == 16) { // wait for a second then allow player to progess by swiping
             if (!this.timerStarted && !this.timerCompleted) {
-                this.timeoutToCancel = setTimeout(() => {this.timerStarted = false; this.timerCompleted = true}, 1200);
+                this.timeoutToCancel = setTimeout(() => {this.timerStarted = false; this.timerCompleted = true}, 800);
                 this.timerStarted = true;
+                this.liftedFinger = false;
             }
 
-            if (this.timerCompleted && touchHandler.dragging == true) {
+            if (!touchHandler.dragging) {this.liftedFinger = true}
+
+            if (this.timerCompleted && touchHandler.dragging == true && this.liftedFinger) {
                 this.state ++; 
                 this.pausePlayer = false
                 this.timerCompleted = false
@@ -3018,24 +3013,31 @@ const Tutorial = {
             if (player.checkpointIndex == 4) {this.state ++; this.pausePlayer = true}
         }
 
+        // 10 bundled w 8
+
         if (this.state == 11) {
             if (player.checkpointIndex == 1) {this.state ++; this.pausePlayer = true}
         }
 
-        // 12 is bundled with state 8 ^^
+        // 12 bundled w 8
 
         if (this.state == 13) {
             if (player.checkpointIndex == 2) {this.state ++; this.pausePlayer = true}
         }
 
+        // 14 bundled w 8
+
         if (this.state == 15) {
             if (player.checkpointIndex == 0) {this.state ++; this.pausePlayer = true}
         }
+
+        // 16 bundled w 8
 
         if (this.state == 17) { // check if ended level
             if (UserInterface.levelState == 3) {this.state ++;}
         }
 
+        // 18 bundled w 7
     },
 
 
@@ -3045,12 +3047,14 @@ const Tutorial = {
         const bg_color = UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
         const icon_color = !UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
 
-        // DEBUG TEXT
-        // ctx.fillText("state: " + this.state, midX - 200, 34)
-        // ctx.fillText(this.targets, 300, midY)
+        // TUTORIAL DEBUG TEXT
+        if (UserInterface.settings.debugText) {
+            ctx.fillText("state: " + this.state, midX - 200, 34)
+            //ctx.fillText(this.targets, 300, midY)
+        }
 
 
-        function drawTextPanel (text){
+        function drawTextPanel(text) {
             const textWidth = ctx.measureText(text).width
 
             ctx.fillStyle = bg_color
@@ -3060,53 +3064,60 @@ const Tutorial = {
             ctx.fillStyle = icon_color
             ctx.fillText(text, midX - textWidth/2, 100)
             
+            // resets position of btn_next so that it can pulse
             btn_next.x = midX + textWidth/2 + 45
             btn_next.y = 50
+        }
+
+
+        function pulseNextButton() {
+
+            speed = 0.006 // 0.002 makes it oscillate ~every second. smaller = faster, larger = slower.
+            const animValue = Math.sin(performance.now() * speed);
+
+            // Pulse btn_next
+            btn_next.width = 80 + (-1 * animValue * 8)
+            btn_next.height = 80 + (-1 * animValue * 8)
+            // this relies on drawTextPanel reseting btn_next's position every frame
+            btn_next.x += (80 - btn_next.width) / 2
+            btn_next.y += (80 - btn_next.height) / 2
+        }
+
+
+        function drawFingerSwipe() {
+
+            const speed = 0.002 // 0.002 makes it oscillate ~every second. smaller = faster, larger = slower.
+            const animValue = Math.sin(performance.now() * speed); // Use a sin wave to occilate between -1 and 1
+
+            if (touchHandler.dragging == false && Tutorial.timerCompleted) {
+                const image = Tutorial.decalList[0]
+                ctx.drawImage(image, midX - image.width/2 + (animValue * 150), canvasArea.canvas.height - image.height - 60)
+            }
         }
 
 
         if (this.state == 1) {
             drawTextPanel("Slide horizontally to turn the player");
 
-            const speed = 0.002 // 0.002 makes it oscillate ~every second. smaller = faster, larger = slower.
-            // Use a sin wave to occilate between -1 and 1
-            const animValue = Math.sin(performance.now() * speed);
-            const animValueFast = Math.sin(performance.now() * speed * 3);
-
-            if (touchHandler.dragging == false) {
-                const image = this.decalList[0]
-                ctx.drawImage(image, midX - image.width/2 + (animValue * 150), canvasArea.canvas.height - image.height - 60)
-            }
-
-            // Pulse btn_next
-            btn_next.width = 80 + (-1 * animValueFast * 8)
-            btn_next.height = 80 + (-1 * animValueFast * 8)
-            // this relies on drawTextPanel reseting btn_next's position every frame
-            btn_next.x += (80 - btn_next.width) / 2
-            btn_next.y += (80 - btn_next.height) / 2
+            drawFingerSwipe()
+            pulseNextButton()
         }
 
 
         if (this.state == 2) {
             drawTextPanel("Sliding vertically does NOT turn the player")
 
-            const speed = 0.002 // 0.002 makes it oscillate ~every second. smaller = faster, larger = slower.
-            
-            // Use a sin wave to occilate between -1 and 1
-            const animValue = Math.sin(performance.now() * speed);
-            const animValueFast = Math.sin(performance.now() * speed * 3);
+            // Draw NO VERTICAL swipe decal
+            const speed = 0.002 // 0.002 makes it oscillate ~every second. smaller = faster, larger = slower.           
+            const animValue = Math.sin(performance.now() * speed); // Use a sin wave to occilate between -1 and 1
+            //const animValueFast = Math.sin(performance.now() * speed * 3);
 
             if (touchHandler.dragging == false) {
                 const image = this.decalList[1]
                 ctx.drawImage(image, midX - 250, midY - 60 + (animValue * 50))
             }
 
-            // Pulse btn_next
-            btn_next.width = 80 + (-1 * animValueFast * 8)
-            btn_next.height = 80 + (-1 * animValueFast * 8)
-            // this relies on drawTextPanel reseting btn_next's position every frame
-            btn_next.x += (80 - btn_next.width) / 2
-            btn_next.y += (80 - btn_next.height) / 2
+            pulseNextButton()
         }
 
 
@@ -3173,77 +3184,49 @@ const Tutorial = {
         if (this.state == 5) {
             drawTextPanel("Start jumping by pressing the jump button")
 
+            // DRAW ARROW
             const speed = 0.005 // 0.002 makes it oscillate ~every second. smaller = faster, larger = slower.
-            // Use a sin wave to occilate between -1 and 1
-            const animValue = Math.sin(performance.now() * speed);
+            const animValue = Math.sin(performance.now() * speed); // Use a sin wave to occilate between -1 and 1
 
-            const image = this.decalList[3] // ARROW
+            const image = this.decalList[3]
             ctx.drawImage(image, btn_jump.x + 150 + (animValue * 20), btn_jump.y + btn_jump.width/2 - image.height/2)
         }
 
 
         if (this.state == 7) {
             drawTextPanel("Stay on the red platforms")
-
-            const speed = 0.006 // 0.002 makes it oscillate ~every second. smaller = faster, larger = slower.
-            // Use a sin wave to occilate between -1 and 1
-            const animValueFast = Math.sin(performance.now() * speed);
-            
-            // Pulse btn_next
-            btn_next.width = 80 + (-1 * animValueFast * 8)
-            btn_next.height = 80 + (-1 * animValueFast * 8)
-            // this relies on drawTextPanel reseting btn_next's position every frame
-            btn_next.x += (80 - btn_next.width) / 2
-            btn_next.y += (80 - btn_next.height) / 2
-
+            pulseNextButton()
         }
 
         
         if (this.state == 8) {
             drawTextPanel("Slide horizontally to change the direction of the player")
-
-            const speed = 0.002 // 0.002 makes it oscillate ~every second. smaller = faster, larger = slower.
-            // Use a sin wave to occilate between -1 and 1
-            const animValue = Math.sin(performance.now() * speed);
-
-            
-            if (touchHandler.dragging == false && this.timerCompleted) {
-                const image = this.decalList[0]
-                ctx.drawImage(image, midX - image.width/2 + (animValue * 150), canvasArea.canvas.height - image.height - 60)
-            }
+            drawFingerSwipe()
         }
 
 
         if (this.state == 10) {
             drawTextPanel("Slow and steady swipes increase speed")
-
-            // MAKE RENDERING THE HORIZONTAL FINGER A FUNCTION 
-
+            drawFingerSwipe()
             // graphic showing smooth turn vs sharp turn?
         }
 
 
         if (this.state == 12) {
             drawTextPanel("Turn smoothly to gain speed and clear the gap")
-            
-            const speed = 0.002 // 0.002 makes it oscillate ~every second. smaller = faster, larger = slower.
-            // Use a sin wave to occilate between -1 and 1
-            const animValue = Math.sin(performance.now() * speed);
-            
-            if (touchHandler.dragging == false && this.timerCompleted) {
-                const image = this.decalList[0]
-                ctx.drawImage(image, midX - image.width/2 + (animValue * 150), canvasArea.canvas.height - image.height - 60)
-            }
+            drawFingerSwipe()
         }
 
 
         if (this.state == 14) {
             drawTextPanel("Don't touch the walls!")
+            drawFingerSwipe()
         }
 
 
         if (this.state == 16) {
             drawTextPanel("Reach the gold endzone to finish the level")
+            drawFingerSwipe()
         }
 
 
@@ -3252,28 +3235,19 @@ const Tutorial = {
 
             // arrow to leaderboard??
 
-            const speed = 0.006 // 0.002 makes it oscillate ~every second. smaller = faster, larger = slower.
-            // Use a sin wave to occilate between -1 and 1
-            const animValueFast = Math.sin(performance.now() * speed);
-            
-            // Pulse btn_next
-            btn_next.width = 80 + (-1 * animValueFast * 8)
-            btn_next.height = 80 + (-1 * animValueFast * 8)
-            // this relies on drawTextPanel reseting btn_next's position every frame
-            btn_next.x += (80 - btn_next.width) / 2
-            btn_next.y += (80 - btn_next.height) / 2
-            
+            pulseNextButton()
         }
 
 
         if (this.state == 19) {
             drawTextPanel("Click here to select a new level")
 
+            // DRAW ARROW
             const speed = 0.005 // 0.002 makes it oscillate ~every second. smaller = faster, larger = slower.
             // Use a sin wave to occilate between -1 and 1
             const animValue = Math.sin(performance.now() * speed);
 
-            const image = this.decalList[3] // ARROW
+            const image = this.decalList[3]
             ctx.drawImage(image, btn_mainMenu.x + 150 + (animValue * 20), btn_mainMenu.y + btn_mainMenu.width/2 - image.height/2)
         }
 
