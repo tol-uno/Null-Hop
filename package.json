@@ -14,15 +14,15 @@
   "license": "Apache-2.0",
   "devDependencies": {
     "cordova-browser": "^7.0.0",
-    "cordova-ios": "^7.0.1",
+    "cordova-ios": "^7.1.1",
     "cordova-plugin-device": "^2.1.0",
     "cordova-plugin-file": "^8.0.1",
     "cordova-plugin-media": "^7.0.0"
   },
   "cordova": {
     "platforms": [
-      "ios",
-      "browser"
+      "browser",
+      "ios"
     ],
     "plugins": {
       "cordova-plugin-device": {},

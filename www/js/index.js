@@ -2358,9 +2358,9 @@ const UserInterface = {
 
                 canvasArea.ctx.strokeStyle = "#000000"; // resetting
                 canvasArea.ctx.lineWidth = 1
-
             }
     
+
             if (this.settings.strafeHUD == 1) { // STRAFE OPTIMIZER HUD
 
                 /* DRAW THE OLD LITTLE GRAPHS UNDER PLAYER
@@ -2437,7 +2437,6 @@ const UserInterface = {
         
     
                         // DRAW VERTICAL WARNING
-
                         // calculations
                         const averageX = Math.abs(touchHandler.averageDragX.getAverage())
                         const averageY = Math.abs(touchHandler.averageDragY.getAverage())
@@ -2447,160 +2446,158 @@ const UserInterface = {
                                 setTimeout(() => {UserInterface.showVerticalWarning = false}, 1500); // waits 1 second to hide warning
                             }
                         }
-    
+                        // draw warning
                         if (this.showVerticalWarning) {
                             ctx.font = "22px BAHNSCHRIFT";
 
-
-                            canvasArea.roundedRect(midX - 200, canvasArea.canvas.height - 180, ctx.measureText("DON'T SWIPE VERTICAL").width + 30, 30, 12)
-                            
+                            canvasArea.roundedRect(midX - 200, canvasArea.canvas.height - 180, ctx.measureText("DON'T SWIPE VERTICAL").width + 30, 30, 12)                            
                             ctx.fillStyle = UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1
-                            // ctx.strokeStyle = UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1
                             ctx.fill()
-                            // ctx.stroke()
 
                             ctx.fillStyle = !UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1
-                            // ctx.fillText("DON'T SWIPE VERTICAL", midX - ctx.measureText("DON'T SWIPE VERTICAL").width/2, 160)
                             ctx.fillText("DON'T SWIPE VERTICAL", midX - 185, canvasArea.canvas.height - 157)
 
+                        }
+
+
+                        // DRAW OVERSTRAFE WARNING
+                        if (this.showOverstrafeWarning) {
+                            ctx.font = "22px BAHNSCHRIFT";
+
+                            heightOffset = this.showVerticalWarning ? 38 : 0;
+                            canvasArea.roundedRect(midX - 200, canvasArea.canvas.height - 180 - heightOffset, ctx.measureText("TURNING TOO FAST!").width + 30, 30, 12)                            
+                            ctx.fillStyle = UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1
+                            ctx.fill()
+
+                            ctx.fillStyle = !UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1
+                            ctx.fillText("TURNING TOO FAST!", midX - 185, canvasArea.canvas.height - 157 - heightOffset)
                         }
                     }
                 }
             }
 
 
-            if (player.endSlow == 0) { // level name, your time, best time, strafe efficiency, leaderboards
+            // ENDSCREEN
+            if (player.endSlow == 0) { // level name, your time, record, leaderboards
 
 
+                // TIME BOX
                 const timeBox = {
-                    x : midX - 250,
-                    y : midY - 170,
-                    width : 300,
-                    height : 200,
+                    x : midX - (this.leaderboards[Map.name] !== undefined ? 332 - 40 : 217 - 40),
+                    y : midY - 120,
+                    width : 434,
+                    height : 268,
                 }
 
-                // END SCREEN BOX
+                // MAP NAME BOX
+                canvasArea.ctx.font = "30px BAHNSCHRIFT";
+                const nameBox = {
+                    x : timeBox.x - 30,
+                    y : timeBox.y - 30,
+                    width : 36 + canvasArea.ctx.measureText(Map.name).width , // change to match map name
+                    height : 60,
+                }
+
+
+                // 30px between timeBox and medalsBox
+
+                // MEDALS BOX
+                const medalsBox = {
+                    x : timeBox.x + timeBox.width + 30,
+                    y : timeBox.y,
+                    width : 200,
+                    height : timeBox.height,
+                }
+
+                // DRAW BOXES
                 canvasArea.ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
 
-                canvasArea.roundedRect(timeBox.x, timeBox.y, timeBox.width, timeBox.height, 25)
-
                 canvasArea.ctx.save(); // save 3
-                
+
                 canvasArea.ctx.shadowColor = "rgba(0, 0, 0, 0.4)"; 
                 canvasArea.ctx.shadowBlur = 30;
+
+                // time box
+                canvasArea.roundedRect(timeBox.x, timeBox.y, timeBox.width, timeBox.height, 25)
                 canvasArea.ctx.fill();
+
+                // name box
+                canvasArea.roundedRect(nameBox.x, nameBox.y, nameBox.width, nameBox.height, 18)
+                canvasArea.ctx.fill();
+
+                // medals box
+                if (this.leaderboards[Map.name] !== undefined) {
+                    canvasArea.roundedRect(medalsBox.x, medalsBox.y, medalsBox.width, medalsBox.height, 25)
+                    canvasArea.ctx.fill();
+                }
 
                 canvasArea.ctx.restore(); // restore 3
                 
+
 
                 // END SCREEN TEXT
-                canvasArea.ctx.font = "25px BAHNSCHRIFT";
+                canvasArea.ctx.fillStyle = (!UserInterface.darkMode) ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
+                
+                // map name
+                canvasArea.ctx.font = "30px BAHNSCHRIFT";
+                canvasArea.ctx.fillText(Map.name, nameBox.x + 18, nameBox.y + nameBox.height/2 + 10);
+                
+                // time
+                canvasArea.ctx.font = "62px BAHNSCHRIFT";
+                canvasArea.ctx.fillText(UserInterface.secondsToMinutes(UserInterface.timer), timeBox.x + 40, timeBox.y + timeBox.height/2 - 10);
 
-                canvasArea.ctx.fillStyle = (!UserInterface.darkMode) ? UserInterface.darkColor_1 : UserInterface.lightColor_1; // GRAY
+                // record OR new record
+                canvasArea.ctx.font = "30px BAHNSCHRIFT";
+                if (this.timer == this.records[Map.name]) {
+                    // canvasArea.ctx.fillText("New Record! " + UserInterface.secondsToMinutes(this.records[Map.name]), timeBox.x + 40, timeBox.y + timeBox.height * 0.75);
+                    canvasArea.ctx.fillText("New Record!", timeBox.x + 40, timeBox.y + timeBox.height * 0.75);
 
-                canvasArea.ctx.fillText("Level: " + Map.name, timeBox.x + 30, timeBox.y + 50);
-                canvasArea.ctx.fillText("Time: " + UserInterface.secondsToMinutes(UserInterface.timer), timeBox.x + 30, timeBox.y + 100);
-                canvasArea.ctx.fillText("Record: " + UserInterface.secondsToMinutes(this.records[Map.name]), timeBox.x + 30, timeBox.y + 130);
-
-                if (this.timer == this.records[Map.name]) {canvasArea.ctx.fillText("New Record!", timeBox.x + 30, timeBox.y + 160)}
-
-
-
-                // QUOTE BOX
-                const quoteBox = {
-                    x : midX - 250,
-                    y : midY + 80,
-                    width : 300,
-                    height : 120,
+                } else {
+                    canvasArea.ctx.fillText("Best Time: " + UserInterface.secondsToMinutes(this.records[Map.name]), timeBox.x + 40, timeBox.y + timeBox.height * 0.75);
                 }
 
-                // QUOTE BOX BORDER
-                canvasArea.ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
-
-                canvasArea.roundedRect(quoteBox.x, quoteBox.y, quoteBox.width, quoteBox.height, 25)
-
-                canvasArea.ctx.save(); // save 3
-                
-                canvasArea.ctx.shadowColor = "rgba(0, 0, 0, 0.4)"; 
-                canvasArea.ctx.shadowBlur = 30;
-                canvasArea.ctx.fill();
-
-                canvasArea.ctx.restore(); // restore 3
-
-
-
-                // LEADERBOARDS IF AVAILABLE
+                // medal times
                 if (this.leaderboards[Map.name] !== undefined) {
-                    
-                    const board = {
-                        x : midX + 100,
-                        y : midY - 170,
-                        width : 300,
-                        height : 380,
-                    }
+                    canvasArea.ctx.fillText(UserInterface.secondsToMinutes(this.leaderboards[Map.name].gold), medalsBox.x + 70, medalsBox.y + medalsBox.height * 0.25 + 10);
+                    canvasArea.ctx.fillText(UserInterface.secondsToMinutes(this.leaderboards[Map.name].silver), medalsBox.x + 70, medalsBox.y + medalsBox.height * 0.5 + 10);
+                    canvasArea.ctx.fillText(UserInterface.secondsToMinutes(this.leaderboards[Map.name].bronze), medalsBox.x + 70, medalsBox.y + medalsBox.height * 0.75 + 10);            
+                
+                
+                    function drawMedal(x, y, radius, fillColor, strokeColor, strokeWidth, shadow) {
 
-                    // LEADERBOARD BOX
-                    canvasArea.ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
-
-                    canvasArea.roundedRect(board.x, board.y, board.width, board.height, 25)
-
-                    canvasArea.ctx.save(); // save 3.5
-                    
-                    canvasArea.ctx.shadowColor = "rgba(0, 0, 0, 0.4)"; 
-                    canvasArea.ctx.shadowBlur = 30;
-                    canvasArea.ctx.fill();
-
-                    canvasArea.ctx.restore(); // restore 3.5
-
-
-                    // LEADERBOARD TEXT
-                    canvasArea.ctx.font = "25px BAHNSCHRIFT";
-
-                    canvasArea.ctx.fillStyle = canvasArea.ctx.strokeStyle = (!UserInterface.darkMode) ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
-
-
-                    //canvasArea.ctx.fillText("Leaderboard", board,x + 20, midY - 150);
-                    let lineSpacing = 20 + 30; // padding from top of box + one line height
-                    let placedInLeaderboard = false;
-
-                    function drawNullTime(lineSpacing, rank) {
-                        // rank
-                        canvasArea.ctx.fillText(rank + ".", board.x + 20, board.y + lineSpacing);
-
-                        // NULL name + time
-                        canvasArea.ctx.fillText("Null", board.x + 60, board.y + lineSpacing);
-                        canvasArea.ctx.fillText(UserInterface.secondsToMinutes(UserInterface.records[Map.name]), board.x + board.width - 30 - canvasArea.ctx.measureText(UserInterface.secondsToMinutes(UserInterface.records[Map.name])).width, board.y + lineSpacing)
-
-                        // border around null's time
-                        canvasArea.roundedRect(board.x + 50, board.y + lineSpacing - 25, board.width - 70, 32, 10)
-                        canvasArea.ctx.lineWidth = 3
-                        canvasArea.ctx.stroke()
-                    }
-
-                    let rank = 1;
-                    for (const [key, value] of Object.entries(this.leaderboards[Map.name])) {
-                        
-                        if (!placedInLeaderboard && this.records[Map.name] <= value) { // if this line should be your record
-
-                            drawNullTime(lineSpacing, rank)                            
-                            lineSpacing += 40;
-                            placedInLeaderboard = true;
-                            rank ++;
+                        canvasArea.ctx.fillStyle = fillColor
+                        canvasArea.ctx.strokeStyle = strokeColor
+                        canvasArea.ctx.lineWidth = strokeWidth
+    
+                        canvasArea.ctx.beginPath()
+                        canvasArea.ctx.arc(x, y, radius, 0, 2 * Math.PI); // (x, y, radius, startAngle, endAngle)
+    
+                        canvasArea.ctx.fill()
+    
+                        canvasArea.ctx.save(); // save 3.1
+                        if (shadow) {
+                            canvasArea.ctx.shadowColor = "rgba(0, 0, 0, 0.3)"; 
+                            canvasArea.ctx.shadowBlur = 20;
                         }
-
-                        // rank
-                        canvasArea.ctx.fillText(rank + ".", board.x + 20, board.y + lineSpacing);
-
-                        canvasArea.ctx.fillText(key, board.x + 60, board.y + lineSpacing);
-                        canvasArea.ctx.fillText(UserInterface.secondsToMinutes(value), board.x + board.width - 30 - canvasArea.ctx.measureText(UserInterface.secondsToMinutes(value)).width, board.y + lineSpacing)
-
-                        lineSpacing += 40;
-                        rank ++;
+                        canvasArea.ctx.stroke()
+                        
+                        canvasArea.ctx.restore() // save 3.1
                     }
 
-                    if (!placedInLeaderboard) { // drawing your record in last place if looped through entirely without being placed
-                        drawNullTime(lineSpacing, rank)
+                    // DRAW BIG MEDALS
+                    if (UserInterface.timer <= this.leaderboards[Map.name].gold) {
+                        drawMedal(timeBox.x + 350, timeBox.y + 100, 50, "#f1b62c", "#fde320", 10, true)
+                    } else if (UserInterface.timer <= this.leaderboards[Map.name].silver) {
+                        drawMedal(timeBox.x + 350, timeBox.y + 100, 50, "#8c9a9b", "#d4d4d6", 10, true)
+                    } else if (UserInterface.timer <= this.leaderboards[Map.name].bronze) {
+                        drawMedal(timeBox.x + 350, timeBox.y + 100, 50, "#e78b4c", "#f4a46f", 10, true)
                     }
+
+                    // DRAW 3 small MEDALS
+                    drawMedal(medalsBox.x + 35, medalsBox.y + medalsBox.height * 0.25, 15, "#f1b62c", "#fde320", 4, false)
+                    drawMedal(medalsBox.x + 35, medalsBox.y + medalsBox.height * 0.5, 15, "#8c9a9b", "#d4d4d6", 4, false)
+                    drawMedal(medalsBox.x + 35, medalsBox.y + medalsBox.height * 0.75, 15, "#e78b4c", "#f4a46f", 4, false)
+            
                 }
             }
         }
@@ -2825,7 +2822,24 @@ const MapBrowser = { // should set back to 0 at some points
                     }
                     rank = UserInterface.getOrdinalSuffix(rank)
                 }
-                ctx.fillText("Leaderboard Rank: " + rank, canvasArea.canvas.width - 475, 220) // do this ranking stuff properly
+                
+                ctx.fillText("Leaderboard Rank: " + rank, canvasArea.canvas.width - 475, 220)
+                
+                // GOLD SILVER AND BRONZE ICONS
+                if (rank == "1st") {
+                    ctx.fillStyle = "#fedc32" // gold
+                }
+
+                if (rank == "2nd") {
+                    ctx.fillStyle = "#dbdbdd" // silver
+                }
+
+                if (rank == "3rd") {
+                    ctx.fillStyle = "#f6b386" // bronze
+                }
+
+                canvasArea.roundedRect(canvasArea.canvas.width - 200, 186, 34, 34, 10)
+                ctx.fill()
             }
 
 
@@ -3034,7 +3048,10 @@ const Tutorial = {
         // 16 bundled w 8
 
         if (this.state == 17) { // check if ended level
-            if (UserInterface.levelState == 3) {this.state ++;}
+            if (UserInterface.levelState == 3) {
+                this.state ++; 
+                btn_playTutorial.released(true) // toggle tutorial button to be false after completing it
+            }
         }
 
         // 18 bundled w 7
@@ -4663,8 +4680,6 @@ const Map = {
 
         // turning lightDirection integer into a Vector
         this.style.lightDirectionVector = new Vector(Math.cos(this.style.lightDirection * (Math.PI/180)), Math.sin(this.style.lightDirection * (Math.PI/180)))
-        // const shadowX = this.style.lightDirectionVector.x * this.style.lightPitch; // kill
-        // const shadowY = this.style.lightDirectionVector.y * this.style.lightPitch;
 
         // lightPitch is actually sun's angle between 0 -> 89
         const sunAngle = this.style.lightPitch
@@ -4709,8 +4724,6 @@ const Map = {
 
             // SHADOW POLYGON
             const angleRad = platform.angle * (Math.PI/180);
-            // kill \/
-            //const wallShadowMultiplier = platform.wall ? (this.style.wallHeight + this.style.platformHeight) / this.style.platformHeight : 1 // makes sure shadows are longer for taller walls
 
             let wallShadowMultiplier
             if (platform.wall && this.style.platformHeight > 0) {
@@ -4871,8 +4884,6 @@ const Map = {
         this.platforms.forEach(platform => { // Loop through ALL platforms to get renderedPlatforms
 
             const adjustedHeight = platform.wall ? this.style.wallHeight : 0 // for adding height to walls
-            // kill
-            //const wallShadowMultiplier = platform.wall ? (this.style.wallHeight + this.style.platformHeight) / this.style.platformHeight : 1 // makes sure shadows are longer for taller walls
 
             let wallShadowMultiplier
             if (platform.wall && this.style.platformHeight > 0) {
@@ -5560,7 +5571,18 @@ class Player {
             // https://www.desmos.com/calculator/k1uc1yai14
             this.addSpeed *= (0.25 * (Math.cbrt(dt)+3))
             
-            if (this.addSpeed > airAcceleration * dt) {this.addSpeed = airAcceleration * dt; console.log("maxspeed clipped by AA")} // addspeed is to big and needs to be limited by airacceleration value
+            
+            
+            if (this.addSpeed > airAcceleration * dt) { // addspeed is too big and needs to be limited by airacceleration value
+                this.addSpeed = airAcceleration * dt; 
+                
+                // show overstrafe warning
+                if (UserInterface.showOverstrafeWarning == false) {
+                    UserInterface.showOverstrafeWarning = true;
+                    setTimeout(() => {UserInterface.showOverstrafeWarning = false}, 1500); // wait 1.5 seconds to hide warning
+                }
+            }
+            
             if (this.addSpeed <= 0) {this.addSpeed = 0; console.log("zero addspeed")} // currentSpeedProjected is greater than max_speed. dont add speed
             
             
