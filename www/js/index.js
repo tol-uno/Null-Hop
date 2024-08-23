@@ -1589,6 +1589,10 @@ const UserInterface = {
 
 
                 if (Tutorial.isActive) { // leaving tutorial level
+                    if (Tutorial.state >= 18) {
+                        btn_playTutorial.released(true) // toggle tutorial button to be false after completing it
+                    }
+
                     Tutorial.reset()
                 }
 
@@ -2081,6 +2085,27 @@ const UserInterface = {
         return minutes + ":" + extraSeconds;
     },
 
+    drawMedal: function(x, y, radius, fillColor, strokeColor, strokeWidth, shadow) {
+                        
+        canvasArea.ctx.fillStyle = fillColor
+        canvasArea.ctx.strokeStyle = strokeColor
+        canvasArea.ctx.lineWidth = strokeWidth
+        
+        canvasArea.ctx.beginPath()
+        canvasArea.ctx.arc(x, y, radius, 0, 2 * Math.PI); // (x, y, radius, startAngle, endAngle)
+        canvasArea.ctx.closePath()
+        
+        canvasArea.ctx.fill()
+        
+        canvasArea.ctx.save(); // save 3.1
+        if (shadow) {
+            canvasArea.ctx.shadowColor = "rgba(0, 0, 0, 0.3)"; 
+            canvasArea.ctx.shadowBlur = 20;
+        }
+        canvasArea.ctx.stroke()
+        canvasArea.ctx.restore() // save 3.1
+    },
+
     getOrdinalSuffix: function (i) { // turns 1 into 1st, 2 into 2nd
         let j = i % 10,
             k = i % 100;
@@ -2479,125 +2504,104 @@ const UserInterface = {
 
             // ENDSCREEN
             if (player.endSlow == 0) { // level name, your time, record, leaderboards
-
-
+        
                 // TIME BOX
                 const timeBox = {
-                    x : midX - (this.leaderboards[Map.name] !== undefined ? 332 - 40 : 217 - 40),
-                    y : midY - 120,
-                    width : 434,
-                    height : 268,
+                    x : midX - (this.leaderboards[Map.name] !== undefined ? 310: 220),
+                    y : midY - (Tutorial.isActive ? 118: 140),
+                    width : 430,
+                    height : 280,
                 }
 
-                // MAP NAME BOX
-                canvasArea.ctx.font = "30px BAHNSCHRIFT";
-                const nameBox = {
-                    x : timeBox.x - 30,
-                    y : timeBox.y - 30,
-                    width : 36 + canvasArea.ctx.measureText(Map.name).width , // change to match map name
-                    height : 60,
-                }
-
-
-                // 30px between timeBox and medalsBox
+                // 20px between timeBox and medalsBox
 
                 // MEDALS BOX
                 const medalsBox = {
-                    x : timeBox.x + timeBox.width + 30,
+                    x : timeBox.x + timeBox.width + 20,
                     y : timeBox.y,
-                    width : 200,
+                    width : 220,
                     height : timeBox.height,
                 }
 
+                // HIGHLIGHT MEDAL BOX
+                const highlightBox = {
+                    x : medalsBox.x + 15,
+                    y : null, // set later
+                    width : medalsBox.width - 30,
+                    height : 74,
+                }
+                
+ 
                 // DRAW BOXES
                 canvasArea.ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
-
+                canvasArea.ctx.strokeStyle = (!UserInterface.darkMode) ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
+                
                 canvasArea.ctx.save(); // save 3
 
-                canvasArea.ctx.shadowColor = "rgba(0, 0, 0, 0.4)"; 
+                canvasArea.ctx.shadowColor = "rgba(0, 0, 0, 0.3)"; 
                 canvasArea.ctx.shadowBlur = 30;
 
                 // time box
-                canvasArea.roundedRect(timeBox.x, timeBox.y, timeBox.width, timeBox.height, 25)
-                canvasArea.ctx.fill();
-
-                // name box
-                canvasArea.roundedRect(nameBox.x, nameBox.y, nameBox.width, nameBox.height, 18)
+                canvasArea.roundedRect(timeBox.x, timeBox.y, timeBox.width, timeBox.height, 20)
                 canvasArea.ctx.fill();
 
                 // medals box
                 if (this.leaderboards[Map.name] !== undefined) {
-                    canvasArea.roundedRect(medalsBox.x, medalsBox.y, medalsBox.width, medalsBox.height, 25)
+                    canvasArea.roundedRect(medalsBox.x, medalsBox.y, medalsBox.width, medalsBox.height, 20)
                     canvasArea.ctx.fill();
+
+                    // set hightlight box y and draw it
+                    if (UserInterface.timer <= this.leaderboards[Map.name].gold) {
+                        highlightBox.y = medalsBox.y + 65 - 37
+                    } else if (UserInterface.timer <= this.leaderboards[Map.name].silver) {
+                        highlightBox.y = medalsBox.y + medalsBox.height/2 - 37
+                    } else if (UserInterface.timer <= this.leaderboards[Map.name].bronze) {
+                        highlightBox.y = medalsBox.y + medalsBox.height - 65 - 37
+                    }
+                    
+                    if (highlightBox.y !== null) {
+                        canvasArea.roundedRect(highlightBox.x, highlightBox.y, highlightBox.width, highlightBox.height, 15)
+                        canvasArea.ctx.fill();
+                        canvasArea.ctx.lineWidth = 4
+                        canvasArea.ctx.stroke()
+                    }
                 }
 
                 canvasArea.ctx.restore(); // restore 3
                 
-
-
+                
                 // END SCREEN TEXT
                 canvasArea.ctx.fillStyle = (!UserInterface.darkMode) ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
                 
                 // map name
-                canvasArea.ctx.font = "30px BAHNSCHRIFT";
-                canvasArea.ctx.fillText(Map.name, nameBox.x + 18, nameBox.y + nameBox.height/2 + 10);
+                canvasArea.ctx.font = "38px BAHNSCHRIFT";
+                canvasArea.ctx.fillText(Map.name, timeBox.x + 40, timeBox.y + 65);
                 
                 // time
-                canvasArea.ctx.font = "62px BAHNSCHRIFT";
-                canvasArea.ctx.fillText(UserInterface.secondsToMinutes(UserInterface.timer), timeBox.x + 40, timeBox.y + timeBox.height/2 - 10);
-
+                canvasArea.ctx.font = "90px BAHNSCHRIFT";
+                canvasArea.ctx.fillText(UserInterface.secondsToMinutes(UserInterface.timer), timeBox.x + 40 - 5, timeBox.y + timeBox.height/2 + 32);
+                
                 // record OR new record
                 canvasArea.ctx.font = "30px BAHNSCHRIFT";
                 if (this.timer == this.records[Map.name]) {
-                    // canvasArea.ctx.fillText("New Record! " + UserInterface.secondsToMinutes(this.records[Map.name]), timeBox.x + 40, timeBox.y + timeBox.height * 0.75);
-                    canvasArea.ctx.fillText("New Record!", timeBox.x + 40, timeBox.y + timeBox.height * 0.75);
-
+                    canvasArea.ctx.fillText("New Record!", timeBox.x + 40, timeBox.y + timeBox.height - 40);
+                    
                 } else {
-                    canvasArea.ctx.fillText("Best Time: " + UserInterface.secondsToMinutes(this.records[Map.name]), timeBox.x + 40, timeBox.y + timeBox.height * 0.75);
+                    canvasArea.ctx.fillText("Best Time: " + UserInterface.secondsToMinutes(this.records[Map.name]), timeBox.x + 40, timeBox.y + timeBox.height - 40);
                 }
-
+                
                 // medal times
                 if (this.leaderboards[Map.name] !== undefined) {
-                    canvasArea.ctx.fillText(UserInterface.secondsToMinutes(this.leaderboards[Map.name].gold), medalsBox.x + 70, medalsBox.y + medalsBox.height * 0.25 + 10);
-                    canvasArea.ctx.fillText(UserInterface.secondsToMinutes(this.leaderboards[Map.name].silver), medalsBox.x + 70, medalsBox.y + medalsBox.height * 0.5 + 10);
-                    canvasArea.ctx.fillText(UserInterface.secondsToMinutes(this.leaderboards[Map.name].bronze), medalsBox.x + 70, medalsBox.y + medalsBox.height * 0.75 + 10);            
-                
-                
-                    function drawMedal(x, y, radius, fillColor, strokeColor, strokeWidth, shadow) {
-
-                        canvasArea.ctx.fillStyle = fillColor
-                        canvasArea.ctx.strokeStyle = strokeColor
-                        canvasArea.ctx.lineWidth = strokeWidth
-    
-                        canvasArea.ctx.beginPath()
-                        canvasArea.ctx.arc(x, y, radius, 0, 2 * Math.PI); // (x, y, radius, startAngle, endAngle)
-    
-                        canvasArea.ctx.fill()
-    
-                        canvasArea.ctx.save(); // save 3.1
-                        if (shadow) {
-                            canvasArea.ctx.shadowColor = "rgba(0, 0, 0, 0.3)"; 
-                            canvasArea.ctx.shadowBlur = 20;
-                        }
-                        canvasArea.ctx.stroke()
+                    canvasArea.ctx.fillText(UserInterface.secondsToMinutes(this.leaderboards[Map.name].gold), medalsBox.x + 80, medalsBox.y + 75 );
+                    canvasArea.ctx.fillText(UserInterface.secondsToMinutes(this.leaderboards[Map.name].silver), medalsBox.x + 80, medalsBox.y + medalsBox.height * 0.5 + 10);
+                    canvasArea.ctx.fillText(UserInterface.secondsToMinutes(this.leaderboards[Map.name].bronze), medalsBox.x + 80, medalsBox.y + medalsBox.height - 55 );            
+                                            
                         
-                        canvasArea.ctx.restore() // save 3.1
-                    }
-
-                    // DRAW BIG MEDALS
-                    if (UserInterface.timer <= this.leaderboards[Map.name].gold) {
-                        drawMedal(timeBox.x + 350, timeBox.y + 100, 50, "#f1b62c", "#fde320", 10, true)
-                    } else if (UserInterface.timer <= this.leaderboards[Map.name].silver) {
-                        drawMedal(timeBox.x + 350, timeBox.y + 100, 50, "#8c9a9b", "#d4d4d6", 10, true)
-                    } else if (UserInterface.timer <= this.leaderboards[Map.name].bronze) {
-                        drawMedal(timeBox.x + 350, timeBox.y + 100, 50, "#e78b4c", "#f4a46f", 10, true)
-                    }
-
                     // DRAW 3 small MEDALS
-                    drawMedal(medalsBox.x + 35, medalsBox.y + medalsBox.height * 0.25, 15, "#f1b62c", "#fde320", 4, false)
-                    drawMedal(medalsBox.x + 35, medalsBox.y + medalsBox.height * 0.5, 15, "#8c9a9b", "#d4d4d6", 4, false)
-                    drawMedal(medalsBox.x + 35, medalsBox.y + medalsBox.height * 0.75, 15, "#e78b4c", "#f4a46f", 4, false)
-            
+                    this.drawMedal(medalsBox.x + 50, medalsBox.y + 75 - 10, 15, "#f1b62c", "#fde320", 4, false)
+                    this.drawMedal(medalsBox.x + 50, medalsBox.y + medalsBox.height * 0.5, 15, "#8c9a9b", "#d4d4d6", 4, false)
+                    this.drawMedal(medalsBox.x + 50, medalsBox.y + medalsBox.height - 55 - 10, 15, "#e78b4c", "#f4a46f", 4, false)
+                    
                 }
             }
         }
@@ -2998,16 +3002,18 @@ const Tutorial = {
         }
 
         if (!this.timerStarted && this.state == 6) { // timer to jump for 2 seconds
-            this.timeoutToCancel = setTimeout(() => {this.timerStarted = false; this.state ++; this.pausePlayer = true}, 2000);
+            this.timeoutToCancel = setTimeout(() => {
+                this.timerStarted = false;
+                this.state ++;
+                this.pausePlayer = true
+                UserInterface.renderedButtons = UserInterface.btnGroup_inLevel.concat(btn_next)
+            }, 2000);
             this.timerStarted = true;
         }
 
-        if (!this.timerStarted && ( this.state == 7 || this.state == 18 )) {
-            this.timeoutToCancel = setTimeout(() => {UserInterface.renderedButtons = UserInterface.renderedButtons.concat(btn_next)}, 1500);
-            this.timerStarted = true;
-        }
+        // state 7 has no wait timer on btn_next
 
-        if (this.state == 8 || this.state == 10 || this.state == 12 || this.state == 14 || this.state == 16) { // wait for a second then allow player to progess by swiping
+        if (this.state == 8 || this.state == 10 || this.state == 12 || this.state == 14 || this.state == 16) { // wait for a bit then allow player to progess by swiping
             if (!this.timerStarted && !this.timerCompleted) {
                 this.timeoutToCancel = setTimeout(() => {this.timerStarted = false; this.timerCompleted = true}, 800);
                 this.timerStarted = true;
@@ -3048,13 +3054,14 @@ const Tutorial = {
         // 16 bundled w 8
 
         if (this.state == 17) { // check if ended level
-            if (UserInterface.levelState == 3) {
+            if (UserInterface.levelState == 3 && player.endSlow == 0) {
                 this.state ++; 
-                btn_playTutorial.released(true) // toggle tutorial button to be false after completing it
+                UserInterface.renderedButtons = UserInterface.btnGroup_inLevel.concat(btn_next)
             }
         }
 
-        // 18 bundled w 7
+        // state 18 has no wait timer on btn_next
+
     },
 
 
@@ -3248,10 +3255,7 @@ const Tutorial = {
 
 
         if (this.state == 18) {
-            drawTextPanel("Finish levels faster to climb the leaderboards")
-
-            // arrow to leaderboard??
-
+            drawTextPanel("Finish levels faster to earn medals")
             pulseNextButton()
         }
 
