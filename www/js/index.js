@@ -715,6 +715,7 @@ const UserInterface = {
 
     leaderboards : {},
     records : {},
+    previousRecord : 0,
 
     showVerticalWarning : false,
     showOverstrafeWarning : false,
@@ -2030,6 +2031,7 @@ const UserInterface = {
         const record = this.records[Map.name]
 
         if (record == null || (record !== null && this.timer < record)) {
+            this.previousRecord = (records == null) ? 0 : this.records[Map.name] // save previous record
             this.records[Map.name] = this.timer
             this.writeRecords()
         }
@@ -2086,24 +2088,32 @@ const UserInterface = {
     },
 
     drawMedal: function(x, y, radius, fillColor, strokeColor, strokeWidth, shadow) {
-                        
+        canvasArea.ctx.save() // save 3a           
         canvasArea.ctx.fillStyle = fillColor
         canvasArea.ctx.strokeStyle = strokeColor
         canvasArea.ctx.lineWidth = strokeWidth
         
+        if (shadow) {
+            canvasArea.ctx.save(); // save 3.1
+            canvasArea.ctx.shadowColor = "rgba(0, 0, 0, 0.21)"; 
+            canvasArea.ctx.shadowOffsetX = 4
+            canvasArea.ctx.shadowOffsetY = 4
+            canvasArea.ctx.beginPath()
+            canvasArea.ctx.arc(x, y, radius + strokeWidth, 0, 2 * Math.PI); // (x, y, radius, startAngle, endAngle)
+            canvasArea.ctx.closePath()
+
+            canvasArea.ctx.fill()
+            canvasArea.ctx.restore() // save 3.1
+        }
+        
+
+
         canvasArea.ctx.beginPath()
         canvasArea.ctx.arc(x, y, radius, 0, 2 * Math.PI); // (x, y, radius, startAngle, endAngle)
-        canvasArea.ctx.closePath()
         
         canvasArea.ctx.fill()
-        
-        canvasArea.ctx.save(); // save 3.1
-        if (shadow) {
-            canvasArea.ctx.shadowColor = "rgba(0, 0, 0, 0.3)"; 
-            canvasArea.ctx.shadowBlur = 20;
-        }
         canvasArea.ctx.stroke()
-        canvasArea.ctx.restore() // save 3.1
+        canvasArea.ctx.restore() // save 3a
     },
 
     getOrdinalSuffix: function (i) { // turns 1 into 1st, 2 into 2nd
@@ -2507,29 +2517,22 @@ const UserInterface = {
         
                 // TIME BOX
                 const timeBox = {
-                    x : midX - (this.leaderboards[Map.name] !== undefined ? 310: 220),
+                    x : midX - (this.leaderboards[Map.name] !== undefined ? 302: 220),
                     y : midY - (Tutorial.isActive ? 118: 140),
-                    width : 430,
-                    height : 280,
+                    width : (this.leaderboards[Map.name] !== undefined ? 652: 418),
+                    height : 288,
                 }
 
-                // 20px between timeBox and medalsBox
-
-                // MEDALS BOX
-                const medalsBox = {
-                    x : timeBox.x + timeBox.width + 20,
-                    y : timeBox.y,
-                    width : 220,
-                    height : timeBox.height,
-                }
 
                 // HIGHLIGHT MEDAL BOX
                 const highlightBox = {
-                    x : medalsBox.x + 15,
+                    x : timeBox.x + 408,
                     y : null, // set later
-                    width : medalsBox.width - 30,
-                    height : 74,
+                    width : 225,
+                    height : 75,
                 }
+
+                let medal = null
                 
  
                 // DRAW BOXES
@@ -2538,44 +2541,51 @@ const UserInterface = {
                 
                 canvasArea.ctx.save(); // save 3
 
-                canvasArea.ctx.shadowColor = "rgba(0, 0, 0, 0.3)"; 
-                canvasArea.ctx.shadowBlur = 30;
+                canvasArea.ctx.shadowColor = "rgba(0, 0, 0, 0.21)"; 
+                canvasArea.ctx.shadowOffsetX = 11
+                canvasArea.ctx.shadowOffsetY = 11
 
                 // time box
                 canvasArea.roundedRect(timeBox.x, timeBox.y, timeBox.width, timeBox.height, 20)
                 canvasArea.ctx.fill();
 
-                // medals box
+                // highlight medal box
                 if (this.leaderboards[Map.name] !== undefined) {
-                    canvasArea.roundedRect(medalsBox.x, medalsBox.y, medalsBox.width, medalsBox.height, 20)
-                    canvasArea.ctx.fill();
 
                     // set hightlight box y and draw it
                     if (UserInterface.timer <= this.leaderboards[Map.name].gold) {
-                        highlightBox.y = medalsBox.y + 65 - 37
+                        medal = 1
+                        highlightBox.y = timeBox.y + 65 - highlightBox.height/2
                     } else if (UserInterface.timer <= this.leaderboards[Map.name].silver) {
-                        highlightBox.y = medalsBox.y + medalsBox.height/2 - 37
+                        medal = 2
+                        highlightBox.y = timeBox.y + timeBox.height/2 - highlightBox.height/2
                     } else if (UserInterface.timer <= this.leaderboards[Map.name].bronze) {
-                        highlightBox.y = medalsBox.y + medalsBox.height - 65 - 37
+                        medal = 3
+                        highlightBox.y = timeBox.y + timeBox.height - 65 - highlightBox.height/2
                     }
                     
-                    if (highlightBox.y !== null) {
+                    if (medal !== null) {
+                        canvasArea.ctx.shadowOffsetX = 7
+                        canvasArea.ctx.shadowOffsetY = 7
+
                         canvasArea.roundedRect(highlightBox.x, highlightBox.y, highlightBox.width, highlightBox.height, 15)
                         canvasArea.ctx.fill();
+
+                        canvasArea.ctx.shadowColor = "transparent"
                         canvasArea.ctx.lineWidth = 4
-                        canvasArea.ctx.stroke()
+                        canvasArea.ctx.stroke();
                     }
                 }
 
                 canvasArea.ctx.restore(); // restore 3
                 
                 
-                // END SCREEN TEXT
+                // DRAW END SCREEN TEXT
                 canvasArea.ctx.fillStyle = (!UserInterface.darkMode) ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
                 
                 // map name
                 canvasArea.ctx.font = "38px BAHNSCHRIFT";
-                canvasArea.ctx.fillText(Map.name, timeBox.x + 40, timeBox.y + 65);
+                canvasArea.ctx.fillText(Map.name, timeBox.x + 40, timeBox.y + 70);
                 
                 // time
                 canvasArea.ctx.font = "90px BAHNSCHRIFT";
@@ -2583,25 +2593,42 @@ const UserInterface = {
                 
                 // record OR new record
                 canvasArea.ctx.font = "30px BAHNSCHRIFT";
-                if (this.timer == this.records[Map.name]) {
-                    canvasArea.ctx.fillText("New Record!", timeBox.x + 40, timeBox.y + timeBox.height - 40);
-                    
-                } else {
-                    canvasArea.ctx.fillText("Best Time: " + UserInterface.secondsToMinutes(this.records[Map.name]), timeBox.x + 40, timeBox.y + timeBox.height - 40);
-                }
+
+                const recordText = this.timer == this.records[Map.name] ? "New Record!  -" + UserInterface.secondsToMinutes(this.previousRecord - this.records[Map.name]) + "" : "Best Time: " + UserInterface.secondsToMinutes(this.records[Map.name])
                 
-                // medal times
+                canvasArea.ctx.fillText(recordText, timeBox.x + 40, timeBox.y + timeBox.height - 45);
+
+                
+                // medals and times
                 if (this.leaderboards[Map.name] !== undefined) {
-                    canvasArea.ctx.fillText(UserInterface.secondsToMinutes(this.leaderboards[Map.name].gold), medalsBox.x + 80, medalsBox.y + 75 );
-                    canvasArea.ctx.fillText(UserInterface.secondsToMinutes(this.leaderboards[Map.name].silver), medalsBox.x + 80, medalsBox.y + medalsBox.height * 0.5 + 10);
-                    canvasArea.ctx.fillText(UserInterface.secondsToMinutes(this.leaderboards[Map.name].bronze), medalsBox.x + 80, medalsBox.y + medalsBox.height - 55 );            
-                                            
-                        
-                    // DRAW 3 small MEDALS
-                    this.drawMedal(medalsBox.x + 50, medalsBox.y + 75 - 10, 15, "#f1b62c", "#fde320", 4, false)
-                    this.drawMedal(medalsBox.x + 50, medalsBox.y + medalsBox.height * 0.5, 15, "#8c9a9b", "#d4d4d6", 4, false)
-                    this.drawMedal(medalsBox.x + 50, medalsBox.y + medalsBox.height - 55 - 10, 15, "#e78b4c", "#f4a46f", 4, false)
+                    let halfFontHeight = 10
+                    let xOffset = 0
+                    let medalRadius = 16
+                    let medalShadow = false
+
+                    function testMedal(number) {
+                        canvasArea.ctx.font = medal == number ? "38px BAHNSCHRIFT" : "30px BAHNSCHRIFT"
+                        halfFontHeight = medal == number ? 13 : 10
+                        xOffset = medal == number ? 14 : 0
+                        medalRadius = medal == number ? 19 : 16
+                        medalShadow = medal == number ? true : false
+                        canvasArea.ctx.globalAlpha = (medal == number || medal == null) ? 1 : 0.5
+                    }
+
+                    testMedal(1)
+                    canvasArea.ctx.fillText(UserInterface.secondsToMinutes(this.leaderboards[Map.name].gold), timeBox.x + 490 - xOffset, timeBox.y + 65 + halfFontHeight);
+                    canvasArea.ctx.globalAlpha = 1
+                    this.drawMedal(timeBox.x + 460 - xOffset, timeBox.y + 65, medalRadius, "#f1b62c", "#fde320", 4, medalShadow)
                     
+                    testMedal(2)
+                    canvasArea.ctx.fillText(UserInterface.secondsToMinutes(this.leaderboards[Map.name].silver), timeBox.x + 490 - xOffset, timeBox.y + timeBox.height/2 + halfFontHeight);
+                    canvasArea.ctx.globalAlpha = 1
+                    this.drawMedal(timeBox.x + 460 - xOffset, timeBox.y + timeBox.height/2, medalRadius, "#8c9a9b", "#d4d4d6", 4, medalShadow)
+                    
+                    testMedal(3)
+                    canvasArea.ctx.fillText(UserInterface.secondsToMinutes(this.leaderboards[Map.name].bronze), timeBox.x + 490 - xOffset, timeBox.y + timeBox.height - 65 + halfFontHeight);            
+                    canvasArea.ctx.globalAlpha = 1
+                    this.drawMedal(timeBox.x + 460 - xOffset, timeBox.y + timeBox.height - 65, medalRadius, "#e78b4c", "#f4a46f", 4, medalShadow)
                 }
             }
         }
