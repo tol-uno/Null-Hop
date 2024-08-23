@@ -2107,7 +2107,6 @@ const UserInterface = {
         }
         
 
-
         canvasArea.ctx.beginPath()
         canvasArea.ctx.arc(x, y, radius, 0, 2 * Math.PI); // (x, y, radius, startAngle, endAngle)
         
@@ -3890,7 +3889,59 @@ const MapEditor = {
             ctx.fillRect(-2, -2, 4, 4) // (0,0) map origin
 
 
-            // RENDER PLATFORMS
+            // DRAW PLATFORM SIDES BELOW TOPS
+            this.renderedPlatforms.forEach(platform => {
+                                
+                // SIDES OF PLATFORMS
+                ctx.save(); // #18a
+                ctx.translate(platform.x, platform.y);
+                
+                const angleRad = platform.angle * (Math.PI/180);
+
+                if (platform.wall) {ctx.fillStyle = canvasArea.getShadedColor(MapEditor.loadedMap.style.wallSideColor, 0.5)} 
+                else if (platform.endzone) {ctx.fillStyle = canvasArea.getShadedColor(MapEditor.loadedMap.style.endZoneSideColor, 0.5)}
+                else {ctx.fillStyle = canvasArea.getShadedColor(MapEditor.loadedMap.style.platformSideColor, 0.5)}
+
+                if (-90 < platform.angle && platform.angle < 90) { // ALMOST ALWAYS RENDER BOTTOM SIDE. side2
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(platform.width/2 * Math.cos(angleRad) - (platform.height/2 * Math.sin(angleRad)), platform.width/2 * Math.sin(angleRad) + (platform.height/2 * Math.cos(angleRad))); // bot right
+                    ctx.lineTo(-platform.width/2 * Math.cos(angleRad) - (platform.height/2 * Math.sin(angleRad)), -platform.width/2 * Math.sin(angleRad) + (platform.height/2 * Math.cos(angleRad))); // bot left
+                    ctx.lineTo(-platform.width/2 * Math.cos(angleRad) - (platform.height/2 * Math.sin(angleRad)), -platform.width/2 * Math.sin(angleRad) + (platform.height/2 * Math.cos(angleRad)) + MapEditor.loadedMap.style.platformHeight);
+                    ctx.lineTo(platform.width/2 * Math.cos(angleRad) - (platform.height/2 * Math.sin(angleRad)), platform.width/2 * Math.sin(angleRad) + (platform.height/2 * Math.cos(angleRad)) + MapEditor.loadedMap.style.platformHeight);
+                    ctx.closePath();
+                    ctx.fill();
+                }
+        
+        
+                if (0 < platform.angle && platform.angle <= 90) { // side3
+        
+                    ctx.beginPath();
+                    ctx.moveTo(platform.width/2 * Math.cos(angleRad) - (platform.height/2 * Math.sin(angleRad)), platform.width/2 * Math.sin(angleRad) + (platform.height/2 * Math.cos(angleRad))); // bot right
+                    ctx.lineTo(platform.width/2 * Math.cos(angleRad) + (platform.height/2 * Math.sin(angleRad)), platform.width/2 * Math.sin(angleRad) - (platform.height/2 * Math.cos(angleRad))); // top right
+                    ctx.lineTo(platform.width/2 * Math.cos(angleRad) + (platform.height/2 * Math.sin(angleRad)), platform.width/2 * Math.sin(angleRad) - (platform.height/2 * Math.cos(angleRad)) + MapEditor.loadedMap.style.platformHeight);
+                    ctx.lineTo(platform.width/2 * Math.cos(angleRad) - (platform.height/2 * Math.sin(angleRad)), platform.width/2 * Math.sin(angleRad) + (platform.height/2 * Math.cos(angleRad)) + MapEditor.loadedMap.style.platformHeight);
+                    ctx.closePath();
+                    ctx.fill();
+                }
+        
+                if (-90 <= platform.angle && platform.angle < 0) { // side1
+        
+                    ctx.beginPath();
+                    ctx.moveTo(-platform.width/2 * Math.cos(angleRad) - (platform.height/2 * Math.sin(angleRad)), -platform.width/2 * Math.sin(angleRad) + (platform.height/2 * Math.cos(angleRad))); // bot left
+                    ctx.lineTo(-platform.width/2 * Math.cos(angleRad) + (platform.height/2 * Math.sin(angleRad)), -platform.width/2 * Math.sin(angleRad) - (platform.height/2 * Math.cos(angleRad))); // top left
+                    ctx.lineTo(-platform.width/2 * Math.cos(angleRad) + (platform.height/2 * Math.sin(angleRad)), -platform.width/2 * Math.sin(angleRad) - (platform.height/2 * Math.cos(angleRad)) + MapEditor.loadedMap.style.platformHeight);
+                    ctx.lineTo(-platform.width/2 * Math.cos(angleRad) - (platform.height/2 * Math.sin(angleRad)), -platform.width/2 * Math.sin(angleRad) + (platform.height/2 * Math.cos(angleRad)) + MapEditor.loadedMap.style.platformHeight);
+                    ctx.closePath();
+                    ctx.fill();
+                }
+        
+      
+                ctx.restore(); // #18 back to map origin translation
+                
+            })
+
+            // RENDER PLATFORMS TOPS
             this.renderedPlatforms.forEach(platform => {
                 
                 // DRAW PLATFORM TOP
@@ -3907,10 +3958,7 @@ const MapEditor = {
                     ctx.fillStyle = this.loadedMap.style.platformTopColor;
                 }
                 
-
                 ctx.fillRect(-platform.width/2, -platform.height/2, platform.width, platform.height);
-
-
 
 
                 if (platform == this.loadedMap.platforms[this.selectedPlatformIndex]) { // DRAWING THE BORDER AROUND THE SELECTED PLATFORM
@@ -3950,6 +3998,28 @@ const MapEditor = {
                 }
 
             })
+
+
+            // RENDER WALLS ADDITIONAL HEIGHT
+            this.renderedPlatforms.forEach(platform => {
+                if (platform.wall) {
+            
+                    // DRAW WALL RAISED TOP
+                    ctx.save(); // ROTATING for Platform
+                    ctx.translate(platform.x, platform.y - MapEditor.loadedMap.style.wallHeight);
+                    ctx.rotate(platform.angle * Math.PI/180);
+
+                    ctx.strokeStyle = canvasArea.getShadedColor(this.loadedMap.style.wallTopColor, 0.25)
+                    ctx.lineWidth = 4
+
+                    ctx.strokeRect(-platform.width/2, -platform.height/2, platform.width, platform.height);
+
+
+                    ctx.restore(); // restoring platform rotation and translation
+                }
+
+            })
+
 
 
             // RENDER CHECKPOINTS
@@ -4158,9 +4228,7 @@ const MapEditor = {
                 ctx.fillText("selected platform index: " + this.selectedPlatformIndex, textX, 180);
                 
             }
-
         }
-
     },
 
     update : function() {
