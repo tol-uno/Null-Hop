@@ -342,7 +342,7 @@ class SliderUI {
         this.width = width;
         this.min = min;
         this.max = max;
-        this.decimalDetail = decimalDetail // 1 = whole numbers, 10 = 10ths place, 100 = 100ths place
+        this.decimalDetail = decimalDetail //0.2 or 1/5 = multiples of 5, 1 = whole numbers, 10 = 10ths place, 100 = 100ths place
         this.label = label;
         this.value = variable;
         this.variableToControl = String(variable);
@@ -1016,6 +1016,21 @@ const UserInterface = {
             MapEditor.snapAmount = this.value
         })
 
+        btn_zoomSlider = new SliderUI("280", "canvasArea.canvas.height - 60", 170, 0.2, 3, 100, "Zoom", MapEditor.loadedMap ? MapEditor.zoom : 1, function() {
+                        
+            const zoomChange = MapEditor.zoom - this.value
+            // ex zC = 1 - 0.5 = 0.5
+            // sX was 4
+            // now is -1
+
+            // MapEditor.screenX += canvasArea.canvas.width * (1/MapEditor.zoom) / 2 * zoomChange
+            // MapEditor.screenY += canvasArea.canvas.height * (1/MapEditor.zoom) / 2 * zoomChange
+            
+            // console.log("zoomChange: " + zoomChange)
+
+            MapEditor.zoom = this.value
+        })
+
         btn_unselect = new Button("canvasArea.canvas.width - 260", "30", 60, "x_button", "", 0, "", function() {
             
             MapEditor.selectedPlatformIndex = -1; // No selected platform
@@ -1035,20 +1050,20 @@ const UserInterface = {
                 }
                 
                 if (this.isPressed) {
-                    platform.x += Math.round(touchHandler.dragAmountX)
-                    platform.y += Math.round(touchHandler.dragAmountY)
+                    platform.x += Math.round(touchHandler.dragAmountX * (1/MapEditor.zoom))
+                    platform.y += Math.round(touchHandler.dragAmountY * (1/MapEditor.zoom))
 
                     if (this.x > canvasArea.canvas.width - 340) {
                         MapEditor.screenX -= Math.round(4 * dt)
                         platform.x += Math.round(4 * dt)
                     }
     
-                    if (this.x < 30) {
+                    if (this.x < 60) {
                         MapEditor.screenX += Math.round(4 * dt)
                         platform.x -= Math.round(4 * dt)
                     }
     
-                    if (this.y > canvasArea.canvas.height - 60) {
+                    if (this.y > canvasArea.canvas.height - 130) {
                         MapEditor.screenY -= Math.round(4 * dt)
                         platform.y += Math.round(4 * dt)
                     }
@@ -1065,8 +1080,8 @@ const UserInterface = {
                 }
 
 
-                this.x =  MapEditor.screenX + platform.x + (platform.width ? 0 : 32) - this.width/2
-                this.y =  MapEditor.screenY + platform.y + (platform.height ? 0 : 32) - this.height/2
+                this.x =  (MapEditor.screenX + platform.x + (platform.width ? 0 : 32)) * MapEditor.zoom - this.width/2
+                this.y =  (MapEditor.screenY + platform.y + (platform.height ? 0 : 32)) * MapEditor.zoom - this.height/2
 
             }
 
@@ -1076,44 +1091,44 @@ const UserInterface = {
                 
                 if (MapEditor.selectedCheckpointIndex[1] == 1) {
                     if (this.isPressed) {
-                        checkpoint.triggerX1 += Math.round(touchHandler.dragAmountX)
-                        checkpoint.triggerY1 += Math.round(touchHandler.dragAmountY)
+                        checkpoint.triggerX1 += Math.round(touchHandler.dragAmountX * (1/MapEditor.zoom))
+                        checkpoint.triggerY1 += Math.round(touchHandler.dragAmountY * (1/MapEditor.zoom))
                     }
                     if (!updateFrame && MapEditor.snapAmount > 0) {
                         checkpoint.triggerX1 = Math.round(checkpoint.triggerX1 / MapEditor.snapAmount) * MapEditor.snapAmount
                         checkpoint.triggerY1 = Math.round(checkpoint.triggerY1 / MapEditor.snapAmount) * MapEditor.snapAmount
                     }   
 
-                    this.x =  MapEditor.screenX + checkpoint.triggerX1 - this.width/2
-                    this.y =  MapEditor.screenY + checkpoint.triggerY1 - this.height/2
+                    this.x =  (MapEditor.screenX + checkpoint.triggerX1) * MapEditor.zoom - this.width/2
+                    this.y =  (MapEditor.screenY + checkpoint.triggerY1) * MapEditor.zoom - this.height/2
                 }
 
                 if (MapEditor.selectedCheckpointIndex[1] == 2) {
                     if (this.isPressed) {
-                        checkpoint.triggerX2 += Math.round(touchHandler.dragAmountX)
-                        checkpoint.triggerY2 += Math.round(touchHandler.dragAmountY)
+                        checkpoint.triggerX2 += Math.round(touchHandler.dragAmountX * (1/MapEditor.zoom))
+                        checkpoint.triggerY2 += Math.round(touchHandler.dragAmountY * (1/MapEditor.zoom))
                     }
                     if (!updateFrame && MapEditor.snapAmount > 0) {
                         checkpoint.triggerX2 = Math.round(checkpoint.triggerX2 / MapEditor.snapAmount) * MapEditor.snapAmount
                         checkpoint.triggerY2 = Math.round(checkpoint.triggerY2 / MapEditor.snapAmount) * MapEditor.snapAmount
                     }
 
-                    this.x =  MapEditor.screenX + checkpoint.triggerX2 - this.width/2
-                    this.y =  MapEditor.screenY + checkpoint.triggerY2 - this.height/2
+                    this.x =  (MapEditor.screenX + checkpoint.triggerX2) * MapEditor.zoom - this.width/2
+                    this.y =  (MapEditor.screenY + checkpoint.triggerY2) * MapEditor.zoom - this.height/2
                 }
 
                 if (MapEditor.selectedCheckpointIndex[1] == 3) {
                     if (this.isPressed) {
-                        checkpoint.x += Math.round(touchHandler.dragAmountX)
-                        checkpoint.y += Math.round(touchHandler.dragAmountY)
+                        checkpoint.x += Math.round(touchHandler.dragAmountX * (1/MapEditor.zoom))
+                        checkpoint.y += Math.round(touchHandler.dragAmountY * (1/MapEditor.zoom))
                     }
                     if (!updateFrame && MapEditor.snapAmount > 0) {
                         checkpoint.x = Math.round(checkpoint.x / MapEditor.snapAmount) * MapEditor.snapAmount
                         checkpoint.y = Math.round(checkpoint.y / MapEditor.snapAmount) * MapEditor.snapAmount
                     }
 
-                    this.x =  MapEditor.screenX + checkpoint.x + 32 - this.width/2
-                    this.y =  MapEditor.screenY + checkpoint.y + 32 - this.height/2
+                    this.x =  (MapEditor.screenX + checkpoint.x + 32) * MapEditor.zoom - this.width/2
+                    this.y =  (MapEditor.screenY + checkpoint.y + 32) * MapEditor.zoom - this.height/2
                 }
 
             }
@@ -1131,7 +1146,7 @@ const UserInterface = {
             if (this.isPressed) {
 
                 // transform drag amount to match with platform angle
-                let drag = new Vector(touchHandler.dragAmountX, touchHandler.dragAmountY).rotate(-platform.angle)
+                let drag = new Vector(touchHandler.dragAmountX * (1/MapEditor.zoom), touchHandler.dragAmountY * (1/MapEditor.zoom)).rotate(-platform.angle)
 
                 platform.width += Math.round(drag.x) * 2 // multiplied by 2 because platform will be moving oppposite direction from drag direction (to appear stable)
                 if (platform.width < 10) {platform.width = 10}
@@ -1146,8 +1161,8 @@ const UserInterface = {
                 platform.height = Math.round(platform.height / MapEditor.snapAmount) * MapEditor.snapAmount
             }
 
-            this.x = platform.x + cornerX + MapEditor.screenX
-            this.y = platform.y + cornerY + MapEditor.screenY
+            this.x = (platform.x + cornerX + MapEditor.screenX) * MapEditor.zoom
+            this.y = (platform.y + cornerY + MapEditor.screenY) * MapEditor.zoom
             
         })
 
@@ -1743,7 +1758,7 @@ const UserInterface = {
         this.btnGroup_customMapBrowser = [btn_mainMenu]
         this.btnGroup_editMapBrowser = [btn_mainMenu]
         this.btnGroup_mapEditorMenu = [btn_mainMenu, btn_new_map, btn_load_map, btn_import_map, btn_import_map_text]
-        this.btnGroup_mapEditorInterface = [btn_exit_edit, btn_add_platform, btn_map_colors, btn_map_settings, btn_add_checkpoint, btn_snappingSlider]
+        this.btnGroup_mapEditorInterface = [btn_exit_edit, btn_add_platform, btn_map_colors, btn_map_settings, btn_add_checkpoint, btn_zoomSlider, btn_snappingSlider]
         this.btnGroup_inLevel = [btn_mainMenu, btn_restart, btn_jump];
         this.btnGroup_mapColor = [
             btn_mainMenu, 
@@ -1782,6 +1797,7 @@ const UserInterface = {
 
             btn_delete_platform,
             btn_duplicate_platform,
+            btn_zoomSlider,
             btn_snappingSlider
         ]
         this.btnGroup_editPlayerStart = [
@@ -1790,6 +1806,7 @@ const UserInterface = {
             
             btn_translate,
             btn_playerAngleSlider,
+            btn_zoomSlider,
             btn_snappingSlider
         ]
         this.btnGroup_editCheckPoint = [
@@ -1799,6 +1816,7 @@ const UserInterface = {
             btn_translate,
 
             btn_delete_platform,
+            btn_zoomSlider,
             btn_snappingSlider
         ]
 
@@ -2213,8 +2231,10 @@ const UserInterface = {
             // RELEASED ON PLATFORM
             MapEditor.renderedPlatforms.forEach(platform => {
                 if (// if x and y touch is within platform (NOT ROTATED THOUGH)
-                    x >= platform.x - platform.width/2 + MapEditor.screenX && x <= platform.x + platform.width/2 + MapEditor.screenX &&
-                    y >= platform.y - platform.height/2 + MapEditor.screenY && y <= platform.y + platform.height/2 + MapEditor.screenY
+                    x >= (platform.x - platform.width/2 + MapEditor.screenX) * MapEditor.zoom && 
+                    x <= (platform.x + platform.width/2 + MapEditor.screenX) * MapEditor.zoom &&
+                    y >= (platform.y - platform.height/2 + MapEditor.screenY) * MapEditor.zoom && 
+                    y <= (platform.y + platform.height/2 + MapEditor.screenY) * MapEditor.zoom
                 ) {
                     MapEditor.selectedPlatformIndex = MapEditor.loadedMap.platforms.indexOf(platform)
                     MapEditor.selectedCheckpointIndex = [-1,1]
@@ -2230,8 +2250,10 @@ const UserInterface = {
             })
             
             if ( // RELEASED on playerStart
-                x >= MapEditor.loadedMap.playerStart.x + MapEditor.screenX - 16 && x <= MapEditor.loadedMap.playerStart.x + 16 + MapEditor.screenX &&
-                y >= MapEditor.loadedMap.playerStart.y + MapEditor.screenY - 16 && y <= MapEditor.loadedMap.playerStart.y + 16 + MapEditor.screenY
+                x >= (MapEditor.loadedMap.playerStart.x + MapEditor.screenX - 16) * MapEditor.zoom && 
+                x <= (MapEditor.loadedMap.playerStart.x + MapEditor.screenX + 16) * MapEditor.zoom &&
+                y >= (MapEditor.loadedMap.playerStart.y + MapEditor.screenY - 16) * MapEditor.zoom && 
+                y <= (MapEditor.loadedMap.playerStart.y + MapEditor.screenY + 16) * MapEditor.zoom
             ) {
                 MapEditor.selectedPlatformIndex = -2 // -2 means player is selected. Maybe change this to be its own variable
                 MapEditor.selectedCheckpointIndex = [-1,1]
@@ -2248,24 +2270,24 @@ const UserInterface = {
                 let pressed = false;
                 let clickedPlayerRestart = false;
                 if ( // released checkpoint trigger 1
-                    Math.abs(checkpoint.triggerX1 + MapEditor.screenX - x) <= 20 &&
-                    Math.abs(checkpoint.triggerY1 + MapEditor.screenY - y) <= 20
+                    Math.abs((checkpoint.triggerX1 + MapEditor.screenX) * MapEditor.zoom - x) <= 20 &&
+                    Math.abs((checkpoint.triggerY1 + MapEditor.screenY) * MapEditor.zoom - y) <= 20
                 ) {
                     pressed = true;
                     MapEditor.selectedCheckpointIndex[1] = 1
                 }
 
                 if ( // released on checkpoint trigger 2
-                    Math.abs(checkpoint.triggerX2 + MapEditor.screenX - x) <= 20 &&
-                    Math.abs(checkpoint.triggerY2 + MapEditor.screenY - y) <= 20
+                    Math.abs((checkpoint.triggerX2 + MapEditor.screenX) * MapEditor.zoom - x) <= 20 &&
+                    Math.abs((checkpoint.triggerY2 + MapEditor.screenY) * MapEditor.zoom - y) <= 20
                 ) {
                     pressed = true;
                     MapEditor.selectedCheckpointIndex[1] = 2
                 }
                 
                 if ( // released on playerRestart
-                    Math.abs(checkpoint.x + MapEditor.screenX - x) <= 20 &&
-                    Math.abs(checkpoint.y + MapEditor.screenY - y) <= 20
+                    Math.abs((checkpoint.x + MapEditor.screenX) * MapEditor.zoom - x) <= 20 &&
+                    Math.abs((checkpoint.y + MapEditor.screenY) * MapEditor.zoom - y) <= 20
                 ) {
                     pressed = true;
                     clickedPlayerRestart = true
@@ -3867,6 +3889,7 @@ const MapEditor = {
     scrollVelY : 0,
     screenX : 0, // where the view is located
     screenY : 0,
+    zoom : 1, // 10 = zoomed to 10x the scale. 0.1 zoomed out so everything is 10% of its size
 
     scrollVelAveragerX : new Averager(10),
     scrollVelAveragerY : new Averager(10),
@@ -3881,9 +3904,13 @@ const MapEditor = {
     render : function() {
 
         if (this.loadedMap !== null) { // IF MAP IS LOADED RENDER IT
+
             const ctx = canvasArea.ctx;
-            ctx.save() // moving to screenx and screeny
+            ctx.save() // zooming everything
+            
+            // ctx.save() // moving to screenx and screeny
             ctx.translate(this.screenX, this.screenY);
+            ctx.scale(this.zoom, this.zoom)
 
 
             ctx.fillRect(-2, -2, 4, 4) // (0,0) map origin
@@ -3969,29 +3996,13 @@ const MapEditor = {
                 }
                 
 
-                // PLAFORM RENDERING DEBUG TEXT
-                // ctx.fillStyle = "#FFFFFF";
-                // ctx.fillText("angle: " + platform.angle, 0,-20);
-                // ctx.fillText("position: " + platform.x + ", " + platform.y, 0, 0);
-                // ctx.fillText("screen Loc X mid: " + (platform.x + this.screenX), 0, 20);
-                // ctx.fillText("screen Loc Y: " + (platform.y + platform.height/2 + this.screenY), 0, 40);
-
                 ctx.restore(); // restoring platform rotation and translation
-
-                if (this.debugText == 1) { // draw platform height indicators
-
-                    ctx.strokeStyle = "#FF0000"
-                    ctx.lineWidth = 4
-                    ctx.lineCap = "butt"
-                    ctx.beginPath()
-                    ctx.moveTo(platform.x, platform.y)
-                    ctx.lineTo(platform.x, platform.y + this.loadedMap.style.platformHeight)
-                    if (platform.wall) {
-                        ctx.strokeStyle = "#0000FF"
-                        ctx.lineTo(platform.x, platform.y - this.loadedMap.style.wallHeight)
-                    }
-                    ctx.stroke()
                 
+                // PLAFORM RENDERING DEBUG TEXT
+                if (UserInterface.settings.debugText == 1) { // draw platform height indicators
+                    ctx.fillStyle = "#FFFFFF";
+                    ctx.fillText("position: " + platform.x + ", " + platform.y, platform.x + 5, platform.y - 5);
+
                     //origin
                     ctx.fillStyle = "#00FF00";
                     ctx.fillRect(platform.x - 3, platform.y - 3, 6, 6)
@@ -4019,7 +4030,6 @@ const MapEditor = {
                 }
 
             })
-
 
 
             // RENDER CHECKPOINTS
@@ -4148,10 +4158,12 @@ const MapEditor = {
                 ctx.lineWidth = 2
                 ctx.strokeRect(-13, -13, 26, 26);
             }
-
             ctx.restore() //restoring player rotation and transformation
-            ctx.restore() // restoring screenx and screeny translation
 
+
+            ctx.restore() // restoring screenx and screeny translation
+            // ctx.restore() // zooming
+            // END OF SCALED ZOOM RENDERING
 
 
             // MAP EDITOR UI
@@ -4214,15 +4226,15 @@ const MapEditor = {
             }
 
 
-            if (this.debugText == 1) {
+            if (UserInterface.settings.debugText == 1) {
                 
                 // GENERAL MAP EDITOR DEBUG TEXT
-                const textX = 150;
+                const textX = 200;
                 ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1 :  UserInterface.lightColor_1;
                 ctx.fillText("screenX: " + this.screenX, textX, 60);
-                ctx.fillText("touchX: " + Math.round(touchHandler.touchX - this.screenX), textX, 80);
-                ctx.fillText("touchY: " + Math.round(touchHandler.touchY - this.screenY), textX, 100);
-                ctx.fillText("previousX: " + touchHandler.previousX, textX, 120);
+                ctx.fillText("screenY: " + this.screenY, textX, 80);
+                ctx.fillText("zoom: " + this.zoom, textX, 100)
+
                 ctx.fillText("rendered platforms: " + this.renderedPlatforms.length, textX, 140);
                 ctx.fillText("editorState: " + this.editorState, textX, 160);
                 ctx.fillText("selected platform index: " + this.selectedPlatformIndex, textX, 180);
@@ -4252,13 +4264,14 @@ const MapEditor = {
 
         if (this.editorState == 1 || this.editorState == 2) { // main map edit screen OR platform select screen
 
-            // SCROLLING THE SCREEN and SETTING OBJECTS TO ANGLE SLIDERS VALUES EVERY FRAME
+            // SCROLLING THE SCREEN and SETTING OBJECTS TO ANGLE SLIDERS VALUES and SETTING ZOOM TO SLIDER VALUE EVERY FRAME
             if (touchHandler.dragging == 1 &&
                 !btn_translate.isPressed && 
                 !btn_resize.isPressed && 
                 btn_angleSlider.confirmed && 
                 btn_playerAngleSlider.confirmed && 
                 btn_checkpointAngleSlider.confirmed && 
+                btn_zoomSlider.confirmed &&
                 btn_snappingSlider.confirmed 
             ){
                 if (this.scrollAmountX == null && this.scrollAmountY == null) { // starting scroll
@@ -4266,13 +4279,13 @@ const MapEditor = {
                     this.scrollAmountY = this.screenY;
                 }
 
-                this.scrollAmountX += touchHandler.dragAmountX
-                this.scrollAmountY += touchHandler.dragAmountY
+                this.scrollAmountX += touchHandler.dragAmountX * (1/this.zoom)
+                this.scrollAmountY += touchHandler.dragAmountY * (1/this.zoom)
 
 
                 // sets scrollVel to average drag amount of past 10 frames
-                this.scrollVelAveragerX.pushValue(touchHandler.dragAmountX)
-                this.scrollVelAveragerY.pushValue(touchHandler.dragAmountY)
+                this.scrollVelAveragerX.pushValue(touchHandler.dragAmountX * (1/this.zoom))
+                this.scrollVelAveragerY.pushValue(touchHandler.dragAmountY * (1/this.zoom))
 
                 this.scrollVelX = this.scrollVelAveragerX.getAverage()
                 this.scrollVelY = this.scrollVelAveragerY.getAverage()
@@ -4300,6 +4313,8 @@ const MapEditor = {
                 if (!btn_angleSlider.confirmed) {this.loadedMap.platforms[this.selectedPlatformIndex].angle = btn_angleSlider.value}
                 if (!btn_playerAngleSlider.confirmed) {this.loadedMap.playerStart.angle = btn_playerAngleSlider.value}
                 if (!btn_checkpointAngleSlider.confirmed) {this.loadedMap.checkpoints[this.selectedCheckpointIndex[0]].angle = btn_checkpointAngleSlider.value}
+            
+                if (!btn_zoomSlider.confirmed) {btn_zoomSlider.func()}
             }
 
 
@@ -4312,9 +4327,9 @@ const MapEditor = {
 
                 if (
                     (platform.x + platform.hypotenuse + this.screenX > 0) && // coming into frame on left side
-                    (platform.x - platform.hypotenuse + this.screenX < canvasArea.canvas.width) && // right side
-                    (platform.y + platform.hypotenuse + this.screenY > 0) && // top side
-                    (platform.y - platform.hypotenuse + this.screenY < canvasArea.canvas.height) // bottom side
+                    (platform.x - platform.hypotenuse + this.screenX < canvasArea.canvas.width * (1/this.zoom)) && // right side
+                    (platform.y + platform.hypotenuse + this.loadedMap.style.platformHeight + this.screenY > 0) && // top side
+                    (platform.y - platform.hypotenuse + (platform.wall ? this.loadedMap.style.wallHeight : 0) + this.screenY < canvasArea.canvas.height * (1/this.zoom)) // bottom side
                 ) {
                     this.renderedPlatforms.push(platform); // ADD platform to renderedPlatforms
                 }
@@ -4442,9 +4457,11 @@ const MapEditor = {
             MapEditor.scrollX_vel = 0;
             MapEditor.scrollY_vel = 0;
             MapEditor.snapAmount = 0;
+            MapEditor.zoom = 1;
             MapEditor.renderedPlatforms = [];
             MapEditor.selectedPlatformIndex = -1;
             MapEditor.selectedCheckpointIndex = [-1,1];
+            btn_zoomSlider.updateState(1);
             btn_snappingSlider.updateState(0);
             
             UserInterface.renderedButtons = UserInterface.btnGroup_mapEditorMenu
