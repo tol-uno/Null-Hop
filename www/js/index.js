@@ -389,16 +389,16 @@ class SliderUI {
 
             if (touchHandler.dragging) {
 
-                if (touchHandler.touchX < this.x) {
+                if (touchHandler.touches[0].x < this.x) {
                     // set to lowest
                     this.sliderX = this.x
                 } else {
-                    if (touchHandler.touchX > this.x + this.width) {
+                    if (touchHandler.touches[0].x > this.x + this.width) {
                         // set to highest
                         this.sliderX = this.x + this.width
                     } else {
                         // within slider bounds
-                        this.sliderX = touchHandler.touchX
+                        this.sliderX = touchHandler.touches[0].x
                     }
                 }
 
@@ -1047,7 +1047,7 @@ const UserInterface = {
                 if (this.isPressed) {
 
                     // moving platform around
-                    platform.x += Math.round(touchHandler.dragAmountX * (1/MapEditor.zoom))
+                    platform.x += Math.round(touchHandler.dragAmountX * (1/MapEditor.zoom)) // this doesnt work well when zoomed in
                     platform.y += Math.round(touchHandler.dragAmountY * (1/MapEditor.zoom))
 
                     // panning if at edges of screen
@@ -2410,10 +2410,12 @@ const UserInterface = {
                 canvasArea.ctx.fillText("renderedPlatforms Count: " + Map.renderedPlatforms.length, textX, 100);
                 canvasArea.ctx.fillText("endZonesToCheck: " + Map.endZonesToCheck, textX, 120);
                 canvasArea.ctx.fillText("dragging: " + touchHandler.dragging, textX, 140);
-                canvasArea.ctx.fillText("touchStartX: " + touchHandler.touchStartX, textX, 160);
-                canvasArea.ctx.fillText("touchStartY: " + touchHandler.touchStartY, textX, 180);
-                canvasArea.ctx.fillText("touch x: " + touchHandler.touchX, textX, 200);
-                canvasArea.ctx.fillText("touch y: " + touchHandler.touchY, textX, 220);
+                canvasArea.ctx.fillText("", textX, 160);
+                canvasArea.ctx.fillText("", textX, 180);
+                if (touchHandler.dragging) {
+                    canvasArea.ctx.fillText("touch x: " + touchHandler.touches[0].x, textX, 200);
+                    canvasArea.ctx.fillText("touch y: " + touchHandler.touches[0].y, textX, 220);
+                }
                 canvasArea.ctx.fillText("dragAmountX: " + touchHandler.dragAmountX, textX, 240);
                 canvasArea.ctx.fillText("velocity: " + Math.round(player.velocity.magnitude()), textX, 260);
                 canvasArea.ctx.fillText("player pos: " + Math.round(player.x) + ", " + Math.round(player.y), textX, 280);
@@ -2478,11 +2480,11 @@ const UserInterface = {
                 if (touchHandler.dragging && this.levelState != 3) { // check if any button is pressed
 
                     let lineUpOffset = 0
-                    if (touchHandler.touchStartX > midX - 200 && touchHandler.touchStartX < midX + 200) { // if touched withing slider's X => offset the handle to lineup with finger
-                        lineUpOffset = touchHandler.touchStartX - midX
+                    if (touchHandler.touches[0].startX > midX - 200 && touchHandler.touches[0].startX < midX + 200) { // if touched withing slider's X => offset the handle to lineup with finger
+                        lineUpOffset = touchHandler.touches[0].startX - midX
                     }
 
-                    let strafeDistanceX = touchHandler.touchX - touchHandler.touchStartX + lineUpOffset
+                    let strafeDistanceX = touchHandler.touches[0].x - touchHandler.touches[0].startX + lineUpOffset
                     while (strafeDistanceX > 212) { // loop back to negative
                         strafeDistanceX = -212 + (strafeDistanceX - 212)
                     }
@@ -2784,21 +2786,20 @@ const MapBrowser = { // should set back to 0 at some points
         // called every frame when gamestate == 2
 
         // changes the position of buttons on scroll
-        if (touchHandler.dragging == 1 && touchHandler.touchX > 250 && touchHandler.touchX < 650) {
+        if (touchHandler.dragging == 1 && touchHandler.touches[0].x > 250 && touchHandler.touches[0].x < 650) {
             if (this.scrollAmount == null) { // start of scroll
                 this.scrollAmount = this.scrollY
             }
 
             // is scrolling
-            // if (touchHandler.touchX > 250 && touchHandler.touchX < 650) { // dont need this check??
-                this.scrollAmount += touchHandler.dragAmountY
+            this.scrollAmount += touchHandler.dragAmountY
 
-                // sets scrollVel to average drag amount of past 10 frames
-                this.scrollVelAverager.pushValue(touchHandler.dragAmountY)
-                this.scrollVel = this.scrollVelAverager.getAverage()
+            // sets scrollVel to average drag amount of past 10 frames
+            this.scrollVelAverager.pushValue(touchHandler.dragAmountY)
+            this.scrollVel = this.scrollVelAverager.getAverage()
 
-                this.scrollY = this.scrollAmount;
-            // }
+            this.scrollY = this.scrollAmount;
+
         } else { // not dragging
 
             if (this.scrollAmount != null) { // just stopped dragging
@@ -4289,14 +4290,16 @@ const MapEditor = {
                 ctx.fillText("rendered platforms: " + this.renderedPlatforms.length, textX, 180);
                 ctx.fillText("editorState: " + this.editorState, textX, 200);
                 ctx.fillText("selected platform index: " + this.selectedPlatformIndex, textX, 220);
-
-                ctx.fillText("touch: " + Math.round(touchHandler.touchX) + ", " + Math.round(touchHandler.touchY), textX, 240);
                 
-                // mapToRange(number, inMin, inMax, outMin, outMax)
-                const touchXMapped = canvasArea.mapToRange(touchHandler.touchX, 0, canvasArea.canvas.width, this.screen.cornerX, this.screen.cornerX + this.screen.width)
-                const touchYMapped = canvasArea.mapToRange(touchHandler.touchY, 0, canvasArea.canvas.height, this.screen.cornerY, this.screen.cornerY + this.screen.height)
-
-                ctx.fillText("touch mapped: " + Math.round(touchXMapped) + ", " + Math.round(touchYMapped), textX, 260);
+                if (touchHandler.dragging) {
+                    ctx.fillText("touch: " + Math.round(touchHandler.touches[0].x) + ", " + Math.round(touchHandler.touches[0].y), textX, 240);
+                    
+                    // mapToRange(number, inMin, inMax, outMin, outMax)
+                    const touchXMapped = canvasArea.mapToRange(touchHandler.touches[0].x, 0, canvasArea.canvas.width, this.screen.cornerX, this.screen.cornerX + this.screen.width)
+                    const touchYMapped = canvasArea.mapToRange(touchHandler.touches[0].y, 0, canvasArea.canvas.height, this.screen.cornerY, this.screen.cornerY + this.screen.height)
+                    
+                    ctx.fillText("touch mapped: " + Math.round(touchXMapped) + ", " + Math.round(touchYMapped), textX, 260);
+                }
             }
         }
     },
@@ -4343,7 +4346,7 @@ const MapEditor = {
                     this.scrollAmountY = this.screen.y;
                 }
 
-                if (touchHandler.) {}
+                // if (touchHandler.) {} if zooming
 
                 this.scrollAmountX -= touchHandler.dragAmountX / this.zoom
                 this.scrollAmountY -= touchHandler.dragAmountY / this.zoom
@@ -5359,15 +5362,8 @@ const Map = {
 class InputHandler {
     dragAmountX = 0;
     dragAmountY = 0;
-    touchStartX = null;
-    touchStartY = null;
-    previousX = 0;
-    previousY = 0;
-    touchX = 0;
-    touchY = 0;
     dragging = false;
     touches = []; 
-    currentDragID = null;
     averageDragX = new Averager(30)
     averageDragY = new Averager(30)
 
@@ -5380,18 +5376,16 @@ class InputHandler {
             for (let i = 0; i < e.changedTouches.length; i++){ // for loop needed incase multiple touches are sent in the same frame
 
                 const touch = {
-                    identifier = e.changedTouches[i].identifier,
-                    x = e.changedTouches[i].pageX * canvasArea.scale,
-                    y = e.changedTouches[i].pageY * canvasArea.scale,
+                    identifier : e.changedTouches[i].identifier,
+                    x : e.changedTouches[i].pageX * canvasArea.scale,
+                    y : e.changedTouches[i].pageY * canvasArea.scale,
+                    startX : e.changedTouches[i].pageX * canvasArea.scale, // used by strafe helper hud
+                    startY : e.changedTouches[i].pageY * canvasArea.scale,
+                    previousX : e.changedTouches[i].pageX * canvasArea.scale,
+                    previousY : e.changedTouches[i].pageY * canvasArea.scale,
                 }
 
-                if (this.dragging == false) { // if this should be the new dragging touch
-                    this.currentDragID = touch.identifier;
-                    this.dragging = true;
-
-                    this.touchStartX = this.touchX = this.previousX = touch.x;
-                    this.touchStartY = this.touchY = this.previousY = touch.y;
-                }
+                if (this.dragging == false) {this.dragging = true}
 
                 UserInterface.touchStarted(touch.x, touch.y); // sends touchStarted for every touchStart
                 
@@ -5403,60 +5397,58 @@ class InputHandler {
         window.addEventListener("touchmove", e => {
             for (let i = 0; i < e.changedTouches.length; i++){ // for loop needed incase multiple touches are sent in the same frame
 
-                if (e.changedTouches[i].identifier == this.currentDragID) { // if this touch is the dragging touch
-                    this.touchX = e.changedTouches[i].pageX * canvasArea.scale;
-                    this.touchY = e.changedTouches[i].pageY * canvasArea.scale;
+                const touch = {
+                    identifier : e.changedTouches[i].identifier,
+                    x : e.changedTouches[i].pageX * canvasArea.scale,
+                    y : e.changedTouches[i].pageY * canvasArea.scale,
                 }
 
-                if (this.dragging == false) { // if main drag is released but theres another to jump to
-                    this.currentDragID = e.changedTouches[i].identifier;
-                }
-
+                // updating this touch within this.touches
+                const touchIndex = this.touches.findIndex(t => t.identifier == touch.identifier)
+                this.touches[touchIndex].previousX = this.touches[touchIndex].x
+                this.touches[touchIndex].previousY = this.touches[touchIndex].y
+                this.touches[touchIndex].x = touch.x
+                this.touches[touchIndex].y = touch.y
             }
         });
 
 
         window.addEventListener("touchcancel", e => { // Fixes tripple tap bugs by reseting everything
-            this.currentDragID = null;
             this.dragging = false;
+            this.touches = [] // this could cause issues i think
         });
 
         window.addEventListener("touchend", e => {
 
             for (let i = 0; i < e.changedTouches.length; i++){ // for loop needed incase multiple touches are sent in the same frame
 
-                if (this.dragging && e.changedTouches[i].identifier == this.currentDragID) { // might not need to check if dragging is true here
+                const touch = {
+                    identifier : e.changedTouches[i].identifier,
+                    x : e.changedTouches[i].pageX * canvasArea.scale,
+                    y : e.changedTouches[i].pageY * canvasArea.scale,
+                }
+
+                const touchIndex = this.touches.findIndex(t => t.identifier == touch.identifier)
+
+                if (this.dragging && touchIndex == 0) { // if this is the primary/first/oldest touch
                     
                     // released current drag
-
                     this.averageDragX.clear()
                     this.averageDragY.clear()
 
                     if (e.touches.length == 0) { // if theres no other drags to switch to
-
-                        this.currentDragID = null;
                         this.dragAmountX = 0;
                         this.dragAmountY = 0;
-                        this.touchStartX = null;
-                        this.touchStartY = null;
-                        this.touchX = 0;
-                        this.touchY = 0;
-                        this.previousX = 0;
-                        this.previousY = 0;
                         this.dragging = false;
-
-
-                    } else { // switch to another touch for primary dragging
-                        this.currentDragID = e.touches[0].identifier
-                        this.touchStartX = this.touchX = e.touches[0].pageX * canvasArea.scale;
-                        this.touchStartY = this.touchY = e.touches[0].pageY * canvasArea.scale;
-                        this.previousX = e.touches[0].pageX * canvasArea.scale;
-                        this.previousY = e.touches[0].pageY * canvasArea.scale;
                     }
-            
                 }
 
-                UserInterface.touchReleased(e.changedTouches[i].pageX * canvasArea.scale, e.changedTouches[i].pageY * canvasArea.scale); // sends touchRealease for every release
+                // removing this touch within this.touches
+                if (touchIndex > -1) { // only splice array when item is found
+                    this.touches.splice(touchIndex, 1); // 2nd parameter means remove one item only
+                }
+
+                UserInterface.touchReleased(touch.x, touch.y); // sends touchRealease for every release
 
             }
         });
@@ -5464,14 +5456,14 @@ class InputHandler {
 
     update() {
         if (this.dragging == true) {
-            this.dragAmountX = this.touchX - this.previousX;
-            this.dragAmountY = this.touchY - this.previousY;
+            this.dragAmountX = this.touches[0].x - this.touches[0].previousX;
+            this.dragAmountY = this.touches[0].y - this.touches[0].previousY;
 
             this.averageDragX.pushValue(this.dragAmountX)
             this.averageDragY.pushValue(this.dragAmountY)
 
-            this.previousY = this.touchY;
-            this.previousX = this.touchX;
+            this.touches[0].previousX = this.touches[0].x;
+            this.touches[0].previousY = this.touches[0].y;
         }
 
         // FOR TESTING
