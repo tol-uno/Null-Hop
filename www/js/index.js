@@ -1022,10 +1022,6 @@ const UserInterface = {
             MapEditor.snapAmount = this.value
         })
 
-        btn_zoomSlider = new SliderUI("280", "canvasArea.canvas.height - 60", 170, 0.2, 3, 100, "Zoom", MapEditor.loadedMap ? MapEditor.zoom : 1, function() {                        
-            MapEditor.zoom = this.value
-        })
-
         btn_unselect = new Button("canvasArea.canvas.width - 260", "30", 60, "x_button", "", 0, "", function() {
             
             MapEditor.selectedPlatformIndex = -1; // No selected platform
@@ -1033,8 +1029,7 @@ const UserInterface = {
             UserInterface.renderedButtons = UserInterface.btnGroup_mapEditorInterface
         })
 
-        btn_translate = new Button(0, 0, 50, "translate_button", "", 0, "", function(updateFrame) {
-
+        btn_translate = new Button(0, 0, 50, "translate_button", "", 0, "", function() {
 
             // PRE CONDITIONING FOR THE SELECTED ELEMENT
             let element
@@ -1092,7 +1087,7 @@ const UserInterface = {
                 // move button according to touch dragging
                 // adjust and pan screen if button is near the edge
                 // move element to rounded and mapped button coords
-                // snap button to snapping slider
+                // snap element to snapping slider
 
                 this.x += touchHandler.dragAmountX
                 this.y += touchHandler.dragAmountY
@@ -1130,52 +1125,87 @@ const UserInterface = {
             }
         })
 
-        btn_resize = new Button(0, 0, 50, "scale_button", "", 0, "", function(updateFrame) {
-
+        btn_resize = new Button(0, 0, 50, "scale_button", "", 0, "", function() {
+            
             let platform = MapEditor.loadedMap.platforms[MapEditor.selectedPlatformIndex]
 
-            if (this.isPressed) {
+            if (!this.isPressed) {
+
+                // position button at corner of element
+
+                // bot right corner (relative to platform center)
+                const angleRad = platform.angle * (Math.PI/180);
+                const cornerX =  ((platform.width / 2) * Math.cos(angleRad)) - ((platform.height / 2) * Math.sin(angleRad))
+                const cornerY = ((platform.width / 2) * Math.sin(angleRad)) + ((platform.height / 2) * Math.cos(angleRad))
+                
+                // corner coords mapped to screen coords
+                // mapToRange(number, inMin, inMax, outMin, outMax)
+                const cornerMappedX = canvasArea.mapToRange(platform.x + cornerX, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, canvasArea.canvas.width)
+                const cornerMappedY = canvasArea.mapToRange(platform.y + cornerY, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, canvasArea.canvas.height)
+                
+                this.x = cornerMappedX
+                this.y = cornerMappedY
+
+
+            } else if (touchHandler.dragging) {
+    
+                // move button according to touch dragging
+                // adjust and pan screen if button is near the edge
+                // resize element to rounded and mapped button coords
+                // snap element to snapping slider
+
+                this.x += touchHandler.dragAmountX
+                this.y += touchHandler.dragAmountY
+
+                // panning if at edges of screen
+                if (this.x > canvasArea.canvas.width - 340) {
+                    MapEditor.screen.x += 4 / MapEditor.zoom * dt
+                }
+
+                if (this.x < 60) {
+                    MapEditor.screen.x -= 4 / MapEditor.zoom * dt
+                }
+
+                if (this.y > canvasArea.canvas.height - 130) {
+                    MapEditor.screen.y += 4 / MapEditor.zoom * dt
+                }
+
+                if (this.y < 30) {
+                    MapEditor.screen.y -= 4 / MapEditor.zoom * dt
+                }
+
+                
+                // map platform center coords to screen coords
+                const xMapped = canvasArea.mapToRange(platform.x, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, canvasArea.canvas.width)
+                const yMapped = canvasArea.mapToRange(platform.y, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, canvasArea.canvas.height)
 
                 // transform drag amount to match with platform angle
-                let drag = new Vector(touchHandler.dragAmountX * (1/MapEditor.zoom), touchHandler.dragAmountY * (1/MapEditor.zoom)).rotate(-platform.angle)
+                let drag = new Vector((this.x - xMapped) / MapEditor.zoom, (this.y - yMapped) / MapEditor.zoom).rotate(-platform.angle)
 
-                platform.width += Math.round(drag.x) * 2 // multiplied by 2 because platform will be moving oppposite direction from drag direction (to appear stable)
-                if (platform.width < 10) {platform.width = 10}
 
-                platform.height += Math.round(drag.y) * 2
-                if (platform.height < 10) {platform.height = 10}
-            
+                platform.width = Math.round(drag.x) * 2 // multiplied by 2 because platform will be moving oppposite direction from drag direction (to appear stable)
+                platform.height = Math.round(drag.y) * 2
+    
+                if (MapEditor.snapAmount > 0) {
+                    platform.width = Math.round(platform.width / MapEditor.snapAmount) * MapEditor.snapAmount
+                    platform.height = Math.round(platform.height / MapEditor.snapAmount) * MapEditor.snapAmount
+                }
+
+                if (platform.width < 5) {platform.width = 5}
+                if (platform.height < 5) {platform.height = 5}
             }
-
-            if (!updateFrame && MapEditor.snapAmount > 0) {
-                platform.width = Math.round(platform.width / MapEditor.snapAmount) * MapEditor.snapAmount
-                platform.height = Math.round(platform.height / MapEditor.snapAmount) * MapEditor.snapAmount
-            }
-
-
-            // bot right corner (relative to platform center)
-            const angleRad = platform.angle * (Math.PI/180);
-            const cornerX =  ((platform.width / 2) * Math.cos(angleRad)) - ((platform.height / 2) * Math.sin(angleRad))
-            const cornerY = ((platform.width / 2) * Math.sin(angleRad)) + ((platform.height / 2) * Math.cos(angleRad))
-            
-            // corner coords mapped to screen coords
-            // mapToRange(number, inMin, inMax, outMin, outMax)
-            const cornerMappedX = canvasArea.mapToRange(platform.x + cornerX, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, canvasArea.canvas.width)
-            const cornerMappedY = canvasArea.mapToRange(platform.y + cornerY, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, canvasArea.canvas.height)
-            
-            this.x = cornerMappedX
-            this.y = cornerMappedY
         })
 
-        btn_angleSlider = new SliderUI("canvasArea.canvas.width - 250", "250", 170, -50, 50, 1, "Angle", MapEditor.loadedMap ? MapEditor.loadedMap.platforms[MapEditor.selectedPlatformIndex] : 0, function() {
+        btn_angleSlider = new SliderUI("canvasArea.canvas.width - 250", "250", 170, -45, 45, 1, "Angle", MapEditor.loadedMap ? MapEditor.loadedMap.platforms[MapEditor.selectedPlatformIndex] : 0, function() {
             if (MapEditor.snapAmount > 0) {this.updateState(Math.round(this.value / MapEditor.snapAmount) * MapEditor.snapAmount)}
+            if (this.value < this.min) {this.updateState(this.min)} // these are incase snapping pushes the value over or under the limits
+            if (this.value > this.max) {this.updateState(this.max)}
             MapEditor.loadedMap.platforms[MapEditor.selectedPlatformIndex].angle = this.value
         })
 
         btn_playerAngleSlider = new SliderUI("canvasArea.canvas.width - 250", "250", 170, 0, 360, 1, "Angle", MapEditor.loadedMap ? MapEditor.loadedMap.playerStart : 0, function() {
             if (MapEditor.snapAmount > 0) {this.updateState(Math.round(this.value / MapEditor.snapAmount) * MapEditor.snapAmount)}
             MapEditor.loadedMap.playerStart.angle = this.value
-            
         })
 
         btn_checkpointAngleSlider = new SliderUI("canvasArea.canvas.width - 250", "280", 170, 0, 360, 1, "Angle", MapEditor.loadedMap ? MapEditor.loadedMap.checkpoints[MapEditor.selectedCheckpointIndex[0]] : 0, function() {
@@ -1759,7 +1789,7 @@ const UserInterface = {
         this.btnGroup_customMapBrowser = [btn_mainMenu]
         this.btnGroup_editMapBrowser = [btn_mainMenu]
         this.btnGroup_mapEditorMenu = [btn_mainMenu, btn_new_map, btn_load_map, btn_import_map, btn_import_map_text]
-        this.btnGroup_mapEditorInterface = [btn_exit_edit, btn_add_platform, btn_map_colors, btn_map_settings, btn_add_checkpoint, btn_zoomSlider, btn_snappingSlider]
+        this.btnGroup_mapEditorInterface = [btn_exit_edit, btn_add_platform, btn_map_colors, btn_map_settings, btn_add_checkpoint, btn_snappingSlider]
         this.btnGroup_inLevel = [btn_mainMenu, btn_restart, btn_jump];
         this.btnGroup_mapColor = [
             btn_mainMenu, 
@@ -1798,7 +1828,6 @@ const UserInterface = {
 
             btn_delete_platform,
             btn_duplicate_platform,
-            btn_zoomSlider,
             btn_snappingSlider
         ]
         this.btnGroup_editPlayerStart = [
@@ -1807,7 +1836,6 @@ const UserInterface = {
             
             btn_translate,
             btn_playerAngleSlider,
-            btn_zoomSlider,
             btn_snappingSlider
         ]
         this.btnGroup_editCheckPoint = [
@@ -1817,7 +1845,6 @@ const UserInterface = {
             btn_translate,
 
             btn_delete_platform,
-            btn_zoomSlider,
             btn_snappingSlider
         ]
 
@@ -2336,7 +2363,7 @@ const UserInterface = {
                     this.renderedButtons =  this.btnGroup_editCheckPoint;
 
                     if (clickedPlayerRestart) {
-                        this.renderedButtons.push(btn_checkpointAngleSlider)
+                        this.renderedButtons = this.renderedButtons.concat(btn_checkpointAngleSlider)
                         btn_checkpointAngleSlider.updateState(MapEditor.loadedMap.checkpoints[MapEditor.selectedCheckpointIndex[0]].angle) // sync
                     }
                     
@@ -3923,9 +3950,7 @@ const MapEditor = {
     scrollVelY : 0,
     
     zoom : 1, // 10 = zoomed to 10x the scale. 0.1 zoomed out so everything is 10% of its size
-    zooming : false,
-    zoomStartLength: 0,
-    zoomRatio: null,
+    startingZoom: 1,
 
     screen : { // where the view is located realative to the map origin
         x : 0, // x and y are the center of the view (the crosshair)
@@ -4257,7 +4282,7 @@ const MapEditor = {
                     ctx.fillText("Checkpoint", sidePanel.x + 25, sidePanel.y + 100);
                     ctx.fillText("Trigger 1: " + this.loadedMap.checkpoints[this.selectedCheckpointIndex[0]].triggerX1 + ", " + this.loadedMap.checkpoints[this.selectedCheckpointIndex[0]].triggerY1, sidePanel.x + 25, sidePanel.y + 130);
                     ctx.fillText("Trigger 2: " + this.loadedMap.checkpoints[this.selectedCheckpointIndex[0]].triggerX2 + ", " + this.loadedMap.checkpoints[this.selectedCheckpointIndex[0]].triggerY2, sidePanel.x + 25, sidePanel.y + 160);
-                    ctx.fillText("Respawn Pos: " + this.loadedMap.checkpoints[this.selectedCheckpointIndex[0]].x + ", " + this.loadedMap.checkpoints[this.selectedCheckpointIndex[0]].y, sidePanel.x + 25, sidePanel.y + 190);
+                    ctx.fillText("Respawn: " + this.loadedMap.checkpoints[this.selectedCheckpointIndex[0]].x + ", " + this.loadedMap.checkpoints[this.selectedCheckpointIndex[0]].y, sidePanel.x + 25, sidePanel.y + 190);
   
                 }
                 
@@ -4302,6 +4327,15 @@ const MapEditor = {
                     
                     ctx.fillText("touch mapped: " + Math.round(touchXMapped) + ", " + Math.round(touchYMapped), textX, 260);
                 }
+
+
+                if (touchHandler.zoom.isZooming) {
+                    ctx.save()
+                    ctx.translate(touchHandler.zoom.x, touchHandler.zoom.y)
+                    ctx.fillRect(-3,-3,6,6)
+                    ctx.restore()
+                }
+
             }
         }
     },
@@ -4338,7 +4372,6 @@ const MapEditor = {
                 btn_angleSlider.confirmed && 
                 btn_playerAngleSlider.confirmed && 
                 btn_checkpointAngleSlider.confirmed && 
-                btn_zoomSlider.confirmed &&
                 btn_snappingSlider.confirmed 
             ){
                 // SCROLLING AROUND SCREEN
@@ -4349,10 +4382,21 @@ const MapEditor = {
                 }
 
                 // ZOOMING 
-                // if (touchHandler.zooming.length >= 2) {
+                if (touchHandler.zoom.isZooming) {
+                     
+                    this.zoom = touchHandler.zoom.ratio * this.startingZoom
+                    if (this.zoom > 5) {this.zoom = 5}
+                    if (this.zoom < 0.1) {this.zoom = 0.1}
+                    if (Math.abs(this.zoom - 1) < 0.1) { // snapping to zoom = 1 if close
+                        this.zoom = 1
+                    }
+                    
+                    
+                } else {
+                    this.startingZoom = this.zoom                
+                }
                 
-                // } 
-
+                // ACTUALLY SCROLLING THE SCREEN
                 this.scrollAmountX -= touchHandler.dragAmountX / this.zoom
                 this.scrollAmountY -= touchHandler.dragAmountY / this.zoom
 
@@ -4365,7 +4409,8 @@ const MapEditor = {
 
                 this.screen.x = this.scrollAmountX;
                 this.screen.y = this.scrollAmountY;
-            
+        
+
             } else { // not dragging around screen
 
                 if (this.scrollAmountX != null && this.scrollAmountY != null) { // just stopped dragging
@@ -4383,11 +4428,9 @@ const MapEditor = {
 
 
                 // UPDATE THE ANGLE OF OBJECTS WHEN THEIR ANGLE SLIDER IS PRESSED
-                if (!btn_angleSlider.confirmed) {this.loadedMap.platforms[this.selectedPlatformIndex].angle = btn_angleSlider.value}
-                if (!btn_playerAngleSlider.confirmed) {this.loadedMap.playerStart.angle = btn_playerAngleSlider.value}
-                if (!btn_checkpointAngleSlider.confirmed) {this.loadedMap.checkpoints[this.selectedCheckpointIndex[0]].angle = btn_checkpointAngleSlider.value}
-            
-                if (!btn_zoomSlider.confirmed) {btn_zoomSlider.func()}
+                if (!btn_angleSlider.confirmed) {btn_angleSlider.func()}
+                if (!btn_playerAngleSlider.confirmed) {btn_playerAngleSlider.func()}
+                if (!btn_checkpointAngleSlider.confirmed) {btn_checkpointAngleSlider.func()}            
             }
 
 
@@ -4423,7 +4466,6 @@ const MapEditor = {
             // ColorPicker.render called in MapEditor.render()
         }
 
-
         if (this.editorState == 4) { // in map settings screen
             if (!btn_platformHeightSlider.confirmed) {
                 this.loadedMap.style.platformHeight = btn_platformHeightSlider.value
@@ -4446,8 +4488,6 @@ const MapEditor = {
             }   
         }
 
-
-
         if (this.editorState == 2) { // update translate and resize buttons every frame
 
             if (UserInterface.renderedButtons.includes(btn_translate)) {
@@ -4468,8 +4508,6 @@ const MapEditor = {
         if (this.editorState == 2 && (this.selectedPlatformIndex == -1 && this.selectedCheckpointIndex[0] == -1)) {
             this.editorState = 1;
         }
-        
-
     
     },
 
@@ -4542,7 +4580,6 @@ const MapEditor = {
             MapEditor.renderedPlatforms = [];
             MapEditor.selectedPlatformIndex = -1;
             MapEditor.selectedCheckpointIndex = [-1,1];
-            btn_zoomSlider.updateState(1);
             btn_snappingSlider.updateState(0);
             
             UserInterface.renderedButtons = UserInterface.btnGroup_mapEditorMenu
@@ -5368,6 +5405,16 @@ class InputHandler {
     dragAmountX = 0;
     dragAmountY = 0;
     dragging = false;
+
+    zoom = {
+        isZooming : false,
+        x : null, // middle point between the two zooming fingers
+        y : null,
+        startLength : null,
+        prevRatio : null, // kill kill not used
+        ratio : null,
+    }
+
     touches = []; 
     averageDragX = new Averager(30)
     averageDragY = new Averager(30)
@@ -5396,6 +5443,16 @@ class InputHandler {
                 
                 this.touches.push(touch)
             }
+            
+            if (UserInterface.gamestate == 7 && this.touches.length >= 2) { // If in map editor 
+                this.zoom.isZooming = true
+                this.zoom.x = (this.touches[0].x + this.touches[1].x) / 2 
+                this.zoom.y = (this.touches[0].y + this.touches[1].y) / 2
+                this.zoom.startLength = Math.sqrt((this.touches[1].x - this.touches[0].x) ** 2 + (this.touches[1].y - this.touches[0].y) ** 2)
+                this.zoom.prevRatio = 1
+                this.zoom.ratio = 1
+
+            }
         });
 
 
@@ -5416,27 +5473,26 @@ class InputHandler {
                 this.touches[touchIndex].y = touch.y
             }
 
-            // zoom = { 
-            //     x : (touchHandler.touches[0].x + touchHandler.touches[1].x) / 2,
-            //     y : (touchHandler.touches[0].y + touchHandler.touches[1].y) /2,
-            //     length : Math.sqrt(((touchHandler.touches[1].x - touchHandler.touches[0].x) ** 2) + ((touchHandler.touches[1].y - touchHandler.touches[0].y) ** 2)),
-            //     // vector from center
+            if (this.zoom.isZooming) {
+                this.zoom.x = (this.touches[0].x + this.touches[1].x) / 2 
+                this.zoom.y = (this.touches[0].y + this.touches[1].y) / 2
+                let currentLength = Math.sqrt((this.touches[1].x - this.touches[0].x) ** 2 + (this.touches[1].y - this.touches[0].y) ** 2)
+                this.zoom.prevRatio = this.zoom.ratio
+                this.zoom.ratio = currentLength / this.zoom.startLength 
+            }
 
-            //     // screen.x translation based on 
-            //     // zoomOrigin close to screen.x means little translation
-            //     // zoomOrigin near edge of screen means max translation
-            // }
         });
 
 
         window.addEventListener("touchcancel", e => { // Fixes tripple tap bugs by reseting everything
             this.dragging = false;
             this.touches = [] // this could cause issues i think
+            this.zoom.isZooming = false
         });
 
         window.addEventListener("touchend", e => {
 
-            for (let i = 0; i < e.changedTouches.length; i++){ // for loop needed incase multiple touches are sent in the same frame
+            for (let i = 0; i < e.changedTouches.length; i++) { // for loop needed incase multiple touches are sent in the same frame
 
                 const touch = {
                     identifier : e.changedTouches[i].identifier,
@@ -5467,20 +5523,46 @@ class InputHandler {
                 UserInterface.touchReleased(touch.x, touch.y); // sends touchRealease for every release
 
             }
+
+            if (this.zoom.isZooming && this.touches.length < 2) { // stop zooming if less than two touches
+                this.zoom.isZooming = false
+                this.zoom.x = null
+                this.zoom.y = null
+                this.zoom.startLength = null
+                this.zoom.prevRatio = null
+                this.zoom.ratio = null
+            }
+
         });
     }
 
     update() {
-        if (this.dragging == true) {
+        if (this.touches.length == 1) {
             this.dragAmountX = this.touches[0].x - this.touches[0].previousX;
             this.dragAmountY = this.touches[0].y - this.touches[0].previousY;
 
-            this.averageDragX.pushValue(this.dragAmountX)
-            this.averageDragY.pushValue(this.dragAmountY)
+            this.touches[0].previousX = this.touches[0].x;
+            this.touches[0].previousY = this.touches[0].y;
+        } 
+        
+        if (this.zoom.isZooming && this.touches.length >= 2) { // pan using center of screen in map editor
+            
+            const zoomMidX = (this.touches[0].x + this.touches[1].x) / 2
+            const zoomMidX_prev = (this.touches[0].previousX + this.touches[1].previousX) / 2
+            const zoomMidY = (this.touches[0].y + this.touches[1].y) / 2
+            const zoomMidY_prev = (this.touches[0].previousY + this.touches[1].previousY) / 2
+
+            this.dragAmountX = zoomMidX - zoomMidX_prev;
+            this.dragAmountY = zoomMidY - zoomMidY_prev;
 
             this.touches[0].previousX = this.touches[0].x;
             this.touches[0].previousY = this.touches[0].y;
-        }
+            this.touches[1].previousX = this.touches[1].x;
+            this.touches[1].previousY = this.touches[1].y;
+        } 
+        
+        this.averageDragX.pushValue(this.dragAmountX)
+        this.averageDragY.pushValue(this.dragAmountY)
 
         // FOR TESTING
         // this.dragAmountX = 2 * dt;
