@@ -1034,7 +1034,73 @@ const UserInterface = {
         })
 
         btn_translate = new Button(0, 0, 50, "translate_button", "", 0, "", function(updateFrame) {
+
+            if (MapEditor.selectedPlatformIndex != -1) { // platform selected
+                let platform;
+    
+                if (MapEditor.selectedPlatformIndex == -2) { // if selected playerStart
+                    platform = MapEditor.loadedMap.playerStart
+                } else { // selected platform
+                    platform = MapEditor.loadedMap.platforms[MapEditor.selectedPlatformIndex]
+                }
+               
+                if (!this.isPressed) {
+                    // position button in the middle of platform
+
+                    // platforms coords mapped to screen coords
+                    // mapToRange(number, inMin, inMax, outMin, outMax)
+                    const xMapped = canvasArea.mapToRange(platform.x, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, canvasArea.canvas.width)
+                    const yMapped = canvasArea.mapToRange(platform.y, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, canvasArea.canvas.height)
+                    
+
+                    this.x =  xMapped + (platform.width ? 0 : 32 * MapEditor.zoom) - this.width/2
+                    this.y =  yMapped + (platform.height ? 0 : 32 * MapEditor.zoom) - this.height/2
+
+                } else if (touchHandler.dragging) {
+
+                    // move button according to touch dragging
+                    // adjust and pan screen if button is near the edge
+                    // move platform to rounded and mapped button coords
+                    // snap button to snapping slider
+
+                    this.x += touchHandler.dragAmountX
+                    this.y += touchHandler.dragAmountY
+
+                    // panning if at edges of screen
+                    if (this.x > canvasArea.canvas.width - 340) {
+                        MapEditor.screen.x += 4 * dt
+                    }
+    
+                    if (this.x < 60) {
+                        MapEditor.screen.x -= 4 * dt
+                    }
+    
+                    if (this.y > canvasArea.canvas.height - 130) {
+                        MapEditor.screen.y += 4 * dt
+                    }
+    
+                    if (this.y < 30) {
+                        MapEditor.screen.y -= 4 * dt
+                    }
             
+                    
+                    // this.x and this.y mapped to map coords
+                    // mapToRange(number, inMin, inMax, outMin, outMax)
+                    const xMapped = canvasArea.mapToRange(this.x - (platform.width ? 0 : 32 * MapEditor.zoom) + this.width/2, 0, canvasArea.canvas.width, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width)
+                    const yMapped = canvasArea.mapToRange(this.y - (platform.height ? 0 : 32 * MapEditor.zoom) + this.height/2, 0, canvasArea.canvas.height, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height)
+                    
+                    platform.x = Math.round(xMapped)
+                    platform.y = Math.round(yMapped)      
+                    
+                    if (MapEditor.snapAmount > 0) {
+                        platform.x = Math.round(platform.x / MapEditor.snapAmount) * MapEditor.snapAmount
+                        platform.y = Math.round(platform.y / MapEditor.snapAmount) * MapEditor.snapAmount
+                    }
+                }
+            }
+
+
+            /*
             if (MapEditor.selectedPlatformIndex != -1) { // platform selected
                 let platform;
     
@@ -1072,9 +1138,14 @@ const UserInterface = {
                     }
 
                 }
-                if (!updateFrame && MapEditor.snapAmount > 0) {
-                    platform.x = Math.round(platform.x / MapEditor.snapAmount) * MapEditor.snapAmount
-                    platform.y = Math.round(platform.y / MapEditor.snapAmount) * MapEditor.snapAmount
+                if (!updateFrame) {
+                    // snap platform pos to a whole number
+
+
+                    if (MapEditor.snapAmount > 0) {
+                        platform.x = Math.round(platform.x / MapEditor.snapAmount) * MapEditor.snapAmount
+                        platform.y = Math.round(platform.y / MapEditor.snapAmount) * MapEditor.snapAmount
+                    }
                 }
 
 
@@ -1089,7 +1160,10 @@ const UserInterface = {
                 this.y =  yMapped + (platform.height ? 0 : 32) - this.height/2
 
             }
+            */
+            
 
+            
             if (MapEditor.selectedCheckpointIndex[0] != -1) { // checkpoint selected
                 
                 const checkpoint = MapEditor.loadedMap.checkpoints[MapEditor.selectedCheckpointIndex[0]]
@@ -2076,7 +2150,7 @@ const UserInterface = {
         const record = this.records[Map.name]
 
         if (record == null || (record !== null && this.timer < record)) {
-            this.previousRecord = (records == null) ? 0 : this.records[Map.name] // save previous record
+            this.previousRecord = (record == null) ? 0 : this.records[Map.name] // save previous record
             this.records[Map.name] = this.timer
             this.writeRecords()
         }
@@ -2262,14 +2336,34 @@ const UserInterface = {
             const touchYMapped = canvasArea.mapToRange(y, 0, canvasArea.canvas.height, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height)
 
 
+            function isPointInRect(pointX, pointY, rect) {
+                // Convert angle from degrees to radians
+                const angleRad = rect.angle * Math.PI / 180;
+            
+                // Calculate the sine and cosine of the angle
+                const cosAngle = Math.cos(angleRad);
+                const sinAngle = Math.sin(angleRad);
+            
+                // Translate point to rectangle's coordinate system (centered at origin)
+                const translatedX = pointX - rect.x;
+                const translatedY = pointY - rect.y;
+            
+                // Rotate point to align with the rectangle (reverse rotation)
+                const rotatedX = cosAngle * translatedX + sinAngle * translatedY;
+                const rotatedY = -sinAngle * translatedX + cosAngle * translatedY;
+            
+                // Check if the rotated point is within the axis-aligned rectangle
+                const halfWidth = rect.width / 2;
+                const halfHeight = rect.height / 2;
+            
+                const isInside = (Math.abs(rotatedX) <= halfWidth) && (Math.abs(rotatedY) <= halfHeight);
+            
+                return isInside;
+            }
+
             // RELEASED ON PLATFORM
             MapEditor.renderedPlatforms.forEach(platform => {
-                if (// if x and y touch is within platform (NOT ROTATED THOUGH)
-                    touchXMapped >= platform.x - platform.width/2 && 
-                    touchXMapped <= platform.x + platform.width/2 &&
-                    touchYMapped >= platform.y - platform.height/2 && 
-                    touchYMapped <= platform.y + platform.height/2
-                ) {
+                if (isPointInRect(touchXMapped, touchYMapped, platform)) {
                     MapEditor.selectedPlatformIndex = MapEditor.loadedMap.platforms.indexOf(platform)
                     MapEditor.selectedCheckpointIndex = [-1,1]
 
@@ -2283,11 +2377,16 @@ const UserInterface = {
                 }
             })
             
+            const playerStartRect = {
+                x: MapEditor.loadedMap.playerStart.x,
+                y: MapEditor.loadedMap.playerStart.y,
+                width: 32,
+                height: 32,
+                angle: MapEditor.loadedMap.playerStart.angle,
+            }
+
             if ( // RELEASED on playerStart
-                touchXMapped >= MapEditor.loadedMap.playerStart.x - 16 && 
-                touchXMapped <= MapEditor.loadedMap.playerStart.x + 16 &&
-                touchYMapped >= MapEditor.loadedMap.playerStart.y - 16 && 
-                touchYMapped <= MapEditor.loadedMap.playerStart.y + 16
+                isPointInRect(touchXMapped, touchYMapped, playerStartRect)
             ) {
                 MapEditor.selectedPlatformIndex = -2 // -2 means player is selected. Maybe change this to be its own variable
                 MapEditor.selectedCheckpointIndex = [-1,1]
@@ -2651,7 +2750,7 @@ const UserInterface = {
                 // record OR new record
                 canvasArea.ctx.font = "30px BAHNSCHRIFT";
 
-                const recordText = this.timer == this.records[Map.name] ? "New Record!  -" + UserInterface.secondsToMinutes(this.previousRecord - this.records[Map.name]) + "" : "Best Time: " + UserInterface.secondsToMinutes(this.records[Map.name])
+                const recordText = (this.timer == this.records[Map.name]) ? "New Record!  -(" + UserInterface.secondsToMinutes(Math.abs(this.previousRecord - this.records[Map.name])) + ")" : "Best Time: " + UserInterface.secondsToMinutes(this.records[Map.name])
                 
                 canvasArea.ctx.fillText(recordText, timeBox.x + 40, timeBox.y + timeBox.height - 45);
 
@@ -3924,7 +4023,10 @@ const MapEditor = {
     scrollVelY : 0,
     
     zoom : 1, // 10 = zoomed to 10x the scale. 0.1 zoomed out so everything is 10% of its size
-    
+    zooming : false,
+    zoomStartLength: 0,
+    zoomRatio: null,
+
     screen : { // where the view is located realative to the map origin
         x : 0, // x and y are the center of the view (the crosshair)
         y : 0, // if 0,0 the view is centered on the map origin. Origin is in the center of the screen
@@ -4346,7 +4448,10 @@ const MapEditor = {
                     this.scrollAmountY = this.screen.y;
                 }
 
-                // if (touchHandler.) {} if zooming
+                // ZOOMING 
+                // if (touchHandler.zooming.length >= 2) {
+                
+                // } 
 
                 this.scrollAmountX -= touchHandler.dragAmountX / this.zoom
                 this.scrollAmountY -= touchHandler.dragAmountY / this.zoom
@@ -5410,6 +5515,17 @@ class InputHandler {
                 this.touches[touchIndex].x = touch.x
                 this.touches[touchIndex].y = touch.y
             }
+
+            // zoom = { 
+            //     x : (touchHandler.touches[0].x + touchHandler.touches[1].x) / 2,
+            //     y : (touchHandler.touches[0].y + touchHandler.touches[1].y) /2,
+            //     length : Math.sqrt(((touchHandler.touches[1].x - touchHandler.touches[0].x) ** 2) + ((touchHandler.touches[1].y - touchHandler.touches[0].y) ** 2)),
+            //     // vector from center
+
+            //     // screen.x translation based on 
+            //     // zoomOrigin close to screen.x means little translation
+            //     // zoomOrigin near edge of screen means max translation
+            // }
         });
 
 
