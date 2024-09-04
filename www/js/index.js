@@ -1035,198 +1035,98 @@ const UserInterface = {
 
         btn_translate = new Button(0, 0, 50, "translate_button", "", 0, "", function(updateFrame) {
 
-            if (MapEditor.selectedPlatformIndex != -1) { // platform selected
-                let platform;
-    
+
+            // PRE CONDITIONING FOR THE SELECTED ELEMENT
+            let element
+            let xKey = "x" // these are used to distingish wheather to use triggerX1 or just x when dealing with checkpoints
+            let yKey = "y" // implemented this system so that the btn_translate logic can be done with one section of code
+            let offSet = 0 // amount to offset the bnt_translate from the center of the element
+
+            if (MapEditor.selectedPlatformIndex != -1) {
+                
                 if (MapEditor.selectedPlatformIndex == -2) { // if selected playerStart
-                    platform = MapEditor.loadedMap.playerStart
+                    element = MapEditor.loadedMap.playerStart
+                    offSet = 32
+
                 } else { // selected platform
-                    platform = MapEditor.loadedMap.platforms[MapEditor.selectedPlatformIndex]
-                }
-               
-                if (!this.isPressed) {
-                    // position button in the middle of platform
-
-                    // platforms coords mapped to screen coords
-                    // mapToRange(number, inMin, inMax, outMin, outMax)
-                    const xMapped = canvasArea.mapToRange(platform.x, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, canvasArea.canvas.width)
-                    const yMapped = canvasArea.mapToRange(platform.y, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, canvasArea.canvas.height)
-                    
-
-                    this.x =  xMapped + (platform.width ? 0 : 32 * MapEditor.zoom) - this.width/2
-                    this.y =  yMapped + (platform.height ? 0 : 32 * MapEditor.zoom) - this.height/2
-
-                } else if (touchHandler.dragging) {
-
-                    // move button according to touch dragging
-                    // adjust and pan screen if button is near the edge
-                    // move platform to rounded and mapped button coords
-                    // snap button to snapping slider
-
-                    this.x += touchHandler.dragAmountX
-                    this.y += touchHandler.dragAmountY
-
-                    // panning if at edges of screen
-                    if (this.x > canvasArea.canvas.width - 340) {
-                        MapEditor.screen.x += 4 * dt
-                    }
-    
-                    if (this.x < 60) {
-                        MapEditor.screen.x -= 4 * dt
-                    }
-    
-                    if (this.y > canvasArea.canvas.height - 130) {
-                        MapEditor.screen.y += 4 * dt
-                    }
-    
-                    if (this.y < 30) {
-                        MapEditor.screen.y -= 4 * dt
-                    }
-            
-                    
-                    // this.x and this.y mapped to map coords
-                    // mapToRange(number, inMin, inMax, outMin, outMax)
-                    const xMapped = canvasArea.mapToRange(this.x - (platform.width ? 0 : 32 * MapEditor.zoom) + this.width/2, 0, canvasArea.canvas.width, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width)
-                    const yMapped = canvasArea.mapToRange(this.y - (platform.height ? 0 : 32 * MapEditor.zoom) + this.height/2, 0, canvasArea.canvas.height, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height)
-                    
-                    platform.x = Math.round(xMapped)
-                    platform.y = Math.round(yMapped)      
-                    
-                    if (MapEditor.snapAmount > 0) {
-                        platform.x = Math.round(platform.x / MapEditor.snapAmount) * MapEditor.snapAmount
-                        platform.y = Math.round(platform.y / MapEditor.snapAmount) * MapEditor.snapAmount
-                    }
+                    element = MapEditor.loadedMap.platforms[MapEditor.selectedPlatformIndex]
                 }
             }
 
-
-            /*
-            if (MapEditor.selectedPlatformIndex != -1) { // platform selected
-                let platform;
-    
-                if (MapEditor.selectedPlatformIndex == -2) { // if selected playerStart
-                    platform = MapEditor.loadedMap.playerStart
-                } else { // selected platform
-                    platform = MapEditor.loadedMap.platforms[MapEditor.selectedPlatformIndex]
-                }
-                
-                if (this.isPressed) {
-
-                    // moving platform around
-                    platform.x += Math.round(touchHandler.dragAmountX * (1/MapEditor.zoom)) // this doesnt work well when zoomed in
-                    platform.y += Math.round(touchHandler.dragAmountY * (1/MapEditor.zoom))
-
-                    // panning if at edges of screen
-                    if (this.x > canvasArea.canvas.width - 340) {
-                        MapEditor.screen.x += Math.round(4 * dt)
-                        platform.x += Math.round(4 * dt)
-                    }
-    
-                    if (this.x < 60) {
-                        MapEditor.screen.x -= Math.round(4 * dt)
-                        platform.x -= Math.round(4 * dt)
-                    }
-    
-                    if (this.y > canvasArea.canvas.height - 130) {
-                        MapEditor.screen.y += Math.round(4 * dt)
-                        platform.y += Math.round(4 * dt)
-                    }
-    
-                    if (this.y < 30) {
-                        MapEditor.screen.y -= Math.round(4 * dt)
-                        platform.y -= Math.round(4 * dt)
-                    }
-
-                }
-                if (!updateFrame) {
-                    // snap platform pos to a whole number
-
-
-                    if (MapEditor.snapAmount > 0) {
-                        platform.x = Math.round(platform.x / MapEditor.snapAmount) * MapEditor.snapAmount
-                        platform.y = Math.round(platform.y / MapEditor.snapAmount) * MapEditor.snapAmount
-                    }
-                }
-
-
-
-                // platforms coords mapped to screen coords
-                // mapToRange(number, inMin, inMax, outMin, outMax)
-                const xMapped = canvasArea.mapToRange(platform.x, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, canvasArea.canvas.width)
-                const yMapped = canvasArea.mapToRange(platform.y, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, canvasArea.canvas.height)
-                
-
-                this.x =  xMapped + (platform.width ? 0 : 32) - this.width/2
-                this.y =  yMapped + (platform.height ? 0 : 32) - this.height/2
-
-            }
-            */
-            
-
-            
             if (MapEditor.selectedCheckpointIndex[0] != -1) { // checkpoint selected
-                
-                const checkpoint = MapEditor.loadedMap.checkpoints[MapEditor.selectedCheckpointIndex[0]]
-                
+                element = MapEditor.loadedMap.checkpoints[MapEditor.selectedCheckpointIndex[0]]
+
                 if (MapEditor.selectedCheckpointIndex[1] == 1) {
-                    if (this.isPressed) {
-                        checkpoint.triggerX1 += Math.round(touchHandler.dragAmountX * (1/MapEditor.zoom))
-                        checkpoint.triggerY1 += Math.round(touchHandler.dragAmountY * (1/MapEditor.zoom))
-                    }
-                    if (!updateFrame && MapEditor.snapAmount > 0) {
-                        checkpoint.triggerX1 = Math.round(checkpoint.triggerX1 / MapEditor.snapAmount) * MapEditor.snapAmount
-                        checkpoint.triggerY1 = Math.round(checkpoint.triggerY1 / MapEditor.snapAmount) * MapEditor.snapAmount
-                    }
-
-                    // trigger coords mapped to screen coords
-                    // mapToRange(number, inMin, inMax, outMin, outMax)
-                    const xMapped = canvasArea.mapToRange(checkpoint.triggerX1, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, canvasArea.canvas.width)
-                    const yMapped = canvasArea.mapToRange(checkpoint.triggerY1, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, canvasArea.canvas.height)
-                    
-
-                    this.x =  xMapped - this.width/2
-                    this.y =  yMapped - this.height/2
+                    xKey = "triggerX1"
+                    yKey = "triggerY1"
                 }
 
                 if (MapEditor.selectedCheckpointIndex[1] == 2) {
-                    if (this.isPressed) {
-                        checkpoint.triggerX2 += Math.round(touchHandler.dragAmountX * (1/MapEditor.zoom))
-                        checkpoint.triggerY2 += Math.round(touchHandler.dragAmountY * (1/MapEditor.zoom))
-                    }
-                    if (!updateFrame && MapEditor.snapAmount > 0) {
-                        checkpoint.triggerX2 = Math.round(checkpoint.triggerX2 / MapEditor.snapAmount) * MapEditor.snapAmount
-                        checkpoint.triggerY2 = Math.round(checkpoint.triggerY2 / MapEditor.snapAmount) * MapEditor.snapAmount
-                    }
-
-                    // trigger coords mapped to screen coords
-                    // mapToRange(number, inMin, inMax, outMin, outMax)
-                    const xMapped = canvasArea.mapToRange(checkpoint.triggerX2, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, canvasArea.canvas.width)
-                    const yMapped = canvasArea.mapToRange(checkpoint.triggerY2, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, canvasArea.canvas.height)
-                    
-                    this.x =  xMapped - this.width/2
-                    this.y =  yMapped - this.height/2
+                    xKey = "triggerX2"
+                    yKey = "triggerY2"
                 }
-
+                
                 if (MapEditor.selectedCheckpointIndex[1] == 3) {
-                    if (this.isPressed) {
-                        checkpoint.x += Math.round(touchHandler.dragAmountX * (1/MapEditor.zoom))
-                        checkpoint.y += Math.round(touchHandler.dragAmountY * (1/MapEditor.zoom))
-                    }
-                    if (!updateFrame && MapEditor.snapAmount > 0) {
-                        checkpoint.x = Math.round(checkpoint.x / MapEditor.snapAmount) * MapEditor.snapAmount
-                        checkpoint.y = Math.round(checkpoint.y / MapEditor.snapAmount) * MapEditor.snapAmount
-                    }
+                    offSet = 32
+                }
+            }
 
 
-                    // checkpoint coords mapped to screen coords
-                    // mapToRange(number, inMin, inMax, outMin, outMax)
-                    const xMapped = canvasArea.mapToRange(checkpoint.x, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, canvasArea.canvas.width)
-                    const yMapped = canvasArea.mapToRange(checkpoint.y, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, canvasArea.canvas.height)
-                    
-                    this.x =  xMapped + 32 - this.width/2
-                    this.y =  yMapped + 32 - this.height/2
+
+            // ACTUAL BUTTON LOGIC 
+
+            if (!this.isPressed) { // not pressed
+                // position button in the middle of element
+
+                // element coords mapped to screen coords
+                // mapToRange(number, inMin, inMax, outMin, outMax)
+                const xMapped = canvasArea.mapToRange(element[xKey], MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, canvasArea.canvas.width)
+                const yMapped = canvasArea.mapToRange(element[yKey], MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, canvasArea.canvas.height)
+                
+
+                this.x =  xMapped + (offSet * MapEditor.zoom) - this.width/2
+                this.y =  yMapped + (offSet * MapEditor.zoom) - this.height/2
+
+            } else if (touchHandler.dragging) {
+
+                // move button according to touch dragging
+                // adjust and pan screen if button is near the edge
+                // move element to rounded and mapped button coords
+                // snap button to snapping slider
+
+                this.x += touchHandler.dragAmountX
+                this.y += touchHandler.dragAmountY
+
+                // panning if at edges of screen
+                if (this.x > canvasArea.canvas.width - 340) {
+                    MapEditor.screen.x += 4 / MapEditor.zoom * dt
                 }
 
+                if (this.x < 60) {
+                    MapEditor.screen.x -= 4 / MapEditor.zoom * dt
+                }
+
+                if (this.y > canvasArea.canvas.height - 130) {
+                    MapEditor.screen.y += 4 / MapEditor.zoom * dt
+                }
+
+                if (this.y < 30) {
+                    MapEditor.screen.y -= 4 / MapEditor.zoom * dt
+                }
+        
+                
+                // this.x and this.y mapped to map coords
+                // mapToRange(number, inMin, inMax, outMin, outMax)
+                const xMapped = canvasArea.mapToRange(this.x - (offSet * MapEditor.zoom) + this.width/2, 0, canvasArea.canvas.width, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width)
+                const yMapped = canvasArea.mapToRange(this.y - (offSet * MapEditor.zoom) + this.height/2, 0, canvasArea.canvas.height, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height)
+                
+                element[xKey] = Math.round(xMapped)
+                element[yKey] = Math.round(yMapped)      
+                
+                if (MapEditor.snapAmount > 0) {
+                    element[xKey] = Math.round(element[xKey] / MapEditor.snapAmount) * MapEditor.snapAmount
+                    element[yKey] = Math.round(element[yKey] / MapEditor.snapAmount) * MapEditor.snapAmount
+                }
             }
         })
 
@@ -4046,7 +3946,7 @@ const MapEditor = {
 
     renderedPlatforms : [],
     selectedPlatformIndex : -1, // -1 = nothing, -2 = player
-    selectedCheckpointIndex : [-1,1],
+    selectedCheckpointIndex : [-1,1], // 1st item is which checkpoint is selected. 2nd item is either: 1-trigger1, 2-trigger2, 3-player Respawn
     snapAmount : 0,
     multiSelect : false,
     debugText : false,
