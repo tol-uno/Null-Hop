@@ -1018,6 +1018,24 @@ const UserInterface = {
             UserInterface.renderedButtons = UserInterface.btnGroup_mapSettings
         })
 
+        btn_multiSelect = new Button("60", "canvasArea.canvas.height - 200", 60, "toggle_button", "toggle_button_pressed", 1, "", function(sync) { 
+            if (MapEditor.loadedMap) { // throws an error otherwise
+                if (sync) {
+                    // doesnt need to sync
+                } else {
+                    if (this.toggle) { // turn off multSelect
+                        this.toggle = 0;
+                        MapEditor.multiSelect = false
+                        // change selectedPlatformIndex to be the first item (or last probs?)
+
+                    } else { // turn on
+                        this.toggle = 1;
+                        MapEditor.multiSelect = true
+                    }
+                }
+            }    
+        })
+
         btn_snappingSlider = new SliderUI("60", "canvasArea.canvas.height - 60", 170, 0, 50, 0.2, "Snapping", MapEditor.loadedMap ? MapEditor.snapAmount : 0, function() {
             MapEditor.snapAmount = this.value
         })
@@ -1789,7 +1807,7 @@ const UserInterface = {
         this.btnGroup_customMapBrowser = [btn_mainMenu]
         this.btnGroup_editMapBrowser = [btn_mainMenu]
         this.btnGroup_mapEditorMenu = [btn_mainMenu, btn_new_map, btn_load_map, btn_import_map, btn_import_map_text]
-        this.btnGroup_mapEditorInterface = [btn_exit_edit, btn_add_platform, btn_map_colors, btn_map_settings, btn_add_checkpoint, btn_snappingSlider]
+        this.btnGroup_mapEditorInterface = [btn_exit_edit, btn_add_platform, btn_map_colors, btn_map_settings, btn_add_checkpoint, btn_multiSelect, btn_snappingSlider]
         this.btnGroup_inLevel = [btn_mainMenu, btn_restart, btn_jump];
         this.btnGroup_mapColor = [
             btn_mainMenu, 
@@ -1828,6 +1846,7 @@ const UserInterface = {
 
             btn_delete_platform,
             btn_duplicate_platform,
+            btn_multiSelect,
             btn_snappingSlider
         ]
         this.btnGroup_editPlayerStart = [
@@ -1836,6 +1855,7 @@ const UserInterface = {
             
             btn_translate,
             btn_playerAngleSlider,
+            btn_multiSelect,
             btn_snappingSlider
         ]
         this.btnGroup_editCheckPoint = [
@@ -1845,6 +1865,7 @@ const UserInterface = {
             btn_translate,
 
             btn_delete_platform,
+            btn_multiSelect,
             btn_snappingSlider
         ]
 
@@ -2609,7 +2630,7 @@ const UserInterface = {
 
                 // HIGHLIGHT MEDAL BOX
                 const highlightBox = {
-                    x : timeBox.x + 408,
+                    x : timeBox.x + 400,
                     y : null, // set later
                     width : 225,
                     height : 75,
@@ -2689,7 +2710,7 @@ const UserInterface = {
                     let medalRadius = 16
                     let medalShadow = false
 
-                    function testMedal(number) {
+                    function testMedal(number) { // sets specific parameters for drawMedal
                         canvasArea.ctx.font = medal == number ? "38px BAHNSCHRIFT" : "30px BAHNSCHRIFT"
                         halfFontHeight = medal == number ? 13 : 10
                         xOffset = medal == number ? 14 : 0
@@ -2699,19 +2720,19 @@ const UserInterface = {
                     }
 
                     testMedal(1)
-                    canvasArea.ctx.fillText(UserInterface.secondsToMinutes(this.leaderboards[Map.name].gold), timeBox.x + 490 - xOffset, timeBox.y + 65 + halfFontHeight);
+                    canvasArea.ctx.fillText(UserInterface.secondsToMinutes(this.leaderboards[Map.name].gold), timeBox.x + 482 - xOffset, timeBox.y + 65 + halfFontHeight);
                     canvasArea.ctx.globalAlpha = 1
-                    this.drawMedal(timeBox.x + 460 - xOffset, timeBox.y + 65, medalRadius, "#f1b62c", "#fde320", 4, medalShadow)
+                    this.drawMedal(timeBox.x + 452 - xOffset, timeBox.y + 65, medalRadius, "#f1b62c", "#fde320", 4, medalShadow)
                     
                     testMedal(2)
-                    canvasArea.ctx.fillText(UserInterface.secondsToMinutes(this.leaderboards[Map.name].silver), timeBox.x + 490 - xOffset, timeBox.y + timeBox.height/2 + halfFontHeight);
+                    canvasArea.ctx.fillText(UserInterface.secondsToMinutes(this.leaderboards[Map.name].silver), timeBox.x + 482 - xOffset, timeBox.y + timeBox.height/2 + halfFontHeight);
                     canvasArea.ctx.globalAlpha = 1
-                    this.drawMedal(timeBox.x + 460 - xOffset, timeBox.y + timeBox.height/2, medalRadius, "#8c9a9b", "#d4d4d6", 4, medalShadow)
+                    this.drawMedal(timeBox.x + 452 - xOffset, timeBox.y + timeBox.height/2, medalRadius, "#8c9a9b", "#d4d4d6", 4, medalShadow)
                     
                     testMedal(3)
-                    canvasArea.ctx.fillText(UserInterface.secondsToMinutes(this.leaderboards[Map.name].bronze), timeBox.x + 490 - xOffset, timeBox.y + timeBox.height - 65 + halfFontHeight);            
+                    canvasArea.ctx.fillText(UserInterface.secondsToMinutes(this.leaderboards[Map.name].bronze), timeBox.x + 482 - xOffset, timeBox.y + timeBox.height - 65 + halfFontHeight);            
                     canvasArea.ctx.globalAlpha = 1
-                    this.drawMedal(timeBox.x + 460 - xOffset, timeBox.y + timeBox.height - 65, medalRadius, "#e78b4c", "#f4a46f", 4, medalShadow)
+                    this.drawMedal(timeBox.x + 452 - xOffset, timeBox.y + timeBox.height - 65, medalRadius, "#e78b4c", "#f4a46f", 4, medalShadow)
                 }
             }
         }
@@ -4063,7 +4084,8 @@ const MapEditor = {
                 ctx.fillRect(-platform.width/2, -platform.height/2, platform.width, platform.height);
 
 
-                if (platform == this.loadedMap.platforms[this.selectedPlatformIndex]) { // DRAWING THE BORDER AROUND THE SELECTED PLATFORM
+                if (this.selectedPlatformIndex.includes(platform)) { // DRAWING THE BORDER AROUND THE SELECTED PLATFORM
+                // if (platform == this.loadedMap.platforms[this.selectedPlatformIndex]) { // DRAWING THE BORDER AROUND THE SELECTED PLATFORM
                     
                     ctx.strokeStyle = UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1
                     ctx.lineWidth = 4
@@ -4098,7 +4120,7 @@ const MapEditor = {
                     ctx.strokeStyle = canvasArea.getShadedColor(this.loadedMap.style.wallTopColor, 0.25)
                     ctx.lineWidth = 4
 
-                    ctx.strokeRect(-platform.width/2, -platform.height/2, platform.width, platform.height);
+                    ctx.strokeRect(-platform.width/2 + 2, -platform.height/2 + 2, platform.width - 4, platform.height - 4);
 
 
                     ctx.restore(); // restoring platform rotation and translation
@@ -4316,7 +4338,7 @@ const MapEditor = {
                 
                 ctx.fillText("rendered platforms: " + this.renderedPlatforms.length, textX, 180);
                 ctx.fillText("editorState: " + this.editorState, textX, 200);
-                ctx.fillText("selected platform index: " + this.selectedPlatformIndex, textX, 220);
+                ctx.fillText("selected platform indexes: " + this.selectedPlatformIndex, textX, 220);
                 
                 if (touchHandler.dragging) {
                     ctx.fillText("touch: " + Math.round(touchHandler.touches[0].x) + ", " + Math.round(touchHandler.touches[0].y), textX, 240);
@@ -4328,8 +4350,9 @@ const MapEditor = {
                     ctx.fillText("touch mapped: " + Math.round(touchXMapped) + ", " + Math.round(touchYMapped), textX, 260);
                 }
 
+                ctx.fillText("multSelect: "  + MapEditor.multiSelect, textX, 280);
 
-                if (touchHandler.zoom.isZooming) {
+                if (touchHandler.zoom.isZooming) { // draw center point between two fingers of zoom
                     ctx.save()
                     ctx.translate(touchHandler.zoom.x, touchHandler.zoom.y)
                     ctx.fillRect(-3,-3,6,6)
@@ -4385,8 +4408,8 @@ const MapEditor = {
                 if (touchHandler.zoom.isZooming) {
                      
                     this.zoom = touchHandler.zoom.ratio * this.startingZoom
-                    if (this.zoom > 5) {this.zoom = 5}
-                    if (this.zoom < 0.1) {this.zoom = 0.1}
+                    if (this.zoom > 10) {this.zoom = 10}
+                    if (this.zoom < 0.05) {this.zoom = 0.05}
                     if (Math.abs(this.zoom - 1) < 0.1) { // snapping to zoom = 1 if close
                         this.zoom = 1
                     }
@@ -5451,7 +5474,6 @@ class InputHandler {
                 this.zoom.startLength = Math.sqrt((this.touches[1].x - this.touches[0].x) ** 2 + (this.touches[1].y - this.touches[0].y) ** 2)
                 this.zoom.prevRatio = 1
                 this.zoom.ratio = 1
-
             }
         });
 
@@ -5537,7 +5559,7 @@ class InputHandler {
     }
 
     update() {
-        if (this.touches.length == 1) {
+        if (!this.zoom.isZooming && this.touches.length >= 1) {
             this.dragAmountX = this.touches[0].x - this.touches[0].previousX;
             this.dragAmountY = this.touches[0].y - this.touches[0].previousY;
 
@@ -5563,10 +5585,6 @@ class InputHandler {
         
         this.averageDragX.pushValue(this.dragAmountX)
         this.averageDragY.pushValue(this.dragAmountY)
-
-        // FOR TESTING
-        // this.dragAmountX = 2 * dt;
-        // console.log(2 * dt)
     }
 
 }
