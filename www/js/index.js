@@ -971,13 +971,11 @@ const UserInterface = {
 
 
             MapEditor.loadedMap.platforms.push(newPlatform);
-            MapEditor.selectedPlatformIndex = MapEditor.loadedMap.platforms.length - 1;
+            MapEditor.selectedElements = MapEditor.multiSelect ? MapEditor.selectedElements.concat(MapEditor.loadedMap.platforms.length - 1) : [MapEditor.loadedMap.platforms.length - 1]
             UserInterface.renderedButtons = UserInterface.btnGroup_editPlatform
             
             // SYNC ALL BUTTONS AND SLIDERS
-            btn_translate.func(true) // intially syncs the buttons position to the selected platform. Called whenever screen is scrolled too. not really needed here but avoids a 1 frame flash 
-            btn_resize.func(true)
-            btn_angleSlider.updateState(MapEditor.loadedMap.platforms[MapEditor.selectedPlatformIndex].angle)
+            btn_angleSlider.updateState(MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].angle)
             btn_wall.func(true) // syncs the wall button's toggle state
         })
 
@@ -1026,7 +1024,10 @@ const UserInterface = {
                     if (this.toggle) { // turn off multSelect
                         this.toggle = 0;
                         MapEditor.multiSelect = false
-                        // change selectedPlatformIndex to be the first item (or last probs?)
+                        if (MapEditor.selectedElements.length > 1) {
+                            MapEditor.selectedElements = [MapEditor.selectedElements[MapEditor.selectedElements.length - 1]] // make it only select the last platform in the array
+                            UserInterface.renderedButtons = UserInterface.btnGroup_editPlatform;
+                        }
 
                     } else { // turn on
                         this.toggle = 1;
@@ -1041,10 +1042,9 @@ const UserInterface = {
         })
 
         btn_unselect = new Button("canvasArea.canvas.width - 260", "30", 60, "x_button", "", 0, "", function() {
-            
-            MapEditor.selectedPlatformIndex = -1; // No selected platform
-            MapEditor.selectedCheckpointIndex = [-1,1]; // No selected checkpoint
             UserInterface.renderedButtons = UserInterface.btnGroup_mapEditorInterface
+            MapEditor.selectedElements = []; // No selected platforms
+            MapEditor.selectedCheckpointIndex = [-1,1]; // No selected checkpoint
         })
 
         btn_translate = new Button(0, 0, 50, "translate_button", "", 0, "", function() {
@@ -1055,14 +1055,14 @@ const UserInterface = {
             let yKey = "y" // implemented this system so that the btn_translate logic can be done with one section of code
             let offSet = 0 // amount to offset the bnt_translate from the center of the element
 
-            if (MapEditor.selectedPlatformIndex != -1) {
+            if (MapEditor.selectedElements.length > 0) {
                 
-                if (MapEditor.selectedPlatformIndex == -2) { // if selected playerStart
+                if (MapEditor.selectedElements.includes("playerStart")) { // if playerStart is selected
                     element = MapEditor.loadedMap.playerStart
                     offSet = 32
 
                 } else { // selected platform
-                    element = MapEditor.loadedMap.platforms[MapEditor.selectedPlatformIndex]
+                    element = MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]]
                 }
             }
 
@@ -1145,7 +1145,7 @@ const UserInterface = {
 
         btn_resize = new Button(0, 0, 50, "scale_button", "", 0, "", function() {
             
-            let platform = MapEditor.loadedMap.platforms[MapEditor.selectedPlatformIndex]
+            let platform = MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]]
 
             if (!this.isPressed) {
 
@@ -1214,11 +1214,11 @@ const UserInterface = {
             }
         })
 
-        btn_angleSlider = new SliderUI("canvasArea.canvas.width - 250", "250", 170, -45, 45, 1, "Angle", MapEditor.loadedMap ? MapEditor.loadedMap.platforms[MapEditor.selectedPlatformIndex] : 0, function() {
+        btn_angleSlider = new SliderUI("canvasArea.canvas.width - 250", "250", 170, -45, 45, 1, "Angle", MapEditor.loadedMap ? MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]] : 0, function() {
             if (MapEditor.snapAmount > 0) {this.updateState(Math.round(this.value / MapEditor.snapAmount) * MapEditor.snapAmount)}
             if (this.value < this.min) {this.updateState(this.min)} // these are incase snapping pushes the value over or under the limits
             if (this.value > this.max) {this.updateState(this.max)}
-            MapEditor.loadedMap.platforms[MapEditor.selectedPlatformIndex].angle = this.value
+            MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].angle = this.value
         })
 
         btn_playerAngleSlider = new SliderUI("canvasArea.canvas.width - 250", "250", 170, 0, 360, 1, "Angle", MapEditor.loadedMap ? MapEditor.loadedMap.playerStart : 0, function() {
@@ -1234,23 +1234,23 @@ const UserInterface = {
         btn_wall = new Button("canvasArea.canvas.width - 170", "280", 60, "toggle_button", "toggle_button_pressed", 1, "", function(sync) { 
             if (MapEditor.loadedMap) { // throws an error otherwise
                 if (sync) {
-                    this.toggle = MapEditor.loadedMap.platforms[MapEditor.selectedPlatformIndex].wall?1:0; // gets initial value of toggle
+                    this.toggle = MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].wall?1:0; // gets initial value of toggle
                 } else {
                     if (this.toggle) {
                         this.toggle = 0;
-                        MapEditor.loadedMap.platforms[MapEditor.selectedPlatformIndex].wall = 0
+                        MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].wall = 0
                     } else {
                         this.toggle = 1;
-                        MapEditor.loadedMap.platforms[MapEditor.selectedPlatformIndex].wall = 1
+                        MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].wall = 1
                     }
                 }
             }    
         })
 
         btn_delete_platform = new Button("canvasArea.canvas.width - 175", "canvasArea.canvas.height - 100", 120, "delete_button", "", 0, "", function() {
-            if (MapEditor.selectedPlatformIndex != -1) { // platform being deleted
-                MapEditor.loadedMap.platforms.splice(MapEditor.selectedPlatformIndex, 1)
-                MapEditor.selectedPlatformIndex = -1; // No selected platform
+            if (MapEditor.selectedElements.length > 0) { // platform being deleted
+                MapEditor.loadedMap.platforms.splice(MapEditor.selectedElements[0], 1)
+                MapEditor.selectedElements = []; // No selected platform
             }
 
             if (MapEditor.selectedCheckpointIndex[0] != -1) { // checkpoint being deleted    
@@ -1264,18 +1264,16 @@ const UserInterface = {
 
         btn_duplicate_platform = new Button("canvasArea.canvas.width - 250", "canvasArea.canvas.height - 185", 200, "", "", 0, "Duplicate", function() {
             
-            const newPlatform = {...MapEditor.loadedMap.platforms[MapEditor.selectedPlatformIndex]} // get selected platform
+            const newPlatform = {...MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]]} // get selected platform. spread syntax creates a shallow copy that doesn not link/reference 
             newPlatform.x = Math.round(MapEditor.screen.x), // center it
             newPlatform.y = Math.round(MapEditor.screen.y),
 
             MapEditor.loadedMap.platforms.push(newPlatform); // add it
-            MapEditor.selectedPlatformIndex = MapEditor.loadedMap.platforms.length - 1;
+            MapEditor.selectedElements = MapEditor.multiSelect ? MapEditor.selectedElements.concat(MapEditor.loadedMap.platforms.length - 1) : [MapEditor.loadedMap.platforms.length - 1]
             UserInterface.renderedButtons = UserInterface.btnGroup_editPlatform
             
             // SYNC ALL BUTTONS AND SLIDERS
-            btn_translate.func(true) // intially syncs the buttons position to the selected platform. Called whenever screen is scrolled too. not really needed here but avoids a 1 frame flash 
-            btn_resize.func(true)
-            btn_angleSlider.updateState(MapEditor.loadedMap.platforms[MapEditor.selectedPlatformIndex].angle)
+            btn_angleSlider.updateState(MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].angle)
             btn_wall.func(true) // syncs the wall button's toggle state
         })
 
@@ -1868,6 +1866,14 @@ const UserInterface = {
             btn_multiSelect,
             btn_snappingSlider
         ]
+        this.btnGroup_editMultiSelect = [
+            btn_exit_edit, 
+            btn_unselect, 
+            
+            btn_translate,
+            btn_multiSelect,
+            btn_snappingSlider
+        ]
 
 
         this.renderedButtons = this.btnGroup_mainMenu; 
@@ -2236,163 +2242,201 @@ const UserInterface = {
     
     touchReleased : function(x,y) { // TRIGGERED BY InputHandler
         
-        let clickedSidePanel = false;
+        // run button functions if clicked
+        // if in mapEditor
+        // was draggin,panning,and zooming the screen -- skip over all this \/
+        // touched side panel
+        // touched playerStart
+        // touched platforms
+        // touched the background
+
+        let editorIgnoreRelease = false;
 
         this.renderedButtons.forEach(button => {
             if (button.constructor.name == "Button") { // only run on buttons not sliders
                 if ( // if x and y touch is within button
                     x >= button.x && x <= button.x + button.width &&
                     y >= button.y && y <= button.y + button.height &&
-                    (MapBrowser.scrollVel == 0 || MapBrowser.scrollAmount == null) // dont release if scrolling in MapBrowser
+                    (MapBrowser.scrollVel == 0 || MapBrowser.scrollAmount == null) // dont release if scrolling through MapBrowser BROWSER
                 ) {
-                    clickedSidePanel = true;
+                    editorIgnoreRelease = true;
                     button.released();
                 }
-
                 button.isPressed = false
-            } else { // button is a Slider
-                // could add released on slider logic here (for the snapping slider)
             }
-            
         });
 
 
-        // test if released within the edit platform panel
-        // needs to be matched with MapEditor.render() values
-        //     x : canvasArea.canvas.width - 280,
-        //     y : 20,
-        //     width : 225,
-        //     height : 320
-        
-        if (
-            UserInterface.gamestate == 7 && MapEditor.editorState == 2 &&
-            x >= canvasArea.canvas.width - 280 && x <= canvasArea.canvas.width - 280 + 225 &&
-            y >= 20 && y <= 20 + 320
-        ) {
-            clickedSidePanel = true;
-        }
+        if (UserInterface.gamestate == 7 && (MapEditor.editorState == 1 || MapEditor.editorState == 2)) { // if in MapEditors main edit screens 
 
+            if (Math.abs(MapEditor.scrollVelX) < 0.5 && Math.abs(MapEditor.scrollVelY) < 0.5) { // if not scrolling/panning
+                
+                // if released within the edit platform side panel
+                // needs to be matched with MapEditor.render() values
+                //     x : canvasArea.canvas.width - 280,
+                //     y : 20,
+                //     width : 225,
+                //     height : 320
 
-        // DEALING WITH MAP EDITOR: Clicking player, clicking platforms
-        // IF IN MAP EDITOR but NOT in map select screen within editor OR in map settings/color screen
-        if (clickedSidePanel == false && this.gamestate == 7 && MapEditor.editorState != 0 && MapEditor.editorState != 3 && MapEditor.editorState != 4) { 
+                if (
+                    MapEditor.editorState == 2 &&
+                    x >= canvasArea.canvas.width - 280 && 
+                    x <= canvasArea.canvas.width - 280 + 225 &&
+                    y >= 20 && 
+                    y <= 20 + 320
+                ) {
+                    editorIgnoreRelease = true;
+                }
 
+                if (editorIgnoreRelease == false) {
 
-            // Maps the screens touch to the map's zoomed and panned view
-            // mapToRange(number, inMin, inMax, outMin, outMax)
-            const touchXMapped = canvasArea.mapToRange(x, 0, canvasArea.canvas.width, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width)
-            const touchYMapped = canvasArea.mapToRange(y, 0, canvasArea.canvas.height, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height)
+                    // Maps the screens touch to the map's zoomed and panned view
+                    // mapToRange(number, inMin, inMax, outMin, outMax)
+                    const touchXMapped = canvasArea.mapToRange(x, 0, canvasArea.canvas.width, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width)
+                    const touchYMapped = canvasArea.mapToRange(y, 0, canvasArea.canvas.height, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height)
 
-
-            function isPointInRect(pointX, pointY, rect) {
-                // Convert angle from degrees to radians
-                const angleRad = rect.angle * Math.PI / 180;
-            
-                // Calculate the sine and cosine of the angle
-                const cosAngle = Math.cos(angleRad);
-                const sinAngle = Math.sin(angleRad);
-            
-                // Translate point to rectangle's coordinate system (centered at origin)
-                const translatedX = pointX - rect.x;
-                const translatedY = pointY - rect.y;
-            
-                // Rotate point to align with the rectangle (reverse rotation)
-                const rotatedX = cosAngle * translatedX + sinAngle * translatedY;
-                const rotatedY = -sinAngle * translatedX + cosAngle * translatedY;
-            
-                // Check if the rotated point is within the axis-aligned rectangle
-                const halfWidth = rect.width / 2;
-                const halfHeight = rect.height / 2;
-            
-                const isInside = (Math.abs(rotatedX) <= halfWidth) && (Math.abs(rotatedY) <= halfHeight);
-            
-                return isInside;
-            }
-
-            // RELEASED ON PLATFORM
-            MapEditor.renderedPlatforms.forEach(platform => {
-                if (isPointInRect(touchXMapped, touchYMapped, platform)) {
-                    MapEditor.selectedPlatformIndex = MapEditor.loadedMap.platforms.indexOf(platform)
-                    MapEditor.selectedCheckpointIndex = [-1,1]
-
-                    this.renderedButtons = this.btnGroup_editPlatform;
+                    function isPointInRect(pointX, pointY, rect) {
+                        // Convert angle from degrees to radians
+                        const angleRad = rect.angle * Math.PI / 180;
                     
-                    // SYNC ALL BUTTONS AND SLIDERS
-                    btn_translate.func(true) // intially syncs the buttons position to the selected platform. Called whenever screen is scrolled too. not really needed here but avoids a 1 frame flash 
-                    btn_resize.func(true)
-                    btn_angleSlider.updateState(MapEditor.loadedMap.platforms[MapEditor.selectedPlatformIndex].angle)
-                    btn_wall.func(true) // syncs the wall button's toggle state
-                }
-            })
-            
-            const playerStartRect = {
-                x: MapEditor.loadedMap.playerStart.x,
-                y: MapEditor.loadedMap.playerStart.y,
-                width: 32,
-                height: 32,
-                angle: MapEditor.loadedMap.playerStart.angle,
-            }
-
-            if ( // RELEASED on playerStart
-                isPointInRect(touchXMapped, touchYMapped, playerStartRect)
-            ) {
-                MapEditor.selectedPlatformIndex = -2 // -2 means player is selected. Maybe change this to be its own variable
-                MapEditor.selectedCheckpointIndex = [-1,1]
-
-                this.renderedButtons = this.btnGroup_editPlayerStart
-
-                // SYNC ALL BUTTONS AND SLIDERS
-                btn_translate.func(true) // intially syncs the buttons position to the selected platform. Called whenever screen is scrolled too. not really needed here but avoids a 1 frame flash 
-                btn_playerAngleSlider.updateState(MapEditor.loadedMap.playerStart.angle)
-            }
-
-            // RELEASED ON CHECKPOINT
-            MapEditor.loadedMap.checkpoints.forEach(checkpoint => {
-                let pressed = false;
-                let clickedPlayerRestart = false;
-                if ( // released checkpoint trigger 1
-                    Math.abs(checkpoint.triggerX1 - touchXMapped) <= 20 &&
-                    Math.abs(checkpoint.triggerY1 - touchYMapped) <= 20
-                ) {
-                    pressed = true;
-                    MapEditor.selectedCheckpointIndex[1] = 1
-                }
-
-                if ( // released on checkpoint trigger 2
-                    Math.abs(checkpoint.triggerX2 - touchXMapped) <= 20 &&
-                    Math.abs(checkpoint.triggerY2 - touchYMapped) <= 20
-                ) {
-                    pressed = true;
-                    MapEditor.selectedCheckpointIndex[1] = 2
-                }
-                
-                if ( // released on playerRestart
-                    Math.abs(checkpoint.x - touchXMapped) <= 20 &&
-                    Math.abs(checkpoint.y - touchYMapped) <= 20
-                ) {
-                    pressed = true;
-                    clickedPlayerRestart = true
-                    MapEditor.selectedCheckpointIndex[1] = 3
-                }
-                
-
-                if (pressed) { // Did click somewhere on the checkpoint
-
-                    MapEditor.selectedCheckpointIndex[0] = MapEditor.loadedMap.checkpoints.indexOf(checkpoint)
-                    MapEditor.selectedPlatformIndex = -1
-
-                    this.renderedButtons =  this.btnGroup_editCheckPoint;
-
-                    if (clickedPlayerRestart) {
-                        this.renderedButtons = this.renderedButtons.concat(btn_checkpointAngleSlider)
-                        btn_checkpointAngleSlider.updateState(MapEditor.loadedMap.checkpoints[MapEditor.selectedCheckpointIndex[0]].angle) // sync
+                        // Calculate the sine and cosine of the angle
+                        const cosAngle = Math.cos(angleRad);
+                        const sinAngle = Math.sin(angleRad);
+                    
+                        // Translate point to rectangle's coordinate system (centered at origin)
+                        const translatedX = pointX - rect.x;
+                        const translatedY = pointY - rect.y;
+                    
+                        // Rotate point to align with the rectangle (reverse rotation)
+                        const rotatedX = cosAngle * translatedX + sinAngle * translatedY;
+                        const rotatedY = -sinAngle * translatedX + cosAngle * translatedY;
+                    
+                        // Check if the rotated point is within the axis-aligned rectangle
+                        const halfWidth = rect.width / 2;
+                        const halfHeight = rect.height / 2;
+                    
+                        const isInside = (Math.abs(rotatedX) <= halfWidth) && (Math.abs(rotatedY) <= halfHeight);
+                    
+                        return isInside;
                     }
+
+                    // TEST IF CLICKED ON PLATFORM, PLAYERSTART, CHECKPOINT
+
+                    // RELEASED ON PLATFORM
+                    MapEditor.renderedPlatforms.forEach(platform => {
+                        if (isPointInRect(touchXMapped, touchYMapped, platform)) {
+
+                            if (MapEditor.selectedElements.includes(MapEditor.loadedMap.platforms.indexOf(platform))) { // if platform is already selected -- deselect it
+
+                                // detoggle platform
+                                const indexOfPlatform = MapEditor.selectedElements.indexOf(MapEditor.loadedMap.platforms.indexOf(platform))
+                                MapEditor.selectedElements.splice(indexOfPlatform, 1)
+
+                            } else { // platform is NOT already selected -- select it
+
+                                if (MapEditor.multiSelect) {
+                                    MapEditor.selectedElements = MapEditor.selectedElements.concat(MapEditor.loadedMap.platforms.indexOf(platform))
+                                } else {
+                                    MapEditor.selectedElements = [MapEditor.loadedMap.platforms.indexOf(platform)]
+                                }
+                            }
+
+                            
+                            // kill when checkpoints are within selectedElements or selectedCheckpoints becomes an array
+                            MapEditor.selectedCheckpointIndex = [-1,1]
+                            
+                            if (MapEditor.selectedElements.length > 1) {
+                                this.renderedButtons = this.btnGroup_editMultiSelect;
+                                
+                            } else if (MapEditor.selectedElements.length == 1) {
+                                this.renderedButtons = this.btnGroup_editPlatform;
+  
+                                btn_angleSlider.updateState(MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].angle)
+                                btn_wall.func(true) // syncs the wall button's toggle state
+
+                            } else if (MapEditor.selectedElements.length == 0) {
+                                UserInterface.renderedButtons = UserInterface.btnGroup_mapEditorInterface
+                            }
+                            
+
+                        } // end of clicked on platform
+                    })
+
+
                     
-                    // SYNC ALL BUTTONS AND SLIDERS
-                    btn_translate.func(true) // intially syncs the buttons position to the selected checkpoint. Called whenever screen is scrolled too. not really needed here but avoids a 1 frame flash 
+                    const playerStartRect = {
+                        x: MapEditor.loadedMap.playerStart.x,
+                        y: MapEditor.loadedMap.playerStart.y,
+                        width: 32,
+                        height: 32,
+                        angle: MapEditor.loadedMap.playerStart.angle,
+                    }
+
+                    if ( // RELEASED on playerStart
+                        isPointInRect(touchXMapped, touchYMapped, playerStartRect)
+                    ) { 
+                        if (MapEditor.selectedElements.includes("playerStart")) {
+                            // toggle playerStart unselected
+                            const indexOfPlayerStart = MapEditor.selectedElements.indexOf("playerStart")
+                            MapEditor.selectedElements.splice(indexOfPlayerStart, 1)
+                            
+                        } else {
+                            MapEditor.selectedElements = MapEditor.multiSelect ? MapEditor.selectedElements.concat("playerStart") : ["playerStart"]
+                        }
+                        MapEditor.selectedCheckpointIndex = [-1,1]
+
+                        this.renderedButtons = this.btnGroup_editPlayerStart
+
+                        // SYNC ALL BUTTONS AND SLIDERS
+                        btn_playerAngleSlider.updateState(MapEditor.loadedMap.playerStart.angle)
+                    }
+
+                    // RELEASED ON CHECKPOINT
+                    MapEditor.loadedMap.checkpoints.forEach(checkpoint => {
+                        let pressed = false;
+                        let clickedPlayerRestart = false;
+                        if ( // released checkpoint trigger 1
+                            Math.abs(checkpoint.triggerX1 - touchXMapped) <= 20 &&
+                            Math.abs(checkpoint.triggerY1 - touchYMapped) <= 20
+                        ) {
+                            pressed = true;
+                            MapEditor.selectedCheckpointIndex[1] = 1
+                        }
+
+                        if ( // released on checkpoint trigger 2
+                            Math.abs(checkpoint.triggerX2 - touchXMapped) <= 20 &&
+                            Math.abs(checkpoint.triggerY2 - touchYMapped) <= 20
+                        ) {
+                            pressed = true;
+                            MapEditor.selectedCheckpointIndex[1] = 2
+                        }
+                        
+                        if ( // released on playerRestart
+                            Math.abs(checkpoint.x - touchXMapped) <= 20 &&
+                            Math.abs(checkpoint.y - touchYMapped) <= 20
+                        ) {
+                            pressed = true;
+                            clickedPlayerRestart = true
+                            MapEditor.selectedCheckpointIndex[1] = 3
+                        }
+                        
+
+                        if (pressed) { // Did click somewhere on the checkpoint
+
+                            MapEditor.selectedCheckpointIndex[0] = MapEditor.loadedMap.checkpoints.indexOf(checkpoint)
+                            MapEditor.selectedElements = []
+
+                            this.renderedButtons =  this.btnGroup_editCheckPoint;
+
+                            if (clickedPlayerRestart) {
+                                this.renderedButtons = this.renderedButtons.concat(btn_checkpointAngleSlider)
+                                btn_checkpointAngleSlider.updateState(MapEditor.loadedMap.checkpoints[MapEditor.selectedCheckpointIndex[0]].angle) // sync
+                            }
+                        }
+                    }) // end of looping through each checkpoint
                 }
-            })
-        }
+            } // end of user not scrolling/panning        
+        } // if in MapEditors main edit screens 
     },
 
     render : function() {
@@ -3991,7 +4035,7 @@ const MapEditor = {
     scrollVelAveragerY : new Averager(10),
 
     renderedPlatforms : [],
-    selectedPlatformIndex : -1, // -1 = nothing, -2 = player
+    selectedElements : [], // platforms are their index, "playerStart" = playerStart, checkpoint items are each an array \/
     selectedCheckpointIndex : [-1,1], // 1st item is which checkpoint is selected. 2nd item is either: 1-trigger1, 2-trigger2, 3-player Respawn
     snapAmount : 0,
     multiSelect : false,
@@ -4064,6 +4108,7 @@ const MapEditor = {
                 
             })
 
+
             // RENDER PLATFORMS TOPS
             this.renderedPlatforms.forEach(platform => {
                 
@@ -4084,8 +4129,7 @@ const MapEditor = {
                 ctx.fillRect(-platform.width/2, -platform.height/2, platform.width, platform.height);
 
 
-                if (this.selectedPlatformIndex.includes(platform)) { // DRAWING THE BORDER AROUND THE SELECTED PLATFORM
-                // if (platform == this.loadedMap.platforms[this.selectedPlatformIndex]) { // DRAWING THE BORDER AROUND THE SELECTED PLATFORM
+                if (this.selectedElements.includes(MapEditor.loadedMap.platforms.indexOf(platform))) { // DRAWING THE BORDER AROUND THE SELECTED PLATFORM
                     
                     ctx.strokeStyle = UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1
                     ctx.lineWidth = 4
@@ -4246,7 +4290,7 @@ const MapEditor = {
             ctx.lineTo(8, 0)
             ctx.stroke();
 
-            if (this.selectedPlatformIndex == -2) { // DRAWING SELECTION BORDER AROUND PLAYER
+            if (this.selectedElements.includes("playerStart")) { // DRAWING SELECTION BORDER AROUND PLAYER
                 ctx.strokeStyle = UserInterface.darkColor_1
                 ctx.lineWidth = 6
                 ctx.strokeRect(-13, -13, 26, 26);
@@ -4259,8 +4303,9 @@ const MapEditor = {
 
 
             ctx.restore() // restoring screen.x and screen.y translation and zoom
-                // essentially translating(+screen.x, +screen.y)
-                // END OF SCALED ZOOM RENDERING
+            // essentially translating(+screen.x, +screen.y)
+            // END OF SCALED ZOOM RENDERING
+
 
 
             // MAP EDITOR UI
@@ -4283,31 +4328,35 @@ const MapEditor = {
 
                 ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1 : UserInterface.lightColor_1; // for text
 
-                if (this.selectedPlatformIndex == -2) { // player start is selected
+                if (this.multiSelect && this.selectedElements.length > 1) {
+                    ctx.fillText("Group Selection", sidePanel.x + 25, sidePanel.y + 100);
+                    ctx.fillText(this.selectedElements.length + " Items", sidePanel.x + 25, sidePanel.y + 130);
+
+                } else {
+
+                    if (this.selectedElements[0] == "playerStart") { // playerStart is selected
                     
-                    ctx.fillText("Player Start", sidePanel.x + 25, sidePanel.y + 100);
-                    ctx.fillText("Position: " + this.loadedMap.playerStart.x + ", " + this.loadedMap.playerStart.y, sidePanel.x + 25, sidePanel.y + 130);
+                        ctx.fillText("Player Start", sidePanel.x + 25, sidePanel.y + 100);
+                        ctx.fillText("Position: " + this.loadedMap.playerStart.x + ", " + this.loadedMap.playerStart.y, sidePanel.x + 25, sidePanel.y + 130);
+    
+                    } else { // platform is selected
+                        ctx.fillText("Platform", sidePanel.x + 25, sidePanel.y + 100);
+                        ctx.fillText("Position: " + this.loadedMap.platforms[this.selectedElements[0]].x + ", " + this.loadedMap.platforms[this.selectedElements[0]].y, sidePanel.x + 25, sidePanel.y + 130);
+                        ctx.fillText("Size: " + this.loadedMap.platforms[this.selectedElements[0]].width + ", " + this.loadedMap.platforms[this.selectedElements[0]].height, sidePanel.x + 25, sidePanel.y + 160);
+                        ctx.fillText("Wall: " + (this.loadedMap.platforms[this.selectedElements[0]].wall?"Yes":"No"), sidePanel.x + 25, sidePanel.y + 280)
+                    }
+                    
+    
+                    if (this.selectedCheckpointIndex[0] >= 0){ // checkpoint is selected
+            
+                        ctx.fillText("Checkpoint", sidePanel.x + 25, sidePanel.y + 100);
+                        ctx.fillText("Trigger 1: " + this.loadedMap.checkpoints[this.selectedCheckpointIndex[0]].triggerX1 + ", " + this.loadedMap.checkpoints[this.selectedCheckpointIndex[0]].triggerY1, sidePanel.x + 25, sidePanel.y + 130);
+                        ctx.fillText("Trigger 2: " + this.loadedMap.checkpoints[this.selectedCheckpointIndex[0]].triggerX2 + ", " + this.loadedMap.checkpoints[this.selectedCheckpointIndex[0]].triggerY2, sidePanel.x + 25, sidePanel.y + 160);
+                        ctx.fillText("Respawn: " + this.loadedMap.checkpoints[this.selectedCheckpointIndex[0]].x + ", " + this.loadedMap.checkpoints[this.selectedCheckpointIndex[0]].y, sidePanel.x + 25, sidePanel.y + 190);
+      
+                    }
 
                 }
-                
-                if (this.selectedPlatformIndex >= 0){ // platform is selected
-                    
-                    ctx.fillText("Platform", sidePanel.x + 25, sidePanel.y + 100);
-                    ctx.fillText("Position: " + this.loadedMap.platforms[this.selectedPlatformIndex].x + ", " + this.loadedMap.platforms[this.selectedPlatformIndex].y, sidePanel.x + 25, sidePanel.y + 130);
-                    ctx.fillText("Size: " + this.loadedMap.platforms[this.selectedPlatformIndex].width + ", " + this.loadedMap.platforms[this.selectedPlatformIndex].height, sidePanel.x + 25, sidePanel.y + 160);
-                    ctx.fillText("Wall: " + (this.loadedMap.platforms[this.selectedPlatformIndex].wall?"Yes":"No"), sidePanel.x + 25, sidePanel.y + 280)
-  
-                }
-
-                if (this.selectedCheckpointIndex[0] >= 0){ // checkpoint is selected
-        
-                    ctx.fillText("Checkpoint", sidePanel.x + 25, sidePanel.y + 100);
-                    ctx.fillText("Trigger 1: " + this.loadedMap.checkpoints[this.selectedCheckpointIndex[0]].triggerX1 + ", " + this.loadedMap.checkpoints[this.selectedCheckpointIndex[0]].triggerY1, sidePanel.x + 25, sidePanel.y + 130);
-                    ctx.fillText("Trigger 2: " + this.loadedMap.checkpoints[this.selectedCheckpointIndex[0]].triggerX2 + ", " + this.loadedMap.checkpoints[this.selectedCheckpointIndex[0]].triggerY2, sidePanel.x + 25, sidePanel.y + 160);
-                    ctx.fillText("Respawn: " + this.loadedMap.checkpoints[this.selectedCheckpointIndex[0]].x + ", " + this.loadedMap.checkpoints[this.selectedCheckpointIndex[0]].y, sidePanel.x + 25, sidePanel.y + 190);
-  
-                }
-                
             }
 
             if (this.editorState == 3) { // IN COLOR SETTINGS 
@@ -4338,7 +4387,7 @@ const MapEditor = {
                 
                 ctx.fillText("rendered platforms: " + this.renderedPlatforms.length, textX, 180);
                 ctx.fillText("editorState: " + this.editorState, textX, 200);
-                ctx.fillText("selected platform indexes: " + this.selectedPlatformIndex, textX, 220);
+                ctx.fillText("selectedElements: " + this.selectedElements, textX, 220);
                 
                 if (touchHandler.dragging) {
                     ctx.fillText("touch: " + Math.round(touchHandler.touches[0].x) + ", " + Math.round(touchHandler.touches[0].y), textX, 240);
@@ -4481,9 +4530,32 @@ const MapEditor = {
             });
 
 
+        } // end of being in editorState 1 or 2
+
+
+        // changing the editorState 
+        if (this.editorState == 1 && (this.selectedElements.length > 0 || this.selectedCheckpointIndex[0] != -1)) {
+            this.editorState = 2; // platform edit state w side panel
         }
 
-        // UPDATING SLIDER CHANGES EVERY FRAME
+        if (this.editorState == 2 && this.selectedElements.length == 0 && this.selectedCheckpointIndex[0] == -1) {
+            this.editorState = 1
+        }
+
+
+        // UPDATING DYNAMIC BUTTONS AND SLIDERS EVERY FRAME
+
+        if (this.editorState == 2) { // update translate and resize buttons every frame
+
+            if (UserInterface.renderedButtons.includes(btn_translate)) {
+                btn_translate.func(true)
+            }
+            
+            if (UserInterface.renderedButtons.includes(btn_resize)) {
+                btn_resize.func(true) // update tag is true -- distinguish between updates and touch releases
+            }
+        }
+
         if (this.editorState == 3) { // in map color screen
             ColorPicker.update();
             // ColorPicker.render called in MapEditor.render()
@@ -4509,29 +4581,7 @@ const MapEditor = {
                 this.loadedMap.style.lightPitch = btn_lightPitchSlider.value
                 PreviewWindow.update()
             }   
-        }
-
-        if (this.editorState == 2) { // update translate and resize buttons every frame
-
-            if (UserInterface.renderedButtons.includes(btn_translate)) {
-                btn_translate.func(true)
-            }
-            
-            if (UserInterface.renderedButtons.includes(btn_resize)) {
-                btn_resize.func(true) // update tag is true -- distinguish between updates and touch releases
-            }
-        }
-
-
-        // changing the editorState
-        if (this.editorState == 1 && (this.selectedPlatformIndex != -1 || this.selectedCheckpointIndex[0] != -1)) {
-            this.editorState = 2;
-        }
-
-        if (this.editorState == 2 && (this.selectedPlatformIndex == -1 && this.selectedCheckpointIndex[0] == -1)) {
-            this.editorState = 1;
-        }
-    
+        }    
     },
 
     saveCustomMap : async function() {
@@ -4561,8 +4611,8 @@ const MapEditor = {
                     "ambientLight" : map.style.ambientLight ?? "rba(140,184,198)",
                     "platformHeight": map.style.platformHeight,
                     "wallHeight": map.style.wallHeight,
-                    "lightDirection": map.style.lightDirection ?? 45, // kill 45
-                    "lightPitch": map.style.lightPitch ?? 45 // kill 45 
+                    "lightDirection": map.style.lightDirection,
+                    "lightPitch": map.style.lightPitch 
                 }
             downloadMap.platforms = [];
             map.platforms.forEach(platform => {
@@ -4601,7 +4651,7 @@ const MapEditor = {
             MapEditor.snapAmount = 0;
             MapEditor.zoom = 1;
             MapEditor.renderedPlatforms = [];
-            MapEditor.selectedPlatformIndex = -1;
+            MapEditor.selectedElements = [];
             MapEditor.selectedCheckpointIndex = [-1,1];
             btn_snappingSlider.updateState(0);
             
@@ -5434,7 +5484,6 @@ class InputHandler {
         x : null, // middle point between the two zooming fingers
         y : null,
         startLength : null,
-        prevRatio : null, // kill kill not used
         ratio : null,
     }
 
@@ -5472,7 +5521,6 @@ class InputHandler {
                 this.zoom.x = (this.touches[0].x + this.touches[1].x) / 2 
                 this.zoom.y = (this.touches[0].y + this.touches[1].y) / 2
                 this.zoom.startLength = Math.sqrt((this.touches[1].x - this.touches[0].x) ** 2 + (this.touches[1].y - this.touches[0].y) ** 2)
-                this.zoom.prevRatio = 1
                 this.zoom.ratio = 1
             }
         });
@@ -5499,7 +5547,6 @@ class InputHandler {
                 this.zoom.x = (this.touches[0].x + this.touches[1].x) / 2 
                 this.zoom.y = (this.touches[0].y + this.touches[1].y) / 2
                 let currentLength = Math.sqrt((this.touches[1].x - this.touches[0].x) ** 2 + (this.touches[1].y - this.touches[0].y) ** 2)
-                this.zoom.prevRatio = this.zoom.ratio
                 this.zoom.ratio = currentLength / this.zoom.startLength 
             }
 
@@ -5551,7 +5598,6 @@ class InputHandler {
                 this.zoom.x = null
                 this.zoom.y = null
                 this.zoom.startLength = null
-                this.zoom.prevRatio = null
                 this.zoom.ratio = null
             }
 
