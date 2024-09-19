@@ -23,9 +23,9 @@
         <preference name="BackgroundColor" value="0xff0000ff"/>
         <preference name="Orientation" value="landscape" />
 
-        <preference name="SuppressesLongPressGesture" value="true" />
-        <preference name="Suppresses3DTouchGesture" value="true" />
-        <preference name="Allow3DTouchLinkPreview" value="false" />
+        <!-- <preference name="SuppressesLongPressGesture" value="true" /> -->
+        <!-- <preference name="Suppresses3DTouchGesture" value="true" /> -->
+        <!-- <preference name="Allow3DTouchLinkPreview" value="false" /> -->
 
 
         <!-- APP ICONS -->
