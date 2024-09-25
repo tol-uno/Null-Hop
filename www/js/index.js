@@ -578,23 +578,21 @@ const canvasArea = { //Canvas Object
     },
 
 
-    HSLToRGB: function(h, s, l, alpha) {
+    HSLToRGB: function(h, s, l) {
         s /= 100;
         l /= 100;
         const k = n => (n + h / 30) % 12;
         const a = s * Math.min(l, 1 - l);
         const f = n =>
           l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
-        // return [255 * f(0), 255 * f(8), 255 * f(4), alpha];
-        return "rgba(" + Math.round(255 * f(0)) + "," + Math.round(255 * f(8)) + "," + Math.round(255 * f(4)) + "," + alpha + ")"
+        return "rgb(" + Math.round(255 * f(0)) + "," + Math.round(255 * f(8)) + "," + Math.round(255 * f(4)) + ")"
     },
 
 
-    RGBToHSL: function (r, g, b, a) {
+    RGBToHSL: function (r, g, b) {
         r /= 255
         g /= 255
         b /= 255
-        a /= 255
 
         let max = Math.max(r, g, b), min = Math.min(r, g, b);
         let h, s, l = (max + min) / 2;
@@ -616,7 +614,6 @@ const canvasArea = { //Canvas Object
             Math.round(h*360),
             Math.round(s*100),
             Math.round(l*100),
-            Math.round(a * 100) / 100
         ];
     },
 
@@ -738,6 +735,7 @@ const UserInterface = {
     darkColor_1 : "#454545",
     darkColor_2 : "#363636",
 
+    debugVector : null,
 
     start : function() { // where all buttons are created
         
@@ -853,51 +851,53 @@ const UserInterface = {
         // MAP EDITOR MENU BUTTONS
         btn_new_map = new Button("200", "40", 400, "", "", 0, "Create New Map", function() {
             
-            MapEditor.loadedMap =
-                {
-                    "playerStart": {
+            MapEditor.loadedMap = {
+                "playerStart": {
+                    "x": 350,
+                    "y": 250,
+                    "angle": 0
+                },
+                "checkpoints": [],
+                "style": {
+                    "backgroundColor": "rgba(163,213,225)",
+                    "playerColor": "rgba(239,238,236)",
+                    "platformTopColor": "rgba(209,70,63)",
+                    "platformSideColor": "rgba(209,70,63)",
+                    "wallTopColor": "rgba(125,94,49)",
+                    "wallSideColor": "rgba(125,94,49)",
+                    "endZoneTopColor": "rgba(255,218,98)",
+                    "endZoneSideColor": "rgba(255,218,98)",
+                    "directLight": "rba(255,255,255)",
+                    "ambientLight": "rba(140,184,198)",
+                    "platformHeight": 25,
+                    "wallHeight": 50,
+                    "lightDirection": 45,
+                    "lightPitch": 45
+                },
+                "platforms": [
+                    {
+                        "x": 350,
+                        "y": 60,
+                        "width": 100,
+                        "height": 100,
+                        "angle": 0,
+                        "endzone": 1,
+                        "wall": 0
+                    },
+                    {
                         "x": 350,
                         "y": 250,
-                        "angle": 0
-                    },
-                    "checkpoints": [],
-                    "style": {
-                        "backgroundColor": "rgba(163,213,225,1)",
-                        "playerColor": "rgba(239,238,236,1)",
-                        "platformTopColor": "rgba(209,70,63,1)",
-                        "platformSideColor": "rgba(209,70,63,1)",
-                        "wallTopColor": "rgba(125, 94, 49, 1)",
-                        "wallSideColor": "rgba(125, 94, 49, 1)",
-                        "endZoneTopColor": "rgba(255,218,98,1)",
-                        "endZoneSideColor": "rgba(255,218,98,1)",
-                        "directLight": "rba(255,255,255)",
-                        "ambientLight": "rba(140,184,198)",
-                        "platformHeight": 25,
-                        "wallHeight": 50,
-                        "lightDirection": 45,
-                        "lightPitch": 45
-                    },
-                    "platforms": [
-                        {
-                            "x": 350,
-                            "y": 60,
-                            "width": 100,
-                            "height": 100,
-                            "angle": 0,
-                            "endzone": 1,
-                            "wall": 0
-                        },
-                        {
-                            "x": 350,
-                            "y": 250,
-                            "width": 100,
-                            "height": 100,
-                            "angle": 45,
-                            "endzone": 0,
-                            "wall": 0
-                        }
-                    ]
-                }
+                        "width": 100,
+                        "height": 100,
+                        "angle": 45,
+                        "endzone": 0,
+                        "wall": 0
+                    }
+                ]
+            }
+            
+            // calculates the initial hypotenuse angleRad and corners for each platform
+            MapEditor.loadedMap.platforms.forEach((platform) => MapEditor.updatePlatformCorners(platform))
         })
 
         btn_load_map = new Button("200", "140", 400, "", "", 0, "Load A Map", function() {
@@ -968,10 +968,13 @@ const UserInterface = {
                 "endzone": 0,
                 "wall": 0
             }
-
+            
+            MapEditor.updatePlatformCorners(newPlatform) // update dynamic attributes of platform
 
             MapEditor.loadedMap.platforms.push(newPlatform);
             MapEditor.selectedElements = MapEditor.multiSelect ? MapEditor.selectedElements.concat(MapEditor.loadedMap.platforms.length - 1) : [MapEditor.loadedMap.platforms.length - 1]
+            // kill
+            // MapEditor.updatePlatformCorners(MapEditor.loadedMap.platforms[MapEditor.loadedMap.platforms.length - 1]) // update dynamic atributes of platform
             UserInterface.renderedButtons = UserInterface.btnGroup_editPlatform
             
             // SYNC ALL BUTTONS AND SLIDERS
@@ -1148,19 +1151,19 @@ const UserInterface = {
                 this.y += touchHandler.dragAmountY
 
                 // panning if at edges of screen
-                if (this.x > canvasArea.canvas.width - 340) {
+                if (this.x + this.width/2 > canvasArea.canvas.width - 280) {
                     MapEditor.screen.x += 4 / MapEditor.zoom * dt
                 }
 
-                if (this.x < 60) {
+                if (this.x + this.width/2 < 50) {
                     MapEditor.screen.x -= 4 / MapEditor.zoom * dt
                 }
 
-                if (this.y > canvasArea.canvas.height - 130) {
+                if (this.y + this.height/2 > canvasArea.canvas.height - 40) {
                     MapEditor.screen.y += 4 / MapEditor.zoom * dt
                 }
 
-                if (this.y < 30) {
+                if (this.y + this.height/2 < 40) {
                     MapEditor.screen.y -= 4 / MapEditor.zoom * dt
                 }
         
@@ -1196,21 +1199,17 @@ const UserInterface = {
             }
         })
 
-
-
         btn_resize = new Button(0, 0, 50, "scale_button", "", 0, "", function() {
             
             let platform = MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]]
 
             if (!this.isPressed) {
-
                 // position button at corner of element
 
                 // bot right corner (relative to platform center)
-                const angleRad = platform.angle * (Math.PI/180);
-                const cornerX =  ((platform.width / 2) * Math.cos(angleRad)) - ((platform.height / 2) * Math.sin(angleRad))
-                const cornerY = ((platform.width / 2) * Math.sin(angleRad)) + ((platform.height / 2) * Math.cos(angleRad))
-                
+                const cornerX = platform.corners[1][0]
+                const cornerY = platform.corners[1][1]
+
                 // corner coords mapped to screen coords
                 // mapToRange(number, inMin, inMax, outMin, outMax)
                 const cornerMappedX = canvasArea.mapToRange(platform.x + cornerX, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, canvasArea.canvas.width)
@@ -1266,6 +1265,115 @@ const UserInterface = {
 
                 if (platform.width < 5) {platform.width = 5}
                 if (platform.height < 5) {platform.height = 5}
+
+                MapEditor.updatePlatformCorners(platform)
+            }
+        })
+
+
+        btn_resize_BL = new Button(0, 0, 50, "scale_button", "", 0, "", function() {
+            
+            let platform = MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]]
+
+            if (!this.isPressed) {
+                // position button at corner/edge of element
+
+                // bot left corner (relative to platform center)
+                const cornerX = platform.corners[0][0]
+                const cornerY = platform.corners[0][1]
+                
+                // corner coords mapped to screen coords
+                // mapToRange(number, inMin, inMax, outMin, outMax)
+                const cornerMappedX = canvasArea.mapToRange(platform.x + cornerX, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, canvasArea.canvas.width)
+                const cornerMappedY = canvasArea.mapToRange(platform.y + cornerY, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, canvasArea.canvas.height)
+                
+                this.x = cornerMappedX
+                this.y = cornerMappedY
+
+
+            } else if (touchHandler.dragging) {
+    
+                // move button according to touch dragging
+                // adjust and pan screen if button is near the edge
+                // resize element to mapped button coords
+                // snap element to snapping slider if neede
+
+                this.x += touchHandler.dragAmountX
+                this.y += touchHandler.dragAmountY
+
+                // panning if at edges of screen
+                if (this.x > canvasArea.canvas.width - 340) { MapEditor.screen.x += 4 / MapEditor.zoom * dt }
+                if (this.x < 60) { MapEditor.screen.x -= 4 / MapEditor.zoom * dt }
+                if (this.y > canvasArea.canvas.height - 130) { MapEditor.screen.y += 4 / MapEditor.zoom * dt }
+                if (this.y < 30) { MapEditor.screen.y -= 4 / MapEditor.zoom * dt }
+                
+
+                // BL corner MAP COORDS
+                const pinnedX = platform.x + platform.corners[0][0]
+                const pinnedY = platform.y + platform.corners[0][1]
+
+                // map pinned coords to SCREEN COORDS
+                // mapToRange(number, inMin, inMax, outMin, outMax)
+                const pinnedXMapped = canvasArea.mapToRange(pinnedX, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, canvasArea.canvas.width)
+                const pinnedYMapped = canvasArea.mapToRange(pinnedY, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, canvasArea.canvas.height)                
+        
+
+                // transform drag amount to match with platform angle
+                // drag measure from TR corner to buttons position
+                // const dragFromPinned = new Vector((pinnedXMapped - this.x) / MapEditor.zoom, (this.y - pinnedYMapped) / MapEditor.zoom).rotate(-platform.angle)
+                let dragFromPinned = new Vector(pinnedXMapped - this.x, this.y - pinnedYMapped).rotate(-platform.angle)
+                
+                // distance the btn has moved away from the corner it controls. dividing by zoom brings it back to real map scale 
+                // let dragFromCorner = new Vector(pinnedXMapped - this.x, this.y - pinnedYMapped)
+                let dragFromCorner = new Vector((pinnedXMapped - this.x) / MapEditor.zoom, (this.y - pinnedYMapped) / MapEditor.zoom)
+
+                // maybe need this? doubt
+                // dragFromCorner.multiply(MapEditor.zoom)
+
+                // this is used for setting the platforms width and height
+                let rotatedDragFromCorner = dragFromCorner.rotate(-platform.angle)
+
+                UserInterface.debugVector = dragFromPinned
+
+                // changing platform dimesions and origin accordingly
+                // platform.width = 2 * Math.round(dragFromPinned.x / 2); // rounds to nearest even number
+                // platform.height = 2 * Math.round(dragFromPinned.y / 2);
+                
+                platform.width += 2 * Math.round(dragFromCorner.x / 2)
+                platform.height += 2 * Math.round(dragFromCorner.y / 2)
+
+                // snapping and restricting size
+                if (MapEditor.snapAmount > 0) {
+                    platform.width = Math.round(platform.width / MapEditor.snapAmount) * MapEditor.snapAmount
+                    platform.height = Math.round(platform.height / MapEditor.snapAmount) * MapEditor.snapAmount
+                }
+
+                if (platform.width < 4) {platform.width = 4}
+                if (platform.height < 4) {platform.height = 4}
+
+
+
+                if (Math.abs(2 * Math.round(dragFromCorner.x / 2)) > 0) {
+                    platform.x -= Math.round(rotatedDragFromCorner.x / 2)
+                }
+                if (Math.abs(2 * Math.round(dragFromCorner.y / 2)) > 0) {
+                    platform.y += Math.round(rotatedDragFromCorner.y / 2)
+                }
+
+                // screen coord middle point between pinned corner and drag to map back into map coords
+                // const toMapX = pinnedXMapped - (dragFromPinned.x / 2)
+                // const toMapY = pinnedYMapped + (dragFromPinned.y / 2)
+
+                // map screen coords to map coords
+                // mapToRange(number, inMin, inMax, outMin, outMax)
+                // newOriginX = canvasArea.mapToRange(toMapX, 0, canvasArea.canvas.width, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width)
+                // newOriginY = canvasArea.mapToRange(toMapY, 0, canvasArea.canvas.height, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height)
+
+                // platform.x = Math.round(newOriginX)
+                // platform.y = Math.round(newOriginY)
+                
+    
+                MapEditor.updatePlatformCorners(platform)
             }
         })
 
@@ -1274,6 +1382,7 @@ const UserInterface = {
             if (this.value < this.min) {this.updateState(this.min)} // these are incase snapping pushes the value over or under the limits
             if (this.value > this.max) {this.updateState(this.max)}
             MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].angle = this.value
+            MapEditor.updatePlatformCorners(MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]])
         })
 
         btn_playerAngleSlider = new SliderUI("canvasArea.canvas.width - 250", "250", 170, 0, 360, 1, "Angle", MapEditor.loadedMap ? MapEditor.loadedMap.playerStart : 0, function() {
@@ -1391,82 +1500,194 @@ const UserInterface = {
 
 
         // COLOR PICKER BUTTONS AND SLIDERS
-        btn_setFromHex = new Button("ColorPicker.x + 160", "ColorPicker.y + 25", 130, "", "", 0, "Use Hex #", function() {
-            ColorPicker.setFromHex()
+        btn_copyColor = new Button("ColorPicker.x + ColorPicker.width/2 - 125", "ColorPicker.y + ColorPicker.height + 20", 116, "", "", 0, "Copy", function() {
+            ColorPicker.copyColor()
         })
 
-        btn_hueSlider = new SliderUI("ColorPicker.x", "ColorPicker.y + 130", 300, 0, 360, 1, "Hue", ColorPicker.h, function() { 
+        btn_pasteColor = new Button("ColorPicker.x + ColorPicker.width/2 + 17", "ColorPicker.y + ColorPicker.height + 20", 116, "", "", 0, "Paste", function() {
+            ColorPicker.pasteColor()
+        })
+
+        btn_hueSlider = new SliderUI("ColorPicker.x + 20", "ColorPicker.y + 160", ColorPicker.width - 40, 0, 360, 1, "Hue", ColorPicker.h, function() { 
             ColorPicker.h = this.value
-            ColorPicker.start()
+            ColorPicker.updateElementColor()
+            ColorPicker.syncGradients()
         })
 
-        btn_saturationSlider = new SliderUI("ColorPicker.x", "ColorPicker.y + 200", 300, 0, 100, 1, "Saturation", ColorPicker.s, function() { 
+        btn_saturationSlider = new SliderUI("ColorPicker.x + 20", "ColorPicker.y + 240", ColorPicker.width - 40, 0, 100, 1, "Saturation", ColorPicker.s, function() { 
             ColorPicker.s = this.value
-            ColorPicker.start()
+            ColorPicker.updateElementColor()
+            ColorPicker.syncGradients()
         })
 
-        btn_lightnessSlider = new SliderUI("ColorPicker.x", "ColorPicker.y + 270", 300, 0, 100, 1, "Lightness", ColorPicker.l, function() { 
+        btn_lightnessSlider = new SliderUI("ColorPicker.x + 20", "ColorPicker.y + 320", ColorPicker.width - 40, 0, 100, 1, "Lightness", ColorPicker.l, function() { 
             ColorPicker.l = this.value
-            ColorPicker.start()
+            ColorPicker.updateElementColor()
+            ColorPicker.syncGradients()
         })
-
-        btn_alphaSlider = new SliderUI("ColorPicker.x", "ColorPicker.y + 340", 300, 0, 1, 100, "Alpha", ColorPicker.a, function() { 
-            ColorPicker.a = this.value
-            ColorPicker.start()
-        })
-
 
 
         // SET COLOR BUTTONS
-        btn_backgroundColor = new Button("canvasArea.canvas.width - 410", "20", 175, "", "", 0, "Background", function() {
-            canvasArea.canvas.style.backgroundColor = MapEditor.loadedMap.style.backgroundColor = ColorPicker.getColor()
-            UserInterface.determineButtonColor()
-            PreviewWindow.update()
+        // 0 nothing
+        // 1 bg
+        // 2 player
+        // 3 platform top
+        // 4 platform side
+        // 5 wall top
+        // 6 wall side
+        // 7 end top
+        // 8 end side
+        // 9 direct light
+        // 10 ambient light
+
+        btn_backgroundColor = new Button("canvasArea.canvas.width - 410", "20", 175, "", "", 0, "Background", function() { 
+            if (this.toggle) {
+                this.toggle = 0;
+                ColorPicker.editingElement = 0
+            } else {
+                // untoggle all others
+                ColorPicker.toggleAllButtons()
+                this.toggle = 1;
+                ColorPicker.editingElement = 1
+                ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.backgroundColor)
+                ColorPicker.updateSliders()
+                ColorPicker.syncGradients()
+            }
         })
 
         btn_playerColor = new Button("canvasArea.canvas.width - 225", "20", 175, "", "", 0, "Player", function() {
-            MapEditor.loadedMap.style.playerColor = ColorPicker.getColor()
-            PreviewWindow.update()
+            if (this.toggle) {
+                this.toggle = 0;
+                ColorPicker.editingElement = 0
+            } else {
+                // untoggle all others
+                ColorPicker.toggleAllButtons()
+                this.toggle = 1;
+                ColorPicker.editingElement = 2
+                ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.playerColor)
+                ColorPicker.updateSliders()
+                ColorPicker.syncGradients()
+            }
         })
 
         btn_platformTopColor = new Button("canvasArea.canvas.width - 410", "120", 175, "", "", 0, "Platform Top", function() {
-            MapEditor.loadedMap.style.platformTopColor = ColorPicker.getColor()
-            PreviewWindow.update()
+            if (this.toggle) {
+                this.toggle = 0;
+                ColorPicker.editingElement = 0
+            } else {
+                // untoggle all others
+                ColorPicker.toggleAllButtons()
+                this.toggle = 1;
+                ColorPicker.editingElement = 3
+                ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.platformTopColor)
+                ColorPicker.updateSliders()
+                ColorPicker.syncGradients()
+            }
         })
 
         btn_platformSideColor = new Button("canvasArea.canvas.width - 225", "120", 175, "", "", 0, "Platform Side", function() {
-            MapEditor.loadedMap.style.platformSideColor = ColorPicker.getColor()
-            PreviewWindow.update()
+            if (this.toggle) {
+                this.toggle = 0;
+                ColorPicker.editingElement = 0
+            } else {
+                // untoggle all others
+                ColorPicker.toggleAllButtons()
+                this.toggle = 1;
+                ColorPicker.editingElement = 4
+                ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.platformSideColor)
+                ColorPicker.updateSliders()
+                ColorPicker.syncGradients()
+            }
         })
 
         btn_wallTopColor = new Button("canvasArea.canvas.width - 410", "220", 175, "", "", 0, "Wall Top", function() {
-            MapEditor.loadedMap.style.wallTopColor = ColorPicker.getColor()
-            PreviewWindow.update()
+            if (this.toggle) {
+                this.toggle = 0;
+                ColorPicker.editingElement = 0
+            } else {
+                // untoggle all others
+                ColorPicker.toggleAllButtons()
+                this.toggle = 1;
+                ColorPicker.editingElement = 5
+                ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.wallTopColor)
+                ColorPicker.updateSliders()
+                ColorPicker.syncGradients()
+            }
         })
 
         btn_wallSideColor = new Button("canvasArea.canvas.width - 225", "220", 175, "", "", 0, "Wall Side", function() {
-            MapEditor.loadedMap.style.wallSideColor = ColorPicker.getColor()
-            PreviewWindow.update()
+            if (this.toggle) {
+                this.toggle = 0;
+                ColorPicker.editingElement = 0
+            } else {
+                // untoggle all others
+                ColorPicker.toggleAllButtons()
+                this.toggle = 1;
+                ColorPicker.editingElement = 6
+                ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.wallSideColor)
+                ColorPicker.updateSliders()
+                ColorPicker.syncGradients()
+            }
         })
 
-        btn_endZoneTopColor = new Button("canvasArea.canvas.width - 410", "320", 175, "", "", 0, "End Zone Top", function() {
-            MapEditor.loadedMap.style.endZoneTopColor = ColorPicker.getColor()
-            PreviewWindow.update()
+        btn_endZoneTopColor = new Button("canvasArea.canvas.width - 410", "320", 175, "", "", 0, "End Zone Top", function() {        
+            if (this.toggle) {
+                this.toggle = 0;
+                ColorPicker.editingElement = 0
+            } else {
+                // untoggle all others
+                ColorPicker.toggleAllButtons()
+                this.toggle = 1;
+                ColorPicker.editingElement = 7
+                ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.endZoneTopColor)
+                ColorPicker.updateSliders()
+                ColorPicker.syncGradients()
+            }
         })
 
         btn_endZoneSideColor = new Button("canvasArea.canvas.width - 225", "320", 175, "", "", 0, "End Zone Side", function() {
-            MapEditor.loadedMap.style.endZoneSideColor = ColorPicker.getColor()
-            PreviewWindow.update()
+            if (this.toggle) {
+                this.toggle = 0;
+                ColorPicker.editingElement = 0
+            } else {
+                // untoggle all others
+                ColorPicker.toggleAllButtons()
+                this.toggle = 1;
+                ColorPicker.editingElement = 8
+                ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.endZoneSideColor)
+                ColorPicker.updateSliders()
+                ColorPicker.syncGradients()
+            }
         })
 
         btn_directLightColor = new Button("canvasArea.canvas.width - 410", "420", 175, "", "", 0, "Direct Light", function() {
-            MapEditor.loadedMap.style.directLight = ColorPicker.getColor()
-            PreviewWindow.update()
+            if (this.toggle) {
+                this.toggle = 0;
+                ColorPicker.editingElement = 0
+            } else {
+                // untoggle all others
+                ColorPicker.toggleAllButtons()
+                this.toggle = 1;
+                ColorPicker.editingElement = 9
+                ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.directLight)
+                ColorPicker.updateSliders()
+                ColorPicker.syncGradients()
+            }
         })
 
         btn_ambientLightColor = new Button("canvasArea.canvas.width - 225", "420", 175, "", "", 0, "Ambient Light", function() {
-            MapEditor.loadedMap.style.ambientLight = ColorPicker.getColor()
-            PreviewWindow.update()
+            if (this.toggle) {
+                this.toggle = 0;
+                ColorPicker.editingElement = 0
+            } else {
+                // untoggle all others
+                ColorPicker.toggleAllButtons()
+                this.toggle = 1;
+                ColorPicker.editingElement = 10
+                ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.ambientLight)
+                ColorPicker.updateSliders()
+                ColorPicker.syncGradients()
+            }
         })
 
 
@@ -1896,11 +2117,11 @@ const UserInterface = {
         this.btnGroup_inLevel = [btn_mainMenu, btn_restart, btn_jump];
         this.btnGroup_mapColor = [
             btn_mainMenu, 
-            btn_setFromHex,
+            btn_copyColor,
+            btn_pasteColor,
             btn_hueSlider, 
             btn_saturationSlider, 
             btn_lightnessSlider, 
-            btn_alphaSlider, 
             
             btn_backgroundColor,
             btn_playerColor,
@@ -1926,6 +2147,7 @@ const UserInterface = {
             
             btn_translate,
             btn_resize,
+            btn_resize_BL,
             btn_angleSlider,
             btn_wall,
 
@@ -2571,6 +2793,15 @@ const UserInterface = {
         this.renderedButtons.forEach(button => { // LOOP RENDERED BUTTONS AND RUN THEIR .render()
             button.render();
         });
+
+        if (this.debugVector) {
+            canvasArea.ctx.beginPath()
+            canvasArea.ctx.moveTo(btn_resize_BL.x, btn_resize_BL.y)
+            canvasArea.ctx.lineTo(btn_resize_BL.x + this.debugVector.x, btn_resize_BL.y - this.debugVector.y)
+            canvasArea.ctx.strokeStyle = "green"
+            canvasArea.ctx.lineWidth = 5
+            canvasArea.ctx.stroke()
+        }
 
         if (this.gamestate == 1) { // In Main Menu
             canvasArea.canvas.style.backgroundColor = "#a3d5e1";
@@ -3955,37 +4186,43 @@ const PreviewWindow = {
 
 
 const ColorPicker = {
-    state : 0,
-    x : 400,
-    y : 40,
-    width : 300,
-    height : 15,
+    x : 360,
+    y : 30,
+    width : 375,
+    height : 375,
     hueGradient : null,
     saturationGradient : null,
     lightnessGradient : null,
-    alphaGradient : null,
 
-    rgbaValue : null,
+    copiedColor : null,
+
+    editingElement : 0, 
+    // 0 nothing
+    // 1 bg
+    // 2 player
+    // 3 platform top
+    // 4 platform side
+    // 5 wall top
+    // 6 wall side
+    // 7 end top
+    // 8 end side
+    // 9 direct light
+    // 10 ambient light
 
     h : 117,
     s : 34,
     l : 75,
-    a : 1,
 
-    start : function() { // should be called sync
+    syncGradients : function() { // should be called sync
         const ctx = canvasArea.ctx;
 
-        this.rgbaValue = canvasArea.HSLToRGB(this.h, this.s, this.l, this.a)
+        // all of these (except hue technically) needs to be created every time a slider is changed
+        this.hueGradient = ctx.createLinearGradient(this.x + 20, 0, this.x + this.width - 40, 0)
+        this.saturationGradient = ctx.createLinearGradient(this.x + 20, 0, this.x + this.width - 40, 0)
+        this.lightnessGradient = ctx.createLinearGradient(this.x + 20, 0, this.x + this.width - 40, 0)
 
 
-        // new ones of these are created every time a slider is changed...not great
-        this.hueGradient = ctx.createLinearGradient(this.x, 0, this.width + this.x, 0)
-        this.saturationGradient = ctx.createLinearGradient(this.x, 0, this.width + this.x, 0)
-        this.lightnessGradient = ctx.createLinearGradient(this.x, 0, this.width + this.x, 0)
-        this.alphaGradient = ctx.createLinearGradient(this.x, 0, this.width + this.x, 0)
-
-
-        // HUE BAR
+        // HUE BAR (could remove the alpha from all these)
         this.hueGradient.addColorStop(0/360, "hsla(0, 100%, 50%, 1)");
         this.hueGradient.addColorStop(10/360, "hsla(10, 100%, 50%, 1)");
         this.hueGradient.addColorStop(20/360, "hsla(20, 100%, 50%, 1)");
@@ -4024,7 +4261,6 @@ const ColorPicker = {
         this.hueGradient.addColorStop(350/360, "hsla(350, 100%, 50%, 1)");
         this.hueGradient.addColorStop(360/360, "hsla(360, 100%, 50%, 1)");
 
-
         // SATURATION BAR
         this.saturationGradient.addColorStop(0, "hsla(" + this.h + ", 0%, 50%, 1)");
         this.saturationGradient.addColorStop(0.25, "hsla(" + this.h + ", 25%, 50%, 1)");
@@ -4038,17 +4274,27 @@ const ColorPicker = {
         this.lightnessGradient.addColorStop(0.5, "hsla(" + this.h + ", 100%, 50%, 1)");
         this.lightnessGradient.addColorStop(0.75, "hsla(" + this.h + ", 100%, 75%, 1)");
         this.lightnessGradient.addColorStop(1, "hsla(" + this.h + ", 100%, 100%, 1)");
+    },
 
-        // ALPHA BAR
-        this.alphaGradient.addColorStop(0, "hsla(" + this.h + ", " + this.s + "%, " + this.l + "%, 0)");
-        this.alphaGradient.addColorStop(1, "hsla(" + this.h + ", " + this.s + "%, " + this.l + "%, 1)");
-
+    toggleAllButtons : function() {
+        UserInterface.renderedButtons.forEach(button => {
+            button.toggle = 0
+        })
     },
 
     update : function() {
-        if (this.hueGradient == null) {
-            this.start();
+        if (this.hueGradient == null) { // only create gradients once
+            this.syncGradients();
         }
+
+        if (!btn_hueSlider.confirmed || !btn_saturationSlider.confirmed || !btn_lightnessSlider.confirmed) { // update every color every frame
+            ColorPicker.h = btn_hueSlider.value
+            ColorPicker.s = btn_saturationSlider.value
+            ColorPicker.l = btn_lightnessSlider.value
+            ColorPicker.updateElementColor()
+            ColorPicker.syncGradients()
+        }
+
     },
 
     render : function() {
@@ -4059,68 +4305,142 @@ const ColorPicker = {
         ctx.strokeStyle = (!UserInterface.darkMode) ? UserInterface.lightColor_1 : UserInterface.darkColor_1
         ctx.lineWidth = 4
 
-        canvasArea.roundedRect(this.x-20, this.y-20, this.width + 40, 385, 25)
+        // bounding box
+        canvasArea.roundedRect(this.x, this.y, this.width, this.height, 25)
         ctx.fill()
         ctx.stroke()
 
-        ctx.fillStyle = "hsla(" + this.h + ", " + this.s + "%, " + this.l + "%, " + this.a + ")"
-
-        canvasArea.roundedRect(this.x, this.y, this.width/2, 80, 10)
+        // color showcase box
+        ctx.fillStyle = "hsl(" + this.h + ", " + this.s + "%, " + this.l + "%)"
+        canvasArea.roundedRect(this.x + 20, this.y + 20, 120, 80, 10)
         ctx.fill()
         ctx.stroke()
 
+        // rbg text
         ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
-        ctx.fillText(this.rgbaValue, this.x + 160, this.y + 10)
+        ctx.fillText(canvasArea.HSLToRGB(this.h, this.s, this.l), this.x + 180, this.y + 50)
 
+        // selected element text
+        let selectedColor = null
+
+        if (this.editingElement == 1) {selectedColor = "Background"}
+        if (this.editingElement == 2) {selectedColor = "Player"}
+        if (this.editingElement == 3) {selectedColor = "Platform Top"}
+        if (this.editingElement == 4) {selectedColor = "Platform Side"}
+        if (this.editingElement == 5) {selectedColor = "Wall Top"}
+        if (this.editingElement == 6) {selectedColor = "Wall Side"}    
+        if (this.editingElement == 7) {selectedColor = "End Zone Top"}
+        if (this.editingElement == 8) {selectedColor = "End Zone Side"}
+        if (this.editingElement == 9) {selectedColor = "Sun Light"}
+        if (this.editingElement == 10) {selectedColor = "Ambient Light"}
+
+        if (selectedColor != null) {
+            ctx.fillText(selectedColor, this.x + 180, this.y + 85)
+        }
+
+        // draw gradients for each slider
         ctx.fillStyle = this.hueGradient
-        ctx.fillRect(this.x, this.y + 105, this.width, this.height)
+        ctx.fillRect(this.x + 20, this.y + 135, this.width - 40, 15)
 
         ctx.fillStyle = this.saturationGradient
-        ctx.fillRect(this.x, this.y + 175, this.width, this.height)
+        ctx.fillRect(this.x + 20, this.y + 215, this.width - 40, 15)
         
         ctx.fillStyle = this.lightnessGradient
-        ctx.fillRect(this.x, this.y + 245, this.width, this.height)
-
-        ctx.fillStyle = this.alphaGradient
-        ctx.fillRect(this.x, this.y + 315, this.width, this.height)
-
+        ctx.fillRect(this.x + 20, this.y + 295, this.width - 40, 15)
     },
 
     getColor : function() {
-        return canvasArea.HSLToRGB(this.h, this.s, this.l, this.a)
-        // return "hsla(" + this.h + ", " + this.s + "%, " + this.l + "%, " + this.a + ")"
+        return canvasArea.HSLToRGB(this.h, this.s, this.l) // returns rbg string
     },
 
-    setFromHex : function() {
-        const color = prompt("Enter Hex Color. #RRGGBB or #RRGGBBAA");
+    copyColor : function() {
+        this.copiedColor = this.getColor()
+    },
 
-        // https://stackoverflow.com/questions/8027423/how-to-check-if-a-string-is-a-valid-hex-color-representation
-        const regEx = /^#[0-9A-F]{6}[0-9a-f]{0,2}$/i
-        if (regEx.test(color)) { // is a valid color. convert to rgb then hsl
+    pasteColor : function() {
+        if (this.copiedColor != null) {
 
-            const r = parseInt(color.substring(1,3), 16); // Grab the hex representation of red (chars 1-2) and convert to decimal (base 10).
-            const g = parseInt(color.substring(3,5), 16);
-            const b = parseInt(color.substring(5,7), 16);
-            const a = color.length < 9 ? 255 : parseInt(color.substring(7,9), 16); // if transparency isnt declared then a = 255
+            this.setColorViaRGB(this.copiedColor)
+            this.updateSliders()
+            this.syncGradients()
+            this.updateElementColor()
+        }
+    },
 
-            console.log([r,g,b,a])
-            console.log(canvasArea.RGBToHSL(r,g,b,a))
+    setColorViaRGB : function(rgbStringOrArray) { // sets the color pickers color
 
-            const hslaValue = canvasArea.RGBToHSL(r,g,b,a)
+        let color
 
-            this.h = hslaValue[0]
-            this.s = hslaValue[1]
-            this.l = hslaValue[2]
-            this.a = hslaValue[3]
+        if (typeof rgbStringOrArray == "string") {
+            color = rgbStringOrArray.replace(/[^\d,.]/g, '').split(',')
+        } else { // is an array
+            color = rgbStringOrArray
+        }
 
-            btn_hueSlider.updateState(this.h)
-            btn_saturationSlider.updateState(this.s)
-            btn_lightnessSlider.updateState(this.l)
-            btn_alphaSlider.updateState(this.a)
+        let r = color[0]
+        let g = color[1]
+        let b = color[2]
 
-            this.start()
-            
-        } else {alert("Not A Hex Color. Use #RRGGBB or #RRGGBBAA")}
+        const hslValue = canvasArea.RGBToHSL(r,g,b)
+
+        this.h = hslValue[0]
+        this.s = hslValue[1]
+        this.l = hslValue[2]
+    },
+
+    updateSliders : function() {
+        btn_hueSlider.updateState(this.h)
+        btn_saturationSlider.updateState(this.s)
+        btn_lightnessSlider.updateState(this.l)
+    },
+
+    updateElementColor : function() { // updates the elements color
+        if (this.editingElement == 0) {return}
+
+        if (this.editingElement == 1) {
+            canvasArea.canvas.style.backgroundColor = MapEditor.loadedMap.style.backgroundColor = ColorPicker.getColor()
+
+            // only recalculate wheather to have light or dark ui once sliders are confirmed
+            if (btn_hueSlider.confirmed && btn_saturationSlider.confirmed & btn_lightnessSlider.confirmed) {UserInterface.determineButtonColor()}
+        }
+
+        if (this.editingElement == 2) {
+            MapEditor.loadedMap.style.playerColor = ColorPicker.getColor()
+        }
+
+        if (this.editingElement == 3) {
+            MapEditor.loadedMap.style.platformTopColor = ColorPicker.getColor()
+        }
+        
+        if (this.editingElement == 4) {
+            MapEditor.loadedMap.style.platformSideColor = ColorPicker.getColor()
+        }
+
+        if (this.editingElement == 5) {
+            MapEditor.loadedMap.style.wallTopColor = ColorPicker.getColor()
+        }
+        
+        if (this.editingElement == 6) {
+            MapEditor.loadedMap.style.wallSideColor = ColorPicker.getColor()
+        }
+        
+        if (this.editingElement == 7) {
+            MapEditor.loadedMap.style.endZoneTopColor = ColorPicker.getColor()
+        }
+        
+        if (this.editingElement == 8) {
+            MapEditor.loadedMap.style.endZoneSideColor = ColorPicker.getColor()
+        }
+
+        if (this.editingElement == 9) {
+            MapEditor.loadedMap.style.directLight = ColorPicker.getColor()
+        }
+
+        if (this.editingElement == 10) {
+            MapEditor.loadedMap.style.ambientLight = ColorPicker.getColor()
+        }
+
+        PreviewWindow.update()
     }
 }
 
@@ -4522,7 +4842,8 @@ const MapEditor = {
                     ctx.fillText("touch mapped: " + Math.round(touchXMapped) + ", " + Math.round(touchYMapped), textX, 260);
                 }
 
-                ctx.fillText("multSelect: "  + MapEditor.multiSelect, textX, 280);
+                ctx.fillText("debug info: ", textX, 280);
+
 
                 if (touchHandler.zoom.isZooming) { // draw center point between two fingers of zoom
                     ctx.save()
@@ -4564,6 +4885,7 @@ const MapEditor = {
             if (touchHandler.dragging == 1 &&
                 !btn_translate.isPressed && 
                 !btn_resize.isPressed && 
+                !btn_resize_BL.isPressed && 
                 btn_angleSlider.confirmed && 
                 btn_playerAngleSlider.confirmed && 
                 btn_checkpointAngleSlider.confirmed && 
@@ -4676,6 +4998,7 @@ const MapEditor = {
             
             if (UserInterface.renderedButtons.includes(btn_resize)) {
                 btn_resize.func(true) // update tag is true -- distinguish between updates and touch releases
+                btn_resize_BL.func(true)
             }
         }
 
@@ -4705,6 +5028,36 @@ const MapEditor = {
                 PreviewWindow.update()
             }   
         }    
+    },
+
+    updatePlatformCorners : function(platform) { // needs to be called when platform is edited
+        platform.hypotenuse = Math.sqrt(platform.width * platform.width + platform.height * platform.height)/2
+        platform.angleRad = platform.angle * (Math.PI/180)
+        platform.corners = [ // order: BL BR TR TL (relative coords to platform origin)
+            // bot left corner
+            [
+            -((platform.width / 2) * Math.cos(platform.angleRad)) - ((platform.height / 2) * Math.sin(platform.angleRad)),
+            -((platform.width / 2) * Math.sin(platform.angleRad)) + ((platform.height / 2) * Math.cos(platform.angleRad))
+            ],
+
+            // bot right corner
+            [
+            ((platform.width / 2) * Math.cos(platform.angleRad)) - ((platform.height / 2) * Math.sin(platform.angleRad)),
+            ((platform.width / 2) * Math.sin(platform.angleRad)) + ((platform.height / 2) * Math.cos(platform.angleRad))
+            ],
+
+            // top right corner
+            [
+            ((platform.width / 2) * Math.cos(platform.angleRad)) + ((platform.height / 2) * Math.sin(platform.angleRad)),
+            ((platform.width / 2) * Math.sin(platform.angleRad)) - ((platform.height / 2) * Math.cos(platform.angleRad))
+            ],
+        
+            // top left corner
+            [
+            -((platform.width / 2) * Math.cos(platform.angleRad)) + ((platform.height / 2) * Math.sin(platform.angleRad)),
+            -((platform.width / 2) * Math.sin(platform.angleRad)) - ((platform.height / 2) * Math.cos(platform.angleRad))
+            ]
+        ]
     },
 
     saveCustomMap : async function() {
@@ -4746,8 +5099,11 @@ const MapEditor = {
                         "width": platform.width,
                         "height": platform.height,
                         "angle": platform.angle,
+                        "angleRad": platform.angleRad,
                         "endzone": platform.endzone,
                         "wall": platform.wall,
+                        "hypotenuse": platform.hypotenuse,
+                        "corners": platform.corners, // relative to platform origin. ordered BL BR TR TL. Blubber Turtle 
                     }
                 )
             })
@@ -4762,7 +5118,7 @@ const MapEditor = {
         }
 
         
-        function exitEdit() {
+        function exitEdit() { // reset everything
             MapEditor.editorState = 0;
             MapEditor.loadedMap = null;
             MapEditor.screen.x = 0;
@@ -4786,6 +5142,8 @@ const MapEditor = {
 
             // create all generated properties for each platform
             platforms.forEach( platform => {
+                
+                /* I should be able to kill all this
                 platform.hypotenuse = Math.sqrt(platform.width * platform.width + platform.height * platform.height)/2
                 platform.angleRad = platform.angle * (Math.PI/180)
                 platform.corners = [ // order: BL BR TR TL
@@ -4813,6 +5171,7 @@ const MapEditor = {
                     -((platform.width / 2) * Math.sin(platform.angleRad)) - ((platform.height / 2) * Math.cos(platform.angleRad))
                     ]
                 ]
+                */
 
                 function sortCornersX(a, b) {
                     // if return is negative ... a comes first 
@@ -4915,7 +5274,6 @@ const MapEditor = {
                 const sorted = [];
 
 
-
                 function dfs(platform) { // Depth-First Search
                     visited.add(platform);
 
@@ -4959,18 +5317,6 @@ const MapEditor = {
             
         }
     },
-
-    adjustPlatforms : function() { // DEBUG TOOL USED TO SHIFT EVERY PLATFORM OVER BY HALF ITS WIDTH AND HEIGHT kill once all are adjusted
-        this.loadedMap.platforms.forEach(platform => {
-            platform.x += platform.width/2
-            platform.y += platform.height/2
-        })
-    },
-
-    newLighting : function() { // debug kill
-        this.loadedMap.style.lightDirection = this.loadedMap.style.lightAngle ?? 90 
-        this.loadedMap.style.lightPitch = this.loadedMap.style.shadowLength ?? 89
-    }
 }
 
 
