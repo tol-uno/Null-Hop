@@ -735,8 +735,6 @@ const UserInterface = {
     darkColor_1 : "#454545",
     darkColor_2 : "#363636",
 
-    debugVector : null,
-
     start : function() { // where all buttons are created
         
 
@@ -1192,84 +1190,9 @@ const UserInterface = {
                         conditioningArray[i].element[conditioningArray[i].xKey] = Math.round(conditioningArray[i].element[conditioningArray[i].xKey] / MapEditor.snapAmount) * MapEditor.snapAmount
                         conditioningArray[i].element[conditioningArray[i].yKey] = Math.round(conditioningArray[i].element[conditioningArray[i].yKey] / MapEditor.snapAmount) * MapEditor.snapAmount
                     }
-
                 }
-                
-
             }
         })
-
-        btn_resize = new Button(0, 0, 50, "scale_button", "", 0, "", function() {
-            
-            let platform = MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]]
-
-            if (!this.isPressed) {
-                // position button at corner of element
-
-                // bot right corner (relative to platform center)
-                const cornerX = platform.corners[1][0]
-                const cornerY = platform.corners[1][1]
-
-                // corner coords mapped to screen coords
-                // mapToRange(number, inMin, inMax, outMin, outMax)
-                const cornerMappedX = canvasArea.mapToRange(platform.x + cornerX, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, canvasArea.canvas.width)
-                const cornerMappedY = canvasArea.mapToRange(platform.y + cornerY, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, canvasArea.canvas.height)
-                
-                this.x = cornerMappedX
-                this.y = cornerMappedY
-
-
-            } else if (touchHandler.dragging) {
-    
-                // move button according to touch dragging
-                // adjust and pan screen if button is near the edge
-                // resize element to rounded and mapped button coords
-                // snap element to snapping slider
-
-                this.x += touchHandler.dragAmountX
-                this.y += touchHandler.dragAmountY
-
-                // panning if at edges of screen
-                if (this.x > canvasArea.canvas.width - 340) {
-                    MapEditor.screen.x += 4 / MapEditor.zoom * dt
-                }
-
-                if (this.x < 60) {
-                    MapEditor.screen.x -= 4 / MapEditor.zoom * dt
-                }
-
-                if (this.y > canvasArea.canvas.height - 130) {
-                    MapEditor.screen.y += 4 / MapEditor.zoom * dt
-                }
-
-                if (this.y < 30) {
-                    MapEditor.screen.y -= 4 / MapEditor.zoom * dt
-                }
-
-                
-                // map platform center coords to screen coords
-                const xMapped = canvasArea.mapToRange(platform.x, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, canvasArea.canvas.width)
-                const yMapped = canvasArea.mapToRange(platform.y, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, canvasArea.canvas.height)
-
-                // transform drag amount to match with platform angle
-                let drag = new Vector((this.x - xMapped) / MapEditor.zoom, (this.y - yMapped) / MapEditor.zoom).rotate(-platform.angle)
-
-
-                platform.width = Math.round(drag.x) * 2 // multiplied by 2 because platform will be moving oppposite direction from drag direction (to appear stable)
-                platform.height = Math.round(drag.y) * 2
-    
-                if (MapEditor.snapAmount > 0) {
-                    platform.width = Math.round(platform.width / MapEditor.snapAmount) * MapEditor.snapAmount
-                    platform.height = Math.round(platform.height / MapEditor.snapAmount) * MapEditor.snapAmount
-                }
-
-                if (platform.width < 5) {platform.width = 5}
-                if (platform.height < 5) {platform.height = 5}
-
-                MapEditor.updatePlatformCorners(platform)
-            }
-        })
-
 
         btn_resize_BL = new Button(0, 0, 50, "scale_button", "", 0, "", function() {
             
@@ -1278,7 +1201,7 @@ const UserInterface = {
             if (!this.isPressed) {
                 // position button at corner/edge of element
 
-                // bot left corner (relative to platform center)
+                // BL corner (relative to platform center)
                 const cornerX = platform.corners[0][0]
                 const cornerY = platform.corners[0][1]
                 
@@ -1287,17 +1210,13 @@ const UserInterface = {
                 const cornerMappedX = canvasArea.mapToRange(platform.x + cornerX, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, canvasArea.canvas.width)
                 const cornerMappedY = canvasArea.mapToRange(platform.y + cornerY, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, canvasArea.canvas.height)
                 
-                this.x = cornerMappedX
+                this.x = cornerMappedX - this.width
                 this.y = cornerMappedY
 
 
             } else if (touchHandler.dragging) {
     
                 // move button according to touch dragging
-                // adjust and pan screen if button is near the edge
-                // resize element to mapped button coords
-                // snap element to snapping slider if neede
-
                 this.x += touchHandler.dragAmountX
                 this.y += touchHandler.dragAmountY
 
@@ -1308,39 +1227,27 @@ const UserInterface = {
                 if (this.y < 30) { MapEditor.screen.y -= 4 / MapEditor.zoom * dt }
                 
 
-                // BL corner MAP COORDS
-                const pinnedX = platform.x + platform.corners[0][0]
-                const pinnedY = platform.y + platform.corners[0][1]
+                // TR pinned corner MAP COORDS
+                const pinnedX_mapCoords = platform.x + platform.corners[2][0]
+                const pinnedY_mapCoords = platform.y + platform.corners[2][1]
 
-                // map pinned coords to SCREEN COORDS
+                // convert pinned coords to SCREEN COORDS
                 // mapToRange(number, inMin, inMax, outMin, outMax)
-                const pinnedXMapped = canvasArea.mapToRange(pinnedX, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, canvasArea.canvas.width)
-                const pinnedYMapped = canvasArea.mapToRange(pinnedY, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, canvasArea.canvas.height)                
+                const pinnedX_screenCoords = canvasArea.mapToRange(pinnedX_mapCoords, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, canvasArea.canvas.width)
+                const pinnedY_screenCoords = canvasArea.mapToRange(pinnedY_mapCoords, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, canvasArea.canvas.height)                
         
 
-                // transform drag amount to match with platform angle
-                // drag measure from TR corner to buttons position
-                // const dragFromPinned = new Vector((pinnedXMapped - this.x) / MapEditor.zoom, (this.y - pinnedYMapped) / MapEditor.zoom).rotate(-platform.angle)
-                let dragFromPinned = new Vector(pinnedXMapped - this.x, this.y - pinnedYMapped).rotate(-platform.angle)
-                
-                // distance the btn has moved away from the corner it controls. dividing by zoom brings it back to real map scale 
-                // let dragFromCorner = new Vector(pinnedXMapped - this.x, this.y - pinnedYMapped)
-                let dragFromCorner = new Vector((pinnedXMapped - this.x) / MapEditor.zoom, (this.y - pinnedYMapped) / MapEditor.zoom)
+                // get vector dragFromPinned (unscaled by zoom) (origin is at pin) x value will be neg at 0deg, y val will be pos(down) at 0 deg 
+                // dividing by zoom brings it back to real map scale 
+                const dragFromPinned = new Vector((this.x + this.width - pinnedX_screenCoords) / MapEditor.zoom, (this.y - pinnedY_screenCoords) / MapEditor.zoom)
 
-                // maybe need this? doubt
-                // dragFromCorner.multiply(MapEditor.zoom)
+                // get rotatedDragFromPinned. (x will always be -, y will always be +)
+                const rotatedDragFromPinned = dragFromPinned.rotate(-platform.angle)
 
-                // this is used for setting the platforms width and height
-                let rotatedDragFromCorner = dragFromCorner.rotate(-platform.angle)
+                // set width and height using rotatedDragFromPinned
+                platform.width = Math.round(-rotatedDragFromPinned.x)
+                platform.height = Math.round(rotatedDragFromPinned.y)
 
-                UserInterface.debugVector = dragFromPinned
-
-                // changing platform dimesions and origin accordingly
-                // platform.width = 2 * Math.round(dragFromPinned.x / 2); // rounds to nearest even number
-                // platform.height = 2 * Math.round(dragFromPinned.y / 2);
-                
-                platform.width += 2 * Math.round(dragFromCorner.x / 2)
-                platform.height += 2 * Math.round(dragFromCorner.y / 2)
 
                 // snapping and restricting size
                 if (MapEditor.snapAmount > 0) {
@@ -1348,30 +1255,272 @@ const UserInterface = {
                     platform.height = Math.round(platform.height / MapEditor.snapAmount) * MapEditor.snapAmount
                 }
 
-                if (platform.width < 4) {platform.width = 4}
-                if (platform.height < 4) {platform.height = 4}
+                if (platform.width < 6) {platform.width = 6}
+                if (platform.height < 6) {platform.height = 6}
 
 
-
-                if (Math.abs(2 * Math.round(dragFromCorner.x / 2)) > 0) {
-                    platform.x -= Math.round(rotatedDragFromCorner.x / 2)
-                }
-                if (Math.abs(2 * Math.round(dragFromCorner.y / 2)) > 0) {
-                    platform.y += Math.round(rotatedDragFromCorner.y / 2)
-                }
-
-                // screen coord middle point between pinned corner and drag to map back into map coords
-                // const toMapX = pinnedXMapped - (dragFromPinned.x / 2)
-                // const toMapY = pinnedYMapped + (dragFromPinned.y / 2)
-
-                // map screen coords to map coords
-                // mapToRange(number, inMin, inMax, outMin, outMax)
-                // newOriginX = canvasArea.mapToRange(toMapX, 0, canvasArea.canvas.width, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width)
-                // newOriginY = canvasArea.mapToRange(toMapY, 0, canvasArea.canvas.height, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height)
-
-                // platform.x = Math.round(newOriginX)
-                // platform.y = Math.round(newOriginY)
+                // get NEW BL dragged corner map coords
+                const updatedDragCorner = [
+                    -((platform.width / 2) * Math.cos(platform.angleRad)) - ((platform.height / 2) * Math.sin(platform.angleRad)),
+                    -((platform.width / 2) * Math.sin(platform.angleRad)) + ((platform.height / 2) * Math.cos(platform.angleRad))
+                ]
                 
+                const draggedX_mapCoords = pinnedX_mapCoords + (updatedDragCorner[0] * 2)
+                const draggedY_mapCoords = pinnedY_mapCoords + (updatedDragCorner[1] * 2)
+                
+                // set platform x and y to inbetween pinnedCorner in MAP COORDS and dragged corner in MAP COORDS
+                platform.x = (pinnedX_mapCoords + draggedX_mapCoords) / 2
+                platform.y = (pinnedY_mapCoords + draggedY_mapCoords) / 2
+
+    
+                MapEditor.updatePlatformCorners(platform)
+            }
+        })
+
+        btn_resize_BR = new Button(0, 0, 50, "scale_button", "", 0, "", function() {
+            
+            let platform = MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]]
+
+            if (!this.isPressed) {
+                // position button at corner/edge of element
+
+                // BR corner (relative to platform center)
+                const cornerX = platform.corners[1][0]
+                const cornerY = platform.corners[1][1]
+                
+                // corner coords mapped to screen coords
+                // mapToRange(number, inMin, inMax, outMin, outMax)
+                const cornerMappedX = canvasArea.mapToRange(platform.x + cornerX, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, canvasArea.canvas.width)
+                const cornerMappedY = canvasArea.mapToRange(platform.y + cornerY, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, canvasArea.canvas.height)
+                
+                this.x = cornerMappedX
+                this.y = cornerMappedY
+
+
+            } else if (touchHandler.dragging) {
+    
+                // move button according to touch dragging
+                this.x += touchHandler.dragAmountX
+                this.y += touchHandler.dragAmountY
+
+                // panning if at edges of screen
+                if (this.x > canvasArea.canvas.width - 340) { MapEditor.screen.x += 4 / MapEditor.zoom * dt }
+                if (this.x < 60) { MapEditor.screen.x -= 4 / MapEditor.zoom * dt }
+                if (this.y > canvasArea.canvas.height - 130) { MapEditor.screen.y += 4 / MapEditor.zoom * dt }
+                if (this.y < 30) { MapEditor.screen.y -= 4 / MapEditor.zoom * dt }
+                
+
+                // TL pinned corner MAP COORDS
+                const pinnedX_mapCoords = platform.x + platform.corners[3][0]
+                const pinnedY_mapCoords = platform.y + platform.corners[3][1]
+
+                // convert pinned coords to SCREEN COORDS
+                // mapToRange(number, inMin, inMax, outMin, outMax)
+                const pinnedX_screenCoords = canvasArea.mapToRange(pinnedX_mapCoords, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, canvasArea.canvas.width)
+                const pinnedY_screenCoords = canvasArea.mapToRange(pinnedY_mapCoords, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, canvasArea.canvas.height)                
+        
+
+                // get vector dragFromPinned (unscaled by zoom) (origin is at pin) x value will be pos at 0deg, y val will be pos(down) at 0 deg 
+                // dividing by zoom brings it back to real map scale 
+                const dragFromPinned = new Vector((this.x - pinnedX_screenCoords) / MapEditor.zoom, (this.y - pinnedY_screenCoords) / MapEditor.zoom)
+
+                // get rotatedDragFromPinned. (x will always be -, y will always be +)
+                const rotatedDragFromPinned = dragFromPinned.rotate(-platform.angle)
+
+                // set width and height using rotatedDragFromPinned
+                platform.width = Math.round(rotatedDragFromPinned.x)
+                platform.height = Math.round(rotatedDragFromPinned.y)
+
+
+                // snapping and restricting size
+                if (MapEditor.snapAmount > 0) {
+                    platform.width = Math.round(platform.width / MapEditor.snapAmount) * MapEditor.snapAmount
+                    platform.height = Math.round(platform.height / MapEditor.snapAmount) * MapEditor.snapAmount
+                }
+
+                if (platform.width < 6) {platform.width = 6}
+                if (platform.height < 6) {platform.height = 6}
+
+
+                // get NEW BR dragged corner map coords
+                const updatedDragCorner = [
+                    ((platform.width / 2) * Math.cos(platform.angleRad)) - ((platform.height / 2) * Math.sin(platform.angleRad)),
+                    ((platform.width / 2) * Math.sin(platform.angleRad)) + ((platform.height / 2) * Math.cos(platform.angleRad))
+                ]
+                
+                const draggedX_mapCoords = pinnedX_mapCoords + (updatedDragCorner[0] * 2)
+                const draggedY_mapCoords = pinnedY_mapCoords + (updatedDragCorner[1] * 2)
+                
+                // set platform x and y to inbetween pinnedCorner in MAP COORDS and dragged corner in MAP COORDS
+                platform.x = (pinnedX_mapCoords + draggedX_mapCoords) / 2
+                platform.y = (pinnedY_mapCoords + draggedY_mapCoords) / 2
+
+    
+                MapEditor.updatePlatformCorners(platform)
+            }
+        })
+
+        btn_resize_TR = new Button(0, 0, 50, "scale_button", "", 0, "", function() {
+            
+            let platform = MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]]
+
+            if (!this.isPressed) {
+                // position button at corner/edge of element
+
+                // TR corner (relative to platform center)
+                const cornerX = platform.corners[2][0]
+                const cornerY = platform.corners[2][1]
+                
+                // corner coords mapped to screen coords
+                // mapToRange(number, inMin, inMax, outMin, outMax)
+                const cornerMappedX = canvasArea.mapToRange(platform.x + cornerX, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, canvasArea.canvas.width)
+                const cornerMappedY = canvasArea.mapToRange(platform.y + cornerY, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, canvasArea.canvas.height)
+                
+                this.x = cornerMappedX
+                this.y = cornerMappedY - this.height
+
+
+            } else if (touchHandler.dragging) {
+    
+                // move button according to touch dragging
+                this.x += touchHandler.dragAmountX
+                this.y += touchHandler.dragAmountY
+
+                // panning if at edges of screen
+                if (this.x > canvasArea.canvas.width - 340) { MapEditor.screen.x += 4 / MapEditor.zoom * dt }
+                if (this.x < 60) { MapEditor.screen.x -= 4 / MapEditor.zoom * dt }
+                if (this.y > canvasArea.canvas.height - 130) { MapEditor.screen.y += 4 / MapEditor.zoom * dt }
+                if (this.y < 30) { MapEditor.screen.y -= 4 / MapEditor.zoom * dt }
+                
+
+                // BL pinned corner MAP COORDS
+                const pinnedX_mapCoords = platform.x + platform.corners[0][0]
+                const pinnedY_mapCoords = platform.y + platform.corners[0][1]
+
+                // convert pinned coords to SCREEN COORDS
+                // mapToRange(number, inMin, inMax, outMin, outMax)
+                const pinnedX_screenCoords = canvasArea.mapToRange(pinnedX_mapCoords, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, canvasArea.canvas.width)
+                const pinnedY_screenCoords = canvasArea.mapToRange(pinnedY_mapCoords, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, canvasArea.canvas.height)                
+        
+
+                // get vector dragFromPinned (unscaled by zoom) (origin is at pin) x value will be pos at 0deg, y val will be neg(up) at 0 deg 
+                // dividing by zoom brings it back to real map scale 
+                const dragFromPinned = new Vector((this.x - pinnedX_screenCoords) / MapEditor.zoom, (this.y + this.height - pinnedY_screenCoords) / MapEditor.zoom)
+
+                // get rotatedDragFromPinned. (x will always be -, y will always be +)
+                const rotatedDragFromPinned = dragFromPinned.rotate(-platform.angle)
+
+                // set width and height using rotatedDragFromPinned
+                platform.width = Math.round(rotatedDragFromPinned.x)
+                platform.height = Math.round(-rotatedDragFromPinned.y) 
+
+
+                // snapping and restricting size
+                if (MapEditor.snapAmount > 0) {
+                    platform.width = Math.round(platform.width / MapEditor.snapAmount) * MapEditor.snapAmount
+                    platform.height = Math.round(platform.height / MapEditor.snapAmount) * MapEditor.snapAmount
+                }
+
+                if (platform.width < 6) {platform.width = 6}
+                if (platform.height < 6) {platform.height = 6}
+
+
+                // get NEW TR dragged corner map coords
+                const updatedDragCorner = [
+                    ((platform.width / 2) * Math.cos(platform.angleRad)) + ((platform.height / 2) * Math.sin(platform.angleRad)),
+                    ((platform.width / 2) * Math.sin(platform.angleRad)) - ((platform.height / 2) * Math.cos(platform.angleRad))
+                ]
+                
+                const draggedX_mapCoords = pinnedX_mapCoords + (updatedDragCorner[0] * 2)
+                const draggedY_mapCoords = pinnedY_mapCoords + (updatedDragCorner[1] * 2)
+                
+                // set platform x and y to inbetween pinnedCorner in MAP COORDS and dragged corner in MAP COORDS
+                platform.x = (pinnedX_mapCoords + draggedX_mapCoords) / 2
+                platform.y = (pinnedY_mapCoords + draggedY_mapCoords) / 2
+
+    
+                MapEditor.updatePlatformCorners(platform)
+            }
+        })
+
+        btn_resize_TL = new Button(0, 0, 50, "scale_button", "", 0, "", function() {
+            
+            let platform = MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]]
+
+            if (!this.isPressed) {
+                // position button at corner/edge of element
+
+                // TL corner (relative to platform center)
+                const cornerX = platform.corners[3][0]
+                const cornerY = platform.corners[3][1]
+                
+                // corner coords mapped to screen coords
+                // mapToRange(number, inMin, inMax, outMin, outMax)
+                const cornerMappedX = canvasArea.mapToRange(platform.x + cornerX, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, canvasArea.canvas.width)
+                const cornerMappedY = canvasArea.mapToRange(platform.y + cornerY, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, canvasArea.canvas.height)
+                
+                this.x = cornerMappedX - this.width
+                this.y = cornerMappedY - this.height
+
+
+            } else if (touchHandler.dragging) {
+    
+                // move button according to touch dragging
+                this.x += touchHandler.dragAmountX
+                this.y += touchHandler.dragAmountY
+
+                // panning if at edges of screen
+                if (this.x > canvasArea.canvas.width - 340) { MapEditor.screen.x += 4 / MapEditor.zoom * dt }
+                if (this.x < 60) { MapEditor.screen.x -= 4 / MapEditor.zoom * dt }
+                if (this.y > canvasArea.canvas.height - 130) { MapEditor.screen.y += 4 / MapEditor.zoom * dt }
+                if (this.y < 30) { MapEditor.screen.y -= 4 / MapEditor.zoom * dt }
+                
+
+                // BR pinned corner MAP COORDS
+                const pinnedX_mapCoords = platform.x + platform.corners[1][0]
+                const pinnedY_mapCoords = platform.y + platform.corners[1][1]
+
+                // convert pinned coords to SCREEN COORDS
+                // mapToRange(number, inMin, inMax, outMin, outMax)
+                const pinnedX_screenCoords = canvasArea.mapToRange(pinnedX_mapCoords, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, canvasArea.canvas.width)
+                const pinnedY_screenCoords = canvasArea.mapToRange(pinnedY_mapCoords, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, canvasArea.canvas.height)                
+        
+
+                // get vector dragFromPinned (unscaled by zoom) (origin is at pin) x value will be neg at 0deg, y val will be neg(up) at 0 deg 
+                // dividing by zoom brings it back to real map scale 
+                const dragFromPinned = new Vector((this.x + this.width - pinnedX_screenCoords) / MapEditor.zoom, (this.y + this.height - pinnedY_screenCoords) / MapEditor.zoom)
+
+                // get rotatedDragFromPinned. (x will always be +, y will always be +)
+                const rotatedDragFromPinned = dragFromPinned.rotate(-platform.angle)
+
+                // set width and height using rotatedDragFromPinned
+                platform.width = Math.round(-rotatedDragFromPinned.x)
+                platform.height = Math.round(-rotatedDragFromPinned.y) 
+
+
+                // snapping and restricting size
+                if (MapEditor.snapAmount > 0) {
+                    platform.width = Math.round(platform.width / MapEditor.snapAmount) * MapEditor.snapAmount
+                    platform.height = Math.round(platform.height / MapEditor.snapAmount) * MapEditor.snapAmount
+                }
+
+                if (platform.width < 6) {platform.width = 6}
+                if (platform.height < 6) {platform.height = 6}
+
+
+                // get NEW TL dragged corner map coords
+                const updatedDragCorner = [
+                    -((platform.width / 2) * Math.cos(platform.angleRad)) + ((platform.height / 2) * Math.sin(platform.angleRad)),
+                    -((platform.width / 2) * Math.sin(platform.angleRad)) - ((platform.height / 2) * Math.cos(platform.angleRad))
+                ]
+                
+                const draggedX_mapCoords = pinnedX_mapCoords + (updatedDragCorner[0] * 2)
+                const draggedY_mapCoords = pinnedY_mapCoords + (updatedDragCorner[1] * 2)
+                
+                // set platform x and y to inbetween pinnedCorner in MAP COORDS and dragged corner in MAP COORDS
+                platform.x = (pinnedX_mapCoords + draggedX_mapCoords) / 2
+                platform.y = (pinnedY_mapCoords + draggedY_mapCoords) / 2
+
     
                 MapEditor.updatePlatformCorners(platform)
             }
@@ -2146,8 +2295,10 @@ const UserInterface = {
             btn_unselect,
             
             btn_translate,
-            btn_resize,
             btn_resize_BL,
+            btn_resize_BR,
+            btn_resize_TR,
+            btn_resize_TL,
             btn_angleSlider,
             btn_wall,
 
@@ -2793,15 +2944,6 @@ const UserInterface = {
         this.renderedButtons.forEach(button => { // LOOP RENDERED BUTTONS AND RUN THEIR .render()
             button.render();
         });
-
-        if (this.debugVector) {
-            canvasArea.ctx.beginPath()
-            canvasArea.ctx.moveTo(btn_resize_BL.x, btn_resize_BL.y)
-            canvasArea.ctx.lineTo(btn_resize_BL.x + this.debugVector.x, btn_resize_BL.y - this.debugVector.y)
-            canvasArea.ctx.strokeStyle = "green"
-            canvasArea.ctx.lineWidth = 5
-            canvasArea.ctx.stroke()
-        }
 
         if (this.gamestate == 1) { // In Main Menu
             canvasArea.canvas.style.backgroundColor = "#a3d5e1";
@@ -4586,14 +4728,14 @@ const MapEditor = {
                 ctx.restore(); // restoring platform rotation and translation
                 
                 // PLAFORM RENDERING DEBUG TEXT
-                if (UserInterface.settings.debugText == 1) { // draw platform height indicators
-                    ctx.fillStyle = "#FFFFFF";
-                    ctx.fillText("position: " + platform.x + ", " + platform.y, platform.x + 5, platform.y - 5);
+                // if (UserInterface.settings.debugText == 1) { // draw platform height indicators
+                //     ctx.fillStyle = "#FFFFFF";
+                //     ctx.fillText("position: " + platform.x + ", " + platform.y, platform.x + 5, platform.y - 5);
 
-                    //origin
-                    ctx.fillStyle = "#00FF00";
-                    ctx.fillRect(platform.x - 3, platform.y - 3, 6, 6)
-                }
+                //     //origin
+                //     ctx.fillStyle = "#00FF00";
+                //     ctx.fillRect(platform.x - 3, platform.y - 3, 6, 6)
+                // }
 
             })
 
@@ -4794,7 +4936,9 @@ const MapEditor = {
                     
                     } else { // platform is selected
                         ctx.fillText("Platform", sidePanel.x + 25, sidePanel.y + 100);
-                        ctx.fillText("Position: " + this.loadedMap.platforms[this.selectedElements[0]].x + ", " + this.loadedMap.platforms[this.selectedElements[0]].y, sidePanel.x + 25, sidePanel.y + 130);
+                        const approxSignX = (this.loadedMap.platforms[this.selectedElements[0]].x % 1 == 0) ? "" : "~" 
+                        const approxSignY = (this.loadedMap.platforms[this.selectedElements[0]].y % 1 == 0) ? "" : "~" 
+                        ctx.fillText("Position: " + approxSignX + Math.round(this.loadedMap.platforms[this.selectedElements[0]].x) + ", " + approxSignY + Math.round(this.loadedMap.platforms[this.selectedElements[0]].y), sidePanel.x + 25, sidePanel.y + 130);
                         ctx.fillText("Size: " + this.loadedMap.platforms[this.selectedElements[0]].width + ", " + this.loadedMap.platforms[this.selectedElements[0]].height, sidePanel.x + 25, sidePanel.y + 160);
                         ctx.fillText("Wall: " + (this.loadedMap.platforms[this.selectedElements[0]].wall?"Yes":"No"), sidePanel.x + 25, sidePanel.y + 280)
                     }
@@ -4884,8 +5028,10 @@ const MapEditor = {
             // SCROLLING THE SCREEN and SETTING OBJECTS TO ANGLE SLIDERS VALUES and SETTING ZOOM TO SLIDER VALUE EVERY FRAME
             if (touchHandler.dragging == 1 &&
                 !btn_translate.isPressed && 
-                !btn_resize.isPressed && 
-                !btn_resize_BL.isPressed && 
+                !btn_resize_BL.isPressed &&
+                !btn_resize_BR.isPressed && 
+                !btn_resize_TR.isPressed && 
+                !btn_resize_TL.isPressed && 
                 btn_angleSlider.confirmed && 
                 btn_playerAngleSlider.confirmed && 
                 btn_checkpointAngleSlider.confirmed && 
@@ -4996,9 +5142,12 @@ const MapEditor = {
                 btn_translate.func(true)
             }
             
-            if (UserInterface.renderedButtons.includes(btn_resize)) {
-                btn_resize.func(true) // update tag is true -- distinguish between updates and touch releases
-                btn_resize_BL.func(true)
+            if (UserInterface.renderedButtons.includes(btn_resize_BL)) {
+                btn_resize_BL.func()
+                btn_resize_BR.func()
+                btn_resize_TR.func()
+                btn_resize_TL.func()
+
             }
         }
 
