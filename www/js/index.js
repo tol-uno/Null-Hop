@@ -4651,47 +4651,46 @@ const MapEditor = {
                 ctx.save(); // #18a
                 ctx.translate(platform.x, platform.y);
                 
-                const angleRad = platform.angle * (Math.PI/180);
-
                 if (platform.wall) {ctx.fillStyle = canvasArea.getShadedColor(MapEditor.loadedMap.style.wallSideColor, 0.5)} 
                 else if (platform.endzone) {ctx.fillStyle = canvasArea.getShadedColor(MapEditor.loadedMap.style.endZoneSideColor, 0.5)}
                 else {ctx.fillStyle = canvasArea.getShadedColor(MapEditor.loadedMap.style.platformSideColor, 0.5)}
 
-                if (-90 < platform.angle && platform.angle < 90) { // ALMOST ALWAYS RENDER BOTTOM SIDE. side2
-                    
+                // corners array order: BL BR TR TL
+
+                // ALWAYS RENDER BOTTOM SIDE. side2    
+                ctx.fillStyle = platform.shaded_sideColor2;
+                ctx.beginPath();
+                ctx.moveTo(platform.corners[1][0], platform.corners[1][1]); // BR
+                ctx.lineTo(platform.corners[0][0], platform.corners[0][1]); // BL
+                ctx.lineTo(platform.corners[0][0], platform.corners[0][1] + this.loadedMap.style.platformHeight); // BL + height
+                ctx.lineTo(platform.corners[1][0], platform.corners[1][1] + this.loadedMap.style.platformHeight); // BR + height
+                ctx.closePath();
+                ctx.fill();
+            
+                if (platform.angle > 0) { // side3 right side
+
+                    ctx.fillStyle = platform.shaded_sideColor3; // sideColor3
                     ctx.beginPath();
-                    ctx.moveTo(platform.width/2 * Math.cos(angleRad) - (platform.height/2 * Math.sin(angleRad)), platform.width/2 * Math.sin(angleRad) + (platform.height/2 * Math.cos(angleRad))); // bot right
-                    ctx.lineTo(-platform.width/2 * Math.cos(angleRad) - (platform.height/2 * Math.sin(angleRad)), -platform.width/2 * Math.sin(angleRad) + (platform.height/2 * Math.cos(angleRad))); // bot left
-                    ctx.lineTo(-platform.width/2 * Math.cos(angleRad) - (platform.height/2 * Math.sin(angleRad)), -platform.width/2 * Math.sin(angleRad) + (platform.height/2 * Math.cos(angleRad)) + MapEditor.loadedMap.style.platformHeight);
-                    ctx.lineTo(platform.width/2 * Math.cos(angleRad) - (platform.height/2 * Math.sin(angleRad)), platform.width/2 * Math.sin(angleRad) + (platform.height/2 * Math.cos(angleRad)) + MapEditor.loadedMap.style.platformHeight);
+                    ctx.moveTo(platform.corners[1][0], platform.corners[1][1]); // BR
+                    ctx.lineTo(platform.corners[2][0], platform.corners[2][1]); // TR
+                    ctx.lineTo(platform.corners[2][0], platform.corners[2][1] + this.loadedMap.style.platformHeight); // TR + height
+                    ctx.lineTo(platform.corners[1][0], platform.corners[1][1] + this.loadedMap.style.platformHeight); // BR + height
                     ctx.closePath();
                     ctx.fill();
                 }
-        
-        
-                if (0 < platform.angle && platform.angle <= 90) { // side3
-        
+
+                if (platform.angle < 0) { // side1 left side
+
+                    ctx.fillStyle = platform.shaded_sideColor1; // sideColor1  
                     ctx.beginPath();
-                    ctx.moveTo(platform.width/2 * Math.cos(angleRad) - (platform.height/2 * Math.sin(angleRad)), platform.width/2 * Math.sin(angleRad) + (platform.height/2 * Math.cos(angleRad))); // bot right
-                    ctx.lineTo(platform.width/2 * Math.cos(angleRad) + (platform.height/2 * Math.sin(angleRad)), platform.width/2 * Math.sin(angleRad) - (platform.height/2 * Math.cos(angleRad))); // top right
-                    ctx.lineTo(platform.width/2 * Math.cos(angleRad) + (platform.height/2 * Math.sin(angleRad)), platform.width/2 * Math.sin(angleRad) - (platform.height/2 * Math.cos(angleRad)) + MapEditor.loadedMap.style.platformHeight);
-                    ctx.lineTo(platform.width/2 * Math.cos(angleRad) - (platform.height/2 * Math.sin(angleRad)), platform.width/2 * Math.sin(angleRad) + (platform.height/2 * Math.cos(angleRad)) + MapEditor.loadedMap.style.platformHeight);
+                    ctx.moveTo(platform.corners[0][0], platform.corners[0][1]); // BL
+                    ctx.lineTo(platform.corners[3][0], platform.corners[3][1]); // TL
+                    ctx.lineTo(platform.corners[3][0], platform.corners[3][1] + this.loadedMap.style.platformHeight); // TL + height
+                    ctx.lineTo(platform.corners[0][0], platform.corners[0][1] + this.loadedMap.style.platformHeight); // BL + height
                     ctx.closePath();
                     ctx.fill();
                 }
-        
-                if (-90 <= platform.angle && platform.angle < 0) { // side1
-        
-                    ctx.beginPath();
-                    ctx.moveTo(-platform.width/2 * Math.cos(angleRad) - (platform.height/2 * Math.sin(angleRad)), -platform.width/2 * Math.sin(angleRad) + (platform.height/2 * Math.cos(angleRad))); // bot left
-                    ctx.lineTo(-platform.width/2 * Math.cos(angleRad) + (platform.height/2 * Math.sin(angleRad)), -platform.width/2 * Math.sin(angleRad) - (platform.height/2 * Math.cos(angleRad))); // top left
-                    ctx.lineTo(-platform.width/2 * Math.cos(angleRad) + (platform.height/2 * Math.sin(angleRad)), -platform.width/2 * Math.sin(angleRad) - (platform.height/2 * Math.cos(angleRad)) + MapEditor.loadedMap.style.platformHeight);
-                    ctx.lineTo(-platform.width/2 * Math.cos(angleRad) - (platform.height/2 * Math.sin(angleRad)), -platform.width/2 * Math.sin(angleRad) + (platform.height/2 * Math.cos(angleRad)) + MapEditor.loadedMap.style.platformHeight);
-                    ctx.closePath();
-                    ctx.fill();
-                }
-        
-      
+              
                 ctx.restore(); // #18 back to map origin translation
                 
             })
@@ -5292,36 +5291,6 @@ const MapEditor = {
             // create all generated properties for each platform
             platforms.forEach( platform => {
                 
-                /* I should be able to kill all this
-                platform.hypotenuse = Math.sqrt(platform.width * platform.width + platform.height * platform.height)/2
-                platform.angleRad = platform.angle * (Math.PI/180)
-                platform.corners = [ // order: BL BR TR TL
-                    // bot left corner        
-                    [
-                    -((platform.width / 2) * Math.cos(platform.angleRad)) - ((platform.height / 2) * Math.sin(platform.angleRad)),
-                    -((platform.width / 2) * Math.sin(platform.angleRad)) + ((platform.height / 2) * Math.cos(platform.angleRad))
-                    ],
-        
-                    // bot right corner
-                    [
-                    ((platform.width / 2) * Math.cos(platform.angleRad)) - ((platform.height / 2) * Math.sin(platform.angleRad)),
-                    ((platform.width / 2) * Math.sin(platform.angleRad)) + ((platform.height / 2) * Math.cos(platform.angleRad))
-                    ],
-        
-                    // top right corner
-                    [
-                    ((platform.width / 2) * Math.cos(platform.angleRad)) + ((platform.height / 2) * Math.sin(platform.angleRad)),
-                    ((platform.width / 2) * Math.sin(platform.angleRad)) - ((platform.height / 2) * Math.cos(platform.angleRad))
-                    ],
-                
-                    // top left corner
-                    [
-                    -((platform.width / 2) * Math.cos(platform.angleRad)) + ((platform.height / 2) * Math.sin(platform.angleRad)),
-                    -((platform.width / 2) * Math.sin(platform.angleRad)) - ((platform.height / 2) * Math.cos(platform.angleRad))
-                    ]
-                ]
-                */
-
                 function sortCornersX(a, b) {
                     // if return is negative ... a comes first 
                     // if return is positive ... b comes first
@@ -5647,7 +5616,6 @@ const Map = {
             platform.shaded_sideColor3 = canvasArea.getShadedColor(colorToUse2, litPercent3)
 
             // SHADOW POLYGON
-            const angleRad = platform.angle * (Math.PI/180);
 
             let wallShadowMultiplier
             if (platform.wall && this.style.platformHeight > 0) {
@@ -5656,54 +5624,54 @@ const Map = {
                 wallShadowMultiplier = 1
             }
 
-            platform.shadowPoints = [ // ALL THE POSSIBLE POINTS TO INPUT IN CONVEX HULL FUNCTION. OPTIMIZE already have come of these points saved to map
+            platform.shadowPoints = [ // ALL THE POSSIBLE POINTS TO INPUT IN CONVEX HULL FUNCTION
             
                 // bot left corner
                 [
-                -((platform.width / 2) * Math.cos(angleRad)) - ((platform.height / 2) * Math.sin(angleRad)),
-                -((platform.width / 2) * Math.sin(angleRad)) + ((platform.height / 2) * Math.cos(angleRad)) + this.style.platformHeight
+                platform.corners[0][0],
+                platform.corners[0][1] + this.style.platformHeight,
                 ],
 
                 // bot right corner
                 [
-                ((platform.width / 2) * Math.cos(angleRad)) - ((platform.height / 2) * Math.sin(angleRad)),
-                ((platform.width / 2) * Math.sin(angleRad)) + ((platform.height / 2) * Math.cos(angleRad)) + this.style.platformHeight
+                platform.corners[1][0],
+                platform.corners[1][1] + this.style.platformHeight,
                 ],
 
                 // top right corner
                 [
-                ((platform.width / 2) * Math.cos(angleRad)) + ((platform.height / 2) * Math.sin(angleRad)),
-                ((platform.width / 2) * Math.sin(angleRad)) - ((platform.height / 2) * Math.cos(angleRad)) + this.style.platformHeight
+                platform.corners[2][0],
+                platform.corners[2][1] + this.style.platformHeight,
                 ],
             
                 // top left corner
                 [
-                -((platform.width / 2) * Math.cos(angleRad)) + ((platform.height / 2) * Math.sin(angleRad)),
-                -((platform.width / 2) * Math.sin(angleRad)) - ((platform.height / 2) * Math.cos(angleRad)) + this.style.platformHeight
+                platform.corners[3][0],
+                platform.corners[3][1] + this.style.platformHeight,
                 ],
             
                 // bot left SHADOW
                 [
-                -((platform.width / 2) * Math.cos(angleRad)) - ((platform.height / 2) * Math.sin(angleRad)) + shadowX * wallShadowMultiplier,
-                -((platform.width / 2) * Math.sin(angleRad)) + ((platform.height / 2) * Math.cos(angleRad)) + this.style.platformHeight + shadowY * wallShadowMultiplier
+                platform.corners[0][0] + shadowX * wallShadowMultiplier,
+                platform.corners[0][1] + this.style.platformHeight + shadowY * wallShadowMultiplier,
                 ],
 
                 // bot right SHADOW
                 [
-                ((platform.width / 2) * Math.cos(angleRad)) - ((platform.height / 2) * Math.sin(angleRad)) + shadowX * wallShadowMultiplier,
-                ((platform.width / 2) * Math.sin(angleRad)) + ((platform.height / 2) * Math.cos(angleRad)) + this.style.platformHeight + shadowY * wallShadowMultiplier
+                platform.corners[1][0] + shadowX * wallShadowMultiplier,
+                platform.corners[1][1] + this.style.platformHeight + shadowY * wallShadowMultiplier,
                 ],
                 
                 // top right SHADOW
                 [
-                ((platform.width / 2) * Math.cos(angleRad)) + ((platform.height / 2) * Math.sin(angleRad)) + shadowX * wallShadowMultiplier,
-                ((platform.width / 2) * Math.sin(angleRad)) - ((platform.height / 2) * Math.cos(angleRad)) + this.style.platformHeight + shadowY * wallShadowMultiplier
+                platform.corners[2][0] + shadowX * wallShadowMultiplier,
+                platform.corners[2][1] + this.style.platformHeight + shadowY * wallShadowMultiplier, 
                 ],
 
                 // top left SHADOW
                 [
-                -((platform.width / 2) * Math.cos(angleRad)) + ((platform.height / 2) * Math.sin(angleRad)) + shadowX * wallShadowMultiplier,
-                -((platform.width / 2) * Math.sin(angleRad)) - ((platform.height / 2) * Math.cos(angleRad)) + this.style.platformHeight + shadowY * wallShadowMultiplier
+                platform.corners[3][0] + shadowX * wallShadowMultiplier,
+                platform.corners[3][1] + this.style.platformHeight + shadowY * wallShadowMultiplier,
                 ],
             
             ]; // end of shadowPoints array
@@ -5920,7 +5888,6 @@ const Map = {
 
             if (platform.endzone) {
                 this.endZonesToCheck.push(platform);
-                //this.endZoneIsRendered = true;
             }
         }); // end of looping through each rendered platform
 
@@ -5947,47 +5914,43 @@ const Map = {
         // SIDES OF PLATFORMS
         ctx.save(); // #18
         ctx.translate(platform.x, platform.y);
-
-        const angleRad = platform.angle * (Math.PI/180);
         
-        // platform angles should only be max of 90 and -90 in mapData
-        // calculating shading works with any angle but sides arent draw because drawing "if statements" are hardcoded to 90 degrees
+        // platform angles should only be max of 45 and -45 in mapData
 
-        // OPTIMIZE could use the platform.corners array istead of calculating every frame
+        // corners array order: BL BR TR TL
 
-        if (-90 < platform.angle && platform.angle < 90) { // ALMOST ALWAYS RENDER BOTTOM SIDE. side2
-            
-            ctx.fillStyle = platform.shaded_sideColor2;
-            ctx.beginPath();
-            ctx.moveTo(platform.width/2 * Math.cos(angleRad) - (platform.height/2 * Math.sin(angleRad)), platform.width/2 * Math.sin(angleRad) + (platform.height/2 * Math.cos(angleRad)) - adjustedHeight); // bot right
-            ctx.lineTo(-platform.width/2 * Math.cos(angleRad) - (platform.height/2 * Math.sin(angleRad)), -platform.width/2 * Math.sin(angleRad) + (platform.height/2 * Math.cos(angleRad)) - adjustedHeight); // bot left
-            ctx.lineTo(-platform.width/2 * Math.cos(angleRad) - (platform.height/2 * Math.sin(angleRad)), -platform.width/2 * Math.sin(angleRad) + (platform.height/2 * Math.cos(angleRad)) + this.style.platformHeight);
-            ctx.lineTo(platform.width/2 * Math.cos(angleRad) - (platform.height/2 * Math.sin(angleRad)), platform.width/2 * Math.sin(angleRad) + (platform.height/2 * Math.cos(angleRad)) + this.style.platformHeight);
-            ctx.closePath();
-            ctx.fill();
-        }
+        // ALWAYS RENDER BOTTOM SIDE. side2    
+        ctx.fillStyle = platform.shaded_sideColor2;
+        ctx.beginPath();
+        ctx.moveTo(platform.corners[1][0], platform.corners[1][1] - adjustedHeight); // BR
+        ctx.lineTo(platform.corners[0][0], platform.corners[0][1] - adjustedHeight); // BL
+        ctx.lineTo(platform.corners[0][0], platform.corners[0][1] + this.style.platformHeight); // BL + height
+        ctx.lineTo(platform.corners[1][0], platform.corners[1][1] + this.style.platformHeight); // BR + height
+        ctx.closePath();
+        ctx.fill();
+    
 
 
-        if (0 < platform.angle && platform.angle <= 90) { // side3
+        if (platform.angle > 0) { // side3 right side
 
             ctx.fillStyle = platform.shaded_sideColor3; // sideColor3
             ctx.beginPath();
-            ctx.moveTo(platform.width/2 * Math.cos(angleRad) - (platform.height/2 * Math.sin(angleRad)), platform.width/2 * Math.sin(angleRad) + (platform.height/2 * Math.cos(angleRad)) - adjustedHeight); // bot right
-            ctx.lineTo(platform.width/2 * Math.cos(angleRad) + (platform.height/2 * Math.sin(angleRad)), platform.width/2 * Math.sin(angleRad) - (platform.height/2 * Math.cos(angleRad)) - adjustedHeight); // top right
-            ctx.lineTo(platform.width/2 * Math.cos(angleRad) + (platform.height/2 * Math.sin(angleRad)), platform.width/2 * Math.sin(angleRad) - (platform.height/2 * Math.cos(angleRad)) + this.style.platformHeight);
-            ctx.lineTo(platform.width/2 * Math.cos(angleRad) - (platform.height/2 * Math.sin(angleRad)), platform.width/2 * Math.sin(angleRad) + (platform.height/2 * Math.cos(angleRad)) + this.style.platformHeight);
+            ctx.moveTo(platform.corners[1][0], platform.corners[1][1] - adjustedHeight); // BR
+            ctx.lineTo(platform.corners[2][0], platform.corners[2][1] - adjustedHeight); // TR
+            ctx.lineTo(platform.corners[2][0], platform.corners[2][1] + this.style.platformHeight); // TR + height
+            ctx.lineTo(platform.corners[1][0], platform.corners[1][1] + this.style.platformHeight); // BR + height
             ctx.closePath();
             ctx.fill();
         }
 
-        if (-90 <= platform.angle && platform.angle < 0) { // side1
+        if (platform.angle < 0) { // side1 left side
 
             ctx.fillStyle = platform.shaded_sideColor1; // sideColor1  
             ctx.beginPath();
-            ctx.moveTo(-platform.width/2 * Math.cos(angleRad) - (platform.height/2 * Math.sin(angleRad)), -platform.width/2 * Math.sin(angleRad) + (platform.height/2 * Math.cos(angleRad)) - adjustedHeight); // bot left
-            ctx.lineTo(-platform.width/2 * Math.cos(angleRad) + (platform.height/2 * Math.sin(angleRad)), -platform.width/2 * Math.sin(angleRad) - (platform.height/2 * Math.cos(angleRad)) - adjustedHeight); // top left
-            ctx.lineTo(-platform.width/2 * Math.cos(angleRad) + (platform.height/2 * Math.sin(angleRad)), -platform.width/2 * Math.sin(angleRad) - (platform.height/2 * Math.cos(angleRad)) + this.style.platformHeight);
-            ctx.lineTo(-platform.width/2 * Math.cos(angleRad) - (platform.height/2 * Math.sin(angleRad)), -platform.width/2 * Math.sin(angleRad) + (platform.height/2 * Math.cos(angleRad)) + this.style.platformHeight);
+            ctx.moveTo(platform.corners[0][0], platform.corners[0][1] - adjustedHeight); // BL
+            ctx.lineTo(platform.corners[3][0], platform.corners[3][1] - adjustedHeight); // TL
+            ctx.lineTo(platform.corners[3][0], platform.corners[3][1] + this.style.platformHeight); // TL + height
+            ctx.lineTo(platform.corners[0][0], platform.corners[0][1] + this.style.platformHeight); // BL + height
             ctx.closePath();
             ctx.fill();
         }
@@ -6000,18 +5963,12 @@ const Map = {
             ctx.fillText(platform.index, 0 - canvasArea.ctx.measureText(platform.index).width / 2, 0);
             // ctx.fillText("renderIndex: " + this.renderedPlatforms.indexOf(platform), 0, 0)
             // ctx.fillText("angle: " + platform.angle, 0, 20);
-            // ctx.fillText("position: " + platform.x + ", " + platform.y, 0 , 20)
-            // ctx.fillText("width / height: " + platform.width + ", " + platform.height, 0 , 40)
+            // ctx.fillText("position: " + platform.x + ", " + platform.y, 0 , 40)
+            // ctx.fillText("size: " + platform.width + ", " + platform.height, 0 , 60)
         }
 
         
         ctx.restore(); // #18 back to map origin translation
-        
-        // Drawing wall split line
-        // if (platform.wall) {
-        //     ctx.fillStyle = "#00FF00"
-        //     ctx.fillRect(player.x, platform.getSplitLineY(player.x), 5, 5)
-        // }
         
 
         // Drawing split line
