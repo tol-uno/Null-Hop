@@ -50,7 +50,7 @@ const PreviewWindow = {
         function updatePlatform(platform) { // Calculate lighting and shadows for whatever platform is passed as param
 
             // turning lightDirection integer into a Vector 
-            MapEditor.loadedMap.style.lightDirectionVector = new Vector(Math.cos(MapEditor.loadedMap.style.lightDirection * (Math.PI/180)), Math.sin(MapEditor.loadedMap.style.lightDirection * (Math.PI/180)))
+            MapEditor.loadedMap.style.lightDirectionVector = new Vector2D3D(Math.cos(MapEditor.loadedMap.style.lightDirection * (Math.PI/180)), Math.sin(MapEditor.loadedMap.style.lightDirection * (Math.PI/180)))
 
             // Setting the colors for platforms, endzones, and walls
             let colorToUse = MapEditor.loadedMap.style.platformSideColor;
@@ -62,9 +62,9 @@ const PreviewWindow = {
             if (platform.wall) {colorToUse2 = MapEditor.loadedMap.style.wallTopColor;}
             
             // platform COLORS + wall and endzone
-            const side1Vec = new Vector(-1,0).rotate(platform.angle)
-            const side2Vec = new Vector(0,1).rotate(platform.angle)
-            const side3Vec = new Vector(1,0).rotate(platform.angle)
+            const side1Vec = new Vector2D3D(-1,0).rotate(platform.angle)
+            const side2Vec = new Vector2D3D(0,1).rotate(platform.angle)
+            const side3Vec = new Vector2D3D(1,0).rotate(platform.angle)
 
             const litPercent1 = side1Vec.angleDifference(MapEditor.loadedMap.style.lightDirectionVector) / Math.PI
             const litPercent2 = side2Vec.angleDifference(MapEditor.loadedMap.style.lightDirectionVector) / Math.PI
@@ -312,7 +312,7 @@ const PreviewWindow = {
         // GETTING CORNERS
         if (loopedAngle > 270 || loopedAngle < 90) { // BOT WALL
 
-            const sideVector = new Vector(0,1).rotate(this.player.angle)
+            const sideVector = new Vector2D3D(0,1).rotate(this.player.angle)
             const litPercent = sideVector.angleDifference(MapEditor.loadedMap.style.lightDirectionVector) / Math.PI
             ctx.fillStyle = CanvasArea.getShadedColor(MapEditor.loadedMap.style.playerColor, litPercent)
 
@@ -327,7 +327,7 @@ const PreviewWindow = {
         
         if (0 < loopedAngle && loopedAngle < 180) { // RIGHT WALL
 
-            const sideVector = new Vector(1,0).rotate(this.player.angle)
+            const sideVector = new Vector2D3D(1,0).rotate(this.player.angle)
             const litPercent = sideVector.angleDifference(MapEditor.loadedMap.style.lightDirectionVector) / Math.PI
             ctx.fillStyle = CanvasArea.getShadedColor(MapEditor.loadedMap.style.playerColor, litPercent)
 
@@ -342,7 +342,7 @@ const PreviewWindow = {
         
         if (90 < loopedAngle && loopedAngle < 270) { // TOP WALL
             
-            const sideVector = new Vector(0,-1).rotate(this.player.angle)
+            const sideVector = new Vector2D3D(0,-1).rotate(this.player.angle)
             const litPercent = sideVector.angleDifference(MapEditor.loadedMap.style.lightDirectionVector) / Math.PI
             ctx.fillStyle = CanvasArea.getShadedColor(MapEditor.loadedMap.style.playerColor, litPercent)
 
@@ -357,7 +357,7 @@ const PreviewWindow = {
         
         if (180 < loopedAngle && loopedAngle < 360) { // LEFT WALL
             
-            const sideVector = new Vector(-1,0).rotate(this.player.angle)
+            const sideVector = new Vector2D3D(-1,0).rotate(this.player.angle)
             const litPercent = sideVector.angleDifference(MapEditor.loadedMap.style.lightDirectionVector) / Math.PI
             ctx.fillStyle = CanvasArea.getShadedColor(MapEditor.loadedMap.style.playerColor, litPercent)
 

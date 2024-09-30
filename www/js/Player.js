@@ -11,8 +11,8 @@ const Player = {
     // left (-1,0) vector OR right (1,0) vector that is rotated by the change in angle that frame. 
     // if angle change is postive use Right vec. Negative use left vec
     // normalized left and right vectors act as if strafe keys were pressed 
-    wishDir : new Vector(0,0),
-    velocity : new Vector(0,0),
+    wishDir : new Vector2D3D(0,0),
+    velocity : new Vector2D3D(0,0),
     currentSpeedProjected : 0,
     addSpeed : 0, // initialized here so that userInterface can access for debug
 
@@ -22,7 +22,7 @@ const Player = {
         this.y = y;
         this.restartX = x;
         this.restartY = y;
-        this.lookAngle = new Vector(1,0)
+        this.lookAngle = new Vector2D3D(1,0)
         this.lookAngle = this.lookAngle.rotate(angle)
         this.restartAngle = angle;
 
@@ -74,7 +74,7 @@ const Player = {
         ctx.clip(Map.upperShadowClip);
         ctx.translate(this.x , this.y);
     
-        ctx.rotate(this.lookAngle.getAngle() * Math.PI/180)
+        ctx.rotate(this.lookAngle.getAngleInDegrees() * Math.PI/180)
 
         ctx.fillStyle = Map.style.shadow_platformColor;
         ctx.fillRect(-15, -15, 30, 30)
@@ -94,7 +94,7 @@ const Player = {
             ctx.clip(Map.endZoneShadowClip);
             ctx.translate(this.x , this.y);
 
-            ctx.rotate(this.lookAngle.getAngle() * Math.PI/180)
+            ctx.rotate(this.lookAngle.getAngleInDegrees() * Math.PI/180)
 
             ctx.fillStyle = Map.style.shadow_endzoneColor;
             ctx.fillRect(-15, -15, 30, 30)
@@ -107,7 +107,7 @@ const Player = {
 
         // DRAWING PLAYER TOP
         ctx.translate(0, -this.jumpValue - 32); 
-        ctx.rotate(this.lookAngle.getAngle() * Math.PI/180) // rotating canvas
+        ctx.rotate(this.lookAngle.getAngleInDegrees() * Math.PI/180) // rotating canvas
         ctx.fillStyle = Map.style.shaded_playerColor;
         ctx.fillRect(-16,-16,32,32)
 
@@ -129,8 +129,8 @@ const Player = {
         // SIDES OF PLAYER
         ctx.save(); // #24
 
-        const angleRad = this.lookAngle.getAngle() * (Math.PI/180);
-        const loopedAngle = this.lookAngle.getAngle();
+        const angleRad = this.lookAngle.getAngleInDegrees() * (Math.PI/180);
+        const loopedAngle = this.lookAngle.getAngleInDegrees();
 
 
         // GETTING CORNERS OF ROTATED RECTANGLE
@@ -138,7 +138,7 @@ const Player = {
 
         if (loopedAngle > 270 || loopedAngle < 90) { // BOT WALL
 
-            const sideVector = new Vector(0,1).rotate(this.lookAngle.getAngle())
+            const sideVector = new Vector2D3D(0,1).rotate(this.lookAngle.getAngleInDegrees())
             const litPercent = sideVector.angleDifference(Map.style.lightDirectionVector) / Math.PI
             ctx.fillStyle = CanvasArea.getShadedColor(Map.style.playerColor, litPercent)
 
@@ -153,7 +153,7 @@ const Player = {
 
         if (0 < loopedAngle && loopedAngle < 180) { // RIGHT WALL
 
-            const sideVector = new Vector(1,0).rotate(this.lookAngle.getAngle())
+            const sideVector = new Vector2D3D(1,0).rotate(this.lookAngle.getAngleInDegrees())
             const litPercent = sideVector.angleDifference(Map.style.lightDirectionVector) / Math.PI
             ctx.fillStyle = CanvasArea.getShadedColor(Map.style.playerColor, litPercent)
 
@@ -168,7 +168,7 @@ const Player = {
 
         if (90 < loopedAngle && loopedAngle < 270) { // TOP WALL
             
-            const sideVector = new Vector(0,-1).rotate(this.lookAngle.getAngle())
+            const sideVector = new Vector2D3D(0,-1).rotate(this.lookAngle.getAngleInDegrees())
             const litPercent = sideVector.angleDifference(Map.style.lightDirectionVector) / Math.PI
             ctx.fillStyle = CanvasArea.getShadedColor(Map.style.playerColor, litPercent)
 
@@ -183,7 +183,7 @@ const Player = {
 
         if (180 < loopedAngle && loopedAngle < 360) { // LEFT WALL
 
-            const sideVector = new Vector(-1,0).rotate(this.lookAngle.getAngle())
+            const sideVector = new Vector2D3D(-1,0).rotate(this.lookAngle.getAngleInDegrees())
             const litPercent = sideVector.angleDifference(Map.style.lightDirectionVector) / Math.PI
             ctx.fillStyle = CanvasArea.getShadedColor(Map.style.playerColor, litPercent)
 
@@ -210,7 +210,7 @@ const Player = {
             ctx.clip(Map.playerClip)
 
             ctx.translate(this.x , this.y);
-            ctx.rotate(this.lookAngle.getAngle() * Math.PI/180)
+            ctx.rotate(this.lookAngle.getAngleInDegrees() * Math.PI/180)
 
             ctx.strokeStyle = Map.style.shaded_playerColor
             ctx.lineWidth = 2
@@ -224,7 +224,7 @@ const Player = {
 
     startLevel : function () {
         this.velocity.set(6,0); // 6,0
-        this.velocity = this.velocity.rotate(this.lookAngle.getAngle());
+        this.velocity = this.velocity.rotate(this.lookAngle.getAngleInDegrees());
     },
 
     updatePos : function () {
@@ -372,7 +372,7 @@ const Player = {
                         collisionY = -closestX * Math.sin(-wall.angleRad) + closestY * Math.cos(-wall.angleRad) + wall.y;
 
                         // Calculate normal vector of collision
-                        const normalVector = new Vector(player.x - collisionX, player.y - collisionY);
+                        const normalVector = new Vector2D3D(player.x - collisionX, player.y - collisionY);
                         if (playerInsideWall) { // if inside the wall the vector needs to be flipped to point the right way
                             normalVector.x *= -1;
                             normalVector.y *= -1;
@@ -550,7 +550,7 @@ const Player = {
             return [topLeft, topRight, bottomRight, bottomLeft];
         }
 
-        const playerPoligon = createPoligon(this.x, this.y, 32, 32, this.lookAngle.getAngle() * Math.PI / 180) // player angle converted to rads
+        const playerPoligon = createPoligon(this.x, this.y, 32, 32, this.lookAngle.getAngleInDegrees() * Math.PI / 180) // player angle converted to rads
 
         // check player against every platform
         arrayOfPlatformsToCheck.forEach(platform => {
@@ -635,7 +635,7 @@ const Player = {
             this.lookAngle.set(1,0)
             this.lookAngle = this.lookAngle.rotate(Map.checkpoints[this.checkpointIndex].angle)
             this.velocity.set(2,0)
-            this.velocity = this.velocity.rotate(this.lookAngle.getAngle())
+            this.velocity = this.velocity.rotate(this.lookAngle.getAngleInDegrees())
             this.jumpValue = 0;
             this.jumpVelocity = 2;
         } else {

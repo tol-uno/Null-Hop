@@ -5,7 +5,7 @@ const airAcceleration = 6; // the sharpness your allowed to turn at
 const maxVelocity = 1.15; // basically the rate at which speed is gained / lost. wishDir is scaled to this magnitude
 const gravity = 0.05;
 let prevDateNow;
-let dt = 1;
+let dt = 1; // delta time always has a 1 frame delay
 
 let midX = 0;
 let midY = 0;

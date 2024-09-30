@@ -544,7 +544,7 @@ const UserInterface = {
 
                 // get vector dragFromPinned (unscaled by zoom) (origin is at pin) x value will be neg at 0deg, y val will be pos(down) at 0 deg 
                 // dividing by zoom brings it back to real map scale 
-                const dragFromPinned = new Vector((this.x + this.width - pinnedX_screenCoords) / MapEditor.zoom, (this.y - pinnedY_screenCoords) / MapEditor.zoom)
+                const dragFromPinned = new Vector2D3D((this.x + this.width - pinnedX_screenCoords) / MapEditor.zoom, (this.y - pinnedY_screenCoords) / MapEditor.zoom)
 
                 // get rotatedDragFromPinned. (x will always be -, y will always be +)
                 const rotatedDragFromPinned = dragFromPinned.rotate(-platform.angle)
@@ -627,7 +627,7 @@ const UserInterface = {
 
                 // get vector dragFromPinned (unscaled by zoom) (origin is at pin) x value will be pos at 0deg, y val will be pos(down) at 0 deg 
                 // dividing by zoom brings it back to real map scale 
-                const dragFromPinned = new Vector((this.x - pinnedX_screenCoords) / MapEditor.zoom, (this.y - pinnedY_screenCoords) / MapEditor.zoom)
+                const dragFromPinned = new Vector2D3D((this.x - pinnedX_screenCoords) / MapEditor.zoom, (this.y - pinnedY_screenCoords) / MapEditor.zoom)
 
                 // get rotatedDragFromPinned. (x will always be -, y will always be +)
                 const rotatedDragFromPinned = dragFromPinned.rotate(-platform.angle)
@@ -710,7 +710,7 @@ const UserInterface = {
 
                 // get vector dragFromPinned (unscaled by zoom) (origin is at pin) x value will be pos at 0deg, y val will be neg(up) at 0 deg 
                 // dividing by zoom brings it back to real map scale 
-                const dragFromPinned = new Vector((this.x - pinnedX_screenCoords) / MapEditor.zoom, (this.y + this.height - pinnedY_screenCoords) / MapEditor.zoom)
+                const dragFromPinned = new Vector2D3D((this.x - pinnedX_screenCoords) / MapEditor.zoom, (this.y + this.height - pinnedY_screenCoords) / MapEditor.zoom)
 
                 // get rotatedDragFromPinned. (x will always be -, y will always be +)
                 const rotatedDragFromPinned = dragFromPinned.rotate(-platform.angle)
@@ -793,7 +793,7 @@ const UserInterface = {
 
                 // get vector dragFromPinned (unscaled by zoom) (origin is at pin) x value will be neg at 0deg, y val will be neg(up) at 0 deg 
                 // dividing by zoom brings it back to real map scale 
-                const dragFromPinned = new Vector((this.x + this.width - pinnedX_screenCoords) / MapEditor.zoom, (this.y + this.height - pinnedY_screenCoords) / MapEditor.zoom)
+                const dragFromPinned = new Vector2D3D((this.x + this.width - pinnedX_screenCoords) / MapEditor.zoom, (this.y + this.height - pinnedY_screenCoords) / MapEditor.zoom)
 
                 // get rotatedDragFromPinned. (x will always be +, y will always be +)
                 const rotatedDragFromPinned = dragFromPinned.rotate(-platform.angle)
@@ -2312,7 +2312,7 @@ const UserInterface = {
                 CanvasArea.ctx.fillText("dragAmountX: " + TouchHandler.dragAmountX, textX, 240);
                 CanvasArea.ctx.fillText("velocity: " + Math.round(Player.velocity.magnitude()), textX, 260);
                 CanvasArea.ctx.fillText("Player pos: " + Math.round(Player.x) + ", " + Math.round(Player.y), textX, 280);
-                CanvasArea.ctx.fillText("lookAngle: " + Player.lookAngle.getAngle(), textX, 300);
+                CanvasArea.ctx.fillText("lookAngle: " + Player.lookAngle.getAngleInDegrees(), textX, 300);
                 CanvasArea.ctx.fillText("Timer: " + UserInterface.secondsToMinutes(this.timer), textX, 320);
 
 

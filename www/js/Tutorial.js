@@ -90,7 +90,7 @@ const Tutorial = {
 
             if (
                 !UserInterface.renderedButtons.includes(btn_next) &&  
-                Math.abs(Player.lookAngle.getAngle() - Map.playerStart.angle) > 45
+                Math.abs(Player.lookAngle.getAngleInDegrees() - Map.playerStart.angle) > 45
             ) {
                 UserInterface.renderedButtons = UserInterface.renderedButtons.concat(btn_next)
             }
@@ -104,7 +104,7 @@ const Tutorial = {
 
                 if (this.targets[0][1] > 0) {
 
-                    if (Math.abs(Player.lookAngle.getAngle() - this.targets[0][0]) < 8) {
+                    if (Math.abs(Player.lookAngle.getAngleInDegrees() - this.targets[0][0]) < 8) {
                         this.targets[0][1] -= (0.8 * dt);
                     } else { this.targets[0][1] = 50 }
     

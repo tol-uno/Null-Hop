@@ -149,6 +149,12 @@ const CanvasArea = {
             b : ambientLight[2]
         }
         
+        
+        // Revised:
+        // if lit % is 0  => fully light color with ambient color. If ambient color lightness is 0, color is black
+        // if lit % is 1 => filly lit by direct. no ambient
+        // if lit % is 0.5 => 
+
         r = (litPercent) * (r * (directLight.r / 255)) + (1 - litPercent) * (r * (ambientLight.r / 255)) // left of + is color fully lit by sunlight
         g = (litPercent) * (g * (directLight.g / 255)) + (1 - litPercent) * (g * (ambientLight.g / 255)) // right of + is color fully lit by ambient light
         b = (litPercent) * (b * (directLight.b / 255)) + (1 - litPercent) * (b * (ambientLight.b / 255))

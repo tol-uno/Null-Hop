@@ -19,10 +19,12 @@ class Vector {
         return new Vector(this.x / scalar, this.y / scalar);
     }
 
-    multiply = function(scalar) {
-        this.x *= scalar;
-        this.y *= scalar;
-    }
+
+    // // unused
+    // multiply = function(scalar) {
+    //     this.x *= scalar;
+    //     this.y *= scalar;
+    // }
 
     dotProduct = function(otherVec) { // ONLY FOR 2D Vectors. Projects Parent Vector onto otherVec
         return (this.x * otherVec.x) + (this.y * otherVec.y)
@@ -57,7 +59,7 @@ class Vector {
         return angleDiff
     }
 
-    getAngle = function() { // RETURNS ANGLE IN DEGREES. https://stackoverflow.com/questions/35271222/getting-the-angle-from-a-direction-vector
+    getAngleInDegrees = function() { // RETURNS ANGLE IN DEGREES. https://stackoverflow.com/questions/35271222/getting-the-angle-from-a-direction-vector
         const angle = Math.atan2(this.y, this.x);   //radians
         // you need to divide by PI, and MULTIPLY by 180:
         const degrees = 180 * angle/Math.PI;  //degrees

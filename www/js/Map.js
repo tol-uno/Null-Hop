@@ -76,7 +76,7 @@ const Map = {
         // Calculate lighting and shadows for each platform and the endzone
 
         // turning lightDirection integer into a Vector
-        this.style.lightDirectionVector = new Vector(Math.cos(this.style.lightDirection * (Math.PI/180)), Math.sin(this.style.lightDirection * (Math.PI/180)))
+        this.style.lightDirectionVector = new Vector2D3D(Math.cos(this.style.lightDirection * (Math.PI/180)), Math.sin(this.style.lightDirection * (Math.PI/180)))
 
         // lightPitch is actually sun's angle between 0 -> 89
         const sunAngle = this.style.lightPitch
@@ -106,9 +106,9 @@ const Map = {
             platformIndex ++;
 
             // PLATFORM COLORS
-            side1Vec = new Vector(-1,0).rotate(platform.angle)
-            side2Vec = new Vector(0,1).rotate(platform.angle)
-            side3Vec = new Vector(1,0).rotate(platform.angle)
+            side1Vec = new Vector2D3D(-1,0).rotate(platform.angle)
+            side2Vec = new Vector2D3D(0,1).rotate(platform.angle)
+            side3Vec = new Vector2D3D(1,0).rotate(platform.angle)
 
             const litPercent1 = side1Vec.angleDifference(this.style.lightDirectionVector) / Math.PI // dividing by PI converts angleDiffernce to between 0->1
             const litPercent2 = side2Vec.angleDifference(this.style.lightDirectionVector) / Math.PI            
@@ -320,7 +320,7 @@ const Map = {
                     this.wallsToCheck.push(platform) // for checking if Player is colliding with walls in Player.updatePos()
 
                     // convert Player angle and get radian version
-                    const angle = Player.lookAngle.getAngle();
+                    const angle = Player.lookAngle.getAngleInDegrees();
                     const angleRad = angle * (Math.PI/180);
 
                     // GET PLAYERS LEFTMOST AND RIGHT MOST CORNERS
@@ -497,7 +497,7 @@ const Map = {
         // DRAWING LOWER PLAYER SHADOW
         ctx.save(); // #20
         ctx.translate(Player.x , Player.y + this.style.platformHeight)
-        ctx.rotate(Player.lookAngle.getAngle() * Math.PI/180); // rotating canvas
+        ctx.rotate(Player.lookAngle.getAngleInDegrees() * Math.PI/180); // rotating canvas
         ctx.fillStyle = this.style.shadow_backgroundColor;
         ctx.fillRect(-15, -15, 30, 30)
         ctx.restore(); // #20
