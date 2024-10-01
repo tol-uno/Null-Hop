@@ -57,15 +57,8 @@ class Vector2D3D {
         this.x = normalizedVector.x * scalar
         this.y = normalizedVector.y * scalar
         this.z = normalizedVector.z * scalar
+        // could round
     }
-
-    // normalize = function(multiplier) { // NOTE: requires multiplier
-    //     if (this.length !== 0) { // dont ever want to normalize when vector length is zero
-    //         const n = this.divide(this.magnitude());
-    //         this.x = n.x * multiplier;
-    //         this.y = n.y * multiplier;
-    //     }
-    // }
 
     rotate(angleInDegrees) { // returns a new vector
         if (this.dimension !== 2) throw new Error("Rotation is only supported for 2D vectors");
@@ -86,8 +79,10 @@ class Vector2D3D {
         if (magnitudes === 0) throw new Error("Cannot calculate angle with zero vector");
         const cosTheta = dotProduct / magnitudes;
 
-        // return Math.acos(cosTheta) * (180 / Math.PI); // return angle in degrees
-        return Math.acos(cosTheta); // return angle in radians
+        // const angleDegrees = Math.acos(cosTheta) * (180 / Math.PI); // angle in degrees
+
+        const angleRadians = Math.acos(cosTheta); // angle in radians
+        return Math.round(angleRadians*10000)/10000  // return rounded angle in radians 
     }
 
     getAngleInDegrees() {

@@ -60,126 +60,25 @@ const Map = {
 
 
     // Big function that parses the map data, sets up lighting, shadows, shadow clips, etc
-    // Called within getJsonData Function to maintain corect order of events
     parseMapData : function (jsonData) {
         
         this.playerStart = jsonData.playerStart;
         this.style = jsonData.style;
         this.checkpoints = jsonData.checkpoints; // returns an object
 
-        jsonData.platforms.forEach(platform => { // LOOP THROUGH DATA AND ADD EACH PLATFORM TO AN ARRAY
+        jsonData.platforms.forEach(platform => { // LOOP THROUGH PLATFORMS TO POPULATE platforms AND walls ARRAYS
             this.platforms.push(platform);
+            if (platform.wall) {this.walls.push(platform)}
         });
 
 
-
-        // Calculate lighting and shadows for each platform and the endzone
-
-        // turning lightDirection integer into a Vector
-        this.style.lightDirectionVector = new Vector2D3D(Math.cos(this.style.lightDirection * (Math.PI/180)), Math.sin(this.style.lightDirection * (Math.PI/180)))
-
-        // lightPitch is actually sun's angle between 0 -> 89
-        const sunAngle = this.style.lightPitch
-        const shadowX = this.style.lightDirectionVector.x * Math.tan(sunAngle * Math.PI / 180) * this.style.platformHeight
-        const shadowY = this.style.lightDirectionVector.y * Math.tan(sunAngle * Math.PI / 180) * this.style.platformHeight
-
-
-        let platformIndex = 0 // set this so that it is z-order
-        this.platforms.forEach(platform => { // CALCULATE PLATFORMS COLORS and SHADOW POLYGON
-
-            // Setting the colors for platforms, endzones, and walls
-            let colorToUse1 = this.style.platformTopColor;
-            let colorToUse2 = this.style.platformSideColor;
-
-            if (platform.endzone) {
-                colorToUse1 = this.style.endZoneTopColor;
-                colorToUse2 = this.style.endZoneSideColor;
-                // this.endZone = platform;
-            }
-            if (platform.wall) {
-                colorToUse1 = this.style.wallTopColor;
-                colorToUse2 = this.style.wallSideColor;
-                this.walls.push(platform);
-            }
-
-            platform.index = platformIndex; // asigns an index to each platform for debugging
-            platformIndex ++;
-
-            // PLATFORM COLORS
-            side1Vec = new Vector2D3D(-1,0).rotate(platform.angle)
-            side2Vec = new Vector2D3D(0,1).rotate(platform.angle)
-            side3Vec = new Vector2D3D(1,0).rotate(platform.angle)
-
-            const litPercent1 = side1Vec.angleDifference(this.style.lightDirectionVector) / Math.PI // dividing by PI converts angleDiffernce to between 0->1
-            const litPercent2 = side2Vec.angleDifference(this.style.lightDirectionVector) / Math.PI            
-            const litPercent3 = side3Vec.angleDifference(this.style.lightDirectionVector) / Math.PI
-
-            platform.shaded_topColor = CanvasArea.getShadedColor(colorToUse1, 1)
-            platform.shaded_sideColor1 = CanvasArea.getShadedColor(colorToUse2, litPercent1)
-            platform.shaded_sideColor2 = CanvasArea.getShadedColor(colorToUse2, litPercent2)
-            platform.shaded_sideColor3 = CanvasArea.getShadedColor(colorToUse2, litPercent3)
-
-            // SHADOW POLYGON
-
-            let wallShadowMultiplier
-            if (platform.wall && this.style.platformHeight > 0) {
-                wallShadowMultiplier = 1 + (this.style.wallHeight / this.style.platformHeight)
-            } else {
-                wallShadowMultiplier = 1
-            }
-
-            platform.shadowPoints = [ // ALL THE POSSIBLE POINTS TO INPUT IN CONVEX HULL FUNCTION
-            
-                // bot left corner
-                [
-                platform.corners[0][0],
-                platform.corners[0][1] + this.style.platformHeight,
-                ],
-
-                // bot right corner
-                [
-                platform.corners[1][0],
-                platform.corners[1][1] + this.style.platformHeight,
-                ],
-
-                // top right corner
-                [
-                platform.corners[2][0],
-                platform.corners[2][1] + this.style.platformHeight,
-                ],
-            
-                // top left corner
-                [
-                platform.corners[3][0],
-                platform.corners[3][1] + this.style.platformHeight,
-                ],
-            
-                // bot left SHADOW
-                [
-                platform.corners[0][0] + shadowX * wallShadowMultiplier,
-                platform.corners[0][1] + this.style.platformHeight + shadowY * wallShadowMultiplier,
-                ],
-
-                // bot right SHADOW
-                [
-                platform.corners[1][0] + shadowX * wallShadowMultiplier,
-                platform.corners[1][1] + this.style.platformHeight + shadowY * wallShadowMultiplier,
-                ],
-                
-                // top right SHADOW
-                [
-                platform.corners[2][0] + shadowX * wallShadowMultiplier,
-                platform.corners[2][1] + this.style.platformHeight + shadowY * wallShadowMultiplier, 
-                ],
-
-                // top left SHADOW
-                [
-                platform.corners[3][0] + shadowX * wallShadowMultiplier,
-                platform.corners[3][1] + this.style.platformHeight + shadowY * wallShadowMultiplier,
-                ],
-            
-            ]; // end of shadowPoints array
+        // SET ALL LIGHTING
+        this.setMapLighting()
         
+        
+        // SETTING CLIPS 
+        // for area behind each wall AND for drawing the player shadow ontop of platforms or endzones
+        this.platforms.forEach(platform => {
 
             // add a .clipPoints property to each wall for occluding Player and drawing players xray
             if (platform.wall) {
@@ -207,62 +106,55 @@ const Map = {
                 let behindWallClipPoints = platform.corners.concat(upperCorners)
         
                 platform.clipPoints = CanvasArea.convexHull(behindWallClipPoints)
-            }
-        
-
-            platform.shadowPoints = CanvasArea.convexHull(platform.shadowPoints)
 
 
-            // SETS EITHER OF THE TWO SHADOW CLIPS FOR UPPER PLAYER SHADOW
-            const clipToUse = platform.endzone ? this.endZoneShadowClip : this.upperShadowClip // get shadow clip to add this platform to
-
-            clipToUse.moveTo( // bot left
-                platform.x + platform.corners[0][0], // x
-                platform.y + platform.corners[0][1] // y
-            )
+                // USED FOR TESTING WETHER A WALL IS INFRONT OF PLAYER
+                platform.getSplitLineY = function(x) {
+                    // y = mx + b
+                    // m = rise over run
+                    const slope = (platform.rightMostCornerY - platform.leftMostCornerY) / (platform.rightMostCornerX - platform.leftMostCornerX)
+                    // b = y - mx
+                    const b = platform.rightMostCornerY - (slope * platform.rightMostCornerX) 
+                    const y = slope * x + b
+                    return y
+                }
             
-            clipToUse.lineTo( // bot right
-                platform.x + platform.corners[1][0],
-                platform.y + platform.corners[1][1]
-            )
+            } else { // platform isnt wall                
 
-            clipToUse.lineTo( // top right
-                platform.x + platform.corners[2][0],
-                platform.y + platform.corners[2][1]
-            )
+                // ADDS EACH AND EVERY PLATFORM INTO COORESPONDING SHADOW CLIP (endZone or platform) To draw correct player shadow color
+                const clipToUse = platform.endzone ? this.endZoneShadowClip : this.upperShadowClip
 
-            clipToUse.lineTo( // top left
-                platform.x + platform.corners[3][0],
-                platform.y + platform.corners[3][1]
-            )
+                clipToUse.moveTo( // bot left
+                    platform.x + platform.corners[0][0], // x
+                    platform.y + platform.corners[0][1] // y
+                )
+                
+                clipToUse.lineTo( // bot right
+                    platform.x + platform.corners[1][0],
+                    platform.y + platform.corners[1][1]
+                )
 
-            clipToUse.closePath()
+                clipToUse.lineTo( // top right
+                    platform.x + platform.corners[2][0],
+                    platform.y + platform.corners[2][1]
+                )
 
+                clipToUse.lineTo( // top left
+                    platform.x + platform.corners[3][0],
+                    platform.y + platform.corners[3][1]
+                )
 
-            platform.getSplitLineY = function(x) {
-                // y = mx + b
-                // m = rise over run
-                const slope = (platform.rightMostCornerY - platform.leftMostCornerY) / (platform.rightMostCornerX - platform.leftMostCornerX)
-                // b = y - mx
-                const b = platform.rightMostCornerY - (slope * platform.rightMostCornerX) 
-                const y = slope * x + b
-                return y
+                clipToUse.closePath()
             }
         
-
-        }); // end of looping thrugh each platform
-
-        // calculate all other map colors
-        this.style.shaded_playerColor = CanvasArea.getShadedColor(this.style.playerColor, 1)
-        this.style.shaded_backgroundColor = CanvasArea.getShadedColor(this.style.backgroundColor, 1)
-
-        this.style.shadow_platformColor = CanvasArea.getShadedColor(this.style.platformTopColor, 0.2) // 0.2 instead of 0 to pretend there's bounce lighting
-        this.style.shadow_endzoneColor = CanvasArea.getShadedColor(this.style.endZoneTopColor, 0.2)
-        this.style.shadow_backgroundColor = CanvasArea.getShadedColor(this.style.backgroundColor, 0.2)
+        }) // end of looping through platforms to set clips
         
 
+
+        // FINISH UP AND MOVE ON
         CanvasArea.canvas.style.backgroundColor = this.style.shaded_backgroundColor;
         document.body.style.backgroundColor = this.style.shaded_backgroundColor;
+        
         Player.initPlayer(this.playerStart.x, this.playerStart.y, this.playerStart.angle)
 
         UserInterface.determineButtonColor();
@@ -398,13 +290,169 @@ const Map = {
     },
 
 
+    setMapLighting : function() { // Calculates all lighting and shadows 
+
+        // determine whether rendering for Map or PreviewWindow
+        const MapData = UserInterface.gamestate == 7 ? PreviewWindow : Map    
+
+        // turning lightDirection integer into a Vector
+        // MapData.style.lightDirectionVector = new Vector2D3D(Math.cos(MapData.style.lightDirection * (Math.PI/180)), Math.sin(MapData.style.lightDirection * (Math.PI/180)))
+        MapData.style.lightDirectionVector = new Vector2D3D(1,0).rotate(MapData.style.lightDirection)
+
+        // lightPitch is actually sun's angle between 0 -> 89
+        const sunAngle = MapData.style.lightPitch
+        const shadowX = MapData.style.lightDirectionVector.x * Math.tan(sunAngle * Math.PI / 180) * MapData.style.platformHeight
+        const shadowY = MapData.style.lightDirectionVector.y * Math.tan(sunAngle * Math.PI / 180) * MapData.style.platformHeight
+
+
+        // LOOPING THROUGH EACH PLATFORM
+        // SETTING : Shaded colors and shadow poligon
+        MapData.platforms.forEach(platform => {
+
+            let colorToUse1 = MapData.style.platformTopColor;
+            let colorToUse2 = MapData.style.platformSideColor;
+
+            if (platform.endzone) {
+                colorToUse1 = MapData.style.endZoneTopColor;
+                colorToUse2 = MapData.style.endZoneSideColor;
+            }
+            if (platform.wall) {
+                colorToUse1 = MapData.style.wallTopColor;
+                colorToUse2 = MapData.style.wallSideColor;
+            }
+
+
+            // PLATFORM COLORS
+            side1Vec = new Vector2D3D(-1,0).rotate(platform.angle)
+            side2Vec = new Vector2D3D(0,1).rotate(platform.angle)
+            side3Vec = new Vector2D3D(1,0).rotate(platform.angle)
+
+            const litPercent1 = side1Vec.angleDifference(MapData.style.lightDirectionVector) / Math.PI // dividing by PI converts angleDiffernce to between 0->1
+            const litPercent2 = side2Vec.angleDifference(MapData.style.lightDirectionVector) / Math.PI            
+            const litPercent3 = side3Vec.angleDifference(MapData.style.lightDirectionVector) / Math.PI
+
+            platform.shaded_topColor = CanvasArea.getShadedColor(colorToUse1, 1)
+            platform.shaded_sideColor1 = CanvasArea.getShadedColor(colorToUse2, litPercent1)
+            platform.shaded_sideColor2 = CanvasArea.getShadedColor(colorToUse2, litPercent2)
+            platform.shaded_sideColor3 = CanvasArea.getShadedColor(colorToUse2, litPercent3)
+
+
+
+            // SHADOW POLYGON
+
+            // set the additional length that's added to wall shadows
+            let wallShadowMultiplier
+            if (platform.wall && MapData.style.platformHeight > 0) {
+                wallShadowMultiplier = 1 + (MapData.style.wallHeight / MapData.style.platformHeight)
+            } else {
+                wallShadowMultiplier = 1
+            }
+
+            platform.shadowPoints = [ // ALL THE POSSIBLE POINTS TO INPUT IN CONVEX HULL FUNCTION
+            
+                // bot left corner
+                [
+                platform.corners[0][0],
+                platform.corners[0][1] + MapData.style.platformHeight,
+                ],
+
+                // bot right corner
+                [
+                platform.corners[1][0],
+                platform.corners[1][1] + MapData.style.platformHeight,
+                ],
+
+                // top right corner
+                [
+                platform.corners[2][0],
+                platform.corners[2][1] + MapData.style.platformHeight,
+                ],
+            
+                // top left corner
+                [
+                platform.corners[3][0],
+                platform.corners[3][1] + MapData.style.platformHeight,
+                ],
+            
+                // bot left SHADOW
+                [
+                platform.corners[0][0] + shadowX * wallShadowMultiplier,
+                platform.corners[0][1] + MapData.style.platformHeight + shadowY * wallShadowMultiplier,
+                ],
+
+                // bot right SHADOW
+                [
+                platform.corners[1][0] + shadowX * wallShadowMultiplier,
+                platform.corners[1][1] + MapData.style.platformHeight + shadowY * wallShadowMultiplier,
+                ],
+                
+                // top right SHADOW
+                [
+                platform.corners[2][0] + shadowX * wallShadowMultiplier,
+                platform.corners[2][1] + MapData.style.platformHeight + shadowY * wallShadowMultiplier, 
+                ],
+
+                // top left SHADOW
+                [
+                platform.corners[3][0] + shadowX * wallShadowMultiplier,
+                platform.corners[3][1] + MapData.style.platformHeight + shadowY * wallShadowMultiplier,
+                ],
+            
+            ]; // end of shadowPoints array
+        
+            platform.shadowPoints = CanvasArea.convexHull(platform.shadowPoints)        
+
+        }); // end of looping thrugh each platform
+
+
+        // calculate all other map colors
+        MapData.style.shaded_playerColor = CanvasArea.getShadedColor(MapData.style.playerColor, 1)
+        MapData.style.shaded_backgroundColor = CanvasArea.getShadedColor(MapData.style.backgroundColor, 1)
+
+        MapData.style.shadow_platformColor = CanvasArea.getShadedColor(MapData.style.platformTopColor, 0.2) // 0.2 instead of 0 to pretend there's bounce lighting
+        MapData.style.shadow_endzoneColor = CanvasArea.getShadedColor(MapData.style.endZoneTopColor, 0.2)
+        MapData.style.shadow_backgroundColor = CanvasArea.getShadedColor(MapData.style.backgroundColor, 0.2)
+        
+    },
+
+
+    renderPlatformShadow : function(platform) {
+
+        // determine whether rendering for Map or PreviewWindow
+        const MapData = UserInterface.gamestate == 7 ? MapEditor.loadedMap : Map    
+
+        const ctx = CanvasArea.ctx;
+        ctx.save(); // #21
+        ctx.translate(platform.x, platform.y);
+
+        ctx.fillStyle = MapData.style.shadow_backgroundColor;
+
+        ctx.beginPath();
+        
+        ctx.moveTo(platform.shadowPoints[0][0], platform.shadowPoints[0][1]); // this comes up in debug a lot
+        for (let i = platform.shadowPoints.length - 1; i > 0; i --) {
+            ctx.lineTo(platform.shadowPoints[i][0], platform.shadowPoints[i][1]);
+        }
+
+        ctx.closePath();
+        ctx.fill();
+
+
+        ctx.restore(); // #21
+    },
+
+
     renderPlatform : function(platform) { // seperate function to render platforms so that it can be called at different times (ex. called after drawing Player inorder to render infront)
         
-        const ctx = CanvasArea.ctx;        
+        const ctx = CanvasArea.ctx;   
+
+        // determine whether rendering for Map or PreviewWindow
+        const MapData = UserInterface.gamestate == 7 ? MapEditor.loadedMap : Map    
         
+
         // DRAW PLATFORM TOP
         ctx.save(); // #17 GO TO PLATFORMs MIDDLE AND ROTATING 
-        const adjustedHeight = platform.wall ? this.style.wallHeight : 0 // for adding height to walls
+        const adjustedHeight = platform.wall ? MapData.style.wallHeight : 0 // for adding height to walls
         ctx.translate(platform.x, platform.y - adjustedHeight);
         ctx.rotate(platform.angle * Math.PI/180);
 
@@ -428,8 +476,8 @@ const Map = {
         ctx.beginPath();
         ctx.moveTo(platform.corners[1][0], platform.corners[1][1] - adjustedHeight); // BR
         ctx.lineTo(platform.corners[0][0], platform.corners[0][1] - adjustedHeight); // BL
-        ctx.lineTo(platform.corners[0][0], platform.corners[0][1] + this.style.platformHeight); // BL + height
-        ctx.lineTo(platform.corners[1][0], platform.corners[1][1] + this.style.platformHeight); // BR + height
+        ctx.lineTo(platform.corners[0][0], platform.corners[0][1] + MapData.style.platformHeight); // BL + height
+        ctx.lineTo(platform.corners[1][0], platform.corners[1][1] + MapData.style.platformHeight); // BR + height
         ctx.closePath();
         ctx.fill();
     
@@ -441,8 +489,8 @@ const Map = {
             ctx.beginPath();
             ctx.moveTo(platform.corners[1][0], platform.corners[1][1] - adjustedHeight); // BR
             ctx.lineTo(platform.corners[2][0], platform.corners[2][1] - adjustedHeight); // TR
-            ctx.lineTo(platform.corners[2][0], platform.corners[2][1] + this.style.platformHeight); // TR + height
-            ctx.lineTo(platform.corners[1][0], platform.corners[1][1] + this.style.platformHeight); // BR + height
+            ctx.lineTo(platform.corners[2][0], platform.corners[2][1] + MapData.style.platformHeight); // TR + height
+            ctx.lineTo(platform.corners[1][0], platform.corners[1][1] + MapData.style.platformHeight); // BR + height
             ctx.closePath();
             ctx.fill();
         }
@@ -453,27 +501,23 @@ const Map = {
             ctx.beginPath();
             ctx.moveTo(platform.corners[0][0], platform.corners[0][1] - adjustedHeight); // BL
             ctx.lineTo(platform.corners[3][0], platform.corners[3][1] - adjustedHeight); // TL
-            ctx.lineTo(platform.corners[3][0], platform.corners[3][1] + this.style.platformHeight); // TL + height
-            ctx.lineTo(platform.corners[0][0], platform.corners[0][1] + this.style.platformHeight); // BL + height
+            ctx.lineTo(platform.corners[3][0], platform.corners[3][1] + MapData.style.platformHeight); // TL + height
+            ctx.lineTo(platform.corners[0][0], platform.corners[0][1] + MapData.style.platformHeight); // BL + height
             ctx.closePath();
             ctx.fill();
         }
 
 
-        // PLAFORM RENDERING DEBUG TEXT
+        // PLATFORM RENDERING DEBUG TEXT
         if (UserInterface.settings.debugText == 1) {
             ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1 :  UserInterface.lightColor_1;
             ctx.font = "12px BAHNSCHRIFT"
-            ctx.fillText(platform.index, 0 - CanvasArea.ctx.measureText(platform.index).width / 2, 0);
-            // ctx.fillText("renderIndex: " + this.renderedPlatforms.indexOf(platform), 0, 0)
             // ctx.fillText("angle: " + platform.angle, 0, 20);
             // ctx.fillText("position: " + platform.x + ", " + platform.y, 0 , 40)
             // ctx.fillText("size: " + platform.width + ", " + platform.height, 0 , 60)
         }
 
-        
-        ctx.restore(); // #18 back to map origin translation
-        
+        ctx.restore(); // #18 back to map origin translation        
 
         // Drawing split line
         // ctx.strokeStyle = "#00FF00"
@@ -484,6 +528,7 @@ const Map = {
         // ctx.stroke()
 
     },
+
 
     render : function() { // Renders Player lower shadow, platforms shadows, platforms, and checkpoints
 
@@ -503,37 +548,18 @@ const Map = {
         ctx.restore(); // #20
 
 
-
-        // LOOP THROUGH TO DRAW PLATFORMS SHADOWS
+        // LOOP TO DRAW renderedPlatforms SHADOWS
         this.renderedPlatforms.forEach(platform => { 
-
-            ctx.save(); // #21
-            ctx.translate(platform.x, platform.y);
-
-            ctx.fillStyle = this.style.shadow_backgroundColor;
-
-            ctx.beginPath();
-            
-            ctx.moveTo(platform.shadowPoints[0][0], platform.shadowPoints[0][1]); // this comes up in debug a lot
-            for (let i = platform.shadowPoints.length - 1; i > 0; i --) {
-                ctx.lineTo(platform.shadowPoints[i][0], platform.shadowPoints[i][1]);
-            }
-
-            ctx.closePath();
-            ctx.fill();
-
-
-            ctx.restore(); // #21
+            Map.renderPlatformShadow(platform)
         })
 
-
-        // Draw each rendered platform
+        // LOOP TO DRAW renderedPlatforms PLATFORMS
         this.renderedPlatforms.forEach(platform => {
             Map.renderPlatform(platform)
         })
 
 
-        // Draw checkpoints
+        // Draw checkpoints if Debugging
         if (UserInterface.settings.debugText == 1) {
             this.checkpoints.forEach(checkpoint => { 
                 ctx.strokeStyle = UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1 

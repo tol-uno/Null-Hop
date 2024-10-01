@@ -44,369 +44,370 @@ const MapEditor = {
 
         if (this.loadedMap !== null) { // IF MAP IS LOADED RENDER IT
 
-            const ctx = CanvasArea.ctx;
+            if (this.editorState == 3) { // IN COLOR SETTINGS
 
+                PreviewWindow.render()
+                ColorPicker.render()
 
-            ctx.save() // zooming everything
-            ctx.scale(this.zoom, this.zoom)
+            } else if (this.editorState == 4) { // IN MAP SETTINGS 
 
-            ctx.translate(-this.screen.cornerX, -this.screen.cornerY); // translate to map orgin
+                PreviewWindow.render()
 
-            ctx.fillRect(-2, -2, 4, 4) // (0,0) draw map origin
+            }  else { // not in map color or settings screen SO RENDER MAP 
 
-
-            // DRAW PLATFORM SIDES BELOW TOPS
-            this.renderedPlatforms.forEach(platform => {
-                                
-                // SIDES OF PLATFORMS
-                ctx.save(); // #18a
-                ctx.translate(platform.x, platform.y);
-                
-                if (platform.wall) {ctx.fillStyle = CanvasArea.getShadedColor(MapEditor.loadedMap.style.wallSideColor, 0.5)} 
-                else if (platform.endzone) {ctx.fillStyle = CanvasArea.getShadedColor(MapEditor.loadedMap.style.endZoneSideColor, 0.5)}
-                else {ctx.fillStyle = CanvasArea.getShadedColor(MapEditor.loadedMap.style.platformSideColor, 0.5)}
-
-                // corners array order: BL BR TR TL
-
-                // ALWAYS RENDER BOTTOM SIDE. side2    
-                ctx.fillStyle = platform.shaded_sideColor2;
-                ctx.beginPath();
-                ctx.moveTo(platform.corners[1][0], platform.corners[1][1]); // BR
-                ctx.lineTo(platform.corners[0][0], platform.corners[0][1]); // BL
-                ctx.lineTo(platform.corners[0][0], platform.corners[0][1] + this.loadedMap.style.platformHeight); // BL + height
-                ctx.lineTo(platform.corners[1][0], platform.corners[1][1] + this.loadedMap.style.platformHeight); // BR + height
-                ctx.closePath();
-                ctx.fill();
-            
-                if (platform.angle > 0) { // side3 right side
-
-                    ctx.fillStyle = platform.shaded_sideColor3; // sideColor3
+                const ctx = CanvasArea.ctx;    
+    
+                ctx.save() // zooming everything
+                ctx.scale(this.zoom, this.zoom)
+    
+                ctx.translate(-this.screen.cornerX, -this.screen.cornerY); // translate to map orgin
+    
+                ctx.fillRect(-2, -2, 4, 4) // (0,0) draw map origin
+    
+    
+                // DRAW PLATFORM SIDES BELOW TOPS
+                this.renderedPlatforms.forEach(platform => {
+                                    
+                    // SIDES OF PLATFORMS
+                    ctx.save(); // #18a
+                    ctx.translate(platform.x, platform.y);
+                    
+                    if (platform.wall) {ctx.fillStyle = CanvasArea.getShadedColor(MapEditor.loadedMap.style.wallSideColor, 0.5)} 
+                    else if (platform.endzone) {ctx.fillStyle = CanvasArea.getShadedColor(MapEditor.loadedMap.style.endZoneSideColor, 0.5)}
+                    else {ctx.fillStyle = CanvasArea.getShadedColor(MapEditor.loadedMap.style.platformSideColor, 0.5)}
+    
+                    // corners array order: BL BR TR TL
+    
+                    // ALWAYS RENDER BOTTOM SIDE. side2    
+                    ctx.fillStyle = platform.shaded_sideColor2;
                     ctx.beginPath();
                     ctx.moveTo(platform.corners[1][0], platform.corners[1][1]); // BR
-                    ctx.lineTo(platform.corners[2][0], platform.corners[2][1]); // TR
-                    ctx.lineTo(platform.corners[2][0], platform.corners[2][1] + this.loadedMap.style.platformHeight); // TR + height
+                    ctx.lineTo(platform.corners[0][0], platform.corners[0][1]); // BL
+                    ctx.lineTo(platform.corners[0][0], platform.corners[0][1] + this.loadedMap.style.platformHeight); // BL + height
                     ctx.lineTo(platform.corners[1][0], platform.corners[1][1] + this.loadedMap.style.platformHeight); // BR + height
                     ctx.closePath();
                     ctx.fill();
-                }
-
-                if (platform.angle < 0) { // side1 left side
-
-                    ctx.fillStyle = platform.shaded_sideColor1; // sideColor1  
-                    ctx.beginPath();
-                    ctx.moveTo(platform.corners[0][0], platform.corners[0][1]); // BL
-                    ctx.lineTo(platform.corners[3][0], platform.corners[3][1]); // TL
-                    ctx.lineTo(platform.corners[3][0], platform.corners[3][1] + this.loadedMap.style.platformHeight); // TL + height
-                    ctx.lineTo(platform.corners[0][0], platform.corners[0][1] + this.loadedMap.style.platformHeight); // BL + height
-                    ctx.closePath();
-                    ctx.fill();
-                }
-              
-                ctx.restore(); // #18 back to map origin translation
                 
-            })
-
-
-            // RENDER PLATFORMS TOPS
-            this.renderedPlatforms.forEach(platform => {
-                
-                // DRAW PLATFORM TOP
-                ctx.save(); // ROTATING for Platforms
-                ctx.translate(platform.x, platform.y);
-                ctx.rotate(platform.angle * Math.PI/180);
-
-                // Change to endzone color if needed
-                if (platform.wall) {
-                    ctx.fillStyle = this.loadedMap.style.wallTopColor;
-                } else if (platform.endzone) {
-                    ctx.fillStyle = this.loadedMap.style.endZoneTopColor;
-                } else {
-                    ctx.fillStyle = this.loadedMap.style.platformTopColor;
-                }
-                
-                ctx.fillRect(-platform.width/2, -platform.height/2, platform.width, platform.height);
-
-
-                if (this.selectedElements.includes(MapEditor.loadedMap.platforms.indexOf(platform))) { // DRAWING THE BORDER AROUND THE SELECTED PLATFORM
+                    if (platform.angle > 0) { // side3 right side
+    
+                        ctx.fillStyle = platform.shaded_sideColor3; // sideColor3
+                        ctx.beginPath();
+                        ctx.moveTo(platform.corners[1][0], platform.corners[1][1]); // BR
+                        ctx.lineTo(platform.corners[2][0], platform.corners[2][1]); // TR
+                        ctx.lineTo(platform.corners[2][0], platform.corners[2][1] + this.loadedMap.style.platformHeight); // TR + height
+                        ctx.lineTo(platform.corners[1][0], platform.corners[1][1] + this.loadedMap.style.platformHeight); // BR + height
+                        ctx.closePath();
+                        ctx.fill();
+                    }
+    
+                    if (platform.angle < 0) { // side1 left side
+    
+                        ctx.fillStyle = platform.shaded_sideColor1; // sideColor1  
+                        ctx.beginPath();
+                        ctx.moveTo(platform.corners[0][0], platform.corners[0][1]); // BL
+                        ctx.lineTo(platform.corners[3][0], platform.corners[3][1]); // TL
+                        ctx.lineTo(platform.corners[3][0], platform.corners[3][1] + this.loadedMap.style.platformHeight); // TL + height
+                        ctx.lineTo(platform.corners[0][0], platform.corners[0][1] + this.loadedMap.style.platformHeight); // BL + height
+                        ctx.closePath();
+                        ctx.fill();
+                    }
+                  
+                    ctx.restore(); // #18 back to map origin translation
                     
-                    ctx.strokeStyle = UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1
-                    ctx.lineWidth = 4
-                    ctx.strokeRect(-platform.width/2 + 2, -platform.height/2 + 2, platform.width - 4, platform.height - 4);
-                }
-                
-
-                ctx.restore(); // restoring platform rotation and translation
-                
-                // PLAFORM RENDERING DEBUG TEXT
-                // if (UserInterface.settings.debugText == 1) { // draw platform height indicators
-                //     ctx.fillStyle = "#FFFFFF";
-                //     ctx.fillText("position: " + platform.x + ", " + platform.y, platform.x + 5, platform.y - 5);
-
-                //     //origin
-                //     ctx.fillStyle = "#00FF00";
-                //     ctx.fillRect(platform.x - 3, platform.y - 3, 6, 6)
-                // }
-
-            })
-
-
-            // RENDER WALLS ADDITIONAL HEIGHT
-            this.renderedPlatforms.forEach(platform => {
-                if (platform.wall) {
-            
-                    // DRAW WALL RAISED TOP
-                    ctx.save(); // ROTATING for Platform
-                    ctx.translate(platform.x, platform.y - MapEditor.loadedMap.style.wallHeight);
+                })
+    
+    
+                // RENDER PLATFORMS TOPS
+                this.renderedPlatforms.forEach(platform => {
+                    
+                    // DRAW PLATFORM TOP
+                    ctx.save(); // ROTATING for Platforms
+                    ctx.translate(platform.x, platform.y);
                     ctx.rotate(platform.angle * Math.PI/180);
-
-                    ctx.strokeStyle = CanvasArea.getShadedColor(this.loadedMap.style.wallTopColor, 0.25)
-                    ctx.lineWidth = 4
-
-                    ctx.strokeRect(-platform.width/2 + 2, -platform.height/2 + 2, platform.width - 4, platform.height - 4);
-
-
+    
+                    // Change to endzone color if needed
+                    if (platform.wall) {
+                        ctx.fillStyle = this.loadedMap.style.wallTopColor;
+                    } else if (platform.endzone) {
+                        ctx.fillStyle = this.loadedMap.style.endZoneTopColor;
+                    } else {
+                        ctx.fillStyle = this.loadedMap.style.platformTopColor;
+                    }
+                    
+                    ctx.fillRect(-platform.width/2, -platform.height/2, platform.width, platform.height);
+    
+    
+                    if (this.selectedElements.includes(MapEditor.loadedMap.platforms.indexOf(platform))) { // DRAWING THE BORDER AROUND THE SELECTED PLATFORM
+                        
+                        ctx.strokeStyle = UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1
+                        ctx.lineWidth = 4
+                        ctx.strokeRect(-platform.width/2 + 2, -platform.height/2 + 2, platform.width - 4, platform.height - 4);
+                    }
+                    
+    
                     ctx.restore(); // restoring platform rotation and translation
-                }
-
-            })
-
-
-            // RENDER CHECKPOINTS
-            MapEditor.loadedMap.checkpoints.forEach(checkpoint => {
-                ctx.strokeStyle = ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1 : UserInterface.lightColor_1; 
-                ctx.lineWidth = 5
-                ctx.beginPath();
-                ctx.moveTo(checkpoint.triggerX1, checkpoint.triggerY1);
-                ctx.lineTo(checkpoint.triggerX2, checkpoint.triggerY2);
-                ctx.stroke();
-
-                ctx.beginPath();
-                ctx.arc(checkpoint.triggerX1, checkpoint.triggerY1, 20, 0, 2 * Math.PI);
-                ctx.fill();
-
-                ctx.beginPath();
-                ctx.arc(checkpoint.triggerX2, checkpoint.triggerY2, 20, 0, 2 * Math.PI);
-                ctx.fill();
-
-                // playerRestart pos
+                    
+                    // PLAFORM RENDERING DEBUG TEXT
+                    // if (UserInterface.settings.debugText == 1) { // draw platform height indicators
+                    //     ctx.fillStyle = "#FFFFFF";
+                    //     ctx.fillText("position: " + platform.x + ", " + platform.y, platform.x + 5, platform.y - 5);
+    
+                    //     //origin
+                    //     ctx.fillStyle = "#00FF00";
+                    //     ctx.fillRect(platform.x - 3, platform.y - 3, 6, 6)
+                    // }
+    
+                })
+    
+    
+                // RENDER WALLS ADDITIONAL HEIGHT
+                this.renderedPlatforms.forEach(platform => {
+                    if (platform.wall) {
+                
+                        // DRAW WALL RAISED TOP
+                        ctx.save(); // ROTATING for Platform
+                        ctx.translate(platform.x, platform.y - MapEditor.loadedMap.style.wallHeight);
+                        ctx.rotate(platform.angle * Math.PI/180);
+    
+                        ctx.strokeStyle = CanvasArea.getShadedColor(this.loadedMap.style.wallTopColor, 0.25)
+                        ctx.lineWidth = 4
+    
+                        ctx.strokeRect(-platform.width/2 + 2, -platform.height/2 + 2, platform.width - 4, platform.height - 4);
+    
+    
+                        ctx.restore(); // restoring platform rotation and translation
+                    }
+    
+                })
+    
+    
+                // RENDER CHECKPOINTS
+                MapEditor.loadedMap.checkpoints.forEach(checkpoint => {
+                    ctx.strokeStyle = ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1 : UserInterface.lightColor_1; 
+                    ctx.lineWidth = 5
+                    ctx.beginPath();
+                    ctx.moveTo(checkpoint.triggerX1, checkpoint.triggerY1);
+                    ctx.lineTo(checkpoint.triggerX2, checkpoint.triggerY2);
+                    ctx.stroke();
+    
+                    ctx.beginPath();
+                    ctx.arc(checkpoint.triggerX1, checkpoint.triggerY1, 20, 0, 2 * Math.PI);
+                    ctx.fill();
+    
+                    ctx.beginPath();
+                    ctx.arc(checkpoint.triggerX2, checkpoint.triggerY2, 20, 0, 2 * Math.PI);
+                    ctx.fill();
+    
+                    // playerRestart pos
+                    ctx.save()
+                    ctx.translate(checkpoint.x, checkpoint.y)
+                    ctx.rotate(checkpoint.angle * Math.PI/180);
+                    ctx.lineWidth = 3
+                    ctx.strokeRect(-16,-16,32,32)
+        
+                    // draw player arrow
+                    ctx.lineWidth = 2
+                    ctx.beginPath();
+                    ctx.moveTo(8, 0);
+                    ctx.lineTo(-5, -7);
+                    ctx.lineTo(-5, 7);
+                    ctx.lineTo(8, 0)
+                    ctx.stroke();
+                    ctx.restore()
+    
+                    // draw lines conecting to the playerRestart
+                    ctx.beginPath();
+                    ctx.setLineDash([6, 12]);
+                    // ctx.strokeStyle = "#FFFFFF88"
+                    ctx.moveTo(checkpoint.triggerX1, checkpoint.triggerY1);
+                    ctx.lineTo(checkpoint.x, checkpoint.y);
+                    ctx.lineTo(checkpoint.triggerX2, checkpoint.triggerY2);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+    
+    
+                    // DRAWING THE BORDER AROUND parts of THE SELECTED Checkpoint parts
+    
+                    // get array of arrays from within selectedElements that cooresponds to this checkpoint ex: [[2, 1], [2, 3], [2, 2]]
+                    const selectionArrays = this.selectedElements.filter((element) => Array.isArray(element) && element[0] == MapEditor.loadedMap.checkpoints.indexOf(checkpoint))
+                    selectionArrays.forEach((checkpointPart) => {
+                        // checkpoint part ex: [2,1] or [2,3]
+                        if (checkpointPart[1] == 1) { // trigger 1
+                            ctx.strokeStyle = UserInterface.darkColor_1
+                            ctx.lineWidth = 6
+                            ctx.beginPath();
+                            ctx.arc(checkpoint.triggerX1, checkpoint.triggerY1, 20, 0, 2 * Math.PI);
+                            ctx.stroke();
+        
+                            ctx.strokeStyle = UserInterface.lightColor_1
+                            ctx.lineWidth = 2
+                            ctx.beginPath();
+                            ctx.arc(checkpoint.triggerX1, checkpoint.triggerY1, 20, 0, 2 * Math.PI);
+                            ctx.stroke();
+                        }
+    
+                        if (checkpointPart[1] == 2) { // trigger 2
+                            ctx.strokeStyle = UserInterface.darkColor_1
+                            ctx.lineWidth = 6
+                            ctx.beginPath();
+                            ctx.arc(checkpoint.triggerX2, checkpoint.triggerY2, 20, 0, 2 * Math.PI);
+                            ctx.stroke();
+        
+                            ctx.strokeStyle = UserInterface.lightColor_1
+                            ctx.lineWidth = 2
+                            ctx.beginPath();
+                            ctx.arc(checkpoint.triggerX2, checkpoint.triggerY2, 20, 0, 2 * Math.PI);
+                            ctx.stroke();
+                        }
+    
+                        if (checkpointPart[1] == 3) { // playerRestart
+                            ctx.save()
+                            ctx.translate(checkpoint.x, checkpoint.y)
+                            ctx.rotate(checkpoint.angle * Math.PI/180);
+                
+                            ctx.strokeStyle = UserInterface.darkColor_1
+                            ctx.lineWidth = 6
+                            ctx.strokeRect(-16, -16, 32, 32);
+                            
+                            ctx.strokeStyle = UserInterface.lightColor_1
+                            ctx.lineWidth = 2
+                            ctx.strokeRect(-16, -16, 32, 32);
+                            ctx.restore()
+                        }    
+                    }) // end of selectionArray forEach
+                }); // end of loadedMap.checkpoints.forEach
+    
+    
+                // RENDER THE PLAYER START
                 ctx.save()
-                ctx.translate(checkpoint.x, checkpoint.y)
-                ctx.rotate(checkpoint.angle * Math.PI/180);
-                ctx.lineWidth = 3
-                ctx.strokeRect(-16,-16,32,32)
+                ctx.translate(this.loadedMap.playerStart.x, this.loadedMap.playerStart.y)
+                ctx.rotate(this.loadedMap.playerStart.angle * Math.PI/180);
+                ctx.fillStyle = this.loadedMap.style.playerColor;
+                ctx.fillRect(-16,-16,32,32)
     
                 // draw player arrow
-                ctx.lineWidth = 2
+                ctx.strokeStyle = "#000000";
+                ctx.lineWidth = 1
                 ctx.beginPath();
                 ctx.moveTo(8, 0);
                 ctx.lineTo(-5, -7);
                 ctx.lineTo(-5, 7);
                 ctx.lineTo(8, 0)
                 ctx.stroke();
-                ctx.restore()
-
-                // draw lines conecting to the playerRestart
-                ctx.beginPath();
-                ctx.setLineDash([6, 12]);
-                // ctx.strokeStyle = "#FFFFFF88"
-                ctx.moveTo(checkpoint.triggerX1, checkpoint.triggerY1);
-                ctx.lineTo(checkpoint.x, checkpoint.y);
-                ctx.lineTo(checkpoint.triggerX2, checkpoint.triggerY2);
-                ctx.stroke();
-                ctx.setLineDash([]);
-
-
-                // DRAWING THE BORDER AROUND parts of THE SELECTED Checkpoint parts
-
-                // get array of arrays from within selectedElements that cooresponds to this checkpoint ex: [[2, 1], [2, 3], [2, 2]]
-                const selectionArrays = this.selectedElements.filter((element) => Array.isArray(element) && element[0] == MapEditor.loadedMap.checkpoints.indexOf(checkpoint))
-                selectionArrays.forEach((checkpointPart) => {
-                    // checkpoint part ex: [2,1] or [2,3]
-                    if (checkpointPart[1] == 1) { // trigger 1
-                        ctx.strokeStyle = UserInterface.darkColor_1
-                        ctx.lineWidth = 6
-                        ctx.beginPath();
-                        ctx.arc(checkpoint.triggerX1, checkpoint.triggerY1, 20, 0, 2 * Math.PI);
-                        ctx.stroke();
     
-                        ctx.strokeStyle = UserInterface.lightColor_1
-                        ctx.lineWidth = 2
-                        ctx.beginPath();
-                        ctx.arc(checkpoint.triggerX1, checkpoint.triggerY1, 20, 0, 2 * Math.PI);
-                        ctx.stroke();
-                    }
-
-                    if (checkpointPart[1] == 2) { // trigger 2
-                        ctx.strokeStyle = UserInterface.darkColor_1
-                        ctx.lineWidth = 6
-                        ctx.beginPath();
-                        ctx.arc(checkpoint.triggerX2, checkpoint.triggerY2, 20, 0, 2 * Math.PI);
-                        ctx.stroke();
+                if (this.selectedElements.includes("playerStart")) { // DRAWING SELECTION BORDER AROUND PLAYER
+                    ctx.strokeStyle = UserInterface.darkColor_1
+                    ctx.lineWidth = 6
+                    ctx.strokeRect(-13, -13, 26, 26);
+                    
+                    ctx.strokeStyle = UserInterface.lightColor_1
+                    ctx.lineWidth = 2
+                    ctx.strokeRect(-13, -13, 26, 26);
+                }
+                ctx.restore() //restoring Player rotation and transformation
     
-                        ctx.strokeStyle = UserInterface.lightColor_1
-                        ctx.lineWidth = 2
-                        ctx.beginPath();
-                        ctx.arc(checkpoint.triggerX2, checkpoint.triggerY2, 20, 0, 2 * Math.PI);
-                        ctx.stroke();
+    
+                ctx.restore() // restoring screen.x and screen.y translation and zoom
+                // essentially translating(+screen.x, +screen.y)
+                // END OF SCALED ZOOM RENDERING
+    
+    
+    
+                // MAP EDITOR UI
+                ctx.font = "20px BAHNSCHRIFT";
+    
+                if (this.editorState == 1 || this.editorState == 2) {
+                    ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1 :  UserInterface.lightColor_1;
+                    ctx.fillText("Group Select", btn_multiSelect.x, btn_multiSelect.y - 15);
+                }
+    
+                if (this.editorState == 2) { // DRAWING SIDE PANEL
+                
+                    const sidePanel = {// If these change also change the values in UserInterface.touchReleased()
+                        x : CanvasArea.canvas.width - 280,
+                        y : 20,
+                        width : 225,
+                        height : 320
                     }
-
-                    if (checkpointPart[1] == 3) { // playerRestart
-                        ctx.save()
-                        ctx.translate(checkpoint.x, checkpoint.y)
-                        ctx.rotate(checkpoint.angle * Math.PI/180);
-            
-                        ctx.strokeStyle = UserInterface.darkColor_1
-                        ctx.lineWidth = 6
-                        ctx.strokeRect(-16, -16, 32, 32);
+    
+                    // SIDE PANEL
+                    ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.lightColor_1 : UserInterface.darkColor_1;
+                    CanvasArea.roundedRect(sidePanel.x, sidePanel.y, sidePanel.width, sidePanel.height, 25) 
+                    ctx.fill()
+    
+                    ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1 : UserInterface.lightColor_1; // for text
+    
+                    if (this.multiSelect && this.selectedElements.length > 1) { // MULTISELECTED
+    
+                        ctx.fillText("Group Selection", sidePanel.x + 25, sidePanel.y + 100);
+                        ctx.fillText(this.selectedElements.length + " Items", sidePanel.x + 25, sidePanel.y + 130);
+    
+                    } else {
+    
+                        if (this.selectedElements[0] == "playerStart") { // playerStart is selected
+                            ctx.fillText("Player Start", sidePanel.x + 25, sidePanel.y + 100);
+                            ctx.fillText("Position: " + this.loadedMap.playerStart.x + ", " + this.loadedMap.playerStart.y, sidePanel.x + 25, sidePanel.y + 130);
+        
+                        } else if (Array.isArray(this.selectedElements[0])) { // checkpoint is selected
+                            ctx.fillText("Checkpoint", sidePanel.x + 25, sidePanel.y + 100);
+                            ctx.fillText("Trigger 1: " + this.loadedMap.checkpoints[this.selectedElements[0][0]].triggerX1 + ", " + this.loadedMap.checkpoints[this.selectedElements[0][0]].triggerY1, sidePanel.x + 25, sidePanel.y + 130);
+                            ctx.fillText("Trigger 2: " + this.loadedMap.checkpoints[this.selectedElements[0][0]].triggerX2 + ", " + this.loadedMap.checkpoints[this.selectedElements[0][0]].triggerY2, sidePanel.x + 25, sidePanel.y + 160);
+                            ctx.fillText("Respawn: " + this.loadedMap.checkpoints[this.selectedElements[0][0]].x + ", " + this.loadedMap.checkpoints[this.selectedElements[0][0]].y, sidePanel.x + 25, sidePanel.y + 190);
                         
-                        ctx.strokeStyle = UserInterface.lightColor_1
-                        ctx.lineWidth = 2
-                        ctx.strokeRect(-16, -16, 32, 32);
-                        ctx.restore()
-                    }    
-                }) // end of selectionArray forEach
-            }); // end of loadedMap.checkpoints.forEach
-
-
-            // RENDER THE PLAYER START
-            ctx.save()
-            ctx.translate(this.loadedMap.playerStart.x, this.loadedMap.playerStart.y)
-            ctx.rotate(this.loadedMap.playerStart.angle * Math.PI/180);
-            ctx.fillStyle = this.loadedMap.style.playerColor;
-            ctx.fillRect(-16,-16,32,32)
-
-            // draw player arrow
-            ctx.strokeStyle = "#000000";
-            ctx.lineWidth = 1
-            ctx.beginPath();
-            ctx.moveTo(8, 0);
-            ctx.lineTo(-5, -7);
-            ctx.lineTo(-5, 7);
-            ctx.lineTo(8, 0)
-            ctx.stroke();
-
-            if (this.selectedElements.includes("playerStart")) { // DRAWING SELECTION BORDER AROUND PLAYER
-                ctx.strokeStyle = UserInterface.darkColor_1
-                ctx.lineWidth = 6
-                ctx.strokeRect(-13, -13, 26, 26);
-                
-                ctx.strokeStyle = UserInterface.lightColor_1
-                ctx.lineWidth = 2
-                ctx.strokeRect(-13, -13, 26, 26);
-            }
-            ctx.restore() //restoring Player rotation and transformation
-
-
-            ctx.restore() // restoring screen.x and screen.y translation and zoom
-            // essentially translating(+screen.x, +screen.y)
-            // END OF SCALED ZOOM RENDERING
-
-
-
-            // MAP EDITOR UI
-            ctx.font = "20px BAHNSCHRIFT";
-
-            if (this.editorState == 1 || this.editorState == 2) {
-                ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1 :  UserInterface.lightColor_1;
-                ctx.fillText("Group Select", btn_multiSelect.x, btn_multiSelect.y - 15);
-            }
-
-            if (this.editorState == 2) { // DRAWING SIDE PANEL
-            
-                const sidePanel = {// If these change also change the values in UserInterface.touchReleased()
-                    x : CanvasArea.canvas.width - 280,
-                    y : 20,
-                    width : 225,
-                    height : 320
-                }
-
-                // SIDE PANEL
-                ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.lightColor_1 : UserInterface.darkColor_1;
-                CanvasArea.roundedRect(sidePanel.x, sidePanel.y, sidePanel.width, sidePanel.height, 25) 
-                ctx.fill()
-
-                ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1 : UserInterface.lightColor_1; // for text
-
-                if (this.multiSelect && this.selectedElements.length > 1) { // MULTISELECTED
-
-                    ctx.fillText("Group Selection", sidePanel.x + 25, sidePanel.y + 100);
-                    ctx.fillText(this.selectedElements.length + " Items", sidePanel.x + 25, sidePanel.y + 130);
-
-                } else {
-
-                    if (this.selectedElements[0] == "playerStart") { // playerStart is selected
-                        ctx.fillText("Player Start", sidePanel.x + 25, sidePanel.y + 100);
-                        ctx.fillText("Position: " + this.loadedMap.playerStart.x + ", " + this.loadedMap.playerStart.y, sidePanel.x + 25, sidePanel.y + 130);
+                        } else { // platform is selected
+                            ctx.fillText("Platform", sidePanel.x + 25, sidePanel.y + 100);
+                            const approxSignX = (this.loadedMap.platforms[this.selectedElements[0]].x % 1 == 0) ? "" : "~" 
+                            const approxSignY = (this.loadedMap.platforms[this.selectedElements[0]].y % 1 == 0) ? "" : "~" 
+                            ctx.fillText("Position: " + approxSignX + Math.round(this.loadedMap.platforms[this.selectedElements[0]].x) + ", " + approxSignY + Math.round(this.loadedMap.platforms[this.selectedElements[0]].y), sidePanel.x + 25, sidePanel.y + 130);
+                            ctx.fillText("Size: " + this.loadedMap.platforms[this.selectedElements[0]].width + ", " + this.loadedMap.platforms[this.selectedElements[0]].height, sidePanel.x + 25, sidePanel.y + 160);
+                            ctx.fillText("Wall: " + (this.loadedMap.platforms[this.selectedElements[0]].wall?"Yes":"No"), sidePanel.x + 25, sidePanel.y + 280)
+                        }
     
-                    } else if (Array.isArray(this.selectedElements[0])) { // checkpoint is selected
-                        ctx.fillText("Checkpoint", sidePanel.x + 25, sidePanel.y + 100);
-                        ctx.fillText("Trigger 1: " + this.loadedMap.checkpoints[this.selectedElements[0][0]].triggerX1 + ", " + this.loadedMap.checkpoints[this.selectedElements[0][0]].triggerY1, sidePanel.x + 25, sidePanel.y + 130);
-                        ctx.fillText("Trigger 2: " + this.loadedMap.checkpoints[this.selectedElements[0][0]].triggerX2 + ", " + this.loadedMap.checkpoints[this.selectedElements[0][0]].triggerY2, sidePanel.x + 25, sidePanel.y + 160);
-                        ctx.fillText("Respawn: " + this.loadedMap.checkpoints[this.selectedElements[0][0]].x + ", " + this.loadedMap.checkpoints[this.selectedElements[0][0]].y, sidePanel.x + 25, sidePanel.y + 190);
-                    
-                    } else { // platform is selected
-                        ctx.fillText("Platform", sidePanel.x + 25, sidePanel.y + 100);
-                        const approxSignX = (this.loadedMap.platforms[this.selectedElements[0]].x % 1 == 0) ? "" : "~" 
-                        const approxSignY = (this.loadedMap.platforms[this.selectedElements[0]].y % 1 == 0) ? "" : "~" 
-                        ctx.fillText("Position: " + approxSignX + Math.round(this.loadedMap.platforms[this.selectedElements[0]].x) + ", " + approxSignY + Math.round(this.loadedMap.platforms[this.selectedElements[0]].y), sidePanel.x + 25, sidePanel.y + 130);
-                        ctx.fillText("Size: " + this.loadedMap.platforms[this.selectedElements[0]].width + ", " + this.loadedMap.platforms[this.selectedElements[0]].height, sidePanel.x + 25, sidePanel.y + 160);
-                        ctx.fillText("Wall: " + (this.loadedMap.platforms[this.selectedElements[0]].wall?"Yes":"No"), sidePanel.x + 25, sidePanel.y + 280)
                     }
-
                 }
-            }
-
-            if (this.editorState == 3) { // IN COLOR SETTINGS 
-                PreviewWindow.render()
-                ColorPicker.render()
-                // PreviewWindow update is called by buttons
-            }
-
-
-            if (this.editorState == 4) { // IN MAP SETTINGS 
-                PreviewWindow.render()
-                // PreviewWindow update is called by buttons
-            }
-
-
-            if (UserInterface.settings.debugText == 1) {
-                
-                // GENERAL MAP EDITOR DEBUG TEXT
-                const textX = 200;
-                ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1 :  UserInterface.lightColor_1;
-                ctx.fillText("zoom: " + this.zoom, textX, 40)
-                ctx.fillText("screen.x: " + this.screen.x, textX, 60);
-                ctx.fillText("screen.y: " + this.screen.y, textX, 80);
-                ctx.fillText("screen.width: " + this.screen.width, textX, 100);
-                ctx.fillText("screen.height: " + this.screen.height, textX, 120);
-                ctx.fillText("screen.cornerX: " + this.screen.cornerX, textX, 140);
-                ctx.fillText("screen.cornerY: " + this.screen.cornerY, textX, 160);
-                
-                ctx.fillText("rendered platforms: " + this.renderedPlatforms.length, textX, 180);
-                ctx.fillText("editorState: " + this.editorState, textX, 200);
-                ctx.fillText("selectedElements: " + this.selectedElements, textX, 220);
-                
-                if (TouchHandler.dragging) {
-                    ctx.fillText("touch: " + Math.round(TouchHandler.touches[0].x) + ", " + Math.round(TouchHandler.touches[0].y), textX, 240);
+    
+    
+                if (UserInterface.settings.debugText == 1) {
                     
-                    // mapToRange(number, inMin, inMax, outMin, outMax)
-                    const touchXMapped = CanvasArea.mapToRange(TouchHandler.touches[0].x, 0, CanvasArea.canvas.width, this.screen.cornerX, this.screen.cornerX + this.screen.width)
-                    const touchYMapped = CanvasArea.mapToRange(TouchHandler.touches[0].y, 0, CanvasArea.canvas.height, this.screen.cornerY, this.screen.cornerY + this.screen.height)
+                    // GENERAL MAP EDITOR DEBUG TEXT
+                    const textX = 200;
+                    ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1 :  UserInterface.lightColor_1;
+                    ctx.fillText("zoom: " + this.zoom, textX, 40)
+                    ctx.fillText("screen.x: " + this.screen.x, textX, 60);
+                    ctx.fillText("screen.y: " + this.screen.y, textX, 80);
+                    ctx.fillText("screen.width: " + this.screen.width, textX, 100);
+                    ctx.fillText("screen.height: " + this.screen.height, textX, 120);
+                    ctx.fillText("screen.cornerX: " + this.screen.cornerX, textX, 140);
+                    ctx.fillText("screen.cornerY: " + this.screen.cornerY, textX, 160);
                     
-                    ctx.fillText("touch mapped: " + Math.round(touchXMapped) + ", " + Math.round(touchYMapped), textX, 260);
-                }
-
-                ctx.fillText("debug info: ", textX, 280);
-
-
-                if (TouchHandler.zoom.isZooming) { // draw center point between two fingers of zoom
-                    ctx.save()
-                    ctx.translate(TouchHandler.zoom.x, TouchHandler.zoom.y)
-                    ctx.fillRect(-3,-3,6,6)
-                    ctx.restore()
+                    ctx.fillText("rendered platforms: " + this.renderedPlatforms.length, textX, 180);
+                    ctx.fillText("editorState: " + this.editorState, textX, 200);
+                    ctx.fillText("selectedElements: " + this.selectedElements, textX, 220);
+                    
+                    if (TouchHandler.dragging) {
+                        ctx.fillText("touch: " + Math.round(TouchHandler.touches[0].x) + ", " + Math.round(TouchHandler.touches[0].y), textX, 240);
+                        
+                        // mapToRange(number, inMin, inMax, outMin, outMax)
+                        const touchXMapped = CanvasArea.mapToRange(TouchHandler.touches[0].x, 0, CanvasArea.canvas.width, this.screen.cornerX, this.screen.cornerX + this.screen.width)
+                        const touchYMapped = CanvasArea.mapToRange(TouchHandler.touches[0].y, 0, CanvasArea.canvas.height, this.screen.cornerY, this.screen.cornerY + this.screen.height)
+                        
+                        ctx.fillText("touch mapped: " + Math.round(touchXMapped) + ", " + Math.round(touchYMapped), textX, 260);
+                    }
+    
+                    ctx.fillText("debug info: ", textX, 280);
+    
+    
+                    if (TouchHandler.zoom.isZooming) { // draw center point between two fingers of zoom
+                        ctx.save()
+                        ctx.translate(TouchHandler.zoom.x, TouchHandler.zoom.y)
+                        ctx.fillRect(-3,-3,6,6)
+                        ctx.restore()
+                    }
+    
                 }
 
             }
+
         }
     },
 
