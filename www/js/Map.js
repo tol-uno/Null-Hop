@@ -58,7 +58,6 @@ const Map = {
     },
 
 
-
     // Big function that parses the map data, sets up lighting, shadows, shadow clips, etc
     parseMapData : function (jsonData) {
         
@@ -209,7 +208,7 @@ const Map = {
                     (platform.y - platform.hypotenuse - this.style.wallHeight < Player.y + 25) // bottom side
                 ) { // test for Player overlap and rendering z-order tests
                     
-                    this.wallsToCheck.push(platform) // for checking if Player is colliding with walls in Player.updatePos()
+                    this.wallsToCheck.push(platform) // for checking if Player is colliding with walls in Player.update()
 
                     // convert Player angle and get radian version
                     const angle = Player.lookAngle.getAngleInDegrees();
@@ -292,18 +291,24 @@ const Map = {
 
     setMapLighting : function() { // Calculates all lighting and shadows 
 
-        // determine whether rendering for Map or PreviewWindow
+        // determine where to pull platforms and styles from. PreviewWindow copies styles from MapEditor.loadedMap
         const MapData = UserInterface.gamestate == 7 ? PreviewWindow : Map    
 
-        // turning lightDirection integer into a Vector
-        // MapData.style.lightDirectionVector = new Vector2D3D(Math.cos(MapData.style.lightDirection * (Math.PI/180)), Math.sin(MapData.style.lightDirection * (Math.PI/180)))
-        MapData.style.lightDirectionVector = new Vector2D3D(1,0).rotate(MapData.style.lightDirection)
 
-        // lightPitch is actually sun's angle between 0 -> 89
-        const sunAngle = MapData.style.lightPitch
-        const shadowX = MapData.style.lightDirectionVector.x * Math.tan(sunAngle * Math.PI / 180) * MapData.style.platformHeight
-        const shadowY = MapData.style.lightDirectionVector.y * Math.tan(sunAngle * Math.PI / 180) * MapData.style.platformHeight
+        // Turning lightDirection and lightPitch into a 3D vector
+        const lightDirection_Rads = MapData.style.lightDirection * (Math.PI / 180)
+        const lightPitch_Rads = MapData.style.lightPitch * (Math.PI / 180) // light pitch = light angle. 0 == flat at the horizon. 90 == directly above
+        
+        const x = Math.cos(lightDirection_Rads) * Math.cos(lightPitch_Rads)
+        const y = Math.sin(lightDirection_Rads) * Math.cos(lightPitch_Rads)
+        const z = Math.sin(lightPitch_Rads)
 
+        const directLightVector = new Vector2D3D(x,y,z)
+        
+        const shadowX = directLightVector.x / Math.tan(lightPitch_Rads) * MapData.style.platformHeight
+        const shadowY = directLightVector.y / Math.tan(lightPitch_Rads) * MapData.style.platformHeight
+    
+        let litPercentTop // init here so that background and others can use
 
         // LOOPING THROUGH EACH PLATFORM
         // SETTING : Shaded colors and shadow poligon
@@ -322,16 +327,33 @@ const Map = {
             }
 
 
-            // PLATFORM COLORS
-            side1Vec = new Vector2D3D(-1,0).rotate(platform.angle)
-            side2Vec = new Vector2D3D(0,1).rotate(platform.angle)
-            side3Vec = new Vector2D3D(1,0).rotate(platform.angle)
+            // CALCULATING PLATFORM COLORS
 
-            const litPercent1 = side1Vec.angleDifference(MapData.style.lightDirectionVector) / Math.PI // dividing by PI converts angleDiffernce to between 0->1
-            const litPercent2 = side2Vec.angleDifference(MapData.style.lightDirectionVector) / Math.PI            
-            const litPercent3 = side3Vec.angleDifference(MapData.style.lightDirectionVector) / Math.PI
+            // get surface normals
+            topNormal = new Vector2D3D(0,0,-1)
+            side1Normal = new Vector2D3D(-1,0,0).rotate(platform.angle)
+            side2Normal = new Vector2D3D(0,1,0).rotate(platform.angle)
+            side3Normal = new Vector2D3D(1,0,0).rotate(platform.angle)
 
-            platform.shaded_topColor = CanvasArea.getShadedColor(colorToUse1, 1)
+
+            // angleDifference result will be between 0 and PI radians
+            // if angleDifference is > PI/2 (90 deg) then side is in light. Otherwise no direct light is hitting it
+            // if angleDifference is < PI/2 (90 deg) then side is in shadow & litPercent = 0
+
+            litPercentTop = Math.cos(Math.PI - topNormal.angleDifference(directLightVector)) // known as geometry term
+            if (litPercentTop < 0) {litPercentTop = 0} // clamp to 0 to 1
+
+            let litPercent1 = Math.cos(Math.PI - side1Normal.angleDifference(directLightVector)) // known as geometry term
+            if (litPercent1 < 0) {litPercent1 = 0} // clamp to 0 to 1
+
+            let litPercent2 = Math.cos(Math.PI - side2Normal.angleDifference(directLightVector)) // known as geometry term
+            if (litPercent2 < 0) {litPercent2 = 0} // clamp to 0 to 1
+            
+            let litPercent3 = Math.cos(Math.PI - side3Normal.angleDifference(directLightVector)) // known as geometry term
+            if (litPercent3 < 0) {litPercent3 = 0} // clamp to 0 to 1
+            
+
+            platform.shaded_topColor = CanvasArea.getShadedColor(colorToUse1, litPercentTop)
             platform.shaded_sideColor1 = CanvasArea.getShadedColor(colorToUse2, litPercent1)
             platform.shaded_sideColor2 = CanvasArea.getShadedColor(colorToUse2, litPercent2)
             platform.shaded_sideColor3 = CanvasArea.getShadedColor(colorToUse2, litPercent3)
@@ -406,19 +428,20 @@ const Map = {
 
 
         // calculate all other map colors
-        MapData.style.shaded_playerColor = CanvasArea.getShadedColor(MapData.style.playerColor, 1)
-        MapData.style.shaded_backgroundColor = CanvasArea.getShadedColor(MapData.style.backgroundColor, 1)
+        // THESE ALL NEED TO USE 3D Normal Vectors for calculations
+        MapData.style.shaded_backgroundColor = CanvasArea.getShadedColor(MapData.style.backgroundColor, litPercentTop)
+        
 
-        MapData.style.shadow_platformColor = CanvasArea.getShadedColor(MapData.style.platformTopColor, 0.2) // 0.2 instead of 0 to pretend there's bounce lighting
-        MapData.style.shadow_endzoneColor = CanvasArea.getShadedColor(MapData.style.endZoneTopColor, 0.2)
-        MapData.style.shadow_backgroundColor = CanvasArea.getShadedColor(MapData.style.backgroundColor, 0.2)
+        MapData.style.shadow_platformColor = CanvasArea.getShadedColor(MapData.style.platformTopColor, Math.max(0, litPercentTop - 0.7)) // shadow brightness can be between 0 and 0.3
+        MapData.style.shadow_endzoneColor = CanvasArea.getShadedColor(MapData.style.endZoneTopColor, Math.max(0, litPercentTop - 0.7))
+        MapData.style.shadow_backgroundColor = CanvasArea.getShadedColor(MapData.style.backgroundColor, Math.max(0, litPercentTop - 0.7))
         
     },
 
 
     renderPlatformShadow : function(platform) {
 
-        // determine whether rendering for Map or PreviewWindow
+        // where to pull syles from: Map or PreviewWindow
         const MapData = UserInterface.gamestate == 7 ? MapEditor.loadedMap : Map    
 
         const ctx = CanvasArea.ctx;
@@ -429,7 +452,8 @@ const Map = {
 
         ctx.beginPath();
         
-        ctx.moveTo(platform.shadowPoints[0][0], platform.shadowPoints[0][1]); // this comes up in debug a lot
+        // console.log(platform.shadowPoints)
+        ctx.moveTo(platform.shadowPoints[0][0], platform.shadowPoints[0][1]); // this comes up in debug a lot. last time was because of wrong references to platforms and styles arrays
         for (let i = platform.shadowPoints.length - 1; i > 0; i --) {
             ctx.lineTo(platform.shadowPoints[i][0], platform.shadowPoints[i][1]);
         }
@@ -538,15 +562,7 @@ const Map = {
         ctx.save(); // #19
         ctx.translate(-Player.x + midX, -Player.y + midY); // move canvas when drawing platforms then restore. midX is center of canvas width
 
-
-        // DRAWING LOWER PLAYER SHADOW
-        ctx.save(); // #20
-        ctx.translate(Player.x , Player.y + this.style.platformHeight)
-        ctx.rotate(Player.lookAngle.getAngleInDegrees() * Math.PI/180); // rotating canvas
-        ctx.fillStyle = this.style.shadow_backgroundColor;
-        ctx.fillRect(-15, -15, 30, 30)
-        ctx.restore(); // #20
-
+        Player.renderLowerShadow()
 
         // LOOP TO DRAW renderedPlatforms SHADOWS
         this.renderedPlatforms.forEach(platform => { 

@@ -114,24 +114,34 @@ const CanvasArea = {
     },
 
 
-    getShadedColor: function (color, litPercent) { // litPercent is how much sun is hitting the face 0 -> 1 
+    getShadedColor: function (color, litPercent) { 
+        // litPercent is how much influence the direct light has on the surface. 
+        // 1 = completly lit by direct
+        // 0 = no direct light only ambient light is illuminating surface
+        // 0.5 means direct and ambient have equal influence over lighting the surface
+
+        const directWeight = litPercent;
+        const ambientWeight = 1 - litPercent;
         
         let directLight;
         let ambientLight;
 
         if (UserInterface.gamestate == 5 || UserInterface.gamestate == 6) {
             directLight = Map.style.directLight ?? "rba(255,255,255)"
-            ambientLight = Map.style.ambientLight ?? "rba(140,184,198)"
+            ambientLight = Map.style.ambientLight ?? "rba(50,50,50)"
         } else {
             directLight = MapEditor.loadedMap.style.directLight ?? "rba(255,255,255)"
-            ambientLight = MapEditor.loadedMap.style.ambientLight ?? "rba(140,184,198)"
+            ambientLight = MapEditor.loadedMap.style.ambientLight ?? "rba(50,50,50)"
         }
 
         // parse main color
         color = color.replace(/[^\d,.]/g, '').split(',')
-        let r = color[0]
-        let g = color[1]
-        let b = color[2]
+        color = {
+            r : color[0],
+            g : color[1],
+            b : color[2],
+        }
+        
         
         // parse directLight color
         directLight = directLight.replace(/[^\d,.]/g, '').split(',')
@@ -150,23 +160,75 @@ const CanvasArea = {
         }
         
         
-        // Revised:
-        // if lit % is 0  => fully light color with ambient color. If ambient color lightness is 0, color is black
-        // if lit % is 1 => filly lit by direct. no ambient
-        // if lit % is 0.5 => 
+        // calculate contributions of lights with weights
+        const colorWithDirectWeighted = {
+            r : color.r * directLight.r/255 * directWeight,
+            g : color.g * directLight.g/255 * directWeight,
+            b : color.b * directLight.b/255 * directWeight,
+        }
 
-        r = (litPercent) * (r * (directLight.r / 255)) + (1 - litPercent) * (r * (ambientLight.r / 255)) // left of + is color fully lit by sunlight
-        g = (litPercent) * (g * (directLight.g / 255)) + (1 - litPercent) * (g * (ambientLight.g / 255)) // right of + is color fully lit by ambient light
-        b = (litPercent) * (b * (directLight.b / 255)) + (1 - litPercent) * (b * (ambientLight.b / 255))
+        // const colorWithAmbientWeighted = {
+        //     r : color.r * ambientLight.r/255 * ambientWeight,
+        //     g : color.g * ambientLight.g/255 * ambientWeight,
+        //     b : color.b * ambientLight.b/255 * ambientWeight,
+        // }
+        
+        const colorWithAmbientWeighted = {
+            r : color.r * ambientLight.r/255,
+            g : color.g * ambientLight.g/255,
+            b : color.b * ambientLight.b/255,
+        }
 
-        r = Math.round(r)
-        g = Math.round(g)
-        b = Math.round(b)
+        // combine the contributions (weighted to account for influence)
+        color = {
+            r : colorWithDirectWeighted.r + colorWithAmbientWeighted.r,
+            g : colorWithDirectWeighted.g + colorWithAmbientWeighted.g,
+            b : colorWithDirectWeighted.b + colorWithAmbientWeighted.b,
+        }
 
-        return `rgb(${r},${g},${b})`
+        // clamp and round values to ensure they are not over 255
+        color = {
+            r : Math.round(Math.min(color.r, 255)),
+            g : Math.round(Math.min(color.g, 255)),
+            b : Math.round(Math.min(color.b, 255)),
+        }
+
+
+        return `rgb(${color.r},${color.g},${color.b})`
     },
 
 
+    generateGradient : function (x1, y1, x2, y2, colorRGB, contrast, reverse = false) { // dark to light unless reversed
+        // contrast is the + and - to apply to lightess in hsl colors
+
+        // parse rgb 
+        let color1 = colorRGB.replace(/[^\d,.]/g, '').split(',')
+        color1 = {
+            r : color1[0],
+            g : color1[1],
+            b : color1[2],
+        }
+        
+        // convert to hsl ARRAY
+        color1 = this.RGBToHSL(color1.r, color1.g, color1.b)
+        
+        // adjust lightness
+        let color2 = [color1[0], color1[1], Math.min(255, color1[2] + contrast)] // set first so color1 isnt modified
+        color1 = [color1[0], color1[1], Math.max(0, color1[2] - contrast)]
+
+        // convert back to rgb string
+        color1 = this.HSLToRGB(color1[0], color1[1], color1[2])
+        color2 = this.HSLToRGB(color2[0], color2[1], color2[2])
+        
+        const gradient = CanvasArea.ctx.createLinearGradient(x1, y1, x2, y2)
+        
+        gradient.addColorStop(0, reverse ? color2 : color1)
+        gradient.addColorStop(1, reverse ? color1 : color2)
+        
+        return gradient 
+    },
+
+    
     roundedRect : function (x, y, width, height, radius) { // not perfect corner arcs. could use .arc() instead
         const ctx = CanvasArea.ctx
 

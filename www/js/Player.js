@@ -15,7 +15,12 @@ const Player = {
     velocity : new Vector2D3D(0,0),
     currentSpeedProjected : 0,
     addSpeed : 0, // initialized here so that userInterface can access for debug
-
+    
+    topColor : "rgb(0,255,0)",
+    botSideColor : "rgb(0,255,0)",
+    rightSideColor : "rgb(0,200,0)",
+    topSideColor : "rgb(0,150,0)",
+    leftSideColor : "rgb(0,100,0)",
 
     initPlayer : function (x, y, angle) {
         this.x = x;
@@ -32,57 +37,138 @@ const Player = {
         this.checkpointIndex = -1
     },
 
+    setPlayerLighting : function() {
+        
+        // determine where to pull platforms and styles from
+        const MapData = UserInterface.gamestate == 7 ? MapEditor.loadedMap : Map    
+
+        // Turning lightDirection and lightPitch into a 3D vector
+        const lightDirection_Rads = MapData.style.lightDirection * (Math.PI / 180)
+        const lightPitch_Rads = MapData.style.lightPitch * (Math.PI / 180) // light pitch = light angle. 0 == flat at the horizon. 90 == directly above
+        
+        const x = Math.cos(lightDirection_Rads) * Math.cos(lightPitch_Rads)
+        const y = Math.sin(lightDirection_Rads) * Math.cos(lightPitch_Rads)
+        const z = Math.sin(lightPitch_Rads)
+
+        const directLightVector = new Vector2D3D(x,y,z)
+    
+
+        // NORMALS
+        const topNormal = new Vector2D3D(0,0,-1)
+        const botSideNormal = new Vector2D3D(0,1,0).rotate(this.lookAngle.getAngleInDegrees())
+        const rightSideNormal = new Vector2D3D(1,0,0).rotate(this.lookAngle.getAngleInDegrees())
+        const topSideNormal = new Vector2D3D(0,-1,0).rotate(this.lookAngle.getAngleInDegrees())
+        const leftSideNormal = new Vector2D3D(-1,0,0).rotate(this.lookAngle.getAngleInDegrees())
+
+        // angleDifference result will be between 0 and PI radians
+        // if angleDifference is > PI/2 (90 deg) then side is in light. Otherwise no direct light is hitting it
+        // if angleDifference is < PI/2 (90 deg) then side is in shadow & litPercent = 0
+
+        litPercentTop = Math.cos(Math.PI - topNormal.angleDifference(directLightVector)) // known as geometry term
+        if (litPercentTop < 0) {litPercentTop = 0} // clamp to 0 to 1
+
+        let litPercentBotSide = Math.cos(Math.PI - botSideNormal.angleDifference(directLightVector))
+        if (litPercentBotSide < 0) {litPercentBotSide = 0}
+
+        let litPercentRightSide = Math.cos(Math.PI - rightSideNormal.angleDifference(directLightVector))
+        if (litPercentRightSide < 0) {litPercentRightSide = 0}
+        
+        let litPercentTopSide = Math.cos(Math.PI - topSideNormal.angleDifference(directLightVector))
+        if (litPercentTopSide < 0) {litPercentTopSide = 0}
+        
+        let litPercentLeftSide = Math.cos(Math.PI - leftSideNormal.angleDifference(directLightVector))
+        if (litPercentLeftSide < 0) {litPercentLeftSide = 0}
+        
+
+        this.topColor = CanvasArea.getShadedColor(MapData.style.playerColor, litPercentTop)
+        this.botSideColor = CanvasArea.getShadedColor(MapData.style.playerColor, litPercentBotSide)
+        this.rightSideColor = CanvasArea.getShadedColor(MapData.style.playerColor, litPercentRightSide)
+        this.topSideColor = CanvasArea.getShadedColor(MapData.style.playerColor, litPercentTopSide)
+        this.leftSideColor = CanvasArea.getShadedColor(MapData.style.playerColor, litPercentLeftSide)
+
+    },
+
+    renderLowerShadow : function () { // used by map
+        const ctx = CanvasArea.ctx;
+
+        const MapData = UserInterface.gamestate == 7 ? MapEditor.loadedMap : Map // to use in PreviewWindow
+
+        ctx.save(); // #20
+        ctx.translate(this.x , this.y + MapData.style.platformHeight)
+        ctx.rotate(this.lookAngle.getAngleInDegrees() * Math.PI/180); // rotating canvas
+        ctx.fillStyle = MapData.style.shadow_backgroundColor;
+        ctx.fillRect(-15, -15, 30, 30)
+        ctx.restore(); // #20
+    }, 
+
     render : function () {
         
+        this.setPlayerLighting()
+
         const ctx = CanvasArea.ctx;
-        
-        ctx.save() // #21.5
-        
-        // create inverted playerClip so not drawn behind walls
-        const clipPathCombo = new Path2D()
-        clipPathCombo.moveTo(0, 0)
-        clipPathCombo.lineTo(0, CanvasArea.canvas.height)
-        clipPathCombo.lineTo(CanvasArea.canvas.width, CanvasArea.canvas.height)
-        clipPathCombo.lineTo(CanvasArea.canvas.width, 0)
-        clipPathCombo.closePath()
+        const MapData = UserInterface.gamestate == 7 ? MapEditor.loadedMap : Map // to use in PreviewWindow
 
-        clipPathCombo.addPath(Map.playerClip, new DOMMatrix([1, 0, 0, 1, -this.x + midX, -this.y + midY]))
         
-        // Draw playerClip DEBUG
-        // ctx.lineWidth = 5
-        // ctx.strokeStyle = "#00ff00"
-        // ctx.stroke(clipPathCombo)
-        
-        ctx.clip(clipPathCombo)
+        ctx.save() // #21.5 To go back before playerClip canvas state
 
+        if (MapData == Map) { // dont bother with this stuff in PreviewWindow
 
-        ctx.save(); // #22
-        ctx.translate(midX, midY);
+            // create inverted playerClip so not drawn behind walls
+            const clipPathCombo = new Path2D()
+            clipPathCombo.moveTo(0, 0)
+            clipPathCombo.lineTo(0, CanvasArea.canvas.height)
+            clipPathCombo.lineTo(CanvasArea.canvas.width, CanvasArea.canvas.height)
+            clipPathCombo.lineTo(CanvasArea.canvas.width, 0)
+            clipPathCombo.closePath()
+            
+            clipPathCombo.addPath(Map.playerClip, new DOMMatrix([1, 0, 0, 1, -this.x + midX, -this.y + midY]))
+            
+            // Draw playerClip DEBUG
+            // ctx.lineWidth = 5
+            // ctx.strokeStyle = "#00ff00"
+            // ctx.stroke(clipPathCombo)
+            
+            ctx.clip(clipPathCombo)
+        }
+            
 
+        ctx.save(); // #22 players XY translation AND rotation AND jump value translation
 
         // LOWER SHADOW IS DRAWN BY MAP
         // DRAWING UPPER SHADOW HERE \/ (drawn twice while over platform or over endzone)
-        ctx.save() // #23
         
-        ctx.translate(-this.x, -this.y)
-        
-        // Draw standard shadowClip DEBUG
-        // ctx.lineWidth = 5
-        // ctx.strokeStyle = "#00ff00"
-        // ctx.stroke(Map.upperShadowClip)
-        
-        ctx.clip(Map.upperShadowClip);
-        ctx.translate(this.x , this.y);
+        if (MapData == Map) {
+            ctx.translate(midX, midY);
+        } else {
+            ctx.translate(this.x, this.y)
+        }
+
+        ctx.save() // #23 upperShadowClip canvas state 
+
+        if (MapData == Map) {
+            ctx.translate(-this.x, -this.y)
+            
+            // Draw standard shadowClip DEBUG
+            // ctx.lineWidth = 5
+            // ctx.strokeStyle = "#00ff00"
+            // ctx.stroke(Map.upperShadowClip)
+            
+            ctx.clip(Map.upperShadowClip);
+            ctx.translate(this.x , this.y);
+        }
+
     
         ctx.rotate(this.lookAngle.getAngleInDegrees() * Math.PI/180)
 
-        ctx.fillStyle = Map.style.shadow_platformColor;
+        ctx.fillStyle = MapData.style.shadow_platformColor;
         ctx.fillRect(-15, -15, 30, 30)
 
-        ctx.restore() // #23 clears upperShadowClip
+        ctx.restore() // #23 clears upperShadowClip if used
 
-        if (Map.endZonesToCheck.length > 0) { // draw a clipped version of the players shadow over endzone
-            ctx.save() // #23.5
+
+
+        if (MapData == Map && Map.endZonesToCheck.length > 0) { // draw a clipped version of the players shadow over endzone
+            ctx.save() // #23.5 endZoneShadowClip canvas state
             
             ctx.translate(-this.x, -this.y)
             
@@ -104,11 +190,10 @@ const Player = {
 
 
 
-
         // DRAWING PLAYER TOP
         ctx.translate(0, -this.jumpValue - 32); 
         ctx.rotate(this.lookAngle.getAngleInDegrees() * Math.PI/180) // rotating canvas
-        ctx.fillStyle = Map.style.shaded_playerColor;
+        ctx.fillStyle = this.topColor;
         ctx.fillRect(-16,-16,32,32)
 
         // Draw players top arrow
@@ -123,88 +208,82 @@ const Player = {
         ctx.stroke();
 
 
-        ctx.restore(); // #22 leaves players space translation AND rotation AND jump value translation
+        ctx.restore(); // #22 leaves players XY translation AND rotation AND jump value translation
 
 
         // SIDES OF PLAYER
-        ctx.save(); // #24
-
         const angleRad = this.lookAngle.getAngleInDegrees() * (Math.PI/180);
         const loopedAngle = this.lookAngle.getAngleInDegrees();
 
+        if (MapData == Map) { // where to draw player sides
+            ctx.translate(midX, midY)
+        } else {
+            ctx.translate(this.x, this.y)
+        }
 
         // GETTING CORNERS OF ROTATED RECTANGLE
         // https://stackoverflow.com/questions/41898990/find-corners-of-a-rotated-rectangle-given-its-center-point-and-rotation
 
         if (loopedAngle > 270 || loopedAngle < 90) { // BOT WALL
 
-            const sideVector = new Vector2D3D(0,1).rotate(this.lookAngle.getAngleInDegrees())
-            const litPercent = sideVector.angleDifference(Map.style.lightDirectionVector) / Math.PI
-            ctx.fillStyle = CanvasArea.getShadedColor(Map.style.playerColor, litPercent)
+            ctx.fillStyle = this.botSideColor
 
             ctx.beginPath();
-            ctx.moveTo(midX - (16 * Math.cos(angleRad) + (16 * Math.sin(angleRad))), midY - 32 - this.jumpValue - (16 * Math.sin(angleRad) - (16 * Math.cos(angleRad))));
-            ctx.lineTo(midX + (16 * Math.cos(angleRad) - (16 * Math.sin(angleRad))), midY - 32 - this.jumpValue + (16 * Math.sin(angleRad) + (16 * Math.cos(angleRad))));
-            ctx.lineTo(midX + (16 * Math.cos(angleRad) - (16 * Math.sin(angleRad))), midY - this.jumpValue + (16 * Math.sin(angleRad) + (16 * Math.cos(angleRad))));
-            ctx.lineTo(midX - (16 * Math.cos(angleRad) + (16 * Math.sin(angleRad))), midY - this.jumpValue - (16 * Math.sin(angleRad) - (16 * Math.cos(angleRad))));
+            ctx.moveTo(-(16 * Math.cos(angleRad) + (16 * Math.sin(angleRad))), - 32 - this.jumpValue - (16 * Math.sin(angleRad) - (16 * Math.cos(angleRad))));
+            ctx.lineTo( (16 * Math.cos(angleRad) - (16 * Math.sin(angleRad))), - 32 - this.jumpValue + (16 * Math.sin(angleRad) + (16 * Math.cos(angleRad))));
+            ctx.lineTo( (16 * Math.cos(angleRad) - (16 * Math.sin(angleRad))), - this.jumpValue + (16 * Math.sin(angleRad) + (16 * Math.cos(angleRad))));
+            ctx.lineTo(-(16 * Math.cos(angleRad) + (16 * Math.sin(angleRad))), - this.jumpValue - (16 * Math.sin(angleRad) - (16 * Math.cos(angleRad))));
             ctx.closePath();
             ctx.fill();
         }
 
         if (0 < loopedAngle && loopedAngle < 180) { // RIGHT WALL
 
-            const sideVector = new Vector2D3D(1,0).rotate(this.lookAngle.getAngleInDegrees())
-            const litPercent = sideVector.angleDifference(Map.style.lightDirectionVector) / Math.PI
-            ctx.fillStyle = CanvasArea.getShadedColor(Map.style.playerColor, litPercent)
+            ctx.fillStyle = this.rightSideColor
 
             ctx.beginPath();
-            ctx.moveTo(midX + (16 * Math.cos(angleRad) - (16 * Math.sin(angleRad))), midY - 32 - this.jumpValue + (16 * Math.sin(angleRad) + (16 * Math.cos(angleRad))));
-            ctx.lineTo(midX + (16 * Math.cos(angleRad) + (16 * Math.sin(angleRad))), midY - 32 - this.jumpValue + (16 * Math.sin(angleRad) - (16 * Math.cos(angleRad))));
-            ctx.lineTo(midX + (16 * Math.cos(angleRad) + (16 * Math.sin(angleRad))), midY - this.jumpValue + (16 * Math.sin(angleRad) - (16 * Math.cos(angleRad))));
-            ctx.lineTo(midX + (16 * Math.cos(angleRad) - (16 * Math.sin(angleRad))), midY - this.jumpValue + (16 * Math.sin(angleRad) + (16 * Math.cos(angleRad))));
+            ctx.moveTo( (16 * Math.cos(angleRad) - (16 * Math.sin(angleRad))), - 32 - this.jumpValue + (16 * Math.sin(angleRad) + (16 * Math.cos(angleRad))));
+            ctx.lineTo( (16 * Math.cos(angleRad) + (16 * Math.sin(angleRad))), - 32 - this.jumpValue + (16 * Math.sin(angleRad) - (16 * Math.cos(angleRad))));
+            ctx.lineTo( (16 * Math.cos(angleRad) + (16 * Math.sin(angleRad))), - this.jumpValue + (16 * Math.sin(angleRad) - (16 * Math.cos(angleRad))));
+            ctx.lineTo( (16 * Math.cos(angleRad) - (16 * Math.sin(angleRad))), - this.jumpValue + (16 * Math.sin(angleRad) + (16 * Math.cos(angleRad))));
             ctx.closePath();
             ctx.fill();
         }
 
         if (90 < loopedAngle && loopedAngle < 270) { // TOP WALL
-            
-            const sideVector = new Vector2D3D(0,-1).rotate(this.lookAngle.getAngleInDegrees())
-            const litPercent = sideVector.angleDifference(Map.style.lightDirectionVector) / Math.PI
-            ctx.fillStyle = CanvasArea.getShadedColor(Map.style.playerColor, litPercent)
+
+            ctx.fillStyle = this.topSideColor
 
             ctx.beginPath();
-            ctx.moveTo(midX + (16 * Math.cos(angleRad) + (16 * Math.sin(angleRad))), midY - 32 - this.jumpValue + (16 * Math.sin(angleRad) - (16 * Math.cos(angleRad))));
-            ctx.lineTo(midX + (16 * Math.cos(angleRad) + (16 * Math.sin(angleRad))), midY - this.jumpValue + (16 * Math.sin(angleRad) - (16 * Math.cos(angleRad))));
-            ctx.lineTo(midX - (16 * Math.cos(angleRad) - (16 * Math.sin(angleRad))), midY - this.jumpValue - (16 * Math.sin(angleRad) + (16 * Math.cos(angleRad))));
-            ctx.lineTo(midX - (16 * Math.cos(angleRad) - (16 * Math.sin(angleRad))), midY - 32 - this.jumpValue - (16 * Math.sin(angleRad) + (16 * Math.cos(angleRad))));
+            ctx.moveTo( (16 * Math.cos(angleRad) + (16 * Math.sin(angleRad))), - 32 - this.jumpValue + (16 * Math.sin(angleRad) - (16 * Math.cos(angleRad))));
+            ctx.lineTo( (16 * Math.cos(angleRad) + (16 * Math.sin(angleRad))), - this.jumpValue + (16 * Math.sin(angleRad) - (16 * Math.cos(angleRad))));
+            ctx.lineTo(-(16 * Math.cos(angleRad) - (16 * Math.sin(angleRad))), - this.jumpValue - (16 * Math.sin(angleRad) + (16 * Math.cos(angleRad))));
+            ctx.lineTo(-(16 * Math.cos(angleRad) - (16 * Math.sin(angleRad))), - 32 - this.jumpValue - (16 * Math.sin(angleRad) + (16 * Math.cos(angleRad))));
             ctx.closePath();
             ctx.fill();
         }
 
         if (180 < loopedAngle && loopedAngle < 360) { // LEFT WALL
 
-            const sideVector = new Vector2D3D(-1,0).rotate(this.lookAngle.getAngleInDegrees())
-            const litPercent = sideVector.angleDifference(Map.style.lightDirectionVector) / Math.PI
-            ctx.fillStyle = CanvasArea.getShadedColor(Map.style.playerColor, litPercent)
+            ctx.fillStyle = this.leftSideColor
 
             ctx.beginPath();
-            ctx.moveTo(midX - (16 * Math.cos(angleRad) - (16 * Math.sin(angleRad))), midY - 32 - this.jumpValue - (16 * Math.sin(angleRad) + (16 * Math.cos(angleRad))));
-            ctx.lineTo(midX - (16 * Math.cos(angleRad) + (16 * Math.sin(angleRad))), midY - 32 - this.jumpValue - (16 * Math.sin(angleRad) - (16 * Math.cos(angleRad))));
-            ctx.lineTo(midX - (16 * Math.cos(angleRad) + (16 * Math.sin(angleRad))), midY - this.jumpValue - (16 * Math.sin(angleRad) - (16 * Math.cos(angleRad))));
-            ctx.lineTo(midX - (16 * Math.cos(angleRad) - (16 * Math.sin(angleRad))), midY - this.jumpValue - (16 * Math.sin(angleRad) + (16 * Math.cos(angleRad))));
+            ctx.moveTo(-(16 * Math.cos(angleRad) - (16 * Math.sin(angleRad))), - 32 - this.jumpValue - (16 * Math.sin(angleRad) + (16 * Math.cos(angleRad))));
+            ctx.lineTo(-(16 * Math.cos(angleRad) + (16 * Math.sin(angleRad))), - 32 - this.jumpValue - (16 * Math.sin(angleRad) - (16 * Math.cos(angleRad))));
+            ctx.lineTo(-(16 * Math.cos(angleRad) + (16 * Math.sin(angleRad))), - this.jumpValue - (16 * Math.sin(angleRad) - (16 * Math.cos(angleRad))));
+            ctx.lineTo(-(16 * Math.cos(angleRad) - (16 * Math.sin(angleRad))), - this.jumpValue - (16 * Math.sin(angleRad) + (16 * Math.cos(angleRad))));
             ctx.closePath();
             ctx.fill();
         }
 
 
-        ctx.restore(); // #24
         ctx.restore(); // 21.5 Clears Map.playerClip
 
 
-        ctx.save() // #24.5
+        ctx.save() // #24 xray view clip and translation
 
         // DRAW PLAYER XRAY IF BEHIND WALL
-        if (Map.wallsToCheck.length != 0) { // could use more precice check here ex: looking to see if theres data in Map.playerClip
+        if (MapData == Map && Map.wallsToCheck.length != 0) { // could use more precice check here ex: looking to see if theres data in Map.playerClip
             
             ctx.translate(-this.x + midX, -this.y + midY)
             ctx.clip(Map.playerClip)
@@ -219,15 +298,10 @@ const Player = {
             ctx.stroke()
         }
 
-        ctx.restore() // #24.5    
+        ctx.restore() // #24 restore before xray view clip and translation
     },
 
-    startLevel : function () {
-        this.velocity.set(6,0); // 6,0
-        this.velocity = this.velocity.rotate(this.lookAngle.getAngleInDegrees());
-    },
-
-    updatePos : function () {
+    update : function () {
         
         if (UserInterface.levelState == 1 || UserInterface.levelState == 2) { // if NOT at end screen
 
@@ -508,6 +582,10 @@ const Player = {
         }
     },
 
+    startLevel : function () {
+        this.velocity.set(6,0); // 6,0
+        this.velocity = this.velocity.rotate(this.lookAngle.getAngleInDegrees());
+    },
 
     checkCollision : function (arrayOfPlatformsToCheck) {
 
@@ -626,7 +704,6 @@ const Player = {
 
         return (collisions > 0)
     },
-
 
     teleport : function () { // Called when player hits the water
         if (this.checkpointIndex !== -1) {

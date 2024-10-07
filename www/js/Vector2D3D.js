@@ -61,15 +61,16 @@ class Vector2D3D {
     }
 
     rotate(angleInDegrees) { // returns a new vector
-        if (this.dimension !== 2) throw new Error("Rotation is only supported for 2D vectors");
+        // when rotating 3d vectors the z axis is unaffected
         const angleInRadians = angleInDegrees * (Math.PI / 180);
         const cos = Math.cos(angleInRadians);
         const sin = Math.sin(angleInRadians);
 
         // needs to be ROUNDED
         return new Vector2D3D(
-            Math.round(10000*(this.x * cos - this.y * sin))/10000, 
-            Math.round(10000*(this.x * sin + this.y * cos))/10000
+            Math.round(1000 * (this.x * cos - this.y * sin)) / 1000, 
+            Math.round(1000 * (this.x * sin + this.y * cos)) / 1000,
+            Math.round(1000 * this.z ) / 1000,
         );
     }
 
@@ -85,8 +86,8 @@ class Vector2D3D {
         return Math.round(angleRadians*10000)/10000  // return rounded angle in radians 
     }
 
-    getAngleInDegrees() {
-        if (this.dimension !== 2) throw new Error("Angle is only defined for 2D vectors");
+    getAngleInDegrees() { // only gets angle for 2d vector 
+        // if (this.dimension !== 2) throw new Error("Angle is only defined for 2D vectors");
         let angle = Math.atan2(this.y, this.x) * (180 / Math.PI); // Calculate angle in degrees
         // Adjust angle to be between 0 and 360
         return Math.round((angle + 360) % 360);

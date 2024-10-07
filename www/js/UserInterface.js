@@ -172,11 +172,11 @@ const UserInterface = {
                     "wallSideColor": "rgba(125,94,49)",
                     "endZoneTopColor": "rgba(255,218,98)",
                     "endZoneSideColor": "rgba(255,218,98)",
-                    "directLight": "rba(255,255,255)",
-                    "ambientLight": "rba(140,184,198)",
+                    "directLight": "rba(128,128,128)",
+                    "ambientLight": "rba(170,191,197)",
                     "platformHeight": 25,
                     "wallHeight": 50,
-                    "lightDirection": 45,
+                    "lightDirection": 180,
                     "lightPitch": 45
                 },
                 "platforms": [
@@ -946,7 +946,7 @@ const UserInterface = {
             PreviewWindow.update()
         })
 
-        btn_lightPitchSlider = new SliderUI("CanvasArea.canvas.width - 660", "400", 460, 0, 85, 1, "Light Pitch", MapEditor.loadedMap ? MapEditor.loadedMap.style.lightPitch : 0, function() { 
+        btn_lightPitchSlider = new SliderUI("CanvasArea.canvas.width - 660", "400", 460, 5, 90, 1, "Light Angle", MapEditor.loadedMap ? MapEditor.loadedMap.style.lightPitch : 0, function() { 
             MapEditor.loadedMap.style.lightPitch = this.value
             PreviewWindow.update()
         })
@@ -966,18 +966,21 @@ const UserInterface = {
             ColorPicker.h = this.value
             ColorPicker.updateElementColor()
             ColorPicker.syncGradients()
+            if (ColorPicker.editingElement == 1 || ColorPicker.editingElement == 9 ||ColorPicker.editingElement == 10) {UserInterface.determineButtonColor()}
         })
 
         btn_saturationSlider = new SliderUI("ColorPicker.x + 20", "ColorPicker.y + 240", ColorPicker.width - 40, 0, 100, 1, "Saturation", ColorPicker.s, function() { 
             ColorPicker.s = this.value
             ColorPicker.updateElementColor()
             ColorPicker.syncGradients()
+            if (ColorPicker.editingElement == 1 || ColorPicker.editingElement == 9 ||ColorPicker.editingElement == 10) {UserInterface.determineButtonColor()}
         })
 
         btn_lightnessSlider = new SliderUI("ColorPicker.x + 20", "ColorPicker.y + 320", ColorPicker.width - 40, 0, 100, 1, "Lightness", ColorPicker.l, function() { 
             ColorPicker.l = this.value
             ColorPicker.updateElementColor()
             ColorPicker.syncGradients()
+            if (ColorPicker.editingElement == 1 || ColorPicker.editingElement == 9 ||ColorPicker.editingElement == 10) {UserInterface.determineButtonColor()}
         })
 
 

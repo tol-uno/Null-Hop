@@ -212,9 +212,6 @@ const ColorPicker = {
 
         if (this.editingElement == 1) {
             CanvasArea.canvas.style.backgroundColor = MapEditor.loadedMap.style.backgroundColor = ColorPicker.getColor()
-
-            // only recalculate wheather to have light or dark ui once sliders are confirmed
-            if (btn_hueSlider.confirmed && btn_saturationSlider.confirmed & btn_lightnessSlider.confirmed) {UserInterface.determineButtonColor()}
         }
 
         if (this.editingElement == 2) {
@@ -245,11 +242,11 @@ const ColorPicker = {
             MapEditor.loadedMap.style.endZoneSideColor = ColorPicker.getColor()
         }
 
-        if (this.editingElement == 9) {
+        if (this.editingElement == 9) { // direct light
             MapEditor.loadedMap.style.directLight = ColorPicker.getColor()
         }
 
-        if (this.editingElement == 10) {
+        if (this.editingElement == 10) { // ambient light
             MapEditor.loadedMap.style.ambientLight = ColorPicker.getColor()
         }
 

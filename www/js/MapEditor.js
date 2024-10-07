@@ -72,9 +72,9 @@ const MapEditor = {
                     ctx.save(); // #18a
                     ctx.translate(platform.x, platform.y);
                     
-                    if (platform.wall) {ctx.fillStyle = CanvasArea.getShadedColor(MapEditor.loadedMap.style.wallSideColor, 0.5)} 
-                    else if (platform.endzone) {ctx.fillStyle = CanvasArea.getShadedColor(MapEditor.loadedMap.style.endZoneSideColor, 0.5)}
-                    else {ctx.fillStyle = CanvasArea.getShadedColor(MapEditor.loadedMap.style.platformSideColor, 0.5)}
+                    if (platform.wall) {ctx.fillStyle = CanvasArea.getShadedColor(MapEditor.loadedMap.style.wallSideColor, 0.3)} 
+                    else if (platform.endzone) {ctx.fillStyle = CanvasArea.getShadedColor(MapEditor.loadedMap.style.endZoneSideColor, 0.3)}
+                    else {ctx.fillStyle = CanvasArea.getShadedColor(MapEditor.loadedMap.style.platformSideColor, 0.3)}
     
                     // corners array order: BL BR TR TL
     

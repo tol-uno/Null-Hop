@@ -39,7 +39,7 @@ function updateGameArea() { // CALLED EVERY FRAME
 
     if (UserInterface.gamestate == 6) {
         Map.update();
-        if (!Tutorial.pausePlayer) {Player.updatePos()}     
+        if (!Tutorial.pausePlayer) {Player.update()}     
         if (Tutorial.isActive) {
             Tutorial.update();
         }
