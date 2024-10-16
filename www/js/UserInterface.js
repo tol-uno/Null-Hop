@@ -1270,7 +1270,7 @@ const UserInterface = {
 
 
 
-        // LEVEL BUTTONS
+        // ALL LEVEL BUTTONS
         btn_level_awakening = new Button(300, 50, 280, "", "", 0, "Awakening", function() {
             if (this.toggle) {
                 this.toggle = 0;
@@ -1290,32 +1290,76 @@ const UserInterface = {
             } else {
                 MapBrowser.toggleAllButtons()
                 this.toggle = 1;
-                MapBrowser.selectedMapIndex = "original"
+                MapBrowser.selectedMapIndex = "Pitfall"
             }
         })
 
-        btn_level_below = new Button(300, 250, 280, "", "", 0, "Below", function() {
+        btn_level_cavernAbyss = new Button(300, 250, 280, "", "", 0, "Cavern Abyss", function() {
             if (this.toggle) {
                 this.toggle = 0;
                 MapBrowser.selectedMapIndex = -1
             } else {
                 MapBrowser.toggleAllButtons()
                 this.toggle = 1;
-                MapBrowser.selectedMapIndex = "hellscape"
+                MapBrowser.selectedMapIndex = "Cavern Abyss"
             }
         })
 
-        btn_level_turmoil = new Button(300, 350, 280, "", "", 0, "Turmoil", function() {
+        btn_level_crystals = new Button(300, 350, 280, "", "", 0, "Crystals", function() {
             if (this.toggle) {
                 this.toggle = 0;
                 MapBrowser.selectedMapIndex = -1
             } else {
                 MapBrowser.toggleAllButtons()
                 this.toggle = 1;
-                MapBrowser.selectedMapIndex = "noob"
+                MapBrowser.selectedMapIndex = "Crystals"
             }
         })
 
+        btn_level_trespass = new Button(300, 450, 280, "", "", 0, "Trespass", function() {
+            if (this.toggle) {
+                this.toggle = 0;
+                MapBrowser.selectedMapIndex = -1
+            } else {
+                MapBrowser.toggleAllButtons()
+                this.toggle = 1;
+                MapBrowser.selectedMapIndex = "Trespass"
+            }
+        })
+
+        btn_level_turmoil = new Button(300, 550, 280, "", "", 0, "Turmoil", function() {
+            if (this.toggle) {
+                this.toggle = 0;
+                MapBrowser.selectedMapIndex = -1
+            } else {
+                MapBrowser.toggleAllButtons()
+                this.toggle = 1;
+                MapBrowser.selectedMapIndex = "Turmoil"
+            }
+        })
+
+        btn_level_tangledForest = new Button(300, 650, 280, "", "", 0, "Tangled Forest", function() {
+            if (this.toggle) {
+                this.toggle = 0;
+                MapBrowser.selectedMapIndex = -1
+            } else {
+                MapBrowser.toggleAllButtons()
+                this.toggle = 1;
+                MapBrowser.selectedMapIndex = "Tangled Forest"
+            }
+        })
+
+
+        btn_level_forever = new Button(300, 750, 280, "", "", 0, "Forever", function() {
+            if (this.toggle) {
+                this.toggle = 0;
+                MapBrowser.selectedMapIndex = -1
+            } else {
+                MapBrowser.toggleAllButtons()
+                this.toggle = 1;
+                MapBrowser.selectedMapIndex = "Forever"
+            }
+        })
 
 
         // IN LEVEL Buttons
@@ -1561,8 +1605,12 @@ const UserInterface = {
             btn_custom_maps,
             btn_level_awakening,
             btn_level_pitfall,
-            btn_level_below,
+            btn_level_cavernAbyss,
+            btn_level_crystals,
+            btn_level_trespass,
             btn_level_turmoil,
+            btn_level_tangledForest,
+            btn_level_forever,
         ]
         this.btnGroup_customMapBrowser = [btn_mainMenu]
         this.btnGroup_editMapBrowser = [btn_mainMenu]

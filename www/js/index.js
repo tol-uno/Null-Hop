@@ -15,8 +15,6 @@ function onDeviceReady() { // Called on page load in HMTL
     TouchHandler.init()
     CanvasArea.start(); // userInterface.start() called here
     AudioHandler.init();
-    // Player.initPlayer is called by Map
-
 }
 
 
