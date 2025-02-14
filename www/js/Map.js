@@ -75,9 +75,27 @@ const Map = {
         this.setMapLighting()
         
         
-        // SETTING CLIPS 
-        // for area behind each wall AND for drawing the player shadow ontop of platforms or endzones
+        // SETTING BOUNDING POINTS AND CLIPS
+        // bounding points are used for determining if platform is in view
+        // clips for area behind each wall AND for drawing the player shadow ontop of platforms or endzones
         this.platforms.forEach(platform => {
+
+            // Set the bounding points for each platform for determining if they're in view
+            let minX = minY = Infinity
+            let maxX = maxY = -Infinity
+
+            platform.shadowPoints.forEach((point) => { // shadowPoints are local to platform
+                if (point[0] < minX) {minX = point[0]}
+                if (point[1] < minY) {minY = point[1]}
+                if (point[0] > maxX) {maxX = point[0]}
+                if (point[1] > maxY) {maxY = point[1]}
+            })
+
+            platform.minX = platform.x + minX // shadowpoints will always coorespond with max and min X 
+            platform.maxX = platform.x + maxX
+            platform.minY = Math.min(platform.y - platform.hypotenuse - (platform.wall ? this.style.wallHeight : 0), platform.y + minY)
+            platform.maxY = Math.max(platform.y + platform.hypotenuse + this.style.platformHeight, platform.y + maxY)
+
 
             // add a .clipPoints property to each wall for occluding Player and drawing players xray
             if (platform.wall) {
@@ -170,32 +188,23 @@ const Map = {
 
         this.platforms.forEach(platform => { // Loop through ALL platforms to get renderedPlatforms
 
-            const adjustedHeight = platform.wall ? this.style.wallHeight : 0 // for adding height to walls
-
-            let wallShadowMultiplier
-            if (platform.wall && this.style.platformHeight > 0) {
-                wallShadowMultiplier = 1 + (this.style.wallHeight / this.style.platformHeight)
-            } else {
-                wallShadowMultiplier = 1
-            }
-
-
-            const shadowLength = Math.tan(this.style.lightPitch * Math.PI / 180) * this.style.platformHeight
+            let zoomOffsetX = (CanvasArea.canvas.width / Player.speedCameraOffset.zoom - CanvasArea.canvas.width) / 2 
+            let zoomOffsetY = (CanvasArea.canvas.height / Player.speedCameraOffset.zoom - CanvasArea.canvas.height) / 2 
 
             if (
-                (platform.x - platform.hypotenuse - (shadowLength * wallShadowMultiplier) < Player.x + midX) && // right side
-                (platform.x + platform.hypotenuse + (shadowLength * wallShadowMultiplier) > Player.x - midX) && // coming into frame on left side
-                (platform.y + platform.hypotenuse + (shadowLength * wallShadowMultiplier) + this.style.platformHeight > Player.y - midY) && // top side
-                (platform.y - platform.hypotenuse - (shadowLength * wallShadowMultiplier) - adjustedHeight < Player.y + midY) // bottom side
+                (platform.minX < Player.x + midX + zoomOffsetX - Player.speedCameraOffset.direction.x) && // coming into frame on right side
+                (platform.maxX > Player.x - midX - zoomOffsetX - Player.speedCameraOffset.direction.x) && // coming into frame on left side
+                (platform.maxY > Player.y - midY - zoomOffsetY - Player.speedCameraOffset.direction.y) && // top side
+                (platform.minY < Player.y + midY + zoomOffsetY - Player.speedCameraOffset.direction.y) // bottom side
             ) {
                 this.renderedPlatforms.push(platform); // ADD platform to renderedPlatforms
             }
+
         }); // end of looping through ALL platforms
 
 
         this.playerClip = new Path2D() // resets the clip every frame. when it is used there must be an counter clockwise rectangle drawn first to invert clip
 
-        //this.endZoneIsRendered = false; // resets every frame. if one of renderedPlatforms is an endzone then its made true
 
         this.renderedPlatforms.forEach(platform => { // Loop through RENDERED platforms (will loop through in order of index)
                                     
@@ -476,6 +485,7 @@ const Map = {
 
         // DRAW PLATFORM TOP
         ctx.save(); // #17 GO TO PLATFORMs MIDDLE AND ROTATING 
+
         const adjustedHeight = platform.wall ? MapData.style.wallHeight : 0 // for adding height to walls
         ctx.translate(platform.x, platform.y - adjustedHeight);
         ctx.rotate(platform.angle * Math.PI/180);
@@ -560,6 +570,13 @@ const Map = {
         const ctx = CanvasArea.ctx;
 
         ctx.save(); // #19
+        ctx.scale(Player.speedCameraOffset.zoom, Player.speedCameraOffset.zoom)
+        
+        ctx.translate(
+            (CanvasArea.canvas.width / Player.speedCameraOffset.zoom - CanvasArea.canvas.width) / 2 + Player.speedCameraOffset.direction.x,
+            (CanvasArea.canvas.height / Player.speedCameraOffset.zoom - CanvasArea.canvas.height) / 2 + Player.speedCameraOffset.direction.y,
+        )
+
         ctx.translate(-Player.x + midX, -Player.y + midY); // move canvas when drawing platforms then restore. midX is center of canvas width
 
         Player.renderLowerShadow()

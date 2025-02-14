@@ -2354,8 +2354,8 @@ const UserInterface = {
                 CanvasArea.ctx.fillText("renderedPlatforms Count: " + Map.renderedPlatforms.length, textX, 100);
                 CanvasArea.ctx.fillText("endZonesToCheck: " + Map.endZonesToCheck, textX, 120);
                 CanvasArea.ctx.fillText("dragging: " + TouchHandler.dragging, textX, 140);
-                CanvasArea.ctx.fillText("", textX, 160);
-                CanvasArea.ctx.fillText("", textX, 180);
+                CanvasArea.ctx.fillText("cameraZoom: " + Player.speedCameraOffset.zoom , textX, 160);
+                CanvasArea.ctx.fillText("offsetDir: " + Math.round(Player.speedCameraOffset.direction.x) + ", " + Math.round(Player.speedCameraOffset.direction.y), textX, 180);
                 if (TouchHandler.dragging) {
                     CanvasArea.ctx.fillText("touch x: " + TouchHandler.touches[0].x, textX, 200);
                     CanvasArea.ctx.fillText("touch y: " + TouchHandler.touches[0].y, textX, 220);

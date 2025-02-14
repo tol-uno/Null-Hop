@@ -11,25 +11,39 @@ const Player = {
     // left (-1,0) vector OR right (1,0) vector that is rotated by the change in angle that frame. 
     // if angle change is postive use Right vec. Negative use left vec
     // normalized left and right vectors act as if strafe keys were pressed 
-    wishDir : new Vector2D3D(0,0),
-    velocity : new Vector2D3D(0,0),
-    currentSpeedProjected : 0,
-    addSpeed : 0, // initialized here so that userInterface can access for debug
-    
-    topColor : "rgb(0,255,0)",
-    botSideColor : "rgb(0,255,0)",
-    rightSideColor : "rgb(0,200,0)",
-    topSideColor : "rgb(0,150,0)",
-    leftSideColor : "rgb(0,100,0)",
+    wishDir: new Vector2D3D(0, 0),
+    velocity: new Vector2D3D(0, 0),
+    currentSpeedProjected: 0,
+    addSpeed: 0, // initialized here so that userInterface can access for debug
 
-    initPlayer : function (x, y, angle) {
+    speedCameraOffset: {
+        zoom: 1, // from 1 (default) to 0.5 (zoomed out)
+        direction: new Vector2D3D(0, 0),
+        zoomAverager: new Averager(90),
+        dirAveragerX: new Averager(180),
+        dirAveragerY: new Averager(180),
+    },
+
+    topColor: "rgb(0,255,0)",
+    botSideColor: "rgb(0,255,0)",
+    rightSideColor: "rgb(0,200,0)",
+    topSideColor: "rgb(0,150,0)",
+    leftSideColor: "rgb(0,100,0)",
+
+    initPlayer: function (x, y, angle) {
         this.x = x;
         this.y = y;
         this.restartX = x;
         this.restartY = y;
-        this.lookAngle = new Vector2D3D(1,0)
+        this.lookAngle = new Vector2D3D(1, 0)
         this.lookAngle = this.lookAngle.rotate(angle)
         this.restartAngle = angle;
+        this.velocity.set(0,0)
+
+        this.speedCameraOffset.zoomAverager.frames.fill(1, 0)
+        this.speedCameraOffset.zoom = 1
+        this.speedCameraOffset.dirAveragerX.frames.fill(0, 0)
+        this.speedCameraOffset.dirAveragerY.frames.fill(0, 0)
 
         this.jumpValue = 0
         this.jumpVelocity = 2
@@ -37,48 +51,48 @@ const Player = {
         this.checkpointIndex = -1
     },
 
-    setPlayerLighting : function() {
-        
+    setPlayerLighting: function () {
+
         // determine where to pull platforms and styles from
-        const MapData = UserInterface.gamestate == 7 ? MapEditor.loadedMap : Map    
+        const MapData = UserInterface.gamestate == 7 ? MapEditor.loadedMap : Map
 
         // Turning lightDirection and lightPitch into a 3D vector
         const lightDirection_Rads = MapData.style.lightDirection * (Math.PI / 180)
         const lightPitch_Rads = MapData.style.lightPitch * (Math.PI / 180) // light pitch = light angle. 0 == flat at the horizon. 90 == directly above
-        
+
         const x = Math.cos(lightDirection_Rads) * Math.cos(lightPitch_Rads)
         const y = Math.sin(lightDirection_Rads) * Math.cos(lightPitch_Rads)
         const z = Math.sin(lightPitch_Rads)
 
-        const directLightVector = new Vector2D3D(x,y,z)
-    
+        const directLightVector = new Vector2D3D(x, y, z)
+
 
         // NORMALS
-        const topNormal = new Vector2D3D(0,0,-1)
-        const botSideNormal = new Vector2D3D(0,1,0).rotate(this.lookAngle.getAngleInDegrees())
-        const rightSideNormal = new Vector2D3D(1,0,0).rotate(this.lookAngle.getAngleInDegrees())
-        const topSideNormal = new Vector2D3D(0,-1,0).rotate(this.lookAngle.getAngleInDegrees())
-        const leftSideNormal = new Vector2D3D(-1,0,0).rotate(this.lookAngle.getAngleInDegrees())
+        const topNormal = new Vector2D3D(0, 0, -1)
+        const botSideNormal = new Vector2D3D(0, 1, 0).rotate(this.lookAngle.getAngleInDegrees())
+        const rightSideNormal = new Vector2D3D(1, 0, 0).rotate(this.lookAngle.getAngleInDegrees())
+        const topSideNormal = new Vector2D3D(0, -1, 0).rotate(this.lookAngle.getAngleInDegrees())
+        const leftSideNormal = new Vector2D3D(-1, 0, 0).rotate(this.lookAngle.getAngleInDegrees())
 
         // angleDifference result will be between 0 and PI radians
         // if angleDifference is > PI/2 (90 deg) then side is in light. Otherwise no direct light is hitting it
         // if angleDifference is < PI/2 (90 deg) then side is in shadow & litPercent = 0
 
         litPercentTop = Math.cos(Math.PI - topNormal.angleDifference(directLightVector)) // known as geometry term
-        if (litPercentTop < 0) {litPercentTop = 0} // clamp to 0 to 1
+        if (litPercentTop < 0) { litPercentTop = 0 } // clamp to 0 to 1
 
         let litPercentBotSide = Math.cos(Math.PI - botSideNormal.angleDifference(directLightVector))
-        if (litPercentBotSide < 0) {litPercentBotSide = 0}
+        if (litPercentBotSide < 0) { litPercentBotSide = 0 }
 
         let litPercentRightSide = Math.cos(Math.PI - rightSideNormal.angleDifference(directLightVector))
-        if (litPercentRightSide < 0) {litPercentRightSide = 0}
-        
+        if (litPercentRightSide < 0) { litPercentRightSide = 0 }
+
         let litPercentTopSide = Math.cos(Math.PI - topSideNormal.angleDifference(directLightVector))
-        if (litPercentTopSide < 0) {litPercentTopSide = 0}
-        
+        if (litPercentTopSide < 0) { litPercentTopSide = 0 }
+
         let litPercentLeftSide = Math.cos(Math.PI - leftSideNormal.angleDifference(directLightVector))
-        if (litPercentLeftSide < 0) {litPercentLeftSide = 0}
-        
+        if (litPercentLeftSide < 0) { litPercentLeftSide = 0 }
+
 
         this.topColor = CanvasArea.getShadedColor(MapData.style.playerColor, litPercentTop)
         this.botSideColor = CanvasArea.getShadedColor(MapData.style.playerColor, litPercentBotSide)
@@ -88,27 +102,33 @@ const Player = {
 
     },
 
-    renderLowerShadow : function () { // used by map
+    renderLowerShadow: function () { // used by map
         const ctx = CanvasArea.ctx;
 
         const MapData = UserInterface.gamestate == 7 ? MapEditor.loadedMap : Map // to use in PreviewWindow
 
         ctx.save(); // #20
-        ctx.translate(this.x , this.y + MapData.style.platformHeight)
-        ctx.rotate(this.lookAngle.getAngleInDegrees() * Math.PI/180); // rotating canvas
+        ctx.translate(this.x, this.y + MapData.style.platformHeight)
+        ctx.rotate(this.lookAngle.getAngleInDegrees() * Math.PI / 180); // rotating canvas
         ctx.fillStyle = MapData.style.shadow_backgroundColor;
         ctx.fillRect(-15, -15, 30, 30)
         ctx.restore(); // #20
-    }, 
+    },
 
-    render : function () {
-        
+    render: function () {
+
         this.setPlayerLighting()
 
         const ctx = CanvasArea.ctx;
         const MapData = UserInterface.gamestate == 7 ? MapEditor.loadedMap : Map // to use in PreviewWindow
 
-        
+        ctx.save() // #21.25 For scaling the canvas for zoom
+        ctx.scale(this.speedCameraOffset.zoom, this.speedCameraOffset.zoom)
+        ctx.translate(
+            (CanvasArea.canvas.width / this.speedCameraOffset.zoom - CanvasArea.canvas.width) / 2 + this.speedCameraOffset.direction.x,
+            (CanvasArea.canvas.height / this.speedCameraOffset.zoom - CanvasArea.canvas.height) / 2 + this.speedCameraOffset.direction.y,
+        )
+
         ctx.save() // #21.5 To go back before playerClip canvas state
 
         if (MapData == Map) { // dont bother with this stuff in PreviewWindow
@@ -120,23 +140,23 @@ const Player = {
             clipPathCombo.lineTo(CanvasArea.canvas.width, CanvasArea.canvas.height)
             clipPathCombo.lineTo(CanvasArea.canvas.width, 0)
             clipPathCombo.closePath()
-            
+
             clipPathCombo.addPath(Map.playerClip, new DOMMatrix([1, 0, 0, 1, -this.x + midX, -this.y + midY]))
-            
+
             // Draw playerClip DEBUG
             // ctx.lineWidth = 5
             // ctx.strokeStyle = "#00ff00"
             // ctx.stroke(clipPathCombo)
-            
-            ctx.clip(clipPathCombo)
+
+            ctx.clip(clipPathCombo, "evenodd")
         }
-            
+
 
         ctx.save(); // #22 players XY translation AND rotation AND jump value translation
 
         // LOWER SHADOW IS DRAWN BY MAP
         // DRAWING UPPER SHADOW HERE \/ (drawn twice while over platform or over endzone)
-        
+
         if (MapData == Map) {
             ctx.translate(midX, midY);
         } else {
@@ -147,18 +167,18 @@ const Player = {
 
         if (MapData == Map) {
             ctx.translate(-this.x, -this.y)
-            
+
             // Draw standard shadowClip DEBUG
             // ctx.lineWidth = 5
             // ctx.strokeStyle = "#00ff00"
             // ctx.stroke(Map.upperShadowClip)
-            
+
             ctx.clip(Map.upperShadowClip);
-            ctx.translate(this.x , this.y);
+            ctx.translate(this.x, this.y);
         }
 
-    
-        ctx.rotate(this.lookAngle.getAngleInDegrees() * Math.PI/180)
+
+        ctx.rotate(this.lookAngle.getAngleInDegrees() * Math.PI / 180)
 
         ctx.fillStyle = MapData.style.shadow_platformColor;
         ctx.fillRect(-15, -15, 30, 30)
@@ -169,18 +189,18 @@ const Player = {
 
         if (MapData == Map && Map.endZonesToCheck.length > 0) { // draw a clipped version of the players shadow over endzone
             ctx.save() // #23.5 endZoneShadowClip canvas state
-            
+
             ctx.translate(-this.x, -this.y)
-            
+
             // Draw endZoneShadowClip DEBUG
             // ctx.lineWidth = 3
             // ctx.strokeStyle = "#0000ff"
             // ctx.stroke(Map.endZoneShadowClip)
-            
-            ctx.clip(Map.endZoneShadowClip);
-            ctx.translate(this.x , this.y);
 
-            ctx.rotate(this.lookAngle.getAngleInDegrees() * Math.PI/180)
+            ctx.clip(Map.endZoneShadowClip);
+            ctx.translate(this.x, this.y);
+
+            ctx.rotate(this.lookAngle.getAngleInDegrees() * Math.PI / 180)
 
             ctx.fillStyle = Map.style.shadow_endzoneColor;
             ctx.fillRect(-15, -15, 30, 30)
@@ -191,10 +211,10 @@ const Player = {
 
 
         // DRAWING PLAYER TOP
-        ctx.translate(0, -this.jumpValue - 32); 
-        ctx.rotate(this.lookAngle.getAngleInDegrees() * Math.PI/180) // rotating canvas
+        ctx.translate(0, -this.jumpValue - 32);
+        ctx.rotate(this.lookAngle.getAngleInDegrees() * Math.PI / 180) // rotating canvas
         ctx.fillStyle = this.topColor;
-        ctx.fillRect(-16,-16,32,32)
+        ctx.fillRect(-16, -16, 32, 32)
 
         // Draw players top arrow
         ctx.strokeStyle = "#00000030";
@@ -212,7 +232,7 @@ const Player = {
 
 
         // SIDES OF PLAYER
-        const angleRad = this.lookAngle.getAngleInDegrees() * (Math.PI/180);
+        const angleRad = this.lookAngle.getAngleInDegrees() * (Math.PI / 180);
         const loopedAngle = this.lookAngle.getAngleInDegrees();
 
         if (MapData == Map) { // where to draw player sides
@@ -230,8 +250,8 @@ const Player = {
 
             ctx.beginPath();
             ctx.moveTo(-(16 * Math.cos(angleRad) + (16 * Math.sin(angleRad))), - 32 - this.jumpValue - (16 * Math.sin(angleRad) - (16 * Math.cos(angleRad))));
-            ctx.lineTo( (16 * Math.cos(angleRad) - (16 * Math.sin(angleRad))), - 32 - this.jumpValue + (16 * Math.sin(angleRad) + (16 * Math.cos(angleRad))));
-            ctx.lineTo( (16 * Math.cos(angleRad) - (16 * Math.sin(angleRad))), - this.jumpValue + (16 * Math.sin(angleRad) + (16 * Math.cos(angleRad))));
+            ctx.lineTo((16 * Math.cos(angleRad) - (16 * Math.sin(angleRad))), - 32 - this.jumpValue + (16 * Math.sin(angleRad) + (16 * Math.cos(angleRad))));
+            ctx.lineTo((16 * Math.cos(angleRad) - (16 * Math.sin(angleRad))), - this.jumpValue + (16 * Math.sin(angleRad) + (16 * Math.cos(angleRad))));
             ctx.lineTo(-(16 * Math.cos(angleRad) + (16 * Math.sin(angleRad))), - this.jumpValue - (16 * Math.sin(angleRad) - (16 * Math.cos(angleRad))));
             ctx.closePath();
             ctx.fill();
@@ -242,10 +262,10 @@ const Player = {
             ctx.fillStyle = this.rightSideColor
 
             ctx.beginPath();
-            ctx.moveTo( (16 * Math.cos(angleRad) - (16 * Math.sin(angleRad))), - 32 - this.jumpValue + (16 * Math.sin(angleRad) + (16 * Math.cos(angleRad))));
-            ctx.lineTo( (16 * Math.cos(angleRad) + (16 * Math.sin(angleRad))), - 32 - this.jumpValue + (16 * Math.sin(angleRad) - (16 * Math.cos(angleRad))));
-            ctx.lineTo( (16 * Math.cos(angleRad) + (16 * Math.sin(angleRad))), - this.jumpValue + (16 * Math.sin(angleRad) - (16 * Math.cos(angleRad))));
-            ctx.lineTo( (16 * Math.cos(angleRad) - (16 * Math.sin(angleRad))), - this.jumpValue + (16 * Math.sin(angleRad) + (16 * Math.cos(angleRad))));
+            ctx.moveTo((16 * Math.cos(angleRad) - (16 * Math.sin(angleRad))), - 32 - this.jumpValue + (16 * Math.sin(angleRad) + (16 * Math.cos(angleRad))));
+            ctx.lineTo((16 * Math.cos(angleRad) + (16 * Math.sin(angleRad))), - 32 - this.jumpValue + (16 * Math.sin(angleRad) - (16 * Math.cos(angleRad))));
+            ctx.lineTo((16 * Math.cos(angleRad) + (16 * Math.sin(angleRad))), - this.jumpValue + (16 * Math.sin(angleRad) - (16 * Math.cos(angleRad))));
+            ctx.lineTo((16 * Math.cos(angleRad) - (16 * Math.sin(angleRad))), - this.jumpValue + (16 * Math.sin(angleRad) + (16 * Math.cos(angleRad))));
             ctx.closePath();
             ctx.fill();
         }
@@ -255,8 +275,8 @@ const Player = {
             ctx.fillStyle = this.topSideColor
 
             ctx.beginPath();
-            ctx.moveTo( (16 * Math.cos(angleRad) + (16 * Math.sin(angleRad))), - 32 - this.jumpValue + (16 * Math.sin(angleRad) - (16 * Math.cos(angleRad))));
-            ctx.lineTo( (16 * Math.cos(angleRad) + (16 * Math.sin(angleRad))), - this.jumpValue + (16 * Math.sin(angleRad) - (16 * Math.cos(angleRad))));
+            ctx.moveTo((16 * Math.cos(angleRad) + (16 * Math.sin(angleRad))), - 32 - this.jumpValue + (16 * Math.sin(angleRad) - (16 * Math.cos(angleRad))));
+            ctx.lineTo((16 * Math.cos(angleRad) + (16 * Math.sin(angleRad))), - this.jumpValue + (16 * Math.sin(angleRad) - (16 * Math.cos(angleRad))));
             ctx.lineTo(-(16 * Math.cos(angleRad) - (16 * Math.sin(angleRad))), - this.jumpValue - (16 * Math.sin(angleRad) + (16 * Math.cos(angleRad))));
             ctx.lineTo(-(16 * Math.cos(angleRad) - (16 * Math.sin(angleRad))), - 32 - this.jumpValue - (16 * Math.sin(angleRad) + (16 * Math.cos(angleRad))));
             ctx.closePath();
@@ -284,12 +304,12 @@ const Player = {
 
         // DRAW PLAYER XRAY IF BEHIND WALL
         if (MapData == Map && Map.wallsToCheck.length != 0) { // could use more precice check here ex: looking to see if theres data in Map.playerClip
-            
+
             ctx.translate(-this.x + midX, -this.y + midY)
             ctx.clip(Map.playerClip)
 
-            ctx.translate(this.x , this.y);
-            ctx.rotate(this.lookAngle.getAngleInDegrees() * Math.PI/180)
+            ctx.translate(this.x, this.y);
+            ctx.rotate(this.lookAngle.getAngleInDegrees() * Math.PI / 180)
 
             ctx.strokeStyle = Map.style.shaded_playerColor
             ctx.lineWidth = 2
@@ -299,14 +319,15 @@ const Player = {
         }
 
         ctx.restore() // #24 restore before xray view clip and translation
+        ctx.restore() // #21.25 clears ctx.scale for zoom
     },
 
-    update : function () {
-        
+    update: function () {
+
         if (UserInterface.levelState == 1 || UserInterface.levelState == 2) { // if NOT at end screen
 
             this.lookAngle = this.lookAngle.rotate(TouchHandler.dragAmountX * UserInterface.settings.sensitivity)
-            
+
             // Setting wishDir
             if (TouchHandler.dragAmountX > 0) {
                 this.wishDir = this.lookAngle.rotate(90) // look angle is already a normalized
@@ -318,8 +339,8 @@ const Player = {
                 this.wishDir.normalize(maxVelocity) // changes the length to be maxVelocity
             }
 
-            if (TouchHandler.dragAmountX == 0) {this.wishDir.set(0,0)}
-        
+            if (TouchHandler.dragAmountX == 0) { this.wishDir.set(0, 0) }
+
         }
 
         if (UserInterface.levelState == 2) { // 1 = pre-start, 2 = playing level, 3 = in endzone
@@ -331,26 +352,26 @@ const Player = {
 
             // addSpeed is clipped between 0 and MAX_ACCEL * dt  --- addSpeed should only be 0 when wishDir is 0
             this.addSpeed = maxVelocity - this.currentSpeedProjected; // sometimes currentSpeedProj is negative
-            
+
             // this is a hack to make gain consistent between fps changes BAD BAD BAD BS
             // https://www.desmos.com/calculator/k1uc1yai14
-            this.addSpeed *= (0.25 * (Math.cbrt(dt)+3))
-            
-            
-            
+            this.addSpeed *= (0.25 * (Math.cbrt(dt) + 3))
+
+
+
             if (this.addSpeed > airAcceleration * dt) { // addspeed is too big and needs to be limited by airacceleration value
-                this.addSpeed = airAcceleration * dt; 
-                
+                this.addSpeed = airAcceleration * dt;
+
                 // show overstrafe warning
                 if (UserInterface.showOverstrafeWarning == false) {
                     UserInterface.showOverstrafeWarning = true;
-                    setTimeout(() => {UserInterface.showOverstrafeWarning = false}, 1500); // wait 1.5 seconds to hide warning
+                    setTimeout(() => { UserInterface.showOverstrafeWarning = false }, 1500); // wait 1.5 seconds to hide warning
                 }
             }
-            
-            if (this.addSpeed <= 0) {this.addSpeed = 0; console.log("zero addspeed")} // currentSpeedProjected is greater than max_speed. dont add speed
-            
-            
+
+            if (this.addSpeed <= 0) { this.addSpeed = 0; console.log("zero addspeed") } // currentSpeedProjected is greater than max_speed. dont add speed
+
+
             // addSpeed is a scaler for wishdir. if addspeed == 0 no wishdir is applied
             this.velocity.x += (this.wishDir.x * this.addSpeed)
             this.velocity.y += (this.wishDir.y * this.addSpeed)
@@ -359,15 +380,17 @@ const Player = {
             // velocity applied to player coords after checking wall collisions
 
 
-            
+
             // JUMPING
-            if (this.jumpValue < 0) { 
+            if (this.jumpValue < 0) {
                 this.jumpValue = 0;
                 this.jumpVelocity = 2;
                 AudioHandler.jumpAudio.play();
                 if (!this.checkCollision(Map.renderedPlatforms.filter(platform => platform.wall == 0))) { // checkCollision on an array of just platforms (no walls)
                     AudioHandler.splashAudio.play();
+                    this.speedCameraOffset.zoomAverager.clear()
                     this.teleport();
+
                 }
             } else {
                 this.jumpValue += this.jumpVelocity * dt;
@@ -468,7 +491,7 @@ const Player = {
                         collided: false
                     };
                 }
-                  
+
 
                 function adjustVelocity(playerMovementVector, wallNormalVector) {
                     // Calculate the dot product of player movement vector and wall normal vector
@@ -482,7 +505,7 @@ const Player = {
                     }
                 }
 
-                
+
 
                 const collisionData = isColliding(Player, wall)
                 if (collisionData.collided) {
@@ -496,20 +519,18 @@ const Player = {
 
 
                 }
-        
+
             })
 
-    
 
             // APPLYING VELOCITY
             this.x += this.velocity.x / 5 * dt;
             this.y += this.velocity.y / 5 * dt;
 
 
-
             // CHECK if colliding with checkpoint triggers
             Map.checkpoints.forEach(checkpoint => {
-                
+
                 const distance = pDistance(this.x, this.y, checkpoint.triggerX1, checkpoint.triggerY1, checkpoint.triggerX2, checkpoint.triggerY2)
                 // console.log("distance to " + checkpoint + ": " + distance)
 
@@ -519,7 +540,7 @@ const Player = {
                 }
 
                 // gets minumum distance to line segment from point: https://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment
-                function pDistance(x, y, x1, y1, x2, y2) { 
+                function pDistance(x, y, x1, y1, x2, y2) {
 
                     const A = x - x1;
                     const B = y - y1;
@@ -555,7 +576,7 @@ const Player = {
 
 
             // CHECK IF COLLIDING WITH ANY ENDZONES
-            if (Map.endZonesToCheck.length > 0) { 
+            if (Map.endZonesToCheck.length > 0) {
                 if (this.checkCollision(Map.endZonesToCheck)) {
                     AudioHandler.successAudio.play();
                     UserInterface.handleRecord();
@@ -565,13 +586,32 @@ const Player = {
         }
 
 
+
+        // CHANGING CAMERA ZOOM and OFFSET BASED ON SPEED
+
+        // add current zoom level to averager
+        this.speedCameraOffset.zoomAverager.pushValue(CanvasArea.mapToRange(this.velocity.magnitude(), 6, 50, 1, 0.5))
+
+        // apply averager zoom to actual zoom
+        this.speedCameraOffset.zoom = this.speedCameraOffset.zoomAverager.getAverage()
+
+        // add current offset direction to averager
+        this.speedCameraOffset.dirAveragerX.pushValue(-this.velocity.x * 3)
+        this.speedCameraOffset.dirAveragerY.pushValue(-this.velocity.y * 3)
+
+        // apply averager offset direction to actual offset direction
+        this.speedCameraOffset.direction.x = this.speedCameraOffset.dirAveragerX.getAverage()
+        this.speedCameraOffset.direction.y = this.speedCameraOffset.dirAveragerY.getAverage()
+
+
+
         if (UserInterface.levelState == 3) { // SLOW DOWN MOVEMENT AFTER HITTING END ZONE
             // if (this.endSlow > 0.02) {this.endSlow = (this.endSlow * 0.95);} else {this.endSlow = 0} // THIS NEEDS TO BE FPS INDEPENDENT
-            if (this.endSlow > 0.02) {this.endSlow = (this.endSlow - 0.02 * dt);} else {this.endSlow = 0}
+            if (this.endSlow > 0.02) { this.endSlow = (this.endSlow - 0.02 * dt); } else { this.endSlow = 0 }
 
-            this.x += this.velocity.x/5 * dt * this.endSlow; // MOVE FORWARD AT ANGLE BASED ON VELOCITY
-            this.y += this.velocity.y/5 * dt * this.endSlow;
-        
+            this.x += this.velocity.x / 5 * dt * this.endSlow; // MOVE FORWARD AT ANGLE BASED ON VELOCITY
+            this.y += this.velocity.y / 5 * dt * this.endSlow;
+
             if (this.jumpValue < 0) { // JUMPING
                 this.jumpValue = 0;
                 this.jumpVelocity = 2;
@@ -582,12 +622,12 @@ const Player = {
         }
     },
 
-    startLevel : function () {
-        this.velocity.set(6,0); // 6,0
+    startLevel: function () {
+        this.velocity.set(6, 0); // 6,0
         this.velocity = this.velocity.rotate(this.lookAngle.getAngleInDegrees());
     },
 
-    checkCollision : function (arrayOfPlatformsToCheck) {
+    checkCollision: function (arrayOfPlatformsToCheck) {
 
         let collisions = 0;
 
@@ -705,13 +745,13 @@ const Player = {
         return (collisions > 0)
     },
 
-    teleport : function () { // Called when player hits the water
+    teleport: function () { // Called when player hits the water
         if (this.checkpointIndex !== -1) {
             this.x = Map.checkpoints[this.checkpointIndex].x;
             this.y = Map.checkpoints[this.checkpointIndex].y;
-            this.lookAngle.set(1,0)
+            this.lookAngle.set(1, 0)
             this.lookAngle = this.lookAngle.rotate(Map.checkpoints[this.checkpointIndex].angle)
-            this.velocity.set(2,0)
+            this.velocity.set(2, 0)
             this.velocity = this.velocity.rotate(this.lookAngle.getAngleInDegrees())
             this.jumpValue = 0;
             this.jumpVelocity = 2;
@@ -720,14 +760,19 @@ const Player = {
         }
     },
 
-    restart : function () { // Called when user hits restart button (not when teleported from water)
+    restart: function () { // Called when user hits restart button (not when teleported from water)
         this.x = this.restartX;
         this.y = this.restartY;
-        this.lookAngle.set(1,0)
+        this.lookAngle.set(1, 0)
         this.lookAngle = this.lookAngle.rotate(this.restartAngle)
-        this.velocity.set(0,0)
+        this.velocity.set(0, 0)
         this.jumpValue = 0;
         this.jumpVelocity = 2;
         this.endSlow = 1;
+        this.speedCameraOffset.zoomAverager.frames.fill(1, 0)
+        this.speedCameraOffset.zoom = 1
+        this.speedCameraOffset.dirAveragerX.frames.fill(0, 0)
+        this.speedCameraOffset.dirAveragerY.frames.fill(0, 0)
+
     }
 }
