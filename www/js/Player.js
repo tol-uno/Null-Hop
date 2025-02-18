@@ -38,7 +38,7 @@ const Player = {
         this.lookAngle = new Vector2D3D(1, 0)
         this.lookAngle = this.lookAngle.rotate(angle)
         this.restartAngle = angle;
-        this.velocity.set(0,0)
+        this.velocity.set(0, 0)
 
         this.speedCameraOffset.zoomAverager.frames.fill(1, 0)
         this.speedCameraOffset.zoom = 1
@@ -103,70 +103,58 @@ const Player = {
     },
 
     renderLowerShadow: function () { // used by map
-        const ctx = CanvasArea.ctx;
+        const ctx = PlayerCanvas.ctx;
 
         const MapData = UserInterface.gamestate == 7 ? MapEditor.loadedMap : Map // to use in PreviewWindow
 
-        ctx.save(); // #20
+        ctx.save(); // #1
         ctx.translate(this.x, this.y + MapData.style.platformHeight)
         ctx.rotate(this.lookAngle.getAngleInDegrees() * Math.PI / 180); // rotating canvas
         ctx.fillStyle = MapData.style.shadow_backgroundColor;
         ctx.fillRect(-15, -15, 30, 30)
-        ctx.restore(); // #20
+        ctx.restore(); // #1
     },
 
     render: function () {
 
+        // Player is drawn on a seperate PlayerCanvas.
+        // On PlayerCanvas, parts of the player that
+        // are behind walls are erased using Map.playerClip
+        // PlayerCanvas is then pasted onto the main CanvasArea
+
         this.setPlayerLighting()
 
-        const ctx = CanvasArea.ctx;
+        const ctx = PlayerCanvas.ctx;
+        PlayerCanvas.clear()
+
         const MapData = UserInterface.gamestate == 7 ? MapEditor.loadedMap : Map // to use in PreviewWindow
 
-        ctx.save() // #21.25 For scaling the canvas for zoom
+
+
+        ctx.save() // #2 For scaling the canvas for zoom
+
         ctx.scale(this.speedCameraOffset.zoom, this.speedCameraOffset.zoom)
         ctx.translate(
             (CanvasArea.canvas.width / this.speedCameraOffset.zoom - CanvasArea.canvas.width) / 2 + this.speedCameraOffset.direction.x,
             (CanvasArea.canvas.height / this.speedCameraOffset.zoom - CanvasArea.canvas.height) / 2 + this.speedCameraOffset.direction.y,
         )
 
-        ctx.save() // #21.5 To go back before playerClip canvas state
-
-        if (MapData == Map) { // dont bother with this stuff in PreviewWindow
-
-            // create inverted playerClip so not drawn behind walls
-            const clipPathCombo = new Path2D()
-            clipPathCombo.moveTo(0, 0)
-            clipPathCombo.lineTo(0, CanvasArea.canvas.height)
-            clipPathCombo.lineTo(CanvasArea.canvas.width, CanvasArea.canvas.height)
-            clipPathCombo.lineTo(CanvasArea.canvas.width, 0)
-            clipPathCombo.closePath()
-
-            clipPathCombo.addPath(Map.playerClip, new DOMMatrix([1, 0, 0, 1, -this.x + midX, -this.y + midY]))
-
-            // Draw playerClip DEBUG
-            // ctx.lineWidth = 5
-            // ctx.strokeStyle = "#00ff00"
-            // ctx.stroke(clipPathCombo)
-
-            ctx.clip(clipPathCombo, "evenodd")
-        }
-
-
-        ctx.save(); // #22 players XY translation AND rotation AND jump value translation
-
-        // LOWER SHADOW IS DRAWN BY MAP
-        // DRAWING UPPER SHADOW HERE \/ (drawn twice while over platform or over endzone)
 
         if (MapData == Map) {
-            ctx.translate(midX, midY);
+            ctx.translate(midX, midY); // translate to center of the screen
         } else {
-            ctx.translate(this.x, this.y)
+            ctx.translate(this.x, this.y) // translate to wherever player is at on screen
         }
 
-        ctx.save() // #23 upperShadowClip canvas state 
+        
+        // LOWER SHADOW IS DRAWN BY MAP
+        // DRAWING UPPER SHADOW HERE (drawn twice, once while over platform and once while over endzone)
+        
+        // SHADOW OVER PLATFORM
+        ctx.save() // #5 upperShadowClip canvas 
 
-        if (MapData == Map) {
-            ctx.translate(-this.x, -this.y)
+        if (MapData == Map) { // only set clip if in Map not PreviewWindow
+            ctx.translate(-this.x, -this.y) // ctx goes to map origin to set clip
 
             // Draw standard shadowClip DEBUG
             // ctx.lineWidth = 5
@@ -174,21 +162,21 @@ const Player = {
             // ctx.stroke(Map.upperShadowClip)
 
             ctx.clip(Map.upperShadowClip);
-            ctx.translate(this.x, this.y);
+            ctx.translate(this.x, this.y); // reset ctx to middle of player at middle of screen
         }
-
 
         ctx.rotate(this.lookAngle.getAngleInDegrees() * Math.PI / 180)
 
         ctx.fillStyle = MapData.style.shadow_platformColor;
         ctx.fillRect(-15, -15, 30, 30)
 
-        ctx.restore() // #23 clears upperShadowClip if used
+        ctx.restore() // #5 clears upperShadowClip
 
 
 
-        if (MapData == Map && Map.endZonesToCheck.length > 0) { // draw a clipped version of the players shadow over endzone
-            ctx.save() // #23.5 endZoneShadowClip canvas state
+        // SHADOW OVER ENDZONE
+        if (MapData == Map && Map.endZonesToCheck.length > 0) {
+            ctx.save() // #6 endZoneShadowClip canvas
 
             ctx.translate(-this.x, -this.y)
 
@@ -205,10 +193,12 @@ const Player = {
             ctx.fillStyle = Map.style.shadow_endzoneColor;
             ctx.fillRect(-15, -15, 30, 30)
 
-            ctx.restore() // #23.5 clears endZoneShadowClip
+            ctx.restore() // #6 clears endZoneShadowClip
         }
 
 
+
+        ctx.save(); // #6.5 for reverting Player.rotation and Player.jumpValue translations
 
         // DRAWING PLAYER TOP
         ctx.translate(0, -this.jumpValue - 32);
@@ -227,19 +217,14 @@ const Player = {
         ctx.lineTo(8, 0)
         ctx.stroke();
 
-
-        ctx.restore(); // #22 leaves players XY translation AND rotation AND jump value translation
+        ctx.restore(); // #6.5 leaves player rotation and jump value translation
+        // ctx is now back at player middle
 
 
         // SIDES OF PLAYER
         const angleRad = this.lookAngle.getAngleInDegrees() * (Math.PI / 180);
         const loopedAngle = this.lookAngle.getAngleInDegrees();
 
-        if (MapData == Map) { // where to draw player sides
-            ctx.translate(midX, midY)
-        } else {
-            ctx.translate(this.x, this.y)
-        }
 
         // GETTING CORNERS OF ROTATED RECTANGLE
         // https://stackoverflow.com/questions/41898990/find-corners-of-a-rotated-rectangle-given-its-center-point-and-rotation
@@ -297,29 +282,59 @@ const Player = {
         }
 
 
-        ctx.restore(); // 21.5 Clears Map.playerClip
+        // ERASE PARTS OF PLAYER THAT ARE BEHIND WALLS
+
+        // ctx is still at player middle
+        ctx.translate(-this.x, -this.y) // ctx is at map origin
+
+        // Draw playerClip DEBUG (This is being drawn on PlayerCanvas)
+        // ctx.lineWidth = 5
+        // ctx.strokeStyle = "#00ff00"
+        // ctx.stroke(Map.playerClip)
+
+        // ADD CLIP of area behind walls
+        ctx.clip(Map.playerClip)
+
+        // ERASE PLAYER THATS BEHIND CLIP
+        ctx.translate(this.x - midX, this.y - midY) // translate to the top left of the screen / canvas
+        PlayerCanvas.clear()
+    
+        // COPY PLAYER TO MAIN CANVAS AFTER ERASE
+        CanvasArea.ctx.drawImage(PlayerCanvas.canvas, 0, 0)
 
 
-        ctx.save() // #24 xray view clip and translation
+        
+        // DRAW PLAYER XRAY IF BEHIND WALL (on normal CanvasArea)
+        if (MapData == Map && Map.wallsToCheck.length != 0) { // could use more precice check here ex: looking to see if theres data in Map.playerClip OPTIMIZE
 
-        // DRAW PLAYER XRAY IF BEHIND WALL
-        if (MapData == Map && Map.wallsToCheck.length != 0) { // could use more precice check here ex: looking to see if theres data in Map.playerClip
+            // DRAW PLAYER XRAY
+            CanvasArea.ctx.save() // # 7 used to reset the CanvasArea (which hasnt really been used in Player.render)
+            
+            // This zooming was only done on PlayerCanvas. CanvasArea needs too 
+            CanvasArea.ctx.scale(this.speedCameraOffset.zoom, this.speedCameraOffset.zoom)
+            CanvasArea.ctx.translate(
+                (CanvasArea.canvas.width / this.speedCameraOffset.zoom - CanvasArea.canvas.width) / 2 + this.speedCameraOffset.direction.x,
+                (CanvasArea.canvas.height / this.speedCameraOffset.zoom - CanvasArea.canvas.height) / 2 + this.speedCameraOffset.direction.y,
+            )
 
-            ctx.translate(-this.x + midX, -this.y + midY)
-            ctx.clip(Map.playerClip)
+            CanvasArea.ctx.translate(-this.x + midX, -this.y + midY) // Map origin ??
+            
+            CanvasArea.ctx.clip(Map.playerClip)
 
-            ctx.translate(this.x, this.y);
-            ctx.rotate(this.lookAngle.getAngleInDegrees() * Math.PI / 180)
+            CanvasArea.ctx.translate(this.x, this.y); // middle of player ??
+            CanvasArea.ctx.rotate(this.lookAngle.getAngleInDegrees() * Math.PI / 180)
 
-            ctx.strokeStyle = Map.style.shaded_playerColor
-            ctx.lineWidth = 2
-            ctx.beginPath()
-            ctx.strokeRect(-16, -16, 32, 32)
-            ctx.stroke()
+            CanvasArea.ctx.strokeStyle = this.topColor
+            CanvasArea.ctx.lineWidth = 2
+            CanvasArea.ctx.beginPath()
+            CanvasArea.ctx.strokeRect(-16, -16, 32, 32)
+            CanvasArea.ctx.stroke()
+            
+            CanvasArea.ctx.restore() // # 7 resets the CanvasArea to whatever weird state it was in previously
         }
+        
 
-        ctx.restore() // #24 restore before xray view clip and translation
-        ctx.restore() // #21.25 clears ctx.scale for zoom
+        ctx.restore() // #2 clears ctx.scale for zoom. Also restores Player.x / .y translation or midX midY
     },
 
     update: function () {

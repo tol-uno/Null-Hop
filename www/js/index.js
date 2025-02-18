@@ -14,6 +14,7 @@ function onDeviceReady() { // Called on page load in HMTL
     
     TouchHandler.init()
     CanvasArea.start(); // userInterface.start() called here
+    PlayerCanvas.start()
     AudioHandler.init();
 }
 

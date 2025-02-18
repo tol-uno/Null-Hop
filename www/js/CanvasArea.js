@@ -30,16 +30,17 @@ const CanvasArea = {
     },
 
 
-    resize : function() { // SHOULDNT REALLY EVER BE CALLED 
-        console.log("resized :)");
+    // KILL KILL KILL
+    // resize : function() { // SHOULDNT REALLY EVER BE CALLED 
+    //     console.log("resized :)");
 
-        this.canvas.width = window.outerWidth;
-        this.canvas.height = window.outerHeight;
+    //     this.canvas.width = window.outerWidth;
+    //     this.canvas.height = window.outerHeight;
 
-        midX = this.canvas.width / 2;
-        midY = this.canvas.height / 2;
+    //     midX = this.canvas.width / 2;
+    //     midY = this.canvas.height / 2;
 
-    },
+    // },
 
 
     convexHull: function(points) {
