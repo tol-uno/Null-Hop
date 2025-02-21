@@ -16,9 +16,12 @@ const TouchHandler = {
     averageDragY : new Averager(30),
 
 
+
+    
+
     init : function () {
         window.addEventListener("touchstart", e => {
-            e.preventDefault() // attempt to suppress highlighting magnifing glass (didnt work on old ios)
+            //e.preventDefault() // attempt to suppress highlighting magnifing glass (didnt work on old ios)
             
             for (let i = 0; i < e.changedTouches.length; i++){ // for loop needed incase multiple touches are sent in the same frame
 
@@ -125,6 +128,31 @@ const TouchHandler = {
             }
 
         });
+
+
+
+        // CODE TO REMOVE THE MAGNIFIER LOUPE
+        // https://discourse.threejs.org/t/iphone-how-to-remove-text-selection-magnifier/47812/12
+        function createDoubleTapPreventer(timeout_ms) {
+            let dblTapTimer = 0;
+            let dblTapPressed = false;
+        
+            return function (e) {
+                clearTimeout(dblTapTimer);
+                if (dblTapPressed) {
+                    e.preventDefault();
+                    dblTapPressed = false;
+                } else {
+                    dblTapPressed = true;
+                    dblTapTimer = setTimeout(function() {
+                        dblTapPressed = false;
+                    }, timeout_ms);
+                }
+            };
+        }
+        
+        document.body.addEventListener("touchstart", createDoubleTapPreventer(500), { passive: false });
+        
     },
 
     update : function () {

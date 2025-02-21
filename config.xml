@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <widget id="com.masonpowers.www" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
-    <name>Null-Hop</name>
+    <name>Null Hop</name>
     <description>A Jumping Journey</description>
     <author email="masonpowers46@gmail.com" href="https://masonpowers.com">
         Mason Powers
@@ -13,7 +13,7 @@
     <platform name="android">
         <preference name="DisallowOverscroll" value="true"/>
         <preference name="Fullscreen" value="true" />
-        <preference name="BackgroundColor" value="0xff0000ff"/>
+        <preference name="BackgroundColor" value="0x37906Dff"/>
         <preference name="Orientation" value="landscape" />
     </platform>
 
@@ -23,9 +23,9 @@
         <preference name="BackgroundColor" value="0xff0000ff"/>
         <preference name="Orientation" value="landscape" />
 
-        <!-- <preference name="SuppressesLongPressGesture" value="true" /> -->
-        <!-- <preference name="Suppresses3DTouchGesture" value="true" /> -->
-        <!-- <preference name="Allow3DTouchLinkPreview" value="false" /> -->
+        <preference name="SuppressesLongPressGesture" value="true" />
+        <preference name="Suppresses3DTouchGesture" value="true" />
+        <preference name="Allow3DTouchLinkPreview" value="false" />
 
 
         <!-- APP ICONS -->
