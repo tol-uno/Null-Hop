@@ -1,79 +1,92 @@
 const TouchHandler = {
-    dragAmountX : 0,
-    dragAmountY : 0,
-    dragging : false,
+    dragAmountX: 0,
+    dragAmountY: 0,
+    dragging: false,
 
-    zoom : {
-        isZooming : false,
-        x : null, // middle point between the two zooming fingers
-        y : null,
-        startLength : null,
-        ratio : null,
+    zoom: {
+        isZooming: false,
+        x: null, // middle point between the two zooming fingers
+        y: null,
+        startLength: null,
+        ratio: null,
     },
 
-    touches : [],
-    averageDragX : new Averager(30),
-    averageDragY : new Averager(30),
+    touches: [],
+    averageDragX: new Averager(30),
+    averageDragY: new Averager(30),
 
-
-
+    /*
     
+    New theory
+    The event Listeners run whenever regardles of fram rate. 
+    Therfore previous touch is updated ouside of the frame's view
+    Therefore the touch is shorter than it should be
 
-    init : function () {
+    Removing setting previousX in touchmove fixed the issue but introduced a bug
+    Using the two finger method is broken
+    When a touch is released the previousX is still where the release was
+    The distance from where the release was and where the current touch is, is fucked up
+    
+    */
+
+
+    init: function () {
         window.addEventListener("touchstart", e => {
-            //e.preventDefault() // attempt to suppress highlighting magnifing glass (didnt work on old ios)
-            
-            for (let i = 0; i < e.changedTouches.length; i++){ // for loop needed incase multiple touches are sent in the same frame
+
+            for (let i = 0; i < e.changedTouches.length; i++) { // for loop needed incase multiple touches are sent in the same frame
 
                 const touch = {
-                    identifier : e.changedTouches[i].identifier,
-                    x : e.changedTouches[i].pageX * CanvasArea.scale,
-                    y : e.changedTouches[i].pageY * CanvasArea.scale,
-                    startX : e.changedTouches[i].pageX * CanvasArea.scale, // used by strafe helper hud
-                    startY : e.changedTouches[i].pageY * CanvasArea.scale,
-                    previousX : e.changedTouches[i].pageX * CanvasArea.scale,
-                    previousY : e.changedTouches[i].pageY * CanvasArea.scale,
+                    identifier: e.changedTouches[i].identifier,
+                    x: e.changedTouches[i].pageX,
+                    y: e.changedTouches[i].pageY,
+                    startX: e.changedTouches[i].pageX,
+                    startY: e.changedTouches[i].pageY,
+                    previousX: e.changedTouches[i].pageX,
+                    previousY: e.changedTouches[i].pageY,
                 }
 
-                if (this.dragging == false) {this.dragging = true}
+                if (this.dragging == false) { this.dragging = true }
 
-                UserInterface.touchStarted(touch.x, touch.y); // sends touchStarted for every touchStart
-                
+                UserInterface.touchStarted(touch.x * CanvasArea.scale, touch.y * CanvasArea.scale); // sends touchStarted for every touchStart
+
                 this.touches.push(touch)
             }
-            
+
             if (UserInterface.gamestate == 7 && this.touches.length >= 2) { // If in map editor 
                 this.zoom.isZooming = true
-                this.zoom.x = (this.touches[0].x + this.touches[1].x) / 2 
+                this.zoom.x = (this.touches[0].x + this.touches[1].x) / 2
                 this.zoom.y = (this.touches[0].y + this.touches[1].y) / 2
                 this.zoom.startLength = Math.sqrt((this.touches[1].x - this.touches[0].x) ** 2 + (this.touches[1].y - this.touches[0].y) ** 2)
                 this.zoom.ratio = 1
             }
+
         });
 
 
         window.addEventListener("touchmove", e => {
-            for (let i = 0; i < e.changedTouches.length; i++){ // for loop needed incase multiple touches are sent in the same frame
+            for (let i = 0; i < e.changedTouches.length; i++) { // for loop needed incase multiple touches are sent in the same frame
 
                 const touch = {
-                    identifier : e.changedTouches[i].identifier,
-                    x : e.changedTouches[i].pageX * CanvasArea.scale,
-                    y : e.changedTouches[i].pageY * CanvasArea.scale,
+                    identifier: e.changedTouches[i].identifier,
+                    x: e.changedTouches[i].pageX,
+                    y: e.changedTouches[i].pageY,
                 }
 
                 // updating this touch within this.touches
                 const touchIndex = this.touches.findIndex(t => t.identifier == touch.identifier)
-                this.touches[touchIndex].previousX = this.touches[touchIndex].x
-                this.touches[touchIndex].previousY = this.touches[touchIndex].y
+
+                // WE DONT WANT TO UPDATE PREVIOUS TOUCH HERE KILL
+                // this.touches[touchIndex].previousX = this.touches[touchIndex].x
+                // this.touches[touchIndex].previousY = this.touches[touchIndex].y
                 this.touches[touchIndex].x = touch.x
                 this.touches[touchIndex].y = touch.y
             }
 
             if (this.zoom.isZooming) {
-                this.zoom.x = (this.touches[0].x + this.touches[1].x) / 2 
+                this.zoom.x = (this.touches[0].x + this.touches[1].x) / 2
                 this.zoom.y = (this.touches[0].y + this.touches[1].y) / 2
                 let currentLength = Math.sqrt((this.touches[1].x - this.touches[0].x) ** 2 + (this.touches[1].y - this.touches[0].y) ** 2)
-                this.zoom.ratio = currentLength / this.zoom.startLength 
+                this.zoom.ratio = currentLength / this.zoom.startLength
             }
 
         });
@@ -83,22 +96,24 @@ const TouchHandler = {
             this.dragging = false;
             this.touches = [] // this could cause issues i think
             this.zoom.isZooming = false
+
         });
+
 
         window.addEventListener("touchend", e => {
 
             for (let i = 0; i < e.changedTouches.length; i++) { // for loop needed incase multiple touches are sent in the same frame
 
                 const touch = {
-                    identifier : e.changedTouches[i].identifier,
-                    x : e.changedTouches[i].pageX * CanvasArea.scale,
-                    y : e.changedTouches[i].pageY * CanvasArea.scale,
+                    identifier: e.changedTouches[i].identifier,
+                    x: e.changedTouches[i].pageX,
+                    y: e.changedTouches[i].pageY,
                 }
 
                 const touchIndex = this.touches.findIndex(t => t.identifier == touch.identifier)
 
                 if (this.dragging && touchIndex == 0) { // if this is the primary/first/oldest touch
-                    
+
                     // released current drag
                     this.averageDragX.clear()
                     this.averageDragY.clear()
@@ -115,7 +130,7 @@ const TouchHandler = {
                     this.touches.splice(touchIndex, 1); // 2nd parameter means remove one item only
                 }
 
-                UserInterface.touchReleased(touch.x, touch.y); // sends touchRealease for every release
+                UserInterface.touchReleased(touch.x * CanvasArea.scale, touch.y * CanvasArea.scale); // sends touchRealease for every release
 
             }
 
@@ -136,7 +151,7 @@ const TouchHandler = {
         function createDoubleTapPreventer(timeout_ms) {
             let dblTapTimer = 0;
             let dblTapPressed = false;
-        
+
             return function (e) {
                 clearTimeout(dblTapTimer);
                 if (dblTapPressed) {
@@ -144,44 +159,49 @@ const TouchHandler = {
                     dblTapPressed = false;
                 } else {
                     dblTapPressed = true;
-                    dblTapTimer = setTimeout(function() {
+                    dblTapTimer = setTimeout(function () {
                         dblTapPressed = false;
                     }, timeout_ms);
                 }
             };
         }
-        
-        document.body.addEventListener("touchstart", createDoubleTapPreventer(500), { passive: false });
-        
+
+        document.body.addEventListener("touchstart", createDoubleTapPreventer(560), { passive: false });
+
     },
 
-    update : function () {
-        if (!this.zoom.isZooming && this.touches.length >= 1) {
-            this.dragAmountX = this.touches[0].x - this.touches[0].previousX;
-            this.dragAmountY = this.touches[0].y - this.touches[0].previousY;
 
-            this.touches[0].previousX = this.touches[0].x;
-            this.touches[0].previousY = this.touches[0].y;
-        } 
-        
+    // processTouchEvent : function () {
+    update: function () {
+        if (!this.zoom.isZooming && this.touches.length >= 1) {
+            this.dragAmountX = (this.touches[0].x - this.touches[0].previousX)
+            this.dragAmountY = (this.touches[0].y - this.touches[0].previousY)
+
+            // loop through each touch and set its previousX and Y            
+            this.touches.forEach((touch) => {
+                touch.previousX = touch.x;
+                touch.previousY = touch.y;
+            })
+        }
+
         if (this.zoom.isZooming && this.touches.length >= 2) { // pan using center of screen in map editor
-            
+
             const zoomMidX = (this.touches[0].x + this.touches[1].x) / 2
             const zoomMidX_prev = (this.touches[0].previousX + this.touches[1].previousX) / 2
             const zoomMidY = (this.touches[0].y + this.touches[1].y) / 2
             const zoomMidY_prev = (this.touches[0].previousY + this.touches[1].previousY) / 2
 
-            this.dragAmountX = zoomMidX - zoomMidX_prev;
-            this.dragAmountY = zoomMidY - zoomMidY_prev;
+            this.dragAmountX = (zoomMidX - zoomMidX_prev) * CanvasArea.scale
+            this.dragAmountY = (zoomMidY - zoomMidY_prev) * CanvasArea.scale
 
             this.touches[0].previousX = this.touches[0].x;
             this.touches[0].previousY = this.touches[0].y;
             this.touches[1].previousX = this.touches[1].x;
             this.touches[1].previousY = this.touches[1].y;
-        } 
-        
+        }
+
         this.averageDragX.pushValue(this.dragAmountX)
         this.averageDragY.pushValue(this.dragAmountY)
-    }
+    },
 
 }

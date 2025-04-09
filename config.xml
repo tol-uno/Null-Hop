@@ -20,7 +20,7 @@
     <platform name="ios">
         <preference name="DisallowOverscroll" value="true"/>
         <preference name="Fullscreen" value="true" />
-        <preference name="BackgroundColor" value="0xff0000ff"/>
+        <preference name="BackgroundColor" value="0x37906Dff"/>
         <preference name="Orientation" value="landscape" />
 
         <preference name="SuppressesLongPressGesture" value="true" />

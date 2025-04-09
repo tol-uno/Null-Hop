@@ -1,17 +1,6 @@
 const Player = {
 
-    // new movement code that uses real quake / source movement
-    // https://adrianb.io/2015/02/14/bunnyhop.html
-    // https://www.youtube.com/watch?v=v3zT3Z5apaM
-    // https://www.youtube.com/watch?v=rTsXO6Zicls
-    // https://www.youtube.com/watch?v=rTsXO6Zicls
-    // https://steamcommunity.com/sharedfiles/filedetails/?id=184184420
-    // https://github.com/myria666/qMovementDoc/blob/main/Quake_s_Player_Movement.pdf
-
-    // left (-1,0) vector OR right (1,0) vector that is rotated by the change in angle that frame. 
-    // if angle change is postive use Right vec. Negative use left vec
-    // normalized left and right vectors act as if strafe keys were pressed 
-    wishDir: new Vector2D3D(0, 0),
+    wish_velocity: new Vector2D3D(0, 0),
     velocity: new Vector2D3D(0, 0),
     currentSpeedProjected: 0,
     addSpeed: 0, // initialized here so that userInterface can access for debug
@@ -30,6 +19,8 @@ const Player = {
     topSideColor: "rgb(0,150,0)",
     leftSideColor: "rgb(0,100,0)",
 
+    debugTurn: 2, // intialized here so it can be accesed in console
+
     initPlayer: function (x, y, angle) {
         this.x = x;
         this.y = y;
@@ -46,7 +37,7 @@ const Player = {
         this.speedCameraOffset.dirAveragerY.frames.fill(0, 0)
 
         this.jumpValue = 0
-        this.jumpVelocity = 2
+        this.jumpVelocity = 200
         this.endSlow = 1
         this.checkpointIndex = -1
     },
@@ -103,7 +94,7 @@ const Player = {
     },
 
     renderLowerShadow: function () { // used by map
-        const ctx = PlayerCanvas.ctx;
+        const ctx = CanvasArea.ctx;
 
         const MapData = UserInterface.gamestate == 7 ? MapEditor.loadedMap : Map // to use in PreviewWindow
 
@@ -146,10 +137,10 @@ const Player = {
             ctx.translate(this.x, this.y) // translate to wherever player is at on screen
         }
 
-        
+
         // LOWER SHADOW IS DRAWN BY MAP
         // DRAWING UPPER SHADOW HERE (drawn twice, once while over platform and once while over endzone)
-        
+
         // SHADOW OVER PLATFORM
         ctx.save() // #5 upperShadowClip canvas 
 
@@ -298,18 +289,18 @@ const Player = {
         // ERASE PLAYER THATS BEHIND CLIP
         ctx.translate(this.x - midX, this.y - midY) // translate to the top left of the screen / canvas
         PlayerCanvas.clear()
-    
+
         // COPY PLAYER TO MAIN CANVAS AFTER ERASE
         CanvasArea.ctx.drawImage(PlayerCanvas.canvas, 0, 0)
 
 
-        
+
         // DRAW PLAYER XRAY IF BEHIND WALL (on normal CanvasArea)
         if (MapData == Map && Map.wallsToCheck.length != 0) { // could use more precice check here ex: looking to see if theres data in Map.playerClip OPTIMIZE
 
             // DRAW PLAYER XRAY
             CanvasArea.ctx.save() // # 7 used to reset the CanvasArea (which hasnt really been used in Player.render)
-            
+
             // This zooming was only done on PlayerCanvas. CanvasArea needs too 
             CanvasArea.ctx.scale(this.speedCameraOffset.zoom, this.speedCameraOffset.zoom)
             CanvasArea.ctx.translate(
@@ -318,7 +309,7 @@ const Player = {
             )
 
             CanvasArea.ctx.translate(-this.x + midX, -this.y + midY) // Map origin ??
-            
+
             CanvasArea.ctx.clip(Map.playerClip)
 
             CanvasArea.ctx.translate(this.x, this.y); // middle of player ??
@@ -329,90 +320,159 @@ const Player = {
             CanvasArea.ctx.beginPath()
             CanvasArea.ctx.strokeRect(-16, -16, 32, 32)
             CanvasArea.ctx.stroke()
-            
+
             CanvasArea.ctx.restore() // # 7 resets the CanvasArea to whatever weird state it was in previously
         }
-        
+
 
         ctx.restore() // #2 clears ctx.scale for zoom. Also restores Player.x / .y translation or midX midY
     },
 
     update: function () {
 
+        //TouchHandler.dragAmountX = dt // debugTurn
+
         if (UserInterface.levelState == 1 || UserInterface.levelState == 2) { // if NOT at end screen
 
             this.lookAngle = this.lookAngle.rotate(TouchHandler.dragAmountX * UserInterface.settings.sensitivity)
 
-            // Setting wishDir
+            // Setting wish_velocity
+            // normalized unit vector that is perpendicular to lookAngle
+            // simulates left or right strafe keys being pressed depending on dragAmount direction
+
             if (TouchHandler.dragAmountX > 0) {
-                this.wishDir = this.lookAngle.rotate(90) // look angle is already a normalized
-                this.wishDir.normalize(maxVelocity) // changes the length to be maxVelocity
+                this.wish_velocity = this.lookAngle.rotate(90) // look angle is already normalized
             }
 
             if (TouchHandler.dragAmountX < 0) {
-                this.wishDir = this.lookAngle.rotate(-90) // look angle is already a normalized
-                this.wishDir.normalize(maxVelocity) // changes the length to be maxVelocity
+                this.wish_velocity = this.lookAngle.rotate(-90) // look angle is already normalized
             }
 
-            if (TouchHandler.dragAmountX == 0) { this.wishDir.set(0, 0) }
+            if (TouchHandler.dragAmountX == 0) { this.wish_velocity.set(0, 0) }
 
         }
 
         if (UserInterface.levelState == 2) { // 1 = pre-start, 2 = playing level, 3 = in endzone
 
-            // ALL MOVEMENT CALCULATIONS
-            // THIS IS VIDEO VERSION OF QUAKE1 CODE	
+            // ALL MOVEMENT CALCULATIONS BASED OFF QUAKE 1 CODE
+            // BUILT MOSTLY FROM zweek's video on how airstrafing works
+            // https://www.youtube.com/watch?v=gRqoXy-0d84
 
-            this.currentSpeedProjected = this.velocity.dotProduct(this.wishDir); // Vector projection of Current_velocity onto wishDir
-
-            // addSpeed is clipped between 0 and MAX_ACCEL * dt  --- addSpeed should only be 0 when wishDir is 0
-            this.addSpeed = maxVelocity - this.currentSpeedProjected; // sometimes currentSpeedProj is negative
-
-            // this is a hack to make gain consistent between fps changes BAD BAD BAD BS
-            // https://www.desmos.com/calculator/k1uc1yai14
-            this.addSpeed *= (0.25 * (Math.cbrt(dt) + 3))
-
+            // Other references for quake / source movement info
+            // https://adrianb.io/2015/02/14/bunnyhop.html
+            // https://www.youtube.com/watch?v=v3zT3Z5apaM
+            // https://www.youtube.com/watch?v=rTsXO6Zicls
+            // https://www.youtube.com/watch?v=rTsXO6Zicls
+            // https://steamcommunity.com/sharedfiles/filedetails/?id=184184420
+            // https://github.com/myria666/qMovementDoc/blob/main/Quake_s_Player_Movement.pdf
 
 
-            if (this.addSpeed > airAcceleration * dt) { // addspeed is too big and needs to be limited by airacceleration value
-                this.addSpeed = airAcceleration * dt;
+            // SUEDO QUAKE 1 CODE
+            /*
+            function SV_AirAccelerate(wish_velocity) {
+                let wish_speed
+                let current_speed
+                let add_speed
+                let accel_speed
 
-                // show overstrafe warning
+                wish_speed = wish_velocity.length
+                wish_velocity.normalize()
+
+                if (wish_speed > 30) { wish_speed = 30 }
+
+                current_speed = dotProduct(velocity, wish_velocity)
+                // curent_speed is actually a measurement of how closely 
+                // the wish_velocity vector aligns with the actual velocity vector
+                // ranges from 1 * velocity.length (when both are aligned)
+                // to -1 * velocity.length when they are pointing opposite each other.
+                // it is 0 * velocity.length when wish_velocity is 90 degrees perpendicular to velocity vector
+
+                add_speed = wish_speed - current_speed
+                // how much speed needs to be added to the player. 
+                if (add_speed <= 0) { return }
+                // if its zero then skip the rest of the function
+
+                accel_speed = grounded_wish_speed * sv_accelerate * host_frametime
+                // grounded_wish_speed = 320 (running speed cap)
+                // sv_accelerate = 10
+                // host_frametime = deltaTime (time between frames expressed in SECONDS ?)
+                // clips our per frame acceleration
+                // defines how long it should take based off of sv_accelerate and frametime to reach grounded_wish_speed from zero speed
+                // this is a per frame acceleration limit
+                // this is what makes this whole thing framerate dependent ... :(
+                // additional notes in actual code
+
+                if (accel_speed > add_speed) { accel_speed = add_speed }
+                // accel_speed cant be bigger than add_speed
+
+                for (i = 0; i < 3; i++) { velocity[i] += accel_speed * wish_velocity[i] }
+                // scales wish_velocity unit vector up to the length of accel_speed and adding it to velocity
+            }
+            */
+
+
+
+            // currentSpeedProjected is a measurment of how closely the wish_velocity aligns with the actual velocity vector
+            this.currentSpeedProjected = this.velocity.dotProduct(this.wish_velocity); // Vector projection of Current_velocity onto wish_velocity
+
+
+            // maxVelocity replaces the action of clipping wish_speed to 30 --- maxVelocity == 30
+            this.addSpeed = maxVelocity - this.currentSpeedProjected;
+
+
+            
+            // show overstrafe warning
+            if (this.addSpeed > 320 * airAcceleration * dt) { // 11:04 in zweeks video shows why u lose speed
                 if (UserInterface.showOverstrafeWarning == false) {
                     UserInterface.showOverstrafeWarning = true;
                     setTimeout(() => { UserInterface.showOverstrafeWarning = false }, 1500); // wait 1.5 seconds to hide warning
                 }
             }
+  
+            // new simplified stuff that replaces commented code block below \/
+            this.addSpeed = Math.max(0, this.addSpeed)
+            this.addSpeed = Math.min(this.addSpeed, 320 * airAcceleration * dt)
 
-            if (this.addSpeed <= 0) { this.addSpeed = 0; console.log("zero addspeed") } // currentSpeedProjected is greater than max_speed. dont add speed
+
+            this.velocity.x += (this.addSpeed * this.wish_velocity.x)
+            this.velocity.y += (this.addSpeed * this.wish_velocity.y)
 
 
-            // addSpeed is a scaler for wishdir. if addspeed == 0 no wishdir is applied
-            this.velocity.x += (this.wishDir.x * this.addSpeed)
-            this.velocity.y += (this.wishDir.y * this.addSpeed)
-            // addSpeed needs to be adjusted by dt. Bigger dt, less fps, bigger addSpeed
+
+            // THIS IS A MORE VERBOSE VERSION OF THE CODE THAT FOLLOWS THE QUAKE CODE CLOSER BUT IS NOT AS CLEAR AS ABOVE
+            /*
+            if (this.addSpeed > 0) { // only run the rest of this movement code if speed should be added
+
+                // show overstrafe warning
+                if (this.addSpeed > 60) { // 11:04 in zweeks video shows why u lose speed
+                    if (UserInterface.showOverstrafeWarning == false) {
+                        UserInterface.showOverstrafeWarning = true;
+                        setTimeout(() => { UserInterface.showOverstrafeWarning = false }, 1500); // wait 1.5 seconds to hide warning
+                    }
+                }
+
+                let accel_speed = 320 * airAcceleration * dt
+                // Quake: accel_speed = grounded_wish_speed * sv_accelerate * host_frametime
+                // accel_speed is the upper limit that add_speed is clipped to 
+                // except that if add_speed doesnt reach that upper threshold then accel_speed is
+                // brought down to match add_speed and used in its place
+
+                // accel_speed at 60fps = 320 * 10 * 0.016 = 53.33
+                // accel_speed at 30fps = 320 * 10 * 0.033 = 106.66
+
+                if (accel_speed > this.addSpeed) {
+                    accel_speed = this.addSpeed;
+                }
+
+                
+                this.velocity.x += (accel_speed * this.wish_velocity.x)
+                this.velocity.y += (accel_speed * this.wish_velocity.y)
+            }
+            */
+
+
 
             // velocity applied to player coords after checking wall collisions
-
-
-
-            // JUMPING
-            if (this.jumpValue < 0) {
-                this.jumpValue = 0;
-                this.jumpVelocity = 2;
-                AudioHandler.jumpAudio.play();
-                if (!this.checkCollision(Map.renderedPlatforms.filter(platform => platform.wall == 0))) { // checkCollision on an array of just platforms (no walls)
-                    AudioHandler.splashAudio.play();
-                    this.speedCameraOffset.zoomAverager.clear()
-                    this.teleport();
-
-                }
-            } else {
-                this.jumpValue += this.jumpVelocity * dt;
-                this.jumpVelocity -= gravity * dt;
-            }
-
-
 
             // CHECK IF COLLIDING WITH WALLS
             Map.wallsToCheck.forEach(wall => {
@@ -539,8 +599,25 @@ const Player = {
 
 
             // APPLYING VELOCITY
-            this.x += this.velocity.x / 5 * dt;
-            this.y += this.velocity.y / 5 * dt;
+            this.x += this.velocity.x * dt;
+            this.y += this.velocity.y * dt;
+
+
+            // JUMPING
+            if (this.jumpValue < 0) {
+                this.jumpValue = 0;
+                this.jumpVelocity = 200;
+                AudioHandler.jumpAudio.play();
+                if (!this.checkCollision(Map.renderedPlatforms.filter(platform => platform.wall == 0))) { // checkCollision on an array of just platforms (no walls)
+                    AudioHandler.splashAudio.play();
+                    this.speedCameraOffset.zoomAverager.clear()
+                    this.teleport();
+
+                }
+            } else {
+                this.jumpValue += this.jumpVelocity * dt;
+                this.jumpVelocity -= gravity * dt;
+            }
 
 
             // CHECK if colliding with checkpoint triggers
@@ -603,33 +680,32 @@ const Player = {
 
 
         // CHANGING CAMERA ZOOM and OFFSET BASED ON SPEED
-
         // add current zoom level to averager
-        this.speedCameraOffset.zoomAverager.pushValue(CanvasArea.mapToRange(this.velocity.magnitude(), 6, 50, 1, 0.5))
+        this.speedCameraOffset.zoomAverager.pushValue(CanvasArea.mapToRange(this.velocity.magnitude(), 100, 900, 1, 0.5))
 
         // apply averager zoom to actual zoom
         this.speedCameraOffset.zoom = this.speedCameraOffset.zoomAverager.getAverage()
 
         // add current offset direction to averager
-        this.speedCameraOffset.dirAveragerX.pushValue(-this.velocity.x * 3)
-        this.speedCameraOffset.dirAveragerY.pushValue(-this.velocity.y * 3)
+        this.speedCameraOffset.dirAveragerX.pushValue(-this.velocity.x / 5)
+        this.speedCameraOffset.dirAveragerY.pushValue(-this.velocity.y / 5)
 
         // apply averager offset direction to actual offset direction
         this.speedCameraOffset.direction.x = this.speedCameraOffset.dirAveragerX.getAverage()
         this.speedCameraOffset.direction.y = this.speedCameraOffset.dirAveragerY.getAverage()
-
+        
 
 
         if (UserInterface.levelState == 3) { // SLOW DOWN MOVEMENT AFTER HITTING END ZONE
             // if (this.endSlow > 0.02) {this.endSlow = (this.endSlow * 0.95);} else {this.endSlow = 0} // THIS NEEDS TO BE FPS INDEPENDENT
-            if (this.endSlow > 0.02) { this.endSlow = (this.endSlow - 0.02 * dt); } else { this.endSlow = 0 }
+            if (this.endSlow > 0) { this.endSlow -= 2 * dt } else { this.endSlow = 0 }
 
-            this.x += this.velocity.x / 5 * dt * this.endSlow; // MOVE FORWARD AT ANGLE BASED ON VELOCITY
-            this.y += this.velocity.y / 5 * dt * this.endSlow;
+            this.x += this.velocity.x * dt * this.endSlow; // MOVE FORWARD AT ANGLE BASED ON VELOCITY
+            this.y += this.velocity.y * dt * this.endSlow;
 
             if (this.jumpValue < 0) { // JUMPING
                 this.jumpValue = 0;
-                this.jumpVelocity = 2;
+                this.jumpVelocity = 200;
             } else {
                 this.jumpValue += this.jumpVelocity * dt * this.endSlow;
                 this.jumpVelocity -= gravity * dt * this.endSlow;
@@ -638,7 +714,7 @@ const Player = {
     },
 
     startLevel: function () {
-        this.velocity.set(6, 0); // 6,0
+        this.velocity.set(180, 0); // 6,0
         this.velocity = this.velocity.rotate(this.lookAngle.getAngleInDegrees());
     },
 
@@ -766,10 +842,10 @@ const Player = {
             this.y = Map.checkpoints[this.checkpointIndex].y;
             this.lookAngle.set(1, 0)
             this.lookAngle = this.lookAngle.rotate(Map.checkpoints[this.checkpointIndex].angle)
-            this.velocity.set(2, 0)
+            this.velocity.set(100, 0)
             this.velocity = this.velocity.rotate(this.lookAngle.getAngleInDegrees())
             this.jumpValue = 0;
-            this.jumpVelocity = 2;
+            this.jumpVelocity = 200;
         } else {
             btn_restart.released(true);
         }

@@ -52,16 +52,16 @@ class SliderUI {
 
             if (TouchHandler.dragging) {
 
-                if (TouchHandler.touches[0].x < this.x) {
+                if (TouchHandler.touches[0].x * CanvasArea.scale < this.x) {
                     // set to lowest
                     this.sliderX = this.x
                 } else {
-                    if (TouchHandler.touches[0].x > this.x + this.width) {
+                    if (TouchHandler.touches[0].x * CanvasArea.scale > this.x + this.width) {
                         // set to highest
                         this.sliderX = this.x + this.width
                     } else {
                         // within slider bounds
-                        this.sliderX = TouchHandler.touches[0].x
+                        this.sliderX = TouchHandler.touches[0].x * CanvasArea.scale
                     }
                 }
 

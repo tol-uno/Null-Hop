@@ -3,6 +3,7 @@ const CanvasArea = {
     start : function() { // called in deviceReady
         this.canvas = document.createElement("canvas")
 
+        // this.scale = window.devicePixelRatio || 1
         this.scale = 1.3
 
         this.canvas.width = window.outerWidth * this.scale;
@@ -19,7 +20,7 @@ const CanvasArea = {
         
         prevDateNow = performance.now()
 
-        this.interval = setInterval(updateGameArea, 10); // Number sets the taget frame rate. 1000/# = FPS
+        this.interval = setInterval(updateGameArea, 1000/60); // Number sets the taget frame rate. 1000/FPS 
 
         UserInterface.start(); // need to be ran here after canvas is resized in CanvasArea.start()
     },
@@ -28,19 +29,6 @@ const CanvasArea = {
     clear : function() { // CLEARS WHOLE CANVAS
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
     },
-
-
-    // KILL KILL KILL
-    // resize : function() { // SHOULDNT REALLY EVER BE CALLED 
-    //     console.log("resized :)");
-
-    //     this.canvas.width = window.outerWidth;
-    //     this.canvas.height = window.outerHeight;
-
-    //     midX = this.canvas.width / 2;
-    //     midY = this.canvas.height / 2;
-
-    // },
 
 
     convexHull: function(points) {

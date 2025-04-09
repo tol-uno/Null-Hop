@@ -2,12 +2,11 @@ class Averager {
     
     constructor(maxFramesSampled) {
         this.maxFramesSampled = maxFramesSampled;
-        // this.dtAdjusted = dtAdjusted;
         this.frames = [];
     }
         
     pushValue = (value) => {
-        if (this.frames.push(value) > this.maxFramesSampled / dt) {this.frames.shift()} // adds new value to frames[] & removes oldest (if theres more then max allowed frames in array)
+        if (this.frames.push(value) > this.maxFramesSampled * 60 * dt) {this.frames.shift()} // adds new value to frames[] & removes oldest (if theres more then max allowed frames in array)
     }
 
     getAverage = () => {

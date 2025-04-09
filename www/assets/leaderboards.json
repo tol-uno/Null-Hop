@@ -1,13 +1,13 @@
 {
     "Awakening": {
-        "gold": 14000,
-        "silver": 15000,
-        "bronze": 25000
+        "gold": 18000,
+        "silver": 25000,
+        "bronze": 40000
     },
     "Pitfall": {
-        "gold": 15000,
-        "silver": 20000,
-        "bronze": 25000
+        "gold": 40000,
+        "silver": 55000,
+        "bronze": 75000
     },
     "Cavern Abyss": {
         "gold": 30283,

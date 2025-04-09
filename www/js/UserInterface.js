@@ -2349,7 +2349,7 @@ const UserInterface = {
                 CanvasArea.ctx.font = "15px BAHNSCHRIFT";
                 CanvasArea.ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1: UserInterface.lightColor_1;
     
-                CanvasArea.ctx.fillText("fps: " + Math.round(100/dt), textX, 60);
+                CanvasArea.ctx.fillText("fps: " + Math.round(1/dt), textX, 60);
                 CanvasArea.ctx.fillText("rounded dt: " + Math.round(dt * 10) / 10 + " milliseconds", textX, 80);
                 CanvasArea.ctx.fillText("renderedPlatforms Count: " + Map.renderedPlatforms.length, textX, 100);
                 CanvasArea.ctx.fillText("endZonesToCheck: " + Map.endZonesToCheck, textX, 120);
@@ -2368,12 +2368,12 @@ const UserInterface = {
 
 
                 // DRAWING PLAYER MOVEMENT DEBUG VECTORS
-                // Player wishDir
+                // Player wish_velocity
                 CanvasArea.ctx.strokeStyle = "#FF00FF";
                 CanvasArea.ctx.lineWidth = 3
                 CanvasArea.ctx.beginPath();
                 CanvasArea.ctx.moveTo(midX, midY);
-                CanvasArea.ctx.lineTo(midX + Player.wishDir.x * 100, midY + Player.wishDir.y * 100);
+                CanvasArea.ctx.lineTo(midX + Player.wish_velocity.x * 100, midY + Player.wish_velocity.y * 100);
                 CanvasArea.ctx.stroke();
 
                 // Player velocity
@@ -2381,7 +2381,7 @@ const UserInterface = {
                 CanvasArea.ctx.lineWidth = 4
                 CanvasArea.ctx.beginPath();
                 CanvasArea.ctx.moveTo(midX, midY);
-                CanvasArea.ctx.lineTo(midX + Player.velocity.x * 10, midY + Player.velocity.y * 10);
+                CanvasArea.ctx.lineTo(midX + Player.velocity.x, midY + Player.velocity.y);
                 CanvasArea.ctx.stroke();
 
                 // Player lookAngle
@@ -2399,23 +2399,28 @@ const UserInterface = {
 
             if (this.settings.strafeHUD == 1) { // STRAFE OPTIMIZER HUD
 
-                /* DRAW THE OLD LITTLE GRAPHS UNDER PLAYER
-                CanvasArea.ctx.fillRect(midX - 18, midY + 28, 8, 4 * Math.abs(TouchHandler.dragAmountX) * UserInterface.settings.sensitivity); // YOUR STRAFE
-                CanvasArea.ctx.fillRect(midX - 4, midY + 28, 8, 10 * Player.currentSpeedProjected); // THE THRESHOLD
-                CanvasArea.ctx.fillRect(midX + 12, midY + 28 + 10 * airAcceleration * dt , 8, 2); // ADDSPEED LIMIT
-                CanvasArea.ctx.fillRect(midX + 10, midY + 28, 8, 10 * Player.addSpeed ); // GAIN
-
-                // little text for strafeHelper
+                // DRAW THE LITTLE GRAPHS UNDER PLAYER
                 CanvasArea.ctx.save()
+                CanvasArea.ctx.fillStyle = "blue"
+                CanvasArea.ctx.fillRect(midX - 32, midY + 32, 10 * Math.abs(TouchHandler.dragAmountX) * this.settings.sensitivity, 6); // YOUR STRAFE
+                CanvasArea.ctx.fillRect(midX - 32, midY + 42, Player.addSpeed, 6); // ADDSPEED
+                CanvasArea.ctx.fillRect(midX - 32, midY + 52, 320 * airAcceleration * dt, 6); // Top End clip LIMIT
+                
+                // CanvasArea.ctx.fillRect(midX - 4, midY + 28, 8, 10 * Player.currentSpeedProjected); // THE THRESHOLD
+                // CanvasArea.ctx.fillRect(midX + 10, midY + 28, 8, 10 * Player.addSpeed ); // GAIN
+                
+                // little text for strafeHelper
                 CanvasArea.ctx.font = "12px BAHNSCHRIFT";
-                CanvasArea.ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1: UserInterface.lightColor_1;
-                CanvasArea.ctx.translate(midX - 17, midY + 28)
+                CanvasArea.ctx.fillStyle = "white"
+                CanvasArea.ctx.fillText(TouchHandler.dragAmountX * this.settings.sensitivity, midX - 100, midY + 38)
+                CanvasArea.ctx.fillText("addSpeed: " + Player.addSpeed, midX - 100, midY + 48)
+                CanvasArea.ctx.fillText("addSpeed Clip: " + 320 * airAcceleration * dt, midX - 100, midY + 58)
+                CanvasArea.ctx.restore()
+                /*
                 CanvasArea.ctx.rotate(90 * Math.PI / 180)
-                CanvasArea.ctx.fillText("dragAmountX", 0, 0)
                 CanvasArea.ctx.fillText("currentSpeedProjected: " + Player.currentSpeedProjected, 0, -14)
                 CanvasArea.ctx.fillText("addSpeed: " + Player.addSpeed, 0, -28)
                 CanvasArea.ctx.fillText("airAcceleration * dt: " + airAcceleration * dt, 0, -42)
-                CanvasArea.ctx.restore()
                 */
 
 
@@ -2424,11 +2429,11 @@ const UserInterface = {
                 if (TouchHandler.dragging && this.levelState != 3) { // check if any button is pressed
 
                     let lineUpOffset = 0
-                    if (TouchHandler.touches[0].startX > midX - 200 && TouchHandler.touches[0].startX < midX + 200) { // if touched withing slider's X => offset the handle to lineup with finger
-                        lineUpOffset = TouchHandler.touches[0].startX - midX
+                    if (TouchHandler.touches[0].startX * CanvasArea.scale > midX - 200 && TouchHandler.touches[0].startX * CanvasArea.scale < midX + 200) { // if touched withing slider's X => offset the handle to lineup with finger
+                        lineUpOffset = TouchHandler.touches[0].startX * CanvasArea.scale - midX
                     }
 
-                    let strafeDistanceX = TouchHandler.touches[0].x - TouchHandler.touches[0].startX + lineUpOffset
+                    let strafeDistanceX = TouchHandler.touches[0].x * CanvasArea.scale - TouchHandler.touches[0].startX * CanvasArea.scale + lineUpOffset
                     while (strafeDistanceX > 212) { // loop back to negative
                         strafeDistanceX = -212 + (strafeDistanceX - 212)
                     }

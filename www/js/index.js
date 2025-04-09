@@ -1,11 +1,12 @@
 document.addEventListener("deviceready", onDeviceReady, false);
 
 
-const airAcceleration = 6; // the sharpness your allowed to turn at
-const maxVelocity = 1.15; // basically the rate at which speed is gained / lost. wishDir is scaled to this magnitude
-const gravity = 0.05;
+// change these 3 to const
+let airAcceleration = 100; // the sharpness your allowed to turn at
+let maxVelocity = 30; // wish_speed is clipped to this in quake. Here, maxVelocity replaces wish_speed
+let gravity = 500;
 let prevDateNow;
-let dt = 1; // delta time always has a 1 frame delay
+let dt = 1/60; // delta time always has a 1 frame delay
 
 let midX = 0;
 let midY = 0;
@@ -25,7 +26,7 @@ function updateGameArea() { // CALLED EVERY FRAME
     TouchHandler.update();
     UserInterface.update();        
     
-    dt = (performance.now() - prevDateNow)/10; // Delta Time for FPS independence. dt = amount of milliseconds between frames
+    dt = (performance.now() - prevDateNow)/1000; // Delta Time for FPS independence. dt = amount of seconds between frames
     prevDateNow = performance.now();
 
 
