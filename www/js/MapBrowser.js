@@ -2,7 +2,7 @@ const MapBrowser = { // should set back to 0 at some points
     state : 0, // 0 = disabled, 1 = standard map browser, 2 = custom map browser
     scrollY: 0,
     scrollVel: 0,
-    scrollVelAverager : new Averager(10),
+    scrollVelAverager : new Averager(5),
     scrollAmount: null,
     selectedMapIndex: -1, // -1 == no map selected ... string of map name when a map is selected
     maxScroll: -50,
@@ -91,16 +91,16 @@ const MapBrowser = { // should set back to 0 at some points
         // called every frame when gamestate == 2
 
         // changes the position of buttons on scroll
-        if (TouchHandler.dragging == 1 && TouchHandler.touches[0].x > 250 && TouchHandler.touches[0].x < 650) {
+        if (TouchHandler.dragging == 1 && TouchHandler.touches[0].x * CanvasArea.scale > 250 && TouchHandler.touches[0].x * CanvasArea.scale < 650) {
             if (this.scrollAmount == null) { // start of scroll
                 this.scrollAmount = this.scrollY
             }
 
             // is scrolling
-            this.scrollAmount += TouchHandler.dragAmountY
+            this.scrollAmount += TouchHandler.dragAmountY * CanvasArea.scale
 
             // sets scrollVel to average drag amount of past 10 frames
-            this.scrollVelAverager.pushValue(TouchHandler.dragAmountY)
+            this.scrollVelAverager.pushValue(TouchHandler.dragAmountY * CanvasArea.scale)
             this.scrollVel = this.scrollVelAverager.getAverage()
 
             this.scrollY = this.scrollAmount;
@@ -113,7 +113,11 @@ const MapBrowser = { // should set back to 0 at some points
             }
 
             this.scrollY += this.scrollVel
-            this.scrollVel = (Math.abs(this.scrollVel) > 0.1) ? this.scrollVel * (1 - 0.05 * dt) : 0        
+            if (Math.abs(this.scrollVel) > 0.1) { // apply friction
+                this.scrollVel -= this.scrollVel * 5 * dt
+            } else {
+                this.scrollVel = 0
+            }
         }
 
 

@@ -6,7 +6,8 @@ class Averager {
     }
         
     pushValue = (value) => {
-        if (this.frames.push(value) > this.maxFramesSampled * 60 * dt) {this.frames.shift()} // adds new value to frames[] & removes oldest (if theres more then max allowed frames in array)
+        this.frames.push(value)
+        if (this.frames.length > this.maxFramesSampled / 60 / dt) {this.frames.shift()} // adds new value to frames[] & removes oldest (if theres more then max allowed frames in array)
     }
 
     getAverage = () => {
