@@ -105,7 +105,7 @@ const Tutorial = {
                 if (this.targets[0][1] > 0) {
 
                     if (Math.abs(Player.lookAngle.getAngleInDegrees() - this.targets[0][0]) < 8) {
-                        this.targets[0][1] -= (0.8 * dt);
+                        this.targets[0][1] -= (60 * dt);
                     } else { this.targets[0][1] = 50 }
     
                 } else { this.targets.shift()} // remove first element
@@ -130,7 +130,7 @@ const Tutorial = {
                 this.state ++;
                 this.pausePlayer = true
                 UserInterface.renderedButtons = UserInterface.btnGroup_inLevel.concat(btn_next)
-            }, 2000);
+            }, 1800);
             this.timerStarted = true;
         }
 

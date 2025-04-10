@@ -421,7 +421,7 @@ const Player = {
 
 
             
-            // show overstrafe warning
+            // show overstrafe warning BROKEN
             if (this.addSpeed > 320 * airAcceleration * dt) { // 11:04 in zweeks video shows why u lose speed
                 if (UserInterface.showOverstrafeWarning == false) {
                     UserInterface.showOverstrafeWarning = true;
@@ -714,7 +714,7 @@ const Player = {
     },
 
     startLevel: function () {
-        this.velocity.set(180, 0); // 6,0
+        this.velocity.set(150, 0); // 6,0
         this.velocity = this.velocity.rotate(this.lookAngle.getAngleInDegrees());
     },
 
