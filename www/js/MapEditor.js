@@ -385,21 +385,21 @@ const MapEditor = {
                     ctx.fillText("selectedElements: " + this.selectedElements, textX, 220);
                     
                     if (TouchHandler.dragging) {
-                        ctx.fillText("touch: " + Math.round(TouchHandler.touches[0].x) + ", " + Math.round(TouchHandler.touches[0].y), textX, 240);
+                        ctx.fillText("touch (unadjusted): " + Math.round(TouchHandler.touches[0].x) + ", " + Math.round(TouchHandler.touches[0].y), textX, 240);
                         
                         // mapToRange(number, inMin, inMax, outMin, outMax)
                         const touchXMapped = CanvasArea.mapToRange(TouchHandler.touches[0].x, 0, CanvasArea.canvas.width, this.screen.cornerX, this.screen.cornerX + this.screen.width)
                         const touchYMapped = CanvasArea.mapToRange(TouchHandler.touches[0].y, 0, CanvasArea.canvas.height, this.screen.cornerY, this.screen.cornerY + this.screen.height)
                         
-                        ctx.fillText("touch mapped: " + Math.round(touchXMapped) + ", " + Math.round(touchYMapped), textX, 260);
+                        ctx.fillText("touch global map coords: " + Math.round(touchXMapped) + ", " + Math.round(touchYMapped), textX, 260);
                     }
     
-                    ctx.fillText("debug info: ", textX, 280);
+                    // ctx.fillText("debug info: ", textX, 280);
     
     
                     if (TouchHandler.zoom.isZooming) { // draw center point between two fingers of zoom
                         ctx.save()
-                        ctx.translate(TouchHandler.zoom.x, TouchHandler.zoom.y)
+                        ctx.translate(TouchHandler.zoom.x * CanvasArea.scale, TouchHandler.zoom.y * CanvasArea.scale)
                         ctx.fillRect(-3,-3,6,6)
                         ctx.restore()
                     }
@@ -471,12 +471,12 @@ const MapEditor = {
                 }
                 
                 // ACTUALLY SCROLLING THE SCREEN
-                this.scrollAmountX -= TouchHandler.dragAmountX / this.zoom
-                this.scrollAmountY -= TouchHandler.dragAmountY / this.zoom
+                this.scrollAmountX -= TouchHandler.dragAmountX / this.zoom * CanvasArea.scale
+                this.scrollAmountY -= TouchHandler.dragAmountY / this.zoom * CanvasArea.scale
 
                 // sets scrollVel to average drag amount of past 10 frames
-                this.scrollVelAveragerX.pushValue(-TouchHandler.dragAmountX / this.zoom)
-                this.scrollVelAveragerY.pushValue(-TouchHandler.dragAmountY / this.zoom)
+                this.scrollVelAveragerX.pushValue(-TouchHandler.dragAmountX / this.zoom * CanvasArea.scale)
+                this.scrollVelAveragerY.pushValue(-TouchHandler.dragAmountY / this.zoom * CanvasArea.scale) 
 
                 this.scrollVelX = this.scrollVelAveragerX.getAverage()
                 this.scrollVelY = this.scrollVelAveragerY.getAverage()
@@ -497,9 +497,18 @@ const MapEditor = {
     
                 this.screen.x += this.scrollVelX
                 this.screen.y += this.scrollVelY
-                this.scrollVelX = (Math.abs(this.scrollVelX) > 0.1) ? this.scrollVelX * (1 - 0.05 * dt) : 0 // dampening
-                this.scrollVelY = (Math.abs(this.scrollVelY) > 0.1) ? this.scrollVelY * (1 - 0.05 * dt) : 0
+                
+                if (Math.abs(this.scrollVelX) > 0.1) { // apply X friction
+                    this.scrollVelX -= this.scrollVelX * 3 * dt
+                } else {
+                    this.scrollVelX = 0
+                }
 
+                if (Math.abs(this.scrollVelY) > 0.1) { // apply Y friction
+                    this.scrollVelY -= this.scrollVelY * 3 * dt
+                } else {
+                    this.scrollVelY = 0
+                }
 
                 // UPDATE THE ANGLE OF OBJECTS WHEN THEIR ANGLE SLIDER IS PRESSED
                 if (!btn_angleSlider.confirmed) {btn_angleSlider.func()}
