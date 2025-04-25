@@ -607,7 +607,10 @@ const Player = {
             if (this.jumpValue < 0) {
                 this.jumpValue = 0;
                 this.jumpVelocity = 200;
-                AudioHandler.jumpAudio.play();
+                // AudioHandler.jumpAudio.play();
+                // AudioHandler.playSound(AudioHandler.jump1Audio)
+                AudioHandler.playSound(AudioHandler[`jump${Math.floor(Math.random() * 3) + 1}Audio`]);
+
                 if (!this.checkCollision(Map.renderedPlatforms.filter(platform => platform.wall == 0))) { // checkCollision on an array of just platforms (no walls)
                     AudioHandler.splashAudio.play();
                     this.speedCameraOffset.zoomAverager.clear()

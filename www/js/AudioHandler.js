@@ -1,54 +1,78 @@
 const AudioHandler = {
 
-    
-    init : function() {
+
+    init: function () {
 
         // FROM: https://github.com/apache/cordova-plugin-media/issues/182
         // Need to unescape if path have '%20' component
-        var menuMusic_path = decodeURI(cordova.file.applicationDirectory) + "www/assets/audio/menuMusic.wav";
+
+        var surfacing_path = decodeURI(cordova.file.applicationDirectory) + "www/assets/audio/surfacing.mp3";
         var successAudio_path = decodeURI(cordova.file.applicationDirectory) + "www/assets/audio/success.mp3";
-        var jumpAudio_path = decodeURI(cordova.file.applicationDirectory) + "www/assets/audio/jump.mp3";
+        var jump1Audio_path = decodeURI(cordova.file.applicationDirectory) + "www/assets/audio/jump1.mp3";
+        var jump2Audio_path = decodeURI(cordova.file.applicationDirectory) + "www/assets/audio/jump2.mp3";
+        var jump3Audio_path = decodeURI(cordova.file.applicationDirectory) + "www/assets/audio/jump3.mp3";
         var splashAudio_path = decodeURI(cordova.file.applicationDirectory) + "www/assets/audio/splash.mp3";
 
         // iOS need to remove file://
         // could use a for loop here. Just throw all the sounds into an array?
         if (device.platform.toLowerCase() == "ios") {
-            menuMusic_path = menuMusic_path.replace("file://", "");
+            surfacing_path = surfacing_path.replace("file://", "");
             successAudio_path = successAudio_path.replace("file://", "");
-            jumpAudio_path = jumpAudio_path.replace("file://", "")
+            jump1Audio_path = jump1Audio_path.replace("file://", "")
+            jump2Audio_path = jump2Audio_path.replace("file://", "")
+            jump3Audio_path = jump3Audio_path.replace("file://", "")
             splashAudio_path = splashAudio_path.replace("file://", "")
         }
 
 
-        // setRate(1) in onSuccess callbacks to counter caching workaround which sets Rate(9999) to play the audio silently at the start of game.
-        this.menuMusic = new Media(menuMusic_path, null, (error) => {console.log(error);});
-        this.successAudio = new Media(successAudio_path, function(){AudioHandler.successAudio.setRate(1)}, (error) => {console.log(error);});
-        this.jumpAudio = new Media (jumpAudio_path, function(){AudioHandler.jumpAudio.setRate(1)}, (error) => {console.log(error);})
-        this.splashAudio = new Media (splashAudio_path, function(){AudioHandler.splashAudio.setRate(1)}, (error) => {console.log(error);})
+        // Media(src, mediaSuccess, mediaError, mediaStatus, mediaDurationUpdate); mediaDurationUpdate is called when duration information becomes available and passes duration
+        this.surfacing = new Media(surfacing_path, null, (error) => { console.log(error); });
+
+        this.jump1Audio = new Media(jump1Audio_path, null, (error) => { console.log(error) })
+        this.jump2Audio = new Media(jump2Audio_path, null, (error) => { console.log(error) })
+        this.jump3Audio = new Media(jump3Audio_path, null, (error) => { console.log(error) })
+        this.successAudio = new Media(successAudio_path, null, (error) => { console.log(error) });
+        this.splashAudio = new Media(splashAudio_path, null, (error) => { console.log(error) })
 
 
-        // PLAY ALL SOUNDS REALLY QUICKLY TO CACHE THEM
-        this.jumpAudio.setRate(999)
-        this.jumpAudio.play()
+        // ONLY JUMP SOUNDS SEEM TO NEED TO BE CACHED RIGHT NOW..
+        // NOT SURE WHY. THE OTHER SOUNDS ARE PLAYING WITHOUT LAG
 
-        this.successAudio.setRate(999)
-        this.successAudio.play()
+        cacheSound(this.jump1Audio)
+        cacheSound(this.jump2Audio)
+        cacheSound(this.jump3Audio)
 
-        this.splashAudio.setRate(999)
-        this.splashAudio.play()
-        
+        function cacheSound(mediaObj) {
+            mediaObj.play();
+
+            setTimeout(() => {
+                mediaObj.stop();
+            }, 490); // stop after 500ms (the silent portion)
+        }
+
+
         // SET CORRECT VOLUMES
+        // FIX THIS: Needs to be called once all sounds are available
         this.setVolumes();
-        this.menuMusic.play()
+        
+        // start music
+        this.surfacing.play()
+
     },
 
 
+    playSound: function (mediaObj) { // can implement a flag for files that dont have silence
+        mediaObj.seekTo(500)
+        mediaObj.play()
+    },
 
-    setVolumes : function() {
 
-        this.menuMusic.setVolume(UserInterface.settings.volume);
+    setVolumes: function () {
+        this.surfacing.setVolume(UserInterface.settings.volume);
         this.successAudio.setVolume(UserInterface.settings.volume);
-        this.jumpAudio.setVolume(UserInterface.settings.volume);
+        this.jump1Audio.setVolume(UserInterface.settings.volume);
+        this.jump2Audio.setVolume(UserInterface.settings.volume);
+        this.jump3Audio.setVolume(UserInterface.settings.volume);
         this.splashAudio.setVolume(UserInterface.settings.volume);
     },
 }
