@@ -450,25 +450,14 @@ const UserInterface = {
                 // move element to rounded and mapped button coords
                 // snap element to snapping slider
 
-                this.x += TouchHandler.dragAmountX
-                this.y += TouchHandler.dragAmountY
+                this.x += TouchHandler.dragAmountX * CanvasArea.scale
+                this.y += TouchHandler.dragAmountY * CanvasArea.scale
 
                 // panning if at edges of screen
-                if (this.x + this.width / 2 > CanvasArea.canvas.width - 280) {
-                    MapEditor.screen.x += 4 / MapEditor.zoom * dt
-                }
-
-                if (this.x + this.width / 2 < 50) {
-                    MapEditor.screen.x -= 4 / MapEditor.zoom * dt
-                }
-
-                if (this.y + this.height / 2 > CanvasArea.canvas.height - 40) {
-                    MapEditor.screen.y += 4 / MapEditor.zoom * dt
-                }
-
-                if (this.y + this.height / 2 < 40) {
-                    MapEditor.screen.y -= 4 / MapEditor.zoom * dt
-                }
+                if (this.x > CanvasArea.canvas.width - 340) { MapEditor.screen.x += 400 / MapEditor.zoom * dt }
+                if (this.x < 60) { MapEditor.screen.x -= 400 / MapEditor.zoom * dt }
+                if (this.y > CanvasArea.canvas.height - 130) { MapEditor.screen.y += 400 / MapEditor.zoom * dt }
+                if (this.y < 30) { MapEditor.screen.y -= 400 / MapEditor.zoom * dt }
 
 
                 // MOVING EACH SELECTED ELEMENT TO FOLLOW BUTTON
@@ -522,14 +511,14 @@ const UserInterface = {
             } else if (TouchHandler.dragging) {
 
                 // move button according to touch dragging
-                this.x += TouchHandler.dragAmountX
-                this.y += TouchHandler.dragAmountY
+                this.x += TouchHandler.dragAmountX * CanvasArea.scale
+                this.y += TouchHandler.dragAmountY * CanvasArea.scale
 
                 // panning if at edges of screen
-                if (this.x > CanvasArea.canvas.width - 340) { MapEditor.screen.x += 4 / MapEditor.zoom * dt }
-                if (this.x < 60) { MapEditor.screen.x -= 4 / MapEditor.zoom * dt }
-                if (this.y > CanvasArea.canvas.height - 130) { MapEditor.screen.y += 4 / MapEditor.zoom * dt }
-                if (this.y < 30) { MapEditor.screen.y -= 4 / MapEditor.zoom * dt }
+                if (this.x > CanvasArea.canvas.width - 340) { MapEditor.screen.x += 400 / MapEditor.zoom * dt }
+                if (this.x < 60) { MapEditor.screen.x -= 400 / MapEditor.zoom * dt }
+                if (this.y > CanvasArea.canvas.height - 130) { MapEditor.screen.y += 400 / MapEditor.zoom * dt }
+                if (this.y < 30) { MapEditor.screen.y -= 400 / MapEditor.zoom * dt }
 
 
                 // TR pinned corner MAP COORDS
@@ -605,14 +594,14 @@ const UserInterface = {
             } else if (TouchHandler.dragging) {
 
                 // move button according to touch dragging
-                this.x += TouchHandler.dragAmountX
-                this.y += TouchHandler.dragAmountY
+                this.x += TouchHandler.dragAmountX * CanvasArea.scale
+                this.y += TouchHandler.dragAmountY * CanvasArea.scale
 
                 // panning if at edges of screen
-                if (this.x > CanvasArea.canvas.width - 340) { MapEditor.screen.x += 4 / MapEditor.zoom * dt }
-                if (this.x < 60) { MapEditor.screen.x -= 4 / MapEditor.zoom * dt }
-                if (this.y > CanvasArea.canvas.height - 130) { MapEditor.screen.y += 4 / MapEditor.zoom * dt }
-                if (this.y < 30) { MapEditor.screen.y -= 4 / MapEditor.zoom * dt }
+                if (this.x > CanvasArea.canvas.width - 340) { MapEditor.screen.x += 400 / MapEditor.zoom * dt }
+                if (this.x < 60) { MapEditor.screen.x -= 400 / MapEditor.zoom * dt }
+                if (this.y > CanvasArea.canvas.height - 130) { MapEditor.screen.y += 400 / MapEditor.zoom * dt }
+                if (this.y < 30) { MapEditor.screen.y -= 400 / MapEditor.zoom * dt }
 
 
                 // TL pinned corner MAP COORDS
@@ -688,14 +677,14 @@ const UserInterface = {
             } else if (TouchHandler.dragging) {
 
                 // move button according to touch dragging
-                this.x += TouchHandler.dragAmountX
-                this.y += TouchHandler.dragAmountY
+                this.x += TouchHandler.dragAmountX * CanvasArea.scale
+                this.y += TouchHandler.dragAmountY * CanvasArea.scale
 
                 // panning if at edges of screen
-                if (this.x > CanvasArea.canvas.width - 340) { MapEditor.screen.x += 4 / MapEditor.zoom * dt }
-                if (this.x < 60) { MapEditor.screen.x -= 4 / MapEditor.zoom * dt }
-                if (this.y > CanvasArea.canvas.height - 130) { MapEditor.screen.y += 4 / MapEditor.zoom * dt }
-                if (this.y < 30) { MapEditor.screen.y -= 4 / MapEditor.zoom * dt }
+                if (this.x > CanvasArea.canvas.width - 340) { MapEditor.screen.x += 400 / MapEditor.zoom * dt }
+                if (this.x < 60) { MapEditor.screen.x -= 400 / MapEditor.zoom * dt }
+                if (this.y > CanvasArea.canvas.height - 130) { MapEditor.screen.y += 400 / MapEditor.zoom * dt }
+                if (this.y < 30) { MapEditor.screen.y -= 400 / MapEditor.zoom * dt }
 
 
                 // BL pinned corner MAP COORDS
@@ -771,14 +760,14 @@ const UserInterface = {
             } else if (TouchHandler.dragging) {
 
                 // move button according to touch dragging
-                this.x += TouchHandler.dragAmountX
-                this.y += TouchHandler.dragAmountY
+                this.x += TouchHandler.dragAmountX * CanvasArea.scale
+                this.y += TouchHandler.dragAmountY * CanvasArea.scale
 
                 // panning if at edges of screen
-                if (this.x > CanvasArea.canvas.width - 340) { MapEditor.screen.x += 4 / MapEditor.zoom * dt }
-                if (this.x < 60) { MapEditor.screen.x -= 4 / MapEditor.zoom * dt }
-                if (this.y > CanvasArea.canvas.height - 130) { MapEditor.screen.y += 4 / MapEditor.zoom * dt }
-                if (this.y < 30) { MapEditor.screen.y -= 4 / MapEditor.zoom * dt }
+                if (this.x > CanvasArea.canvas.width - 340) { MapEditor.screen.x += 400 / MapEditor.zoom * dt }
+                if (this.x < 60) { MapEditor.screen.x -= 400 / MapEditor.zoom * dt }
+                if (this.y > CanvasArea.canvas.height - 130) { MapEditor.screen.y += 400 / MapEditor.zoom * dt }
+                if (this.y < 30) { MapEditor.screen.y -= 400 / MapEditor.zoom * dt }
 
 
                 // BR pinned corner MAP COORDS
