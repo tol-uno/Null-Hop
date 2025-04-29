@@ -325,11 +325,18 @@ const UserInterface = {
         btn_multiSelect = new Button("60", "CanvasArea.canvas.height - 200", 60, "toggle_button", "toggle_button_pressed", 1, "", function (sync) {
             if (MapEditor.loadedMap) { // throws an error otherwise
                 if (sync) {
-                    // doesnt need to sync
+                    this.toggle = MapEditor.multiSelect;
                 } else {
-                    if (this.toggle) { // turn off multSelect
+                    if (this.toggle) { // turn off multiSelect
                         this.toggle = 0;
                         MapEditor.multiSelect = false
+
+                        // turn off dragSelect bc it needs multiSelect
+                        if (MapEditor.dragSelect) {
+                            MapEditor.dragSelect = false
+                            btn_dragSelect.func(true) // sync button
+                        }
+
                         if (MapEditor.selectedElements.length > 1) {
                             MapEditor.selectedElements = [MapEditor.selectedElements[MapEditor.selectedElements.length - 1]] // make it only select the last element in the array
 
@@ -346,9 +353,28 @@ const UserInterface = {
 
                         }
 
-                    } else { // turn on
+                    } else { // turn on multiSelect
                         this.toggle = 1;
                         MapEditor.multiSelect = true
+                    }
+                }
+            }
+        })
+
+        btn_dragSelect = new Button("60", "CanvasArea.canvas.height - 300", 60, "toggle_button", "toggle_button_pressed", 1, "", function (sync) {
+            if (MapEditor.loadedMap) { // throws an error otherwise
+                if (sync) {
+                    this.toggle = MapEditor.dragSelect;
+                } else {
+                    if (this.toggle) { // turn off dragSelect
+                        this.toggle = 0;
+                        MapEditor.dragSelect = false
+
+                    } else { // turn on dragSelect and multiSelect (required)
+                        this.toggle = 1;
+                        MapEditor.dragSelect = true
+                        MapEditor.multiSelect = true
+                        btn_multiSelect.func(true)  // sync button's toggle
                     }
                 }
             }
@@ -1604,7 +1630,7 @@ const UserInterface = {
         this.btnGroup_customMapBrowser = [btn_mainMenu]
         this.btnGroup_editMapBrowser = [btn_mainMenu]
         this.btnGroup_mapEditorMenu = [btn_mainMenu, btn_new_map, btn_load_map, btn_import_map, btn_import_map_text]
-        this.btnGroup_mapEditorInterface = [btn_exit_edit, btn_add_platform, btn_map_colors, btn_map_settings, btn_add_checkpoint, btn_multiSelect, btn_snappingSlider]
+        this.btnGroup_mapEditorInterface = [btn_exit_edit, btn_add_platform, btn_map_colors, btn_map_settings, btn_add_checkpoint, btn_dragSelect, btn_multiSelect, btn_snappingSlider]
         this.btnGroup_inLevel = [btn_mainMenu, btn_restart, btn_jump];
         this.btnGroup_mapColor = [
             btn_mainMenu,
@@ -1646,6 +1672,7 @@ const UserInterface = {
 
             btn_delete_platform,
             btn_duplicate_platform,
+            btn_dragSelect,
             btn_multiSelect,
             btn_snappingSlider
         ]
@@ -1655,6 +1682,7 @@ const UserInterface = {
 
             btn_translate,
             btn_playerAngleSlider,
+            btn_dragSelect,
             btn_multiSelect,
             btn_snappingSlider
         ]
@@ -1666,6 +1694,7 @@ const UserInterface = {
             btn_checkpointAngleSlider,
 
             btn_delete_platform,
+            btn_dragSelect,
             btn_multiSelect,
             btn_snappingSlider
         ]
@@ -1676,6 +1705,7 @@ const UserInterface = {
             btn_delete_platform,
             btn_duplicate_platform,
             btn_translate,
+            btn_dragSelect,
             btn_multiSelect,
             btn_snappingSlider
         ]
@@ -2083,6 +2113,7 @@ const UserInterface = {
         });
 
         // this should all be in mapEditor
+        // also use screenPosToMapPos function in MapEditor instead of mapping touch manually
         if (UserInterface.gamestate == 7 && (MapEditor.editorState == 1 || MapEditor.editorState == 2)) { // if in MapEditors main edit screens 
 
             if (Math.abs(MapEditor.scrollVelX) < 0.5 && Math.abs(MapEditor.scrollVelY) < 0.5) { // if not scrolling/panning
@@ -2106,11 +2137,40 @@ const UserInterface = {
 
                 if (editorIgnoreRelease == false) {
 
+                    // IF CLICKED ON PLAYERSTART, OR CHECKPOINT, OR PLATFORM for btnGroup
+                    let hitPlayerStart = false;
+                    let hitCheckPoint = false;
+                    let hitPlatform = false;
+
+
                     // Maps the screens touch to the map's zoomed and panned view
                     // mapToRange(number, inMin, inMax, outMin, outMax)
                     const touchXMapped = CanvasArea.mapToRange(x, 0, CanvasArea.canvas.width, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width)
                     const touchYMapped = CanvasArea.mapToRange(y, 0, CanvasArea.canvas.height, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height)
 
+                    if (MapEditor.dragSelect) {
+                        MapEditor.dragSelect = false
+                        btn_dragSelect.func(true) // sync button
+
+                        // add marqueeSelectedElements to selectedElements
+                        // NEED TO MAKE SURE EACH PLATFORM ISNT ALREADY SELECTED BEFORE ADDING
+                        MapEditor.marqueeSelectedElements.forEach((platformIndex) => {
+
+
+                            if (!MapEditor.selectedElements.includes(platformIndex)) { // add if not already included
+                                MapEditor.selectedElements = MapEditor.selectedElements.concat(platformIndex)
+                                hitPlatform = true
+                            }
+
+                        })
+
+                        MapEditor.marqueeSelectedElements = [];
+
+                        // return // exits the touchReleased function ()
+                    }
+
+
+                    // used to check if clicked on platforms
                     function isPointInRect(pointX, pointY, rect) {
                         // Convert angle from degrees to radians
                         const angleRad = rect.angle * Math.PI / 180;
@@ -2137,11 +2197,6 @@ const UserInterface = {
                     }
 
 
-                    // TEST IF CLICKED ON PLAYERSTART, OR CHECKPOINT, OR PLATFORM
-                    let hitPlayerStart = false;
-                    let hitCheckPoint = false;
-                    let hitPlatform = false;
-
                     const playerStartRect = {
                         x: MapEditor.loadedMap.playerStart.x,
                         y: MapEditor.loadedMap.playerStart.y,
@@ -2150,9 +2205,8 @@ const UserInterface = {
                         angle: MapEditor.loadedMap.playerStart.angle,
                     }
 
-                    if ( // RELEASED ON playerStart
-                        isPointInRect(touchXMapped, touchYMapped, playerStartRect)
-                    ) {
+                    // RELEASED ON playerStart
+                    if (isPointInRect(touchXMapped, touchYMapped, playerStartRect)) {
                         if (MapEditor.selectedElements.includes("playerStart")) {
                             // toggle playerStart off
                             const indexOfPlayerStart = MapEditor.selectedElements.indexOf("playerStart")
@@ -2164,7 +2218,6 @@ const UserInterface = {
 
                         hitPlayerStart = true
                     }
-
 
 
                     // RELEASED ON CHECKPOINT
@@ -2223,7 +2276,6 @@ const UserInterface = {
                     }
 
 
-
                     // RELEASED ON PLATFORM
                     if (!hitPlayerStart && !hitCheckPoint) {
                         MapEditor.renderedPlatforms.forEach(platform => {
@@ -2247,7 +2299,6 @@ const UserInterface = {
                             } // end of clicked on platform
                         }) // end of looping through all renderedPlatforms
                     }
-
 
 
                     // SETTING BTN GROUPS AND UPDATING NESESARY SLIDERS AND BUTTONS
@@ -2276,7 +2327,7 @@ const UserInterface = {
                         }
                     }
 
-                } // end of not ignoring touch
+                } // end of NOT ignoring touch bc touched button or side panel
             } // end of user not scrolling/panning        
         } // if in MapEditors main edit screens 
     },
@@ -2387,7 +2438,7 @@ const UserInterface = {
 
 
             if (this.settings.strafeHUD == 1) { // STRAFE OPTIMIZER HUD
-                
+
                 const ctx = CanvasArea.ctx
 
                 if (this.settings.debugText == 1) {
@@ -2463,7 +2514,7 @@ const UserInterface = {
                         // calculations
                         const averageX = Math.abs(TouchHandler.averageDragX.getAverage())
                         const averageY = Math.abs(TouchHandler.averageDragY.getAverage())
-                        if (averageY > 5 * 1/60/dt && averageY > averageX * 1.25) {
+                        if (averageY > 5 * 1 / 60 / dt && averageY > averageX * 1.25) {
                             if (this.showVerticalWarning == false) {
                                 this.showVerticalWarning = true;
                                 setTimeout(() => { UserInterface.showVerticalWarning = false }, 1500); // waits 1 second to hide warning

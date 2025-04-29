@@ -725,113 +725,13 @@ const Player = {
 
         let collisions = 0;
 
-        // takes a rectangle defined by center coordinates (x, y), width, height, and angle in radians
-        // returns an array of corner points in clockwise order, starting from the top-left corner
-        function createPoligon(x, y, width, height, angle) {
-            // Calculate half width and half height
-            var hw = width / 2;
-            var hh = height / 2;
-
-            // Calculate the cos and sin of the angle
-            var cosAngle = Math.cos(angle);
-            var sinAngle = Math.sin(angle);
-
-            // Calculate the corner points relative to the center
-            var topLeft = {
-                x: x - (hw * cosAngle) - (hh * sinAngle),
-                y: y - (hw * sinAngle) + (hh * cosAngle)
-            };
-
-            var topRight = {
-                x: x + (hw * cosAngle) - (hh * sinAngle),
-                y: y + (hw * sinAngle) + (hh * cosAngle)
-            };
-
-            var bottomRight = {
-                x: x + (hw * cosAngle) + (hh * sinAngle),
-                y: y + (hw * sinAngle) - (hh * cosAngle)
-            };
-
-            var bottomLeft = {
-                x: x - (hw * cosAngle) + (hh * sinAngle),
-                y: y - (hw * sinAngle) - (hh * cosAngle)
-            };
-
-
-            // Return the corner points in clockwise order
-            return [topLeft, topRight, bottomRight, bottomLeft];
-        }
-
-        const playerPoligon = createPoligon(this.x, this.y, 32, 32, this.lookAngle.getAngleInDegrees() * Math.PI / 180) // player angle converted to rads
+        const playerPoligon = CanvasArea.createPoligon(this.x, this.y, 32, 32, this.lookAngle.getAngleInDegrees() * Math.PI / 180) // player angle converted to rads
 
         // check player against every platform
         arrayOfPlatformsToCheck.forEach(platform => {
-            const platformPoligon = createPoligon(platform.x, platform.y, platform.width, platform.height, platform.angleRad)
+            const platformPoligon = CanvasArea.createPoligon(platform.x, platform.y, platform.width, platform.height, platform.angleRad)
 
-            // @param a an array of connected points [{x:, y:}, {x:, y:},...] that form a closed polygon
-            // @param b an array of connected points [{x:, y:}, {x:, y:},...] that form a closed polygon
-            // @return true if there is any intersection between the 2 polygons, false otherwise
-            // https://stackoverflow.com/questions/10962379/how-to-check-intersection-between-2-rotated-rectangles
-            function doPolygonsIntersect(a, b) {
-                const polygons = [a, b];
-                let minA, maxA, projected, i, i1, j, minB, maxB;
-
-                for (i = 0; i < polygons.length; i++) {
-
-                    // for each polygon, look at each edge of the polygon, and determine if it separates
-                    // the two shapes
-                    const polygon = polygons[i];
-                    for (i1 = 0; i1 < polygon.length; i1++) {
-
-                        // grab 2 vertices to create an edge
-                        const i2 = (i1 + 1) % polygon.length;
-                        const p1 = polygon[i1];
-                        const p2 = polygon[i2];
-
-                        // find the line perpendicular to this edge
-                        const normal = {
-                            x: p2.y - p1.y,
-                            y: p1.x - p2.x
-                        };
-
-                        minA = maxA = undefined;
-                        // for each vertex in the first shape, project it onto the line perpendicular to the edge
-                        // and keep track of the min and max of these values
-                        for (j = 0; j < a.length; j++) {
-                            projected = normal.x * a[j].x + normal.y * a[j].y;
-                            if (minA == null || projected < minA) {
-                                minA = projected;
-                            }
-                            if (maxA == null || projected > maxA) {
-                                maxA = projected;
-                            }
-                        }
-
-                        // for each vertex in the second shape, project it onto the line perpendicular to the edge
-                        // and keep track of the min and max of these values
-                        minB = maxB = undefined;
-                        for (j = 0; j < b.length; j++) {
-                            projected = normal.x * b[j].x + normal.y * b[j].y;
-                            if (minB == null || projected < minB) {
-                                minB = projected;
-                            }
-                            if (maxB == null || projected > maxB) {
-                                maxB = projected;
-                            }
-                        }
-
-                        // if there is no overlap between the projects, the edge we are looking at separates the two
-                        // polygons, and we know there is no overlap
-                        if (maxA < minB || maxB < minA) {
-                            return false;
-                        }
-                    }
-                }
-                return true;
-            };
-
-
-            if (doPolygonsIntersect(playerPoligon, platformPoligon)) {
+            if (CanvasArea.doPolygonsIntersect(playerPoligon, platformPoligon)) {
                 collisions++
             }
         })
