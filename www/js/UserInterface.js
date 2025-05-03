@@ -2049,17 +2049,6 @@ const UserInterface = {
         }
     },
 
-    arraysAreEqual: function (a, b) {
-        if (a === b) return true;
-        if (a == null || b == null) return false;
-        if (a.length !== b.length) return false;
-
-        for (var i = 0; i < a.length; ++i) {
-            if (a[i] !== b[i]) return false;
-        }
-        return true;
-    },
-
     touchStarted: function (x, y) { // TRIGGERED BY TouchHandler
 
         this.renderedButtons.forEach(button => {
@@ -2086,15 +2075,10 @@ const UserInterface = {
         });
     },
 
-    touchReleased: function (x, y) { // TRIGGERED BY TouchHandler
+    touchReleased: function (x, y) { // TRIGGERED BY TouchHandler. x and y are already canvas scaled
 
-        // run button functions if clicked
-        // if in mapEditor
-        // was draggin,panning,and zooming the screen -- skip over all this \/
-        // touched side panel
-        // touched playerStart
-        // touched platforms
-        // touched the background
+        // run button's function if clicked
+        // run MapEditor.touchRelease if active and no buttons are pressed
 
         let editorIgnoreRelease = false;
 
@@ -2103,7 +2087,7 @@ const UserInterface = {
                 if ( // if x and y touch is within button
                     x >= button.x && x <= button.x + button.width &&
                     y >= button.y && y <= button.y + button.height &&
-                    (MapBrowser.scrollVel == 0 || MapBrowser.scrollAmount == null) // dont release if scrolling through MapBrowser BROWSER
+                    (MapBrowser.scrollVel == 0 || MapBrowser.scrollAmount == null) // dont release if scrolling through Map Browser 
                 ) {
                     editorIgnoreRelease = true;
                     button.released();
@@ -2112,224 +2096,14 @@ const UserInterface = {
             }
         });
 
-        // this should all be in mapEditor
-        // also use screenPosToMapPos function in MapEditor instead of mapping touch manually
-        if (UserInterface.gamestate == 7 && (MapEditor.editorState == 1 || MapEditor.editorState == 2)) { // if in MapEditors main edit screens 
+        if ( // no button was pressed and MapEditor is active
+            editorIgnoreRelease == false &&
+            UserInterface.gamestate == 7 &&
+            (MapEditor.editorState == 1 || MapEditor.editorState == 2)
+        ) {
+            MapEditor.touchReleased(x, y)
+        }
 
-            if (Math.abs(MapEditor.scrollVelX) < 0.5 && Math.abs(MapEditor.scrollVelY) < 0.5) { // if not scrolling/panning
-
-                // if released within the edit platform side panel
-                // needs to be matched with MapEditor.render() values
-                //     x : CanvasArea.canvas.width - 280,
-                //     y : 20,
-                //     width : 225,
-                //     height : 320
-
-                if (
-                    MapEditor.editorState == 2 &&
-                    x >= CanvasArea.canvas.width - 280 &&
-                    x <= CanvasArea.canvas.width - 280 + 225 &&
-                    y >= 20 &&
-                    y <= 20 + 320
-                ) {
-                    editorIgnoreRelease = true;
-                }
-
-                if (editorIgnoreRelease == false) {
-
-                    // IF CLICKED ON PLAYERSTART, OR CHECKPOINT, OR PLATFORM for btnGroup
-                    let hitPlayerStart = false;
-                    let hitCheckPoint = false;
-                    let hitPlatform = false;
-
-
-                    // Maps the screens touch to the map's zoomed and panned view
-                    // mapToRange(number, inMin, inMax, outMin, outMax)
-                    const touchXMapped = CanvasArea.mapToRange(x, 0, CanvasArea.canvas.width, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width)
-                    const touchYMapped = CanvasArea.mapToRange(y, 0, CanvasArea.canvas.height, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height)
-
-                    if (MapEditor.dragSelect) {
-                        MapEditor.dragSelect = false
-                        btn_dragSelect.func(true) // sync button
-
-                        // add marqueeSelectedElements to selectedElements
-                        // NEED TO MAKE SURE EACH PLATFORM ISNT ALREADY SELECTED BEFORE ADDING
-                        MapEditor.marqueeSelectedElements.forEach((platformIndex) => {
-
-
-                            if (!MapEditor.selectedElements.includes(platformIndex)) { // add if not already included
-                                MapEditor.selectedElements = MapEditor.selectedElements.concat(platformIndex)
-                                hitPlatform = true
-                            }
-
-                        })
-
-                        MapEditor.marqueeSelectedElements = [];
-
-                        // return // exits the touchReleased function ()
-                    }
-
-
-                    // used to check if clicked on platforms
-                    function isPointInRect(pointX, pointY, rect) {
-                        // Convert angle from degrees to radians
-                        const angleRad = rect.angle * Math.PI / 180;
-
-                        // Calculate the sine and cosine of the angle
-                        const cosAngle = Math.cos(angleRad);
-                        const sinAngle = Math.sin(angleRad);
-
-                        // Translate point to rectangle's coordinate system (centered at origin)
-                        const translatedX = pointX - rect.x;
-                        const translatedY = pointY - rect.y;
-
-                        // Rotate point to align with the rectangle (reverse rotation)
-                        const rotatedX = cosAngle * translatedX + sinAngle * translatedY;
-                        const rotatedY = -sinAngle * translatedX + cosAngle * translatedY;
-
-                        // Check if the rotated point is within the axis-aligned rectangle
-                        const halfWidth = rect.width / 2;
-                        const halfHeight = rect.height / 2;
-
-                        const isInside = (Math.abs(rotatedX) <= halfWidth) && (Math.abs(rotatedY) <= halfHeight);
-
-                        return isInside;
-                    }
-
-
-                    const playerStartRect = {
-                        x: MapEditor.loadedMap.playerStart.x,
-                        y: MapEditor.loadedMap.playerStart.y,
-                        width: 32,
-                        height: 32,
-                        angle: MapEditor.loadedMap.playerStart.angle,
-                    }
-
-                    // RELEASED ON playerStart
-                    if (isPointInRect(touchXMapped, touchYMapped, playerStartRect)) {
-                        if (MapEditor.selectedElements.includes("playerStart")) {
-                            // toggle playerStart off
-                            const indexOfPlayerStart = MapEditor.selectedElements.indexOf("playerStart")
-                            MapEditor.selectedElements.splice(indexOfPlayerStart, 1)
-                        } else {
-                            // toggle playerStart on
-                            MapEditor.selectedElements = MapEditor.multiSelect ? MapEditor.selectedElements.concat("playerStart") : ["playerStart"]
-                        }
-
-                        hitPlayerStart = true
-                    }
-
-
-                    // RELEASED ON CHECKPOINT
-                    if (!hitPlayerStart) {
-                        MapEditor.loadedMap.checkpoints.forEach(checkpoint => {
-                            const checkpointIndex = MapEditor.loadedMap.checkpoints.indexOf(checkpoint)
-
-                            if ( // released checkpoint trigger 1
-                                Math.abs(checkpoint.triggerX1 - touchXMapped) <= 20 &&
-                                Math.abs(checkpoint.triggerY1 - touchYMapped) <= 20
-                            ) {
-                                if (MapEditor.selectedElements.some((element) => this.arraysAreEqual(element, [checkpointIndex, 1]))) {
-                                    // toggle trigger1 off
-                                    const indexOfSelectionItem = MapEditor.selectedElements.findIndex(element => this.arraysAreEqual(element, [checkpointIndex, 1]))
-                                    MapEditor.selectedElements.splice(indexOfSelectionItem, 1)
-                                } else {
-                                    // toggle trigger1 on
-                                    MapEditor.selectedElements = MapEditor.multiSelect ? MapEditor.selectedElements.concat([new Array(MapEditor.loadedMap.checkpoints.indexOf(checkpoint), 1)]) : [new Array(MapEditor.loadedMap.checkpoints.indexOf(checkpoint), 1)]
-                                }
-
-                                hitCheckPoint = true
-                            }
-
-                            if ( // released on checkpoint trigger 2
-                                Math.abs(checkpoint.triggerX2 - touchXMapped) <= 20 &&
-                                Math.abs(checkpoint.triggerY2 - touchYMapped) <= 20
-                            ) {
-                                if (MapEditor.selectedElements.some((element) => this.arraysAreEqual(element, [checkpointIndex, 2]))) {
-                                    // toggle trigger2 off
-                                    const indexOfSelectionItem = MapEditor.selectedElements.findIndex(element => this.arraysAreEqual(element, [checkpointIndex, 2]))
-                                    MapEditor.selectedElements.splice(indexOfSelectionItem, 1)
-                                } else {
-                                    // toggle trigger2 on
-                                    MapEditor.selectedElements = MapEditor.multiSelect ? MapEditor.selectedElements.concat([new Array(MapEditor.loadedMap.checkpoints.indexOf(checkpoint), 2)]) : [new Array(MapEditor.loadedMap.checkpoints.indexOf(checkpoint), 2)]
-                                }
-
-                                hitCheckPoint = true
-                            }
-
-                            if ( // released on playerRestart
-                                Math.abs(checkpoint.x - touchXMapped) <= 20 &&
-                                Math.abs(checkpoint.y - touchYMapped) <= 20
-                            ) {
-                                if (MapEditor.selectedElements.some((element) => this.arraysAreEqual(element, [checkpointIndex, 3]))) {
-                                    // toggle platerRestart off
-                                    const indexOfSelectionItem = MapEditor.selectedElements.findIndex(element => this.arraysAreEqual(element, [checkpointIndex, 3]))
-                                    MapEditor.selectedElements.splice(indexOfSelectionItem, 1)
-                                } else {
-                                    // toggle playerRestart on
-                                    MapEditor.selectedElements = MapEditor.multiSelect ? MapEditor.selectedElements.concat([new Array(MapEditor.loadedMap.checkpoints.indexOf(checkpoint), 3)]) : [new Array(MapEditor.loadedMap.checkpoints.indexOf(checkpoint), 3)]
-                                }
-
-                                hitCheckPoint = true
-                            }
-                        }) // end of looping through each checkpoint
-                    }
-
-
-                    // RELEASED ON PLATFORM
-                    if (!hitPlayerStart && !hitCheckPoint) {
-                        MapEditor.renderedPlatforms.forEach(platform => {
-                            if (isPointInRect(touchXMapped, touchYMapped, platform)) {
-
-                                if (MapEditor.selectedElements.includes(MapEditor.loadedMap.platforms.indexOf(platform))) { // if platform is already selected -- deselect it
-                                    // toggle platform off
-                                    const indexOfPlatform = MapEditor.selectedElements.indexOf(MapEditor.loadedMap.platforms.indexOf(platform))
-                                    MapEditor.selectedElements.splice(indexOfPlatform, 1)
-
-                                } else {
-                                    // toggle platform on
-                                    if (MapEditor.multiSelect) {
-                                        MapEditor.selectedElements = MapEditor.selectedElements.concat(MapEditor.loadedMap.platforms.indexOf(platform))
-                                    } else {
-                                        MapEditor.selectedElements = [MapEditor.loadedMap.platforms.indexOf(platform)]
-                                    }
-                                }
-
-                                hitPlatform = true
-                            } // end of clicked on platform
-                        }) // end of looping through all renderedPlatforms
-                    }
-
-
-                    // SETTING BTN GROUPS AND UPDATING NESESARY SLIDERS AND BUTTONS
-                    if (hitPlayerStart || hitCheckPoint || hitPlatform) {
-
-                        if (MapEditor.selectedElements.length == 0) { // nothing selected
-                            this.renderedButtons = this.btnGroup_mapEditorInterface
-
-                        } else if (MapEditor.selectedElements.length > 1) { // multiple elements selected
-                            this.renderedButtons = this.btnGroup_editMultiSelect
-
-                        } else {
-                            if (MapEditor.selectedElements.includes("playerStart")) {
-                                this.renderedButtons = this.btnGroup_editPlayerStart
-                                btn_playerAngleSlider.updateState(MapEditor.loadedMap.playerStart.angle)
-
-                            } else if (Array.isArray(MapEditor.selectedElements[0])) { // checkpoint part is selected
-                                this.renderedButtons = this.btnGroup_editCheckPoint;
-                                btn_checkpointAngleSlider.updateState(MapEditor.loadedMap.checkpoints[MapEditor.selectedElements[0][0]].angle) // sync
-
-                            } else { // platform is selected
-                                this.renderedButtons = this.btnGroup_editPlatform;
-                                btn_angleSlider.updateState(MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].angle)
-                                btn_wall.func(true) // syncs the wall button's toggle state
-                            }
-                        }
-                    }
-
-                } // end of NOT ignoring touch bc touched button or side panel
-            } // end of user not scrolling/panning        
-        } // if in MapEditors main edit screens 
     },
 
     render: function () {

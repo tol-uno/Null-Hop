@@ -410,24 +410,24 @@ const MapEditor = {
                     ctx.fillText("selectedElements: " + this.selectedElements, textX, 220);
 
                     if (TouchHandler.dragging) {
-                        
+
                         ctx.fillText("touch (screen cords): " + Math.round(TouchHandler.touches[0].x * CanvasArea.scale) + ", " + Math.round(TouchHandler.touches[0].y * CanvasArea.scale), textX, 240);
-                        
+
                         const touchMapped = this.convertToMapCord(TouchHandler.touches[0].x * CanvasArea.scale, TouchHandler.touches[0].y * CanvasArea.scale)
-                        
+
                         ctx.fillText("touch global map coords: " + Math.round(touchMapped.x) + ", " + Math.round(touchMapped.y), textX, 260);
 
                         if (this.dragSelect) {
 
                             const globalMarqueeCornerTL = this.convertToMapCord(this.dragSelectMarquee.x, this.dragSelectMarquee.y)
-                            
+
                             const globalMarqueeCornerBR = this.convertToMapCord(this.dragSelectMarquee.x + this.dragSelectMarquee.width, this.dragSelectMarquee.y + this.dragSelectMarquee.height)
-                            
-                            ctx.fillText("global marquee: " + 
-                            Math.round(globalMarqueeCornerTL.x) + "," + 
-                            Math.round(globalMarqueeCornerTL.y) + "," + 
-                            Math.round(globalMarqueeCornerBR.x - globalMarqueeCornerTL.x) + "," + 
-                            Math.round(globalMarqueeCornerBR.y - globalMarqueeCornerTL.y), textX, 280);
+
+                            ctx.fillText("global marquee: " +
+                                Math.round(globalMarqueeCornerTL.x) + "," +
+                                Math.round(globalMarqueeCornerTL.y) + "," +
+                                Math.round(globalMarqueeCornerBR.x - globalMarqueeCornerTL.x) + "," +
+                                Math.round(globalMarqueeCornerBR.y - globalMarqueeCornerTL.y), textX, 280);
                         }
                     }
 
@@ -589,15 +589,15 @@ const MapEditor = {
                 // marquee rectangle (screen coords) will need to be translated to global map cordinates to compare with platform positions
                 const globalMarqueeCornerTL = this.convertToMapCord(this.dragSelectMarquee.x, this.dragSelectMarquee.y)
                 const globalMarqueeCornerBR = this.convertToMapCord(this.dragSelectMarquee.x + this.dragSelectMarquee.width, this.dragSelectMarquee.y + this.dragSelectMarquee.height)
-                
+
                 // takes a rectangle defined by center coordinates (x, y), width, height, and angle in radians
                 const marqueePolygon = CanvasArea.createPoligon(
-                    (globalMarqueeCornerTL.x + globalMarqueeCornerBR.x) / 2, 
-                    (globalMarqueeCornerTL.y + globalMarqueeCornerBR.y) / 2, 
+                    (globalMarqueeCornerTL.x + globalMarqueeCornerBR.x) / 2,
+                    (globalMarqueeCornerTL.y + globalMarqueeCornerBR.y) / 2,
                     (globalMarqueeCornerBR.x - globalMarqueeCornerTL.x),
-                    (globalMarqueeCornerBR.y - globalMarqueeCornerTL.y), 
+                    (globalMarqueeCornerBR.y - globalMarqueeCornerTL.y),
                     0
-                    )
+                )
 
                 this.marqueeSelectedElements = [];
 
@@ -672,6 +672,232 @@ const MapEditor = {
                 PreviewWindow.update()
             }
         }
+    },
+
+
+    touchReleased: function (x, y) { // only ever called if editorState == 1 or 2
+        // x and y are already canvas scaled
+
+        if (Math.abs(this.scrollVelX) > 0.5 || Math.abs(this.scrollVelY) > 0.5) { // if scrolling/panning
+            return
+        }
+
+        // if released within the edit platform side panel
+        // needs to be matched with MapEditor.render() values
+        //     x : CanvasArea.canvas.width - 280,
+        //     y : 20,
+        //     width : 225,
+        //     height : 320
+
+        if (
+            this.editorState == 2 &&
+            x >= CanvasArea.canvas.width - 280 &&
+            x <= CanvasArea.canvas.width - 280 + 225 &&
+            y >= 20 &&
+            y <= 20 + 320
+        ) {
+            return
+        }
+
+        // IF CLICKED ON PLAYERSTART, OR CHECKPOINT, OR PLATFORM. Used for btnGroup
+        // let hitPlayerStart = false;
+        // let hitCheckPoint = false;
+        // let hitPlatform = false;
+        // KILL
+
+        // Maps the screens touch to the map's zoomed and panned view
+        const touchMapped = this.convertToMapCord(x, y)
+
+        if (this.dragSelect) { // release from dragSelect
+            this.dragSelect = false
+            btn_dragSelect.func(true) // sync button
+
+            // add marqueeSelectedElements to selectedElements
+            // need to make sure each platform isnt already selected before adding
+            this.marqueeSelectedElements.forEach((platformIndex) => {
+
+                if (!this.selectedElements.includes(platformIndex)) { // add if not already included
+                    this.selectedElements = this.selectedElements.concat(platformIndex)
+                    hitPlatform = true
+                }
+
+            })
+
+            this.marqueeSelectedElements = [];
+            
+            setButtonGroup()
+            return
+        }
+
+
+        // used to check if clicked on platforms
+        function isPointInRect(pointX, pointY, rect) {
+            // Convert angle from degrees to radians
+            const angleRad = rect.angle * Math.PI / 180;
+
+            // Calculate the sine and cosine of the angle
+            const cosAngle = Math.cos(angleRad);
+            const sinAngle = Math.sin(angleRad);
+
+            // Translate point to rectangle's coordinate system (centered at origin)
+            const translatedX = pointX - rect.x;
+            const translatedY = pointY - rect.y;
+
+            // Rotate point to align with the rectangle (reverse rotation)
+            const rotatedX = cosAngle * translatedX + sinAngle * translatedY;
+            const rotatedY = -sinAngle * translatedX + cosAngle * translatedY;
+
+            // Check if the rotated point is within the axis-aligned rectangle
+            const halfWidth = rect.width / 2;
+            const halfHeight = rect.height / 2;
+
+            const isInside = (Math.abs(rotatedX) <= halfWidth) && (Math.abs(rotatedY) <= halfHeight);
+
+            return isInside;
+        }
+
+
+        const playerStartRect = {
+            x: this.loadedMap.playerStart.x,
+            y: this.loadedMap.playerStart.y,
+            width: 32,
+            height: 32,
+            angle: this.loadedMap.playerStart.angle,
+        }
+
+        // RELEASED ON playerStart
+        if (isPointInRect(touchMapped.x, touchMapped.y, playerStartRect)) {
+            if (this.selectedElements.includes("playerStart")) {
+                // toggle playerStart off
+                const indexOfPlayerStart = this.selectedElements.indexOf("playerStart")
+                this.selectedElements.splice(indexOfPlayerStart, 1)
+            } else {
+                // toggle playerStart on
+                this.selectedElements = this.multiSelect ? this.selectedElements.concat("playerStart") : ["playerStart"]
+            }
+
+            setButtonGroup()
+            return
+        }
+
+
+        // RELEASED ON CHECKPOINT
+        function arraysAreEqual(a, b) { // used to test if two arrays == each other
+            if (a === b) return true;
+            if (a == null || b == null) return false;
+            if (a.length !== b.length) return false;
+    
+            for (var i = 0; i < a.length; ++i) {
+                if (a[i] !== b[i]) return false;
+            }
+            return true;
+        }
+
+        this.loadedMap.checkpoints.forEach(checkpoint => {
+            const checkpointIndex = this.loadedMap.checkpoints.indexOf(checkpoint)
+
+            if ( // released checkpoint trigger 1
+                Math.abs(checkpoint.triggerX1 - touchMapped.x) <= 20 &&
+                Math.abs(checkpoint.triggerY1 - touchMapped.y) <= 20
+            ) {
+                if (this.selectedElements.some((element) => arraysAreEqual(element, [checkpointIndex, 1]))) {
+                    // toggle trigger1 off
+                    const indexOfSelectionItem = this.selectedElements.findIndex(element => arraysAreEqual(element, [checkpointIndex, 1]))
+                    this.selectedElements.splice(indexOfSelectionItem, 1)
+                } else {
+                    // toggle trigger1 on
+                    this.selectedElements = this.multiSelect ? this.selectedElements.concat([new Array(this.loadedMap.checkpoints.indexOf(checkpoint), 1)]) : [new Array(this.loadedMap.checkpoints.indexOf(checkpoint), 1)]
+                }
+
+                setButtonGroup()
+                return
+            }
+
+            if ( // released on checkpoint trigger 2
+                Math.abs(checkpoint.triggerX2 - touchMapped.x) <= 20 &&
+                Math.abs(checkpoint.triggerY2 - touchMapped.y) <= 20
+            ) {
+                if (this.selectedElements.some((element) => arraysAreEqual(element, [checkpointIndex, 2]))) {
+                    // toggle trigger2 off
+                    const indexOfSelectionItem = this.selectedElements.findIndex(element => arraysAreEqual(element, [checkpointIndex, 2]))
+                    this.selectedElements.splice(indexOfSelectionItem, 1)
+                } else {
+                    // toggle trigger2 on
+                    this.selectedElements = this.multiSelect ? this.selectedElements.concat([new Array(this.loadedMap.checkpoints.indexOf(checkpoint), 2)]) : [new Array(this.loadedMap.checkpoints.indexOf(checkpoint), 2)]
+                }
+
+                setButtonGroup()
+                return
+            }
+
+            if ( // released on playerRestart
+                Math.abs(checkpoint.x - touchMapped.x) <= 20 &&
+                Math.abs(checkpoint.y - touchMapped.y) <= 20
+            ) {
+                if (this.selectedElements.some((element) => arraysAreEqual(element, [checkpointIndex, 3]))) {
+                    // toggle platerRestart off
+                    const indexOfSelectionItem = this.selectedElements.findIndex(element => arraysAreEqual(element, [checkpointIndex, 3]))
+                    this.selectedElements.splice(indexOfSelectionItem, 1)
+                } else {
+                    // toggle playerRestart on
+                    this.selectedElements = this.multiSelect ? this.selectedElements.concat([new Array(this.loadedMap.checkpoints.indexOf(checkpoint), 3)]) : [new Array(this.loadedMap.checkpoints.indexOf(checkpoint), 3)]
+                }
+
+                setButtonGroup()
+                return
+            }
+        }) // end of looping through each checkpoint
+
+
+        // RELEASED ON PLATFORM
+        this.renderedPlatforms.forEach(platform => {
+            if (isPointInRect(touchMapped.x, touchMapped.y, platform)) {
+
+                if (this.selectedElements.includes(this.loadedMap.platforms.indexOf(platform))) { // if platform is already selected -- deselect it
+                    // toggle platform off
+                    const indexOfPlatform = this.selectedElements.indexOf(this.loadedMap.platforms.indexOf(platform))
+                    this.selectedElements.splice(indexOfPlatform, 1)
+                } else {
+                    // toggle platform on
+                    if (this.multiSelect) {
+                        this.selectedElements = this.selectedElements.concat(this.loadedMap.platforms.indexOf(platform))
+                    } else {
+                        this.selectedElements = [this.loadedMap.platforms.indexOf(platform)]
+                    }
+                }
+
+                setButtonGroup()
+                return
+            }
+        }) // end of looping through all renderedPlatforms
+
+
+        // SETTING BTN GROUPS AND UPDATING NESESARY SLIDERS AND BUTTONS
+        function setButtonGroup() {
+
+            if (MapEditor.selectedElements.length == 0) { // nothing selected
+                UserInterface.renderedButtons = UserInterface.btnGroup_mapEditorInterface
+
+            } else if (MapEditor.selectedElements.length > 1) { // multiple elements selected
+                UserInterface.renderedButtons = UserInterface.btnGroup_editMultiSelect
+
+            } else {
+                if (MapEditor.selectedElements.includes("playerStart")) {
+                    UserInterface.renderedButtons = UserInterface.btnGroup_editPlayerStart
+                    btn_playerAngleSlider.updateState(MapEditor.loadedMap.playerStart.angle)
+
+                } else if (Array.isArray(MapEditor.selectedElements[0])) { // checkpoint part is selected
+                    UserInterface.renderedButtons = UserInterface.btnGroup_editCheckPoint;
+                    btn_checkpointAngleSlider.updateState(MapEditor.loadedMap.checkpoints[MapEditor.selectedElements[0][0]].angle) // sync
+
+                } else { // platform is selected
+                    UserInterface.renderedButtons = UserInterface.btnGroup_editPlatform;
+                    btn_angleSlider.updateState(MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].angle)
+                    btn_wall.func(true) // syncs the wall button's toggle state
+                }
+            }
+        }
+
     },
 
     updatePlatformCorners: function (platform) { // needs to be called when platform is edited
@@ -931,7 +1157,6 @@ const MapEditor = {
 
         }
     },
-
 
     convertToMapCord: function (screenX, screenY) { // these need to already be * by CanvasArea.scale
         const mapX = CanvasArea.mapToRange(screenX, 0, CanvasArea.canvas.width, this.screen.cornerX, this.screen.cornerX + this.screen.width)
