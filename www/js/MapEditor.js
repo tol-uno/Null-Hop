@@ -197,7 +197,10 @@ const MapEditor = {
 
 
                 // RENDER CHECKPOINTS
-                MapEditor.loadedMap.checkpoints.forEach(checkpoint => {
+                this.loadedMap.checkpoints.forEach(checkpoint => {
+
+                    const checkpointIndex = this.loadedMap.checkpoints.indexOf(checkpoint)
+
                     ctx.strokeStyle = ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
                     ctx.lineWidth = 5
                     ctx.beginPath();
@@ -205,13 +208,52 @@ const MapEditor = {
                     ctx.lineTo(checkpoint.triggerX2, checkpoint.triggerY2);
                     ctx.stroke();
 
+                    // trigger 1
                     ctx.beginPath();
                     ctx.arc(checkpoint.triggerX1, checkpoint.triggerY1, 20, 0, 2 * Math.PI);
                     ctx.fill();
 
+                    // if trigger 1 selected highlight
+                    if (
+                        this.selectedElements.some(element => Array.isArray(element) && this.arraysAreEqual(element, [checkpointIndex, 1])) ||
+                        this.marqueeSelectedElements.some(element => Array.isArray(element) && this.arraysAreEqual(element, [checkpointIndex, 1]))
+                    ) {
+                        ctx.strokeStyle = UserInterface.darkColor_1
+                        ctx.lineWidth = 6
+                        ctx.beginPath();
+                        ctx.arc(checkpoint.triggerX1, checkpoint.triggerY1, 20, 0, 2 * Math.PI);
+                        ctx.stroke();
+
+                        ctx.strokeStyle = UserInterface.lightColor_1
+                        ctx.lineWidth = 2
+                        ctx.beginPath();
+                        ctx.arc(checkpoint.triggerX1, checkpoint.triggerY1, 20, 0, 2 * Math.PI);
+                        ctx.stroke();
+                    }
+
+
+                    // trigger 2
                     ctx.beginPath();
                     ctx.arc(checkpoint.triggerX2, checkpoint.triggerY2, 20, 0, 2 * Math.PI);
                     ctx.fill();
+
+                    // if trigger 2 selected highlight
+                    if (
+                        this.selectedElements.some(element => Array.isArray(element) && this.arraysAreEqual(element, [checkpointIndex, 2])) ||
+                        this.marqueeSelectedElements.some(element => Array.isArray(element) && this.arraysAreEqual(element, [checkpointIndex, 2]))
+                    ) {
+                        ctx.strokeStyle = UserInterface.darkColor_1
+                        ctx.lineWidth = 6
+                        ctx.beginPath();
+                        ctx.arc(checkpoint.triggerX2, checkpoint.triggerY2, 20, 0, 2 * Math.PI);
+                        ctx.stroke();
+
+                        ctx.strokeStyle = UserInterface.lightColor_1
+                        ctx.lineWidth = 2
+                        ctx.beginPath();
+                        ctx.arc(checkpoint.triggerX2, checkpoint.triggerY2, 20, 0, 2 * Math.PI);
+                        ctx.stroke();
+                    }
 
                     // playerRestart pos
                     ctx.save()
@@ -230,6 +272,26 @@ const MapEditor = {
                     ctx.stroke();
                     ctx.restore()
 
+                    // if playerRestart selected highlight
+                    if (
+                        this.selectedElements.some(element => Array.isArray(element) && this.arraysAreEqual(element, [checkpointIndex, 3])) ||
+                        this.marqueeSelectedElements.some(element => Array.isArray(element) && this.arraysAreEqual(element, [checkpointIndex, 3]))
+                    ) {
+                        ctx.save()
+                        ctx.translate(checkpoint.x, checkpoint.y)
+                        ctx.rotate(checkpoint.angle * Math.PI / 180);
+
+                        ctx.strokeStyle = UserInterface.darkColor_1
+                        ctx.lineWidth = 6
+                        ctx.strokeRect(-16, -16, 32, 32);
+
+                        ctx.strokeStyle = UserInterface.lightColor_1
+                        ctx.lineWidth = 2
+                        ctx.strokeRect(-16, -16, 32, 32);
+                        ctx.restore()
+                    }
+
+
                     // draw lines conecting to the playerRestart
                     ctx.beginPath();
                     ctx.setLineDash([6, 12]);
@@ -240,61 +302,11 @@ const MapEditor = {
                     ctx.stroke();
                     ctx.setLineDash([]);
 
-
-                    // DRAWING THE BORDER AROUND parts of THE SELECTED Checkpoint parts
-
-                    // get array of arrays from within selectedElements that cooresponds to this checkpoint ex: [[2, 1], [2, 3], [2, 2]]
-                    const selectionArrays = this.selectedElements.filter((element) => Array.isArray(element) && element[0] == MapEditor.loadedMap.checkpoints.indexOf(checkpoint))
-                    selectionArrays.forEach((checkpointPart) => {
-                        // checkpoint part ex: [2,1] or [2,3]
-                        if (checkpointPart[1] == 1) { // trigger 1
-                            ctx.strokeStyle = UserInterface.darkColor_1
-                            ctx.lineWidth = 6
-                            ctx.beginPath();
-                            ctx.arc(checkpoint.triggerX1, checkpoint.triggerY1, 20, 0, 2 * Math.PI);
-                            ctx.stroke();
-
-                            ctx.strokeStyle = UserInterface.lightColor_1
-                            ctx.lineWidth = 2
-                            ctx.beginPath();
-                            ctx.arc(checkpoint.triggerX1, checkpoint.triggerY1, 20, 0, 2 * Math.PI);
-                            ctx.stroke();
-                        }
-
-                        if (checkpointPart[1] == 2) { // trigger 2
-                            ctx.strokeStyle = UserInterface.darkColor_1
-                            ctx.lineWidth = 6
-                            ctx.beginPath();
-                            ctx.arc(checkpoint.triggerX2, checkpoint.triggerY2, 20, 0, 2 * Math.PI);
-                            ctx.stroke();
-
-                            ctx.strokeStyle = UserInterface.lightColor_1
-                            ctx.lineWidth = 2
-                            ctx.beginPath();
-                            ctx.arc(checkpoint.triggerX2, checkpoint.triggerY2, 20, 0, 2 * Math.PI);
-                            ctx.stroke();
-                        }
-
-                        if (checkpointPart[1] == 3) { // playerRestart
-                            ctx.save()
-                            ctx.translate(checkpoint.x, checkpoint.y)
-                            ctx.rotate(checkpoint.angle * Math.PI / 180);
-
-                            ctx.strokeStyle = UserInterface.darkColor_1
-                            ctx.lineWidth = 6
-                            ctx.strokeRect(-16, -16, 32, 32);
-
-                            ctx.strokeStyle = UserInterface.lightColor_1
-                            ctx.lineWidth = 2
-                            ctx.strokeRect(-16, -16, 32, 32);
-                            ctx.restore()
-                        }
-                    }) // end of selectionArray forEach
                 }); // end of loadedMap.checkpoints.forEach
 
 
                 // RENDER THE PLAYER START
-                ctx.save()
+                ctx.save() // player rotation translate save
                 ctx.translate(this.loadedMap.playerStart.x, this.loadedMap.playerStart.y)
                 ctx.rotate(this.loadedMap.playerStart.angle * Math.PI / 180);
                 ctx.fillStyle = this.loadedMap.style.playerColor;
@@ -310,7 +322,8 @@ const MapEditor = {
                 ctx.lineTo(8, 0)
                 ctx.stroke();
 
-                if (this.selectedElements.includes("playerStart")) { // DRAWING SELECTION BORDER AROUND PLAYER
+                // DRAWING SELECTION BORDER AROUND PLAYER
+                if (this.selectedElements.includes("playerStart") || this.marqueeSelectedElements.includes("playerStart")) {
                     ctx.strokeStyle = UserInterface.darkColor_1
                     ctx.lineWidth = 6
                     ctx.strokeRect(-13, -13, 26, 26);
@@ -319,7 +332,8 @@ const MapEditor = {
                     ctx.lineWidth = 2
                     ctx.strokeRect(-13, -13, 26, 26);
                 }
-                ctx.restore() //restoring Player rotation and transformation
+
+                ctx.restore() // player rotation and translate restoring
 
 
                 ctx.restore() // restoring screen.x and screen.y translation and zoom
@@ -331,10 +345,10 @@ const MapEditor = {
                 // MAP EDITOR UI
                 ctx.font = "20px BAHNSCHRIFT";
 
-                if (this.editorState == 1 || this.editorState == 2) { // main edit screen or platform edit sidepanel screen
+                if (this.editorState == 1 || this.editorState == 2) { // Draw Non Side Panel UI. main edit screen or platform edit screen
                     ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
                     ctx.fillText("Drag Select", btn_dragSelect.x, btn_dragSelect.y - 15);
-                    ctx.fillText("Group Select", btn_multiSelect.x, btn_multiSelect.y - 15);
+                    if (!this.dragSelect) { ctx.fillText("Group Select", btn_multiSelect.x, btn_multiSelect.y - 15); }
 
                     // Draw dragSelect rectangle marquee
                     if (this.dragSelect && TouchHandler.dragging) {
@@ -346,7 +360,7 @@ const MapEditor = {
                     }
                 }
 
-                if (this.editorState == 2) { // DRAWING SIDE PANEL
+                if (this.editorState == 2 && !this.dragSelect) { // DRAWING SIDE PANEL
 
                     const sidePanel = {// If these change also change the values in UserInterface.touchReleased()
                         x: CanvasArea.canvas.width - 280,
@@ -577,7 +591,7 @@ const MapEditor = {
             });
 
 
-            // Calculate which renderedPlatforms (and checkpoints/playerStart eventually) are in marquee select
+            // Calculate which renderedPlatforms, checkpoints, and playerStart are in marquee select
             if (this.dragSelect && TouchHandler.dragging) {
 
                 const touch = TouchHandler.touches[0]
@@ -601,6 +615,8 @@ const MapEditor = {
 
                 this.marqueeSelectedElements = [];
 
+
+                // Looping PLAFORMS to check if in marquee
                 this.renderedPlatforms.forEach(platform => {
 
                     const platformPoligon = CanvasArea.createPoligon(platform.x, platform.y, platform.width, platform.height, platform.angleRad)
@@ -612,6 +628,51 @@ const MapEditor = {
 
                     }
                 })
+
+
+                // Looping CHECKPOINTS to check if in marquee
+                this.loadedMap.checkpoints.forEach(checkpoint => {
+                    const checkpointIndex = this.loadedMap.checkpoints.indexOf(checkpoint)
+
+                    // CREATE A 3 POINT POLIGON FROM CHECKPOINT
+                    const trigger1 = {
+                        x: checkpoint.triggerX1,
+                        y: checkpoint.triggerY1
+                    };
+
+                    const trigger2 = {
+                        x: checkpoint.triggerX2,
+                        y: checkpoint.triggerY2
+                    };
+
+                    const respawn = {
+                        x: checkpoint.x,
+                        y: checkpoint.y
+                    };
+
+                    const checkpointPoligon = [trigger1, trigger2, respawn]
+
+                    if (CanvasArea.doPolygonsIntersect(marqueePolygon, checkpointPoligon)) {
+
+                        // add each part of checkpoint to marqueeSelectedElements
+                        this.marqueeSelectedElements = this.marqueeSelectedElements.concat([new Array(checkpointIndex, 1)])
+                        this.marqueeSelectedElements = this.marqueeSelectedElements.concat([new Array(checkpointIndex, 2)])
+                        this.marqueeSelectedElements = this.marqueeSelectedElements.concat([new Array(checkpointIndex, 3)])
+                    }
+                })
+
+
+
+                // Check if playerStart is in marquee
+                const playerStart = this.loadedMap.playerStart
+                const playerStartPoligon = CanvasArea.createPoligon(playerStart.x, playerStart.y, 32, 32, playerStart.angle * Math.PI/180)
+
+                if (CanvasArea.doPolygonsIntersect(marqueePolygon, playerStartPoligon)) {
+
+                    // add playerStart to marqueeSelectedElements
+                    this.marqueeSelectedElements = this.marqueeSelectedElements.concat("playerStart")
+        
+                }
 
             }
 
@@ -699,11 +760,6 @@ const MapEditor = {
             return
         }
 
-        // IF CLICKED ON PLAYERSTART, OR CHECKPOINT, OR PLATFORM. Used for btnGroup
-        // let hitPlayerStart = false;
-        // let hitCheckPoint = false;
-        // let hitPlatform = false;
-        // KILL
 
         // Maps the screens touch to the map's zoomed and panned view
         const touchMapped = this.convertToMapCord(x, y)
@@ -713,19 +769,29 @@ const MapEditor = {
             btn_dragSelect.func(true) // sync button
 
             // add marqueeSelectedElements to selectedElements
-            // need to make sure each platform isnt already selected before adding
-            this.marqueeSelectedElements.forEach((platformIndex) => {
+            // need to make sure each platform, checkpoint, and playerStart isnt already selected before adding
+            this.marqueeSelectedElements.forEach((elementIndex) => {
 
-                if (!this.selectedElements.includes(platformIndex)) { // add if not already included
-                    this.selectedElements = this.selectedElements.concat(platformIndex)
-                    hitPlatform = true
+                console.log(elementIndex)
+
+                if (Array.isArray(elementIndex)) { // if element is checkpoint
+                    console.log("is an array (cp)")
+                    if (!this.selectedElements.some((element) => this.arraysAreEqual(element, elementIndex))) {
+                        console.log("array (cp) is not already selected")
+                        this.selectedElements = this.selectedElements.concat([elementIndex])
+                    }
+                } else { // elementIndex is platform or playerStart
+
+                    if (!this.selectedElements.includes(elementIndex)) {
+                        this.selectedElements = this.selectedElements.concat(elementIndex)
+                    }
+
                 }
-
             })
 
             this.marqueeSelectedElements = [];
-            
-            setButtonGroup()
+
+            this.setButtonGroup()
             return
         }
 
@@ -776,23 +842,12 @@ const MapEditor = {
                 this.selectedElements = this.multiSelect ? this.selectedElements.concat("playerStart") : ["playerStart"]
             }
 
-            setButtonGroup()
+            this.setButtonGroup()
             return
         }
 
-
-        // RELEASED ON CHECKPOINT
-        function arraysAreEqual(a, b) { // used to test if two arrays == each other
-            if (a === b) return true;
-            if (a == null || b == null) return false;
-            if (a.length !== b.length) return false;
-    
-            for (var i = 0; i < a.length; ++i) {
-                if (a[i] !== b[i]) return false;
-            }
-            return true;
-        }
-
+        // RELEASED ON checkpoint
+        let clickedCheckpoint = false
         this.loadedMap.checkpoints.forEach(checkpoint => {
             const checkpointIndex = this.loadedMap.checkpoints.indexOf(checkpoint)
 
@@ -800,16 +855,17 @@ const MapEditor = {
                 Math.abs(checkpoint.triggerX1 - touchMapped.x) <= 20 &&
                 Math.abs(checkpoint.triggerY1 - touchMapped.y) <= 20
             ) {
-                if (this.selectedElements.some((element) => arraysAreEqual(element, [checkpointIndex, 1]))) {
+                if (this.selectedElements.some((element) => this.arraysAreEqual(element, [checkpointIndex, 1]))) {
                     // toggle trigger1 off
-                    const indexOfSelectionItem = this.selectedElements.findIndex(element => arraysAreEqual(element, [checkpointIndex, 1]))
+                    const indexOfSelectionItem = this.selectedElements.findIndex(element => this.arraysAreEqual(element, [checkpointIndex, 1]))
                     this.selectedElements.splice(indexOfSelectionItem, 1)
                 } else {
                     // toggle trigger1 on
                     this.selectedElements = this.multiSelect ? this.selectedElements.concat([new Array(this.loadedMap.checkpoints.indexOf(checkpoint), 1)]) : [new Array(this.loadedMap.checkpoints.indexOf(checkpoint), 1)]
                 }
 
-                setButtonGroup()
+                this.setButtonGroup()
+                clickedCheckpoint = true
                 return
             }
 
@@ -817,16 +873,17 @@ const MapEditor = {
                 Math.abs(checkpoint.triggerX2 - touchMapped.x) <= 20 &&
                 Math.abs(checkpoint.triggerY2 - touchMapped.y) <= 20
             ) {
-                if (this.selectedElements.some((element) => arraysAreEqual(element, [checkpointIndex, 2]))) {
+                if (this.selectedElements.some((element) => this.arraysAreEqual(element, [checkpointIndex, 2]))) {
                     // toggle trigger2 off
-                    const indexOfSelectionItem = this.selectedElements.findIndex(element => arraysAreEqual(element, [checkpointIndex, 2]))
+                    const indexOfSelectionItem = this.selectedElements.findIndex(element => this.arraysAreEqual(element, [checkpointIndex, 2]))
                     this.selectedElements.splice(indexOfSelectionItem, 1)
                 } else {
                     // toggle trigger2 on
                     this.selectedElements = this.multiSelect ? this.selectedElements.concat([new Array(this.loadedMap.checkpoints.indexOf(checkpoint), 2)]) : [new Array(this.loadedMap.checkpoints.indexOf(checkpoint), 2)]
                 }
 
-                setButtonGroup()
+                this.setButtonGroup()
+                clickedCheckpoint = true
                 return
             }
 
@@ -834,22 +891,24 @@ const MapEditor = {
                 Math.abs(checkpoint.x - touchMapped.x) <= 20 &&
                 Math.abs(checkpoint.y - touchMapped.y) <= 20
             ) {
-                if (this.selectedElements.some((element) => arraysAreEqual(element, [checkpointIndex, 3]))) {
+                if (this.selectedElements.some((element) => this.arraysAreEqual(element, [checkpointIndex, 3]))) {
                     // toggle platerRestart off
-                    const indexOfSelectionItem = this.selectedElements.findIndex(element => arraysAreEqual(element, [checkpointIndex, 3]))
+                    const indexOfSelectionItem = this.selectedElements.findIndex(element => this.arraysAreEqual(element, [checkpointIndex, 3]))
                     this.selectedElements.splice(indexOfSelectionItem, 1)
                 } else {
                     // toggle playerRestart on
                     this.selectedElements = this.multiSelect ? this.selectedElements.concat([new Array(this.loadedMap.checkpoints.indexOf(checkpoint), 3)]) : [new Array(this.loadedMap.checkpoints.indexOf(checkpoint), 3)]
                 }
 
-                setButtonGroup()
+                this.setButtonGroup()
+                clickedCheckpoint = true
                 return
             }
         }) // end of looping through each checkpoint
+        if (clickedCheckpoint) {return} // avoids clicking platform below
 
 
-        // RELEASED ON PLATFORM
+        // RELEASED ON platform
         this.renderedPlatforms.forEach(platform => {
             if (isPointInRect(touchMapped.x, touchMapped.y, platform)) {
 
@@ -866,37 +925,10 @@ const MapEditor = {
                     }
                 }
 
-                setButtonGroup()
+                this.setButtonGroup()
                 return
             }
         }) // end of looping through all renderedPlatforms
-
-
-        // SETTING BTN GROUPS AND UPDATING NESESARY SLIDERS AND BUTTONS
-        function setButtonGroup() {
-
-            if (MapEditor.selectedElements.length == 0) { // nothing selected
-                UserInterface.renderedButtons = UserInterface.btnGroup_mapEditorInterface
-
-            } else if (MapEditor.selectedElements.length > 1) { // multiple elements selected
-                UserInterface.renderedButtons = UserInterface.btnGroup_editMultiSelect
-
-            } else {
-                if (MapEditor.selectedElements.includes("playerStart")) {
-                    UserInterface.renderedButtons = UserInterface.btnGroup_editPlayerStart
-                    btn_playerAngleSlider.updateState(MapEditor.loadedMap.playerStart.angle)
-
-                } else if (Array.isArray(MapEditor.selectedElements[0])) { // checkpoint part is selected
-                    UserInterface.renderedButtons = UserInterface.btnGroup_editCheckPoint;
-                    btn_checkpointAngleSlider.updateState(MapEditor.loadedMap.checkpoints[MapEditor.selectedElements[0][0]].angle) // sync
-
-                } else { // platform is selected
-                    UserInterface.renderedButtons = UserInterface.btnGroup_editPlatform;
-                    btn_angleSlider.updateState(MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].angle)
-                    btn_wall.func(true) // syncs the wall button's toggle state
-                }
-            }
-        }
 
     },
 
@@ -998,6 +1030,7 @@ const MapEditor = {
             MapEditor.scrollVelX = 0;
             MapEditor.scrollVelY = 0;
             MapEditor.snapAmount = 0;
+            MapEditor.dragSelect = 0;
             MapEditor.zoom = 1;
             MapEditor.renderedPlatforms = [];
             MapEditor.selectedElements = [];
@@ -1166,5 +1199,41 @@ const MapEditor = {
             x: mapX,
             y: mapY
         }
-    }
+    },
+
+    setButtonGroup: function () { // setting btnGroups and syncing nesesary sliders and buttons
+
+        if (MapEditor.selectedElements.length == 0) { // nothing selected
+            UserInterface.renderedButtons = UserInterface.btnGroup_mapEditorInterface
+
+        } else if (MapEditor.selectedElements.length > 1) { // multiple elements selected
+            UserInterface.renderedButtons = UserInterface.btnGroup_editMultiSelect
+
+        } else {
+            if (MapEditor.selectedElements.includes("playerStart")) {
+                UserInterface.renderedButtons = UserInterface.btnGroup_editPlayerStart
+                btn_playerAngleSlider.updateState(MapEditor.loadedMap.playerStart.angle)
+
+            } else if (Array.isArray(MapEditor.selectedElements[0])) { // checkpoint part is selected
+                UserInterface.renderedButtons = UserInterface.btnGroup_editCheckPoint;
+                btn_checkpointAngleSlider.updateState(MapEditor.loadedMap.checkpoints[MapEditor.selectedElements[0][0]].angle) // sync
+
+            } else { // platform is selected
+                UserInterface.renderedButtons = UserInterface.btnGroup_editPlatform;
+                btn_angleSlider.updateState(MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].angle)
+                btn_wall.func(true) // syncs the wall button's toggle state
+            }
+        }
+    },
+
+    arraysAreEqual: function (a, b) { // used to test if two arrays == each other
+        if (a === b) return true;
+        if (a == null || b == null) return false;
+        if (a.length !== b.length) return false;
+
+        for (var i = 0; i < a.length; ++i) {
+            if (a[i] !== b[i]) return false;
+        }
+        return true;
+    },
 }

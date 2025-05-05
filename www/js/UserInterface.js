@@ -369,12 +369,14 @@ const UserInterface = {
                     if (this.toggle) { // turn off dragSelect
                         this.toggle = 0;
                         MapEditor.dragSelect = false
+                        MapEditor.setButtonGroup()
 
                     } else { // turn on dragSelect and multiSelect (required)
                         this.toggle = 1;
                         MapEditor.dragSelect = true
                         MapEditor.multiSelect = true
                         btn_multiSelect.func(true)  // sync button's toggle
+                        UserInterface.renderedButtons = UserInterface.btnGroup_dragSelect // hides all other buttons
                     }
                 }
             }
@@ -1364,7 +1366,6 @@ const UserInterface = {
             }
         })
 
-
         btn_level_forever = new Button(300, 750, 280, "", "", 0, "Forever", function () {
             if (this.toggle) {
                 this.toggle = 0;
@@ -1709,7 +1710,7 @@ const UserInterface = {
             btn_multiSelect,
             btn_snappingSlider
         ]
-
+        this.btnGroup_dragSelect = [btn_dragSelect]
 
         this.renderedButtons = this.btnGroup_mainMenu;
     },
@@ -2087,7 +2088,8 @@ const UserInterface = {
                 if ( // if x and y touch is within button
                     x >= button.x && x <= button.x + button.width &&
                     y >= button.y && y <= button.y + button.height &&
-                    (MapBrowser.scrollVel == 0 || MapBrowser.scrollAmount == null) // dont release if scrolling through Map Browser 
+                    (MapBrowser.scrollVel == 0 || MapBrowser.scrollAmount == null) && // dont release if scrolling through Map Browser 
+                    (MapEditor.dragSelect == false) // dont release if dragSelecting in Map Editor
                 ) {
                     editorIgnoreRelease = true;
                     button.released();
