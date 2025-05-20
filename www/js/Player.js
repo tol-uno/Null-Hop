@@ -31,8 +31,9 @@ const Player = {
         this.restartAngle = angle;
         this.velocity.set(0, 0)
 
-        this.speedCameraOffset.zoomAverager.frames.fill(1, 0)
-        this.speedCameraOffset.zoom = 1
+        this.speedCameraOffset.zoomAverager.frames.fill(1.5, 0)
+        this.speedCameraOffset.zoom = 1.5
+
         this.speedCameraOffset.dirAveragerX.frames.fill(0, 0)
         this.speedCameraOffset.dirAveragerY.frames.fill(0, 0)
 
@@ -684,7 +685,7 @@ const Player = {
 
         // CHANGING CAMERA ZOOM and OFFSET BASED ON SPEED
         // add current zoom level to averager
-        this.speedCameraOffset.zoomAverager.pushValue(CanvasArea.mapToRange(this.velocity.magnitude(), 100, 900, 1, 0.5))
+        this.speedCameraOffset.zoomAverager.pushValue(CanvasArea.mapToRange(this.velocity.magnitude(), 100, 1100, 1.5, 0.5))
 
         // apply averager zoom to actual zoom
         this.speedCameraOffset.zoom = this.speedCameraOffset.zoomAverager.getAverage()
@@ -763,8 +764,8 @@ const Player = {
         this.jumpValue = 0;
         this.jumpVelocity = 2;
         this.endSlow = 1;
-        this.speedCameraOffset.zoomAverager.frames.fill(1, 0)
-        this.speedCameraOffset.zoom = 1
+        this.speedCameraOffset.zoomAverager.frames.fill(1.5, 0)
+        this.speedCameraOffset.zoom = 1.5
         this.speedCameraOffset.dirAveragerX.frames.fill(0, 0)
         this.speedCameraOffset.dirAveragerY.frames.fill(0, 0)
 

@@ -3,8 +3,8 @@ const CanvasArea = {
     start: function () { // called in deviceReady
         this.canvas = document.createElement("canvas")
 
-        // this.scale = window.devicePixelRatio || 1
-        this.scale = 1.3
+        this.scale = window.devicePixelRatio || 1
+        // this.scale = 1.3
 
         this.canvas.width = window.outerWidth * this.scale;
         this.canvas.height = window.outerHeight * this.scale;
@@ -32,7 +32,7 @@ const CanvasArea = {
 
 
     convexHull: function (points) {
-
+        // points formated as: [[1,1],[2,2]]
         function cross(a, b, o) {
             return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0])
         }

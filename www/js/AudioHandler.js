@@ -62,8 +62,10 @@ const AudioHandler = {
 
 
     playSound: function (mediaObj) { // can implement a flag for files that dont have silence
-        mediaObj.seekTo(500)
-        mediaObj.play()
+        if (UserInterface.settings.volume > 0){
+            mediaObj.seekTo(500)
+            mediaObj.play()
+        }
     },
 
 

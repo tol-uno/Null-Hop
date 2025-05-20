@@ -97,6 +97,56 @@ const Map = {
             platform.maxY = Math.max(platform.y + platform.hypotenuse + this.style.platformHeight, platform.y + maxY)
 
 
+
+            // GENERATE platform.hull
+            // getting all corners needed for hull. need to consider walls that need upper corners
+
+            const upperCorners = platform.wall ? [ // return empty array if not wall
+                [
+                    platform.corners[0][0],
+                    platform.corners[0][1] - Map.style.wallHeight
+                ],
+                [
+                    platform.corners[1][0],
+                    platform.corners[1][1] - Map.style.wallHeight
+                ],
+                [
+                    platform.corners[2][0],
+                    platform.corners[2][1] - Map.style.wallHeight
+                ],
+                [
+                    platform.corners[3][0],
+                    platform.corners[3][1] - Map.style.wallHeight
+                ],
+            ] : []
+
+            // midCorners == platforms.corners
+
+            const lowerCorners = [
+                [
+                    platform.corners[0][0],
+                    platform.corners[0][1] + Map.style.platformHeight
+                ],
+                [
+                    platform.corners[1][0],
+                    platform.corners[1][1] + Map.style.platformHeight
+                ],
+                [
+                    platform.corners[2][0],
+                    platform.corners[2][1] + Map.style.platformHeight
+                ],
+                [
+                    platform.corners[3][0],
+                    platform.corners[3][1] + Map.style.platformHeight
+                ],
+            ]
+
+            const allHullPoints = platform.corners.concat(upperCorners).concat(lowerCorners)
+
+            platform.hull = CanvasArea.convexHull(allHullPoints)
+
+
+
             // add a .clipPoints property to each wall for occluding Player and drawing players xray
             if (platform.wall) {
 
@@ -268,7 +318,7 @@ const Map = {
                     // ADD TO CLIP SHAPE FOR AREAS BEHIND WALLS
                     function addToPlayerClip() {
                         // the clipPoints array can have different lengths so it must dynamicly go through the array of points
-                        
+
                         let clipPolygon = new Path2D
 
                         for (let i = 0; i < platform.clipPoints.length; i++) {
@@ -511,66 +561,78 @@ const Map = {
 
         // determine whether rendering for Map or PreviewWindow
         const MapData = UserInterface.gamestate == 7 ? MapEditor.loadedMap : Map
-
-
-        // DRAW PLATFORM TOP
-        ctx.save(); // #17 GO TO PLATFORMs MIDDLE AND ROTATING 
-
         const adjustedHeight = platform.wall ? MapData.style.wallHeight : 0 // for adding height to walls
-        ctx.translate(platform.x, platform.y - adjustedHeight);
-        ctx.rotate(platform.angle * Math.PI / 180);
 
-        ctx.fillStyle = platform.shaded_topColor;
 
-        ctx.fillRect(-platform.width / 2, -platform.height / 2, platform.width, platform.height);
+        // DRAW BACKGROUND HULL
+        ctx.save()
+        ctx.translate(platform.x, platform.y)
+        ctx.fillStyle = platform.shaded_topColor
 
-        ctx.restore(); // #17 restores platform translation and rotation
+        ctx.beginPath()
+        ctx.moveTo(platform.hull[0][0], platform.hull[0][1]) // this comes up in debug a lot. last time was because of wrong references to platforms and styles arrays
+        for (let i = platform.hull.length - 1; i > 0; i--) {
+            ctx.lineTo(platform.hull[i][0], platform.hull[i][1])
+        }
+        ctx.closePath()
+        ctx.fill()
+
+        ctx.restore()
+
+
+
+        // DRAW PLATFORM TOP (using moveTo, lineTo, and fill with platform's corners)
+        ctx.save()
+
+        ctx.translate(platform.x, platform.y - adjustedHeight)
+        ctx.fillStyle = platform.shaded_topColor
+        ctx.beginPath()
+        ctx.moveTo(platform.corners[0][0], platform.corners[0][1]) // BL corner
+        ctx.lineTo(platform.corners[1][0], platform.corners[1][1]) // BR corner
+        ctx.lineTo(platform.corners[2][0], platform.corners[2][1]) // TR corner
+        ctx.lineTo(platform.corners[3][0], platform.corners[3][1]) // TL corner
+        ctx.closePath()
+        ctx.fill()
+
+        ctx.restore()
 
 
         // SIDES OF PLATFORMS
-        ctx.save(); // #18
-        ctx.translate(platform.x, platform.y);
-
         // platform angles should only be max of 45 and -45 in mapData
-
         // corners array order: BL BR TR TL
 
-        // ALWAYS RENDER BOTTOM SIDE. side2    
-        ctx.fillStyle = platform.shaded_sideColor2;
-        ctx.beginPath();
+        ctx.save() // ALWAYS RENDER BOTTOM SIDE. side2
+        ctx.translate(platform.x, platform.y)
+        ctx.fillStyle = platform.shaded_sideColor2
+        ctx.beginPath()
         ctx.moveTo(platform.corners[1][0], platform.corners[1][1] - adjustedHeight); // BR
         ctx.lineTo(platform.corners[0][0], platform.corners[0][1] - adjustedHeight); // BL
         ctx.lineTo(platform.corners[0][0], platform.corners[0][1] + MapData.style.platformHeight); // BL + height
         ctx.lineTo(platform.corners[1][0], platform.corners[1][1] + MapData.style.platformHeight); // BR + height
-        ctx.closePath();
-        ctx.fill();
-
-
+        ctx.closePath()
+        ctx.fill()
 
         if (platform.angle > 0) { // side3 right side
-
-            ctx.fillStyle = platform.shaded_sideColor3; // sideColor3
-            ctx.beginPath();
+            ctx.fillStyle = platform.shaded_sideColor3
+            ctx.beginPath()
             ctx.moveTo(platform.corners[1][0], platform.corners[1][1] - adjustedHeight); // BR
             ctx.lineTo(platform.corners[2][0], platform.corners[2][1] - adjustedHeight); // TR
             ctx.lineTo(platform.corners[2][0], platform.corners[2][1] + MapData.style.platformHeight); // TR + height
             ctx.lineTo(platform.corners[1][0], platform.corners[1][1] + MapData.style.platformHeight); // BR + height
-            ctx.closePath();
-            ctx.fill();
+            ctx.closePath()
+            ctx.fill()
         }
 
         if (platform.angle < 0) { // side1 left side
-
-            ctx.fillStyle = platform.shaded_sideColor1; // sideColor1  
-            ctx.beginPath();
+            ctx.fillStyle = platform.shaded_sideColor1
+            ctx.beginPath()
             ctx.moveTo(platform.corners[0][0], platform.corners[0][1] - adjustedHeight); // BL
             ctx.lineTo(platform.corners[3][0], platform.corners[3][1] - adjustedHeight); // TL
             ctx.lineTo(platform.corners[3][0], platform.corners[3][1] + MapData.style.platformHeight); // TL + height
             ctx.lineTo(platform.corners[0][0], platform.corners[0][1] + MapData.style.platformHeight); // BL + height
-            ctx.closePath();
-            ctx.fill();
+            ctx.closePath()
+            ctx.fill()
         }
-
 
         // PLATFORM RENDERING DEBUG TEXT
         if (UserInterface.settings.debugText == 1) {
@@ -581,8 +643,6 @@ const Map = {
             // ctx.fillText("size: " + platform.width + ", " + platform.height, 0 , 60)
         }
 
-        ctx.restore(); // #18 back to map origin translation        
-
         // Drawing split line
         // ctx.strokeStyle = "#00FF00"
         // ctx.lineWidth = 1
@@ -591,6 +651,7 @@ const Map = {
         // ctx.lineTo(platform.rightMostCornerX, platform.rightMostCornerY)
         // ctx.stroke()
 
+        ctx.restore()
     },
 
 

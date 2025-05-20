@@ -281,8 +281,7 @@ class Button {
     }
 
     released(override) { // overide ignores the requirement to be pressed before released
-        if (override) {this.func()}
-        if (this.isPressed) {this.func()}
+        if (override || this.isPressed) {this.func()}
     }
 
 }

@@ -51,7 +51,285 @@ const MapEditor = {
     // this array gets added to selectedElements on touchRelease
     marqueeSelectedElements: [],
 
+    editQueue: [], // gets filled with QueueItems
+    recordingEdit: false,
+
     debugText: false,
+
+    update: function () {
+
+        // when map is loaded for editing
+        if (this.editorState == 0 || this.editorState == 5) { // 0 == new/load map screen OR map browser screen
+            if (this.loadedMap !== null) { // if map is loaded then switch to Main Map Edit screen
+
+                CanvasArea.canvas.style.backgroundColor = this.loadedMap.style.backgroundColor; // set bg color here so it only triggers once not every render frame
+                document.body.style.backgroundColor = this.loadedMap.style.backgroundColor;
+
+                UserInterface.renderedButtons = UserInterface.btnGroup_mapEditorInterface;
+                UserInterface.determineButtonColor()
+
+                this.screen.x = this.loadedMap.playerStart.x;
+                this.screen.y = this.loadedMap.playerStart.y;
+                this.screen.width = CanvasArea.canvas.width / this.zoom
+                this.screen.height = CanvasArea.canvas.height / this.zoom
+                this.screen.cornerX = this.screen.x - this.screen.width / 2
+                this.screen.cornerY = this.screen.y - this.screen.height / 2
+
+                this.editorState = 1
+            }
+        }
+
+        if (this.editorState == 1 || this.editorState == 2) { // main map edit screen OR platform select screen
+
+            // SCROLLING THE SCREEN and SETTING OBJECTS TO ANGLE SLIDERS VALUES and SETTING ZOOM TO SLIDER VALUE EVERY FRAME
+            if (TouchHandler.dragging == 1 &&
+                !this.dragSelect &&
+                !btn_translate.isPressed &&
+                !btn_resize_BL.isPressed &&
+                !btn_resize_BR.isPressed &&
+                !btn_resize_TR.isPressed &&
+                !btn_resize_TL.isPressed &&
+                btn_angleSlider.confirmed &&
+                btn_playerAngleSlider.confirmed &&
+                btn_checkpointAngleSlider.confirmed &&
+                btn_snappingSlider.confirmed
+            ) {
+                // SCROLLING AROUND SCREEN
+
+                if (this.scrollAmountX == null && this.scrollAmountY == null) { // starting scroll
+                    this.scrollAmountX = this.screen.x;
+                    this.scrollAmountY = this.screen.y;
+                }
+
+                // ZOOMING 
+                if (TouchHandler.zoom.isZooming) {
+
+                    this.zoom = TouchHandler.zoom.ratio * this.startingZoom
+                    if (this.zoom > 10) { this.zoom = 10 }
+                    if (this.zoom < 0.05) { this.zoom = 0.05 }
+                    if (Math.abs(this.zoom - 1) < 0.1) { // snapping to zoom = 1 if close
+                        this.zoom = 1
+                    }
+
+
+                } else {
+                    this.startingZoom = this.zoom
+                }
+
+                // ACTUALLY SCROLLING THE SCREEN
+                this.scrollAmountX -= TouchHandler.dragAmountX / this.zoom * CanvasArea.scale
+                this.scrollAmountY -= TouchHandler.dragAmountY / this.zoom * CanvasArea.scale
+
+                // sets scrollVel to average drag amount of past 10 frames
+                this.scrollVelAveragerX.pushValue(-TouchHandler.dragAmountX / this.zoom * CanvasArea.scale)
+                this.scrollVelAveragerY.pushValue(-TouchHandler.dragAmountY / this.zoom * CanvasArea.scale)
+
+                this.scrollVelX = this.scrollVelAveragerX.getAverage()
+                this.scrollVelY = this.scrollVelAveragerY.getAverage()
+
+                this.screen.x = this.scrollAmountX;
+                this.screen.y = this.scrollAmountY;
+
+
+            } else { // not dragging around screen
+
+                if (this.scrollAmountX != null && this.scrollAmountY != null) { // just stopped dragging
+                    this.scrollAmountX = null
+                    this.scrollAmountY = null
+
+                    this.scrollVelAveragerX.clear()
+                    this.scrollVelAveragerY.clear()
+                }
+
+                this.screen.x += this.scrollVelX
+                this.screen.y += this.scrollVelY
+
+                if (Math.abs(this.scrollVelX) > 0.1) { // apply X friction
+                    this.scrollVelX -= this.scrollVelX * 3 * dt
+                } else {
+                    this.scrollVelX = 0
+                }
+
+                if (Math.abs(this.scrollVelY) > 0.1) { // apply Y friction
+                    this.scrollVelY -= this.scrollVelY * 3 * dt
+                } else {
+                    this.scrollVelY = 0
+                }
+
+                // UPDATE THE ANGLE OF OBJECTS WHEN THEIR ANGLE SLIDER IS PRESSED
+                if (!btn_angleSlider.confirmed) { btn_angleSlider.func() }
+                if (!btn_playerAngleSlider.confirmed) { btn_playerAngleSlider.func() }
+                if (!btn_checkpointAngleSlider.confirmed) { btn_checkpointAngleSlider.func() }
+            }
+
+
+            // UPDATING THE other 2 SCREEN Perameters every frame incase zoom changes
+            this.screen.width = CanvasArea.canvas.width / this.zoom
+            this.screen.height = CanvasArea.canvas.height / this.zoom
+            this.screen.cornerX = this.screen.x - this.screen.width / 2
+            this.screen.cornerY = this.screen.y - this.screen.height / 2
+
+
+            // FIGURING OUT WHICH PLATFORMS TO RENDER IN MAP EDITOR
+            this.renderedPlatforms = [];
+
+            this.loadedMap.platforms.forEach(platform => { // Loop through platforms
+                platform.hypotenuse = Math.sqrt(platform.width * platform.width + platform.height * platform.height) / 2
+
+                if (
+                    (platform.x + platform.hypotenuse > this.screen.cornerX) && // coming into frame on left side
+                    (platform.x - platform.hypotenuse < this.screen.cornerX + this.screen.width) && // right side
+                    (platform.y + platform.hypotenuse + this.loadedMap.style.platformHeight > this.screen.cornerY) && // top side
+                    (platform.y - platform.hypotenuse - (platform.wall ? this.loadedMap.style.wallHeight : 0) < this.screen.cornerY + this.screen.height) // bottom side
+                ) {
+                    this.renderedPlatforms.push(platform); // ADD platform to renderedPlatforms
+                }
+            });
+
+
+            // Calculate which renderedPlatforms, checkpoints, and playerStart are in marquee select
+            if (this.dragSelect && TouchHandler.dragging) {
+
+                const touch = TouchHandler.touches[0]
+                this.dragSelectMarquee.x = Math.min(touch.startX, touch.x) * CanvasArea.scale
+                this.dragSelectMarquee.y = Math.min(touch.startY, touch.y) * CanvasArea.scale
+                this.dragSelectMarquee.width = Math.max(touch.startX, touch.x) * CanvasArea.scale - this.dragSelectMarquee.x
+                this.dragSelectMarquee.height = Math.max(touch.startY, touch.y) * CanvasArea.scale - this.dragSelectMarquee.y
+
+                // marquee rectangle (screen coords) will need to be translated to global map cordinates to compare with platform positions
+                const globalMarqueeCornerTL = this.convertToMapCord(this.dragSelectMarquee.x, this.dragSelectMarquee.y)
+                const globalMarqueeCornerBR = this.convertToMapCord(this.dragSelectMarquee.x + this.dragSelectMarquee.width, this.dragSelectMarquee.y + this.dragSelectMarquee.height)
+
+                // takes a rectangle defined by center coordinates (x, y), width, height, and angle in radians
+                const marqueePolygon = CanvasArea.createPoligon(
+                    (globalMarqueeCornerTL.x + globalMarqueeCornerBR.x) / 2,
+                    (globalMarqueeCornerTL.y + globalMarqueeCornerBR.y) / 2,
+                    (globalMarqueeCornerBR.x - globalMarqueeCornerTL.x),
+                    (globalMarqueeCornerBR.y - globalMarqueeCornerTL.y),
+                    0
+                )
+
+                this.marqueeSelectedElements = [];
+
+
+                // Looping PLAFORMS to check if in marquee
+                this.renderedPlatforms.forEach(platform => {
+
+                    const platformPoligon = CanvasArea.createPoligon(platform.x, platform.y, platform.width, platform.height, platform.angleRad)
+
+                    if (CanvasArea.doPolygonsIntersect(marqueePolygon, platformPoligon)) {
+
+                        // add platform to marqueeSelectedElements. concat is used for selectedElements array -- i dont remember why
+                        this.marqueeSelectedElements = this.marqueeSelectedElements.concat(MapEditor.loadedMap.platforms.indexOf(platform))
+
+                    }
+                })
+
+
+                // Looping CHECKPOINTS to check if in marquee
+                this.loadedMap.checkpoints.forEach(checkpoint => {
+                    const checkpointIndex = this.loadedMap.checkpoints.indexOf(checkpoint)
+
+                    // CREATE A 3 POINT POLIGON FROM CHECKPOINT
+                    const trigger1 = {
+                        x: checkpoint.triggerX1,
+                        y: checkpoint.triggerY1
+                    };
+
+                    const trigger2 = {
+                        x: checkpoint.triggerX2,
+                        y: checkpoint.triggerY2
+                    };
+
+                    const respawn = {
+                        x: checkpoint.x,
+                        y: checkpoint.y
+                    };
+
+                    const checkpointPoligon = [trigger1, trigger2, respawn]
+
+                    if (CanvasArea.doPolygonsIntersect(marqueePolygon, checkpointPoligon)) {
+
+                        // add each part of checkpoint to marqueeSelectedElements
+                        this.marqueeSelectedElements = this.marqueeSelectedElements.concat([new Array(checkpointIndex, 1)])
+                        this.marqueeSelectedElements = this.marqueeSelectedElements.concat([new Array(checkpointIndex, 2)])
+                        this.marqueeSelectedElements = this.marqueeSelectedElements.concat([new Array(checkpointIndex, 3)])
+                    }
+                })
+
+
+
+                // Check if playerStart is in marquee
+                const playerStart = this.loadedMap.playerStart
+                const playerStartPoligon = CanvasArea.createPoligon(playerStart.x, playerStart.y, 32, 32, playerStart.angle * Math.PI/180)
+
+                if (CanvasArea.doPolygonsIntersect(marqueePolygon, playerStartPoligon)) {
+
+                    // add playerStart to marqueeSelectedElements
+                    this.marqueeSelectedElements = this.marqueeSelectedElements.concat("playerStart")
+        
+                }
+
+            }
+
+
+        } // end of being in editorState 1 or 2
+
+
+        // changing the editorState 
+        if (this.editorState == 1 && this.selectedElements.length > 0) {
+            this.editorState = 2; // platform edit state w side panel
+        }
+
+        if (this.editorState == 2 && this.selectedElements.length == 0) {
+            this.editorState = 1
+        }
+
+
+        // UPDATING DYNAMIC BUTTONS AND SLIDERS EVERY FRAME
+
+        if (this.editorState == 2) { // update translate and resize buttons every frame
+
+            if (UserInterface.renderedButtons.includes(btn_translate)) {
+                btn_translate.func(true)
+            }
+
+            if (UserInterface.renderedButtons.includes(btn_resize_BL)) {
+                btn_resize_BL.func()
+                btn_resize_BR.func()
+                btn_resize_TR.func()
+                btn_resize_TL.func()
+
+            }
+        }
+
+        if (this.editorState == 3) { // in map color screen
+            ColorPicker.update();
+            // ColorPicker.render called in MapEditor.render()
+        }
+
+        if (this.editorState == 4) { // in map settings screen
+            if (!btn_platformHeightSlider.confirmed) {
+                this.loadedMap.style.platformHeight = btn_platformHeightSlider.value
+                PreviewWindow.update()
+            }
+
+            if (!btn_wallHeightSlider.confirmed) {
+                this.loadedMap.style.wallHeight = btn_wallHeightSlider.value
+                PreviewWindow.update()
+            }
+
+            if (!btn_lightDirectionSlider.confirmed) {
+                this.loadedMap.style.lightDirection = btn_lightDirectionSlider.value
+                PreviewWindow.update()
+            }
+
+            if (!btn_lightPitchSlider.confirmed) {
+                this.loadedMap.style.lightPitch = btn_lightPitchSlider.value
+                PreviewWindow.update()
+            }
+        }
+    },
 
     render: function () {
 
@@ -460,282 +738,6 @@ const MapEditor = {
         }
     },
 
-    update: function () {
-
-        // when map is loaded for editing
-        if (this.editorState == 0 || this.editorState == 5) { // 0 == new/load map screen OR map browser screen
-            if (this.loadedMap !== null) { // if map is loaded then switch to Main Map Edit screen
-
-                CanvasArea.canvas.style.backgroundColor = this.loadedMap.style.backgroundColor; // set bg color here so it only triggers once not every render frame
-                document.body.style.backgroundColor = this.loadedMap.style.backgroundColor;
-
-                UserInterface.renderedButtons = UserInterface.btnGroup_mapEditorInterface;
-                UserInterface.determineButtonColor()
-
-                this.screen.x = this.loadedMap.playerStart.x;
-                this.screen.y = this.loadedMap.playerStart.y;
-                this.screen.width = CanvasArea.canvas.width / this.zoom
-                this.screen.height = CanvasArea.canvas.height / this.zoom
-                this.screen.cornerX = this.screen.x - this.screen.width / 2
-                this.screen.cornerY = this.screen.y - this.screen.height / 2
-
-                this.editorState = 1
-            }
-        }
-
-        if (this.editorState == 1 || this.editorState == 2) { // main map edit screen OR platform select screen
-
-            // SCROLLING THE SCREEN and SETTING OBJECTS TO ANGLE SLIDERS VALUES and SETTING ZOOM TO SLIDER VALUE EVERY FRAME
-            if (TouchHandler.dragging == 1 &&
-                !this.dragSelect &&
-                !btn_translate.isPressed &&
-                !btn_resize_BL.isPressed &&
-                !btn_resize_BR.isPressed &&
-                !btn_resize_TR.isPressed &&
-                !btn_resize_TL.isPressed &&
-                btn_angleSlider.confirmed &&
-                btn_playerAngleSlider.confirmed &&
-                btn_checkpointAngleSlider.confirmed &&
-                btn_snappingSlider.confirmed
-            ) {
-                // SCROLLING AROUND SCREEN
-
-                if (this.scrollAmountX == null && this.scrollAmountY == null) { // starting scroll
-                    this.scrollAmountX = this.screen.x;
-                    this.scrollAmountY = this.screen.y;
-                }
-
-                // ZOOMING 
-                if (TouchHandler.zoom.isZooming) {
-
-                    this.zoom = TouchHandler.zoom.ratio * this.startingZoom
-                    if (this.zoom > 10) { this.zoom = 10 }
-                    if (this.zoom < 0.05) { this.zoom = 0.05 }
-                    if (Math.abs(this.zoom - 1) < 0.1) { // snapping to zoom = 1 if close
-                        this.zoom = 1
-                    }
-
-
-                } else {
-                    this.startingZoom = this.zoom
-                }
-
-                // ACTUALLY SCROLLING THE SCREEN
-                this.scrollAmountX -= TouchHandler.dragAmountX / this.zoom * CanvasArea.scale
-                this.scrollAmountY -= TouchHandler.dragAmountY / this.zoom * CanvasArea.scale
-
-                // sets scrollVel to average drag amount of past 10 frames
-                this.scrollVelAveragerX.pushValue(-TouchHandler.dragAmountX / this.zoom * CanvasArea.scale)
-                this.scrollVelAveragerY.pushValue(-TouchHandler.dragAmountY / this.zoom * CanvasArea.scale)
-
-                this.scrollVelX = this.scrollVelAveragerX.getAverage()
-                this.scrollVelY = this.scrollVelAveragerY.getAverage()
-
-                this.screen.x = this.scrollAmountX;
-                this.screen.y = this.scrollAmountY;
-
-
-            } else { // not dragging around screen
-
-                if (this.scrollAmountX != null && this.scrollAmountY != null) { // just stopped dragging
-                    this.scrollAmountX = null
-                    this.scrollAmountY = null
-
-                    this.scrollVelAveragerX.clear()
-                    this.scrollVelAveragerY.clear()
-                }
-
-                this.screen.x += this.scrollVelX
-                this.screen.y += this.scrollVelY
-
-                if (Math.abs(this.scrollVelX) > 0.1) { // apply X friction
-                    this.scrollVelX -= this.scrollVelX * 3 * dt
-                } else {
-                    this.scrollVelX = 0
-                }
-
-                if (Math.abs(this.scrollVelY) > 0.1) { // apply Y friction
-                    this.scrollVelY -= this.scrollVelY * 3 * dt
-                } else {
-                    this.scrollVelY = 0
-                }
-
-                // UPDATE THE ANGLE OF OBJECTS WHEN THEIR ANGLE SLIDER IS PRESSED
-                if (!btn_angleSlider.confirmed) { btn_angleSlider.func() }
-                if (!btn_playerAngleSlider.confirmed) { btn_playerAngleSlider.func() }
-                if (!btn_checkpointAngleSlider.confirmed) { btn_checkpointAngleSlider.func() }
-            }
-
-
-            // UPDATING THE other 2 SCREEN Perameters every frame incase zoom changes
-            this.screen.width = CanvasArea.canvas.width / this.zoom
-            this.screen.height = CanvasArea.canvas.height / this.zoom
-            this.screen.cornerX = this.screen.x - this.screen.width / 2
-            this.screen.cornerY = this.screen.y - this.screen.height / 2
-
-
-            // FIGURING OUT WHICH PLATFORMS TO RENDER IN MAP EDITOR
-            this.renderedPlatforms = [];
-
-            this.loadedMap.platforms.forEach(platform => { // Loop through platforms
-                platform.hypotenuse = Math.sqrt(platform.width * platform.width + platform.height * platform.height) / 2
-
-                if (
-                    (platform.x + platform.hypotenuse > this.screen.cornerX) && // coming into frame on left side
-                    (platform.x - platform.hypotenuse < this.screen.cornerX + this.screen.width) && // right side
-                    (platform.y + platform.hypotenuse + this.loadedMap.style.platformHeight > this.screen.cornerY) && // top side
-                    (platform.y - platform.hypotenuse - (platform.wall ? this.loadedMap.style.wallHeight : 0) < this.screen.cornerY + this.screen.height) // bottom side
-                ) {
-                    this.renderedPlatforms.push(platform); // ADD platform to renderedPlatforms
-                }
-            });
-
-
-            // Calculate which renderedPlatforms, checkpoints, and playerStart are in marquee select
-            if (this.dragSelect && TouchHandler.dragging) {
-
-                const touch = TouchHandler.touches[0]
-                this.dragSelectMarquee.x = Math.min(touch.startX, touch.x) * CanvasArea.scale
-                this.dragSelectMarquee.y = Math.min(touch.startY, touch.y) * CanvasArea.scale
-                this.dragSelectMarquee.width = Math.max(touch.startX, touch.x) * CanvasArea.scale - this.dragSelectMarquee.x
-                this.dragSelectMarquee.height = Math.max(touch.startY, touch.y) * CanvasArea.scale - this.dragSelectMarquee.y
-
-                // marquee rectangle (screen coords) will need to be translated to global map cordinates to compare with platform positions
-                const globalMarqueeCornerTL = this.convertToMapCord(this.dragSelectMarquee.x, this.dragSelectMarquee.y)
-                const globalMarqueeCornerBR = this.convertToMapCord(this.dragSelectMarquee.x + this.dragSelectMarquee.width, this.dragSelectMarquee.y + this.dragSelectMarquee.height)
-
-                // takes a rectangle defined by center coordinates (x, y), width, height, and angle in radians
-                const marqueePolygon = CanvasArea.createPoligon(
-                    (globalMarqueeCornerTL.x + globalMarqueeCornerBR.x) / 2,
-                    (globalMarqueeCornerTL.y + globalMarqueeCornerBR.y) / 2,
-                    (globalMarqueeCornerBR.x - globalMarqueeCornerTL.x),
-                    (globalMarqueeCornerBR.y - globalMarqueeCornerTL.y),
-                    0
-                )
-
-                this.marqueeSelectedElements = [];
-
-
-                // Looping PLAFORMS to check if in marquee
-                this.renderedPlatforms.forEach(platform => {
-
-                    const platformPoligon = CanvasArea.createPoligon(platform.x, platform.y, platform.width, platform.height, platform.angleRad)
-
-                    if (CanvasArea.doPolygonsIntersect(marqueePolygon, platformPoligon)) {
-
-                        // add platform to marqueeSelectedElements. concat is used for selectedElements array -- i dont remember why
-                        this.marqueeSelectedElements = this.marqueeSelectedElements.concat(MapEditor.loadedMap.platforms.indexOf(platform))
-
-                    }
-                })
-
-
-                // Looping CHECKPOINTS to check if in marquee
-                this.loadedMap.checkpoints.forEach(checkpoint => {
-                    const checkpointIndex = this.loadedMap.checkpoints.indexOf(checkpoint)
-
-                    // CREATE A 3 POINT POLIGON FROM CHECKPOINT
-                    const trigger1 = {
-                        x: checkpoint.triggerX1,
-                        y: checkpoint.triggerY1
-                    };
-
-                    const trigger2 = {
-                        x: checkpoint.triggerX2,
-                        y: checkpoint.triggerY2
-                    };
-
-                    const respawn = {
-                        x: checkpoint.x,
-                        y: checkpoint.y
-                    };
-
-                    const checkpointPoligon = [trigger1, trigger2, respawn]
-
-                    if (CanvasArea.doPolygonsIntersect(marqueePolygon, checkpointPoligon)) {
-
-                        // add each part of checkpoint to marqueeSelectedElements
-                        this.marqueeSelectedElements = this.marqueeSelectedElements.concat([new Array(checkpointIndex, 1)])
-                        this.marqueeSelectedElements = this.marqueeSelectedElements.concat([new Array(checkpointIndex, 2)])
-                        this.marqueeSelectedElements = this.marqueeSelectedElements.concat([new Array(checkpointIndex, 3)])
-                    }
-                })
-
-
-
-                // Check if playerStart is in marquee
-                const playerStart = this.loadedMap.playerStart
-                const playerStartPoligon = CanvasArea.createPoligon(playerStart.x, playerStart.y, 32, 32, playerStart.angle * Math.PI/180)
-
-                if (CanvasArea.doPolygonsIntersect(marqueePolygon, playerStartPoligon)) {
-
-                    // add playerStart to marqueeSelectedElements
-                    this.marqueeSelectedElements = this.marqueeSelectedElements.concat("playerStart")
-        
-                }
-
-            }
-
-
-        } // end of being in editorState 1 or 2
-
-
-        // changing the editorState 
-        if (this.editorState == 1 && this.selectedElements.length > 0) {
-            this.editorState = 2; // platform edit state w side panel
-        }
-
-        if (this.editorState == 2 && this.selectedElements.length == 0) {
-            this.editorState = 1
-        }
-
-
-        // UPDATING DYNAMIC BUTTONS AND SLIDERS EVERY FRAME
-
-        if (this.editorState == 2) { // update translate and resize buttons every frame
-
-            if (UserInterface.renderedButtons.includes(btn_translate)) {
-                btn_translate.func(true)
-            }
-
-            if (UserInterface.renderedButtons.includes(btn_resize_BL)) {
-                btn_resize_BL.func()
-                btn_resize_BR.func()
-                btn_resize_TR.func()
-                btn_resize_TL.func()
-
-            }
-        }
-
-        if (this.editorState == 3) { // in map color screen
-            ColorPicker.update();
-            // ColorPicker.render called in MapEditor.render()
-        }
-
-        if (this.editorState == 4) { // in map settings screen
-            if (!btn_platformHeightSlider.confirmed) {
-                this.loadedMap.style.platformHeight = btn_platformHeightSlider.value
-                PreviewWindow.update()
-            }
-
-            if (!btn_wallHeightSlider.confirmed) {
-                this.loadedMap.style.wallHeight = btn_wallHeightSlider.value
-                PreviewWindow.update()
-            }
-
-            if (!btn_lightDirectionSlider.confirmed) {
-                this.loadedMap.style.lightDirection = btn_lightDirectionSlider.value
-                PreviewWindow.update()
-            }
-
-            if (!btn_lightPitchSlider.confirmed) {
-                this.loadedMap.style.lightPitch = btn_lightPitchSlider.value
-                PreviewWindow.update()
-            }
-        }
-    },
-
-
     touchReleased: function (x, y) { // only ever called if editorState == 1 or 2
         // x and y are already canvas scaled
 
@@ -772,12 +774,8 @@ const MapEditor = {
             // need to make sure each platform, checkpoint, and playerStart isnt already selected before adding
             this.marqueeSelectedElements.forEach((elementIndex) => {
 
-                console.log(elementIndex)
-
                 if (Array.isArray(elementIndex)) { // if element is checkpoint
-                    console.log("is an array (cp)")
-                    if (!this.selectedElements.some((element) => this.arraysAreEqual(element, elementIndex))) {
-                        console.log("array (cp) is not already selected")
+                    if (!this.selectedElements.some((element) => this.arraysAreEqual(element, elementIndex))) { // checkpoint is NOT already selected
                         this.selectedElements = this.selectedElements.concat([elementIndex])
                     }
                 } else { // elementIndex is platform or playerStart

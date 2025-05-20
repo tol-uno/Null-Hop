@@ -139,7 +139,7 @@ const TouchHandler = {
                 this.zoom.x = null
                 this.zoom.y = null
                 this.zoom.startLength = null
-                this.zoom.ratio = null
+                this.zoom.ratio = 1
             }
 
         });
