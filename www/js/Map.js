@@ -253,6 +253,7 @@ const Map = {
         }); // end of looping through ALL platforms
 
 
+        // BAD FIX FIX FIX
         this.playerClip = new Path2D() // resets the clip every frame. when it is used there must be an counter clockwise rectangle drawn first to invert clip
 
 
@@ -340,31 +341,6 @@ const Map = {
 
                         clipPolygon.closePath()
                         Map.playerClip.addPath(clipPolygon)
-                    }
-
-
-
-                    // ADD TO CLIP SHAPE FOR AREAS BEHIND WALLS
-                    function addToPlayerClipOLD() { // KILL KILL KILL
-                        // the clipPoints array can have different lengths so it must dynamicly go through the array of points
-                        for (let i = 0; i < platform.clipPoints.length; i++) {
-                            if (i == 0) { // first point in array so use moveTo
-
-                                // -Player.x + midX, -Player.y + midY
-
-                                Map.playerClip.moveTo(
-                                    platform.x + platform.clipPoints[i][0], // x
-                                    platform.y + platform.clipPoints[i][1] // y
-                                )
-                            } else { // its not the first point in the hull so use lineTo
-                                Map.playerClip.lineTo(
-                                    platform.x + platform.clipPoints[i][0], // x
-                                    platform.y + platform.clipPoints[i][1] // y
-                                )
-                            }
-                        }
-
-                        Map.playerClip.closePath()
                     }
 
                 }

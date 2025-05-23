@@ -59,7 +59,7 @@ const Player = {
         const directLightVector = new Vector2D3D(x, y, z)
 
 
-        // NORMALS
+        // NORMALS. Optimally these wouldnt be creating new vectors each frame
         const topNormal = new Vector2D3D(0, 0, -1)
         const botSideNormal = new Vector2D3D(0, 1, 0).rotate(this.lookAngle.getAngleInDegrees())
         const rightSideNormal = new Vector2D3D(1, 0, 0).rotate(this.lookAngle.getAngleInDegrees())
@@ -189,8 +189,42 @@ const Player = {
         }
 
 
+        // GENERATE player.hull
+        // (0, -this.jumpValue) used here because createPoligon returns global coords and we want local to player
+        const cornersPolygon = CanvasArea.createPoligon(0, -this.jumpValue, 32, 32, this.lookAngle.getAngleInDegrees() * Math.PI / 180)
 
+        const lowerCorners = [ // topLeft, topRight, bottomRight, bottomLeft
+            [cornersPolygon[0].x, cornersPolygon[0].y],
+            [cornersPolygon[1].x, cornersPolygon[1].y],
+            [cornersPolygon[2].x, cornersPolygon[2].y],
+            [cornersPolygon[3].x, cornersPolygon[3].y]
+        ]
+
+        const upperCorners = [
+            [cornersPolygon[0].x, cornersPolygon[0].y - 32],
+            [cornersPolygon[1].x, cornersPolygon[1].y - 32],
+            [cornersPolygon[2].x, cornersPolygon[2].y - 32],
+            [cornersPolygon[3].x, cornersPolygon[3].y - 32]
+        ]
+
+        const allHullPoints = lowerCorners.concat(upperCorners)
+
+        this.hull = CanvasArea.convexHull(allHullPoints)
+
+
+        // DRAW BACKGROUND HULL
         ctx.save(); // #6.5 for reverting Player.rotation and Player.jumpValue translations
+        
+        ctx.fillStyle = this.topColor
+
+        ctx.beginPath()
+        ctx.moveTo(this.hull[0][0], this.hull[0][1])
+        for (let i = this.hull.length - 1; i > 0; i--) {
+            ctx.lineTo(this.hull[i][0], this.hull[i][1])
+        }
+        ctx.closePath()
+        ctx.fill()
+
 
         // DRAWING PLAYER TOP
         ctx.translate(0, -this.jumpValue - 32);
@@ -210,26 +244,24 @@ const Player = {
         ctx.stroke();
 
         ctx.restore(); // #6.5 leaves player rotation and jump value translation
-        // ctx is now back at player middle
+        // ctx is now back at player coords with no jumpvalue
 
 
         // SIDES OF PLAYER
-        const angleRad = this.lookAngle.getAngleInDegrees() * (Math.PI / 180);
         const loopedAngle = this.lookAngle.getAngleInDegrees();
 
-
-        // GETTING CORNERS OF ROTATED RECTANGLE
-        // https://stackoverflow.com/questions/41898990/find-corners-of-a-rotated-rectangle-given-its-center-point-and-rotation
+        // at lookAngle == 0 the player is facing to the right. BOT WALL refers to the bottom wall when lookAnlge == 0
+        // lowerCorners & upperCorners order: topLeft, topRight, bottomRight, bottomLeft
 
         if (loopedAngle > 270 || loopedAngle < 90) { // BOT WALL
 
             ctx.fillStyle = this.botSideColor
 
             ctx.beginPath();
-            ctx.moveTo(-(16 * Math.cos(angleRad) + (16 * Math.sin(angleRad))), - 32 - this.jumpValue - (16 * Math.sin(angleRad) - (16 * Math.cos(angleRad))));
-            ctx.lineTo((16 * Math.cos(angleRad) - (16 * Math.sin(angleRad))), - 32 - this.jumpValue + (16 * Math.sin(angleRad) + (16 * Math.cos(angleRad))));
-            ctx.lineTo((16 * Math.cos(angleRad) - (16 * Math.sin(angleRad))), - this.jumpValue + (16 * Math.sin(angleRad) + (16 * Math.cos(angleRad))));
-            ctx.lineTo(-(16 * Math.cos(angleRad) + (16 * Math.sin(angleRad))), - this.jumpValue - (16 * Math.sin(angleRad) - (16 * Math.cos(angleRad))));
+            ctx.moveTo(upperCorners[2][0],upperCorners[2][1]);
+            ctx.lineTo(upperCorners[3][0],upperCorners[3][1]);
+            ctx.lineTo(lowerCorners[3][0],lowerCorners[3][1]);
+            ctx.lineTo(lowerCorners[2][0],lowerCorners[2][1]);
             ctx.closePath();
             ctx.fill();
         }
@@ -237,12 +269,11 @@ const Player = {
         if (0 < loopedAngle && loopedAngle < 180) { // RIGHT WALL
 
             ctx.fillStyle = this.rightSideColor
-
             ctx.beginPath();
-            ctx.moveTo((16 * Math.cos(angleRad) - (16 * Math.sin(angleRad))), - 32 - this.jumpValue + (16 * Math.sin(angleRad) + (16 * Math.cos(angleRad))));
-            ctx.lineTo((16 * Math.cos(angleRad) + (16 * Math.sin(angleRad))), - 32 - this.jumpValue + (16 * Math.sin(angleRad) - (16 * Math.cos(angleRad))));
-            ctx.lineTo((16 * Math.cos(angleRad) + (16 * Math.sin(angleRad))), - this.jumpValue + (16 * Math.sin(angleRad) - (16 * Math.cos(angleRad))));
-            ctx.lineTo((16 * Math.cos(angleRad) - (16 * Math.sin(angleRad))), - this.jumpValue + (16 * Math.sin(angleRad) + (16 * Math.cos(angleRad))));
+            ctx.moveTo(upperCorners[1][0],upperCorners[1][1]);
+            ctx.lineTo(upperCorners[2][0],upperCorners[2][1]);
+            ctx.lineTo(lowerCorners[2][0],lowerCorners[2][1]);
+            ctx.lineTo(lowerCorners[1][0],lowerCorners[1][1]);
             ctx.closePath();
             ctx.fill();
         }
@@ -252,10 +283,10 @@ const Player = {
             ctx.fillStyle = this.topSideColor
 
             ctx.beginPath();
-            ctx.moveTo((16 * Math.cos(angleRad) + (16 * Math.sin(angleRad))), - 32 - this.jumpValue + (16 * Math.sin(angleRad) - (16 * Math.cos(angleRad))));
-            ctx.lineTo((16 * Math.cos(angleRad) + (16 * Math.sin(angleRad))), - this.jumpValue + (16 * Math.sin(angleRad) - (16 * Math.cos(angleRad))));
-            ctx.lineTo(-(16 * Math.cos(angleRad) - (16 * Math.sin(angleRad))), - this.jumpValue - (16 * Math.sin(angleRad) + (16 * Math.cos(angleRad))));
-            ctx.lineTo(-(16 * Math.cos(angleRad) - (16 * Math.sin(angleRad))), - 32 - this.jumpValue - (16 * Math.sin(angleRad) + (16 * Math.cos(angleRad))));
+            ctx.moveTo(upperCorners[0][0],upperCorners[0][1]);
+            ctx.lineTo(upperCorners[1][0],upperCorners[1][1]);
+            ctx.lineTo(lowerCorners[1][0],lowerCorners[1][1]);
+            ctx.lineTo(lowerCorners[0][0],lowerCorners[0][1]);
             ctx.closePath();
             ctx.fill();
         }
@@ -265,10 +296,10 @@ const Player = {
             ctx.fillStyle = this.leftSideColor
 
             ctx.beginPath();
-            ctx.moveTo(-(16 * Math.cos(angleRad) - (16 * Math.sin(angleRad))), - 32 - this.jumpValue - (16 * Math.sin(angleRad) + (16 * Math.cos(angleRad))));
-            ctx.lineTo(-(16 * Math.cos(angleRad) + (16 * Math.sin(angleRad))), - 32 - this.jumpValue - (16 * Math.sin(angleRad) - (16 * Math.cos(angleRad))));
-            ctx.lineTo(-(16 * Math.cos(angleRad) + (16 * Math.sin(angleRad))), - this.jumpValue - (16 * Math.sin(angleRad) - (16 * Math.cos(angleRad))));
-            ctx.lineTo(-(16 * Math.cos(angleRad) - (16 * Math.sin(angleRad))), - this.jumpValue - (16 * Math.sin(angleRad) + (16 * Math.cos(angleRad))));
+            ctx.moveTo(upperCorners[3][0],upperCorners[3][1]);
+            ctx.lineTo(upperCorners[0][0],upperCorners[0][1]);
+            ctx.lineTo(lowerCorners[0][0],lowerCorners[0][1]);
+            ctx.lineTo(lowerCorners[3][0],lowerCorners[3][1]);
             ctx.closePath();
             ctx.fill();
         }
@@ -421,7 +452,7 @@ const Player = {
             this.addSpeed = maxVelocity - this.currentSpeedProjected;
 
 
-            
+
             // show overstrafe warning BROKEN
             if (this.addSpeed > 320 * airAcceleration * dt) { // 11:04 in zweeks video shows why u lose speed
                 if (UserInterface.showOverstrafeWarning == false) {
@@ -429,7 +460,7 @@ const Player = {
                     setTimeout(() => { UserInterface.showOverstrafeWarning = false }, 1500); // wait 1.5 seconds to hide warning
                 }
             }
-  
+
             // new simplified stuff that replaces commented code block below \/
             this.addSpeed = Math.max(0, this.addSpeed)
             this.addSpeed = Math.min(this.addSpeed, 320 * airAcceleration * dt)
@@ -439,8 +470,7 @@ const Player = {
             this.velocity.y += (this.addSpeed * this.wish_velocity.y)
 
 
-
-            // THIS IS A MORE VERBOSE VERSION OF THE CODE THAT FOLLOWS THE QUAKE CODE CLOSER BUT IS NOT AS CLEAR AS ABOVE
+            // THIS IS A MORE VERBOSE VERSION OF THE THIS SECTION THAT FOLLOWS THE QUAKE CODE CLOSER BUT IS NOT AS CLEAR AS ABOVE
             /*
             if (this.addSpeed > 0) { // only run the rest of this movement code if speed should be added
 
@@ -496,7 +526,7 @@ const Player = {
                     const distanceY = rotatedY - closestY;
                     const distanceSquared = distanceX * distanceX + distanceY * distanceY;
 
-                    if (distanceSquared <= (18 * 18)) {  // 16 is the player's collision radius
+                    if (distanceSquared <= (18 * 18)) {  // 16 is the player's collision radius (18 is used)
                         // Collision detected
 
                         let collisionX, collisionY;
@@ -697,7 +727,7 @@ const Player = {
         // apply averager offset direction to actual offset direction
         this.speedCameraOffset.direction.x = this.speedCameraOffset.dirAveragerX.getAverage()
         this.speedCameraOffset.direction.y = this.speedCameraOffset.dirAveragerY.getAverage()
-        
+
 
 
         if (UserInterface.levelState == 3) { // SLOW DOWN MOVEMENT AFTER HITTING END ZONE
@@ -723,22 +753,21 @@ const Player = {
     },
 
     checkCollision: function (arrayOfPlatformsToCheck) {
-
-        let collisions = 0;
-
+        
         const playerPoligon = CanvasArea.createPoligon(this.x, this.y, 32, 32, this.lookAngle.getAngleInDegrees() * Math.PI / 180) // player angle converted to rads
 
-        // check player against every platform
-        arrayOfPlatformsToCheck.forEach(platform => {
+        for (const platform of arrayOfPlatformsToCheck) {
             const platformPoligon = CanvasArea.createPoligon(platform.x, platform.y, platform.width, platform.height, platform.angleRad)
 
             if (CanvasArea.doPolygonsIntersect(playerPoligon, platformPoligon)) {
-                collisions++
+                return true; // breaks out of loop once at least one collision is detected
             }
-        })
+        }
 
-        return (collisions > 0)
+        return false;
     },
+
+
 
     teleport: function () { // Called when player hits the water
         if (this.checkpointIndex !== -1) {

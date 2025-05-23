@@ -4,7 +4,6 @@ const CanvasArea = {
         this.canvas = document.createElement("canvas")
 
         this.scale = window.devicePixelRatio || 1
-        // this.scale = 1.3
 
         this.canvas.width = window.outerWidth * this.scale;
         this.canvas.height = window.outerHeight * this.scale;
@@ -243,7 +242,8 @@ const CanvasArea = {
 
 
     // takes a rectangle defined by center coordinates (x, y), width, height, and angle in radians
-    // returns an array of corner points in clockwise order, starting from the top-left corner
+    // returns an array of global corner points in clockwise order, starting from the top-left corner
+    // [{x:1,y:1}, {x:3,y:1}, {x:3,y:3}, {x:1,y:3}]
     createPoligon: function (x, y, width, height, angle) {
         // Calculate half width and half height
         var hw = width / 2;
@@ -255,26 +255,26 @@ const CanvasArea = {
 
         // Calculate the corner points relative to the center
         var topLeft = {
-            x: x - (hw * cosAngle) - (hh * sinAngle),
-            y: y - (hw * sinAngle) + (hh * cosAngle)
-        };
-
-        var topRight = {
-            x: x + (hw * cosAngle) - (hh * sinAngle),
-            y: y + (hw * sinAngle) + (hh * cosAngle)
-        };
-
-        var bottomRight = {
-            x: x + (hw * cosAngle) + (hh * sinAngle),
-            y: y + (hw * sinAngle) - (hh * cosAngle)
-        };
-
-        var bottomLeft = {
             x: x - (hw * cosAngle) + (hh * sinAngle),
             y: y - (hw * sinAngle) - (hh * cosAngle)
         };
 
-        // Return the corner points in clockwise order
+        var topRight = {
+            x: x + (hw * cosAngle) + (hh * sinAngle),
+            y: y + (hw * sinAngle) - (hh * cosAngle)
+        };
+
+        var bottomRight = {
+            x: x + (hw * cosAngle) - (hh * sinAngle),
+            y: y + (hw * sinAngle) + (hh * cosAngle)
+        };
+
+        var bottomLeft = {
+            x: x - (hw * cosAngle) - (hh * sinAngle),
+            y: y - (hw * sinAngle) + (hh * cosAngle)
+        };
+
+        // Return the corner points (GLOBAL) in clockwise order
         return [topLeft, topRight, bottomRight, bottomLeft];
     },
 
