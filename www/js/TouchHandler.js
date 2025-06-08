@@ -47,7 +47,7 @@ const TouchHandler = {
 
                 if (this.dragging == false) { this.dragging = true }
 
-                UserInterface.touchStarted(touch.x * CanvasArea.scale, touch.y * CanvasArea.scale); // sends touchStarted for every touchStart
+                UserInterface.touchStarted(touch.x, touch.y); // sends touchStarted for every touchStart
 
                 this.touches.push(touch)
             }
@@ -130,7 +130,7 @@ const TouchHandler = {
                     this.touches.splice(touchIndex, 1); // 2nd parameter means remove one item only
                 }
 
-                UserInterface.touchReleased(touch.x * CanvasArea.scale, touch.y * CanvasArea.scale); // sends touchRealease for every release
+                UserInterface.touchReleased(touch.x, touch.y); // sends touchRealease for every release
 
             }
 
@@ -166,7 +166,7 @@ const TouchHandler = {
             };
         }
 
-        document.body.addEventListener("touchstart", createDoubleTapPreventer(560), { passive: false });
+        document.body.addEventListener("touchstart", createDoubleTapPreventer(575), { passive: false });
 
     },
 
@@ -191,8 +191,8 @@ const TouchHandler = {
             const zoomMidY = (this.touches[0].y + this.touches[1].y) / 2
             const zoomMidY_prev = (this.touches[0].previousY + this.touches[1].previousY) / 2
 
-            this.dragAmountX = (zoomMidX - zoomMidX_prev) * CanvasArea.scale
-            this.dragAmountY = (zoomMidY - zoomMidY_prev) * CanvasArea.scale
+            this.dragAmountX = (zoomMidX - zoomMidX_prev) * CanvasArea.scale // probably need to remove this scaling
+            this.dragAmountY = (zoomMidY - zoomMidY_prev) * CanvasArea.scale // but havent gotten here yet
 
             this.touches[0].previousX = this.touches[0].x;
             this.touches[0].previousY = this.touches[0].y;

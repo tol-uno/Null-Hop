@@ -91,16 +91,16 @@ const MapBrowser = { // should set back to 0 at some points
         // called every frame when gamestate == 2
 
         // changes the position of buttons on scroll
-        if (TouchHandler.dragging == 1 && TouchHandler.touches[0].x * CanvasArea.scale > 250 && TouchHandler.touches[0].x * CanvasArea.scale < 650) {
+        if (TouchHandler.dragging == 1 && TouchHandler.touches[0].x > 200 && TouchHandler.touches[0].x < 650) {
             if (this.scrollAmount == null) { // start of scroll
                 this.scrollAmount = this.scrollY
             }
 
             // is scrolling
-            this.scrollAmount += TouchHandler.dragAmountY * CanvasArea.scale
+            this.scrollAmount += TouchHandler.dragAmountY
 
             // sets scrollVel to average drag amount of past 10 frames
-            this.scrollVelAverager.pushValue(TouchHandler.dragAmountY * CanvasArea.scale)
+            this.scrollVelAverager.pushValue(TouchHandler.dragAmountY)
             this.scrollVel = this.scrollVelAverager.getAverage()
 
             this.scrollY = this.scrollAmount;

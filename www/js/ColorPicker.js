@@ -1,8 +1,8 @@
 const ColorPicker = {
-    x : 360,
+    x : window.outerWidth - 400,
     y : 30,
-    width : 375,
-    height : 375,
+    width : 360,
+    height : 340,
     hueGradient : null,
     saturationGradient : null,
     lightnessGradient : null,
@@ -112,6 +112,8 @@ const ColorPicker = {
 
     render : function() {
         const ctx = CanvasArea.ctx;
+        ctx.save()
+        ctx.scale(CanvasArea.scale, CanvasArea.scale) // All UI elements are positioned on original CSS cords. this brings them up to device DPI resolution
 
         ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.lightColor_1 : UserInterface.darkColor_1;
 
@@ -130,8 +132,9 @@ const ColorPicker = {
         ctx.stroke()
 
         // rbg text
+        ctx.font = "16px BAHNSCHRIFT";
         ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
-        ctx.fillText(CanvasArea.HSLToRGB(this.h, this.s, this.l), this.x + 180, this.y + 50)
+        ctx.fillText(CanvasArea.HSLToRGB(this.h, this.s, this.l), this.x + 164, this.y + 36)
 
         // selected element text
         let selectedColor = null
@@ -153,13 +156,15 @@ const ColorPicker = {
 
         // draw gradients for each slider
         ctx.fillStyle = this.hueGradient
-        ctx.fillRect(this.x + 20, this.y + 135, this.width - 40, 15)
+        ctx.fillRect(this.x + 16, this.y + 160, this.width - 32, 14)
 
         ctx.fillStyle = this.saturationGradient
-        ctx.fillRect(this.x + 20, this.y + 215, this.width - 40, 15)
+        ctx.fillRect(this.x + 16, this.y + 234, this.width - 32, 14)
         
         ctx.fillStyle = this.lightnessGradient
-        ctx.fillRect(this.x + 20, this.y + 295, this.width - 40, 15)
+        ctx.fillRect(this.x + 16, this.y + 308, this.width - 32, 14)
+
+        ctx.restore()
     },
 
     getColor : function() {

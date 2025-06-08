@@ -101,11 +101,11 @@ class Button {
                 })
             }, () => {
                 this.width = width;
-                this.height = this.width > 75 ? 75 : this.width
+                this.height = this.width > 55 ? 55 : this.width
 
                 // TRUNCATE LABEL
-                CanvasArea.ctx.font = "22px BAHNSCHRIFT"; // for measuring text
-                this.shortLabel = UserInterface.truncateText(label, this.width - 50) 
+                CanvasArea.ctx.font = "18px BAHNSCHRIFT"; // for measuring text
+                this.shortLabel = UserInterface.truncateText(label, this.width - 40) 
                 
                 
             });
@@ -194,7 +194,7 @@ class Button {
 
         CanvasArea.ctx.save()
 
-        const shrinkFactor = (this.hasToggleImage) ? 1 : 0.95 // doesnt need to be calculated every frame
+        const shrinkFactor = (this.hasToggleImage) ? 1 : 0.94 // doesnt need to be calculated every frame
 
         if (this.image == null) { // dynamically draw button (no icon)
 
@@ -267,10 +267,10 @@ class Button {
 
         if (this.label != "") {
 
-            CanvasArea.ctx.font = "22px BAHNSCHRIFT";
+            CanvasArea.ctx.font = "18px BAHNSCHRIFT";
             CanvasArea.ctx.fillStyle = (!UserInterface.darkMode) ? UserInterface.darkColor_1: UserInterface.lightColor_1;
 
-            CanvasArea.ctx.fillText(this.shortLabel, this.x + (this.width - CanvasArea.ctx.measureText(this.shortLabel).width)/2, this.y + (this.height/2) + 7)
+            CanvasArea.ctx.fillText(this.shortLabel, this.x + (this.width - CanvasArea.ctx.measureText(this.shortLabel).width)/2, this.y + (this.height/2) + 6)
         }
      
     }

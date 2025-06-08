@@ -125,16 +125,17 @@ const Player = {
 
         ctx.save() // #2 For scaling the canvas for zoom
 
-        ctx.scale(this.speedCameraOffset.zoom, this.speedCameraOffset.zoom)
-        ctx.translate(
-            (CanvasArea.canvas.width / this.speedCameraOffset.zoom - CanvasArea.canvas.width) / 2 + this.speedCameraOffset.direction.x,
-            (CanvasArea.canvas.height / this.speedCameraOffset.zoom - CanvasArea.canvas.height) / 2 + this.speedCameraOffset.direction.y,
-        )
 
+        if (MapData == Map) { // in actual level
+            ctx.scale(this.speedCameraOffset.zoom, this.speedCameraOffset.zoom)
 
-        if (MapData == Map) {
+            ctx.translate(
+                (CanvasArea.canvas.width / this.speedCameraOffset.zoom - CanvasArea.canvas.width) / 2 + this.speedCameraOffset.direction.x,
+                (CanvasArea.canvas.height / this.speedCameraOffset.zoom - CanvasArea.canvas.height) / 2 + this.speedCameraOffset.direction.y,
+            )
+
             ctx.translate(midX, midY); // translate to center of the screen
-        } else {
+        } else { // in preview window
             ctx.translate(this.x, this.y) // translate to wherever player is at on screen
         }
 
@@ -145,7 +146,7 @@ const Player = {
         // SHADOW OVER PLATFORM
         ctx.save() // #5 upperShadowClip canvas 
 
-        if (MapData == Map) { // only set clip if in Map not PreviewWindow
+        if (MapData == Map) { // only set upper shadow clip if in Map not PreviewWindow
             ctx.translate(-this.x, -this.y) // ctx goes to map origin to set clip
 
             // Draw standard shadowClip DEBUG
@@ -167,7 +168,7 @@ const Player = {
 
 
         // SHADOW OVER ENDZONE
-        if (MapData == Map && Map.endZonesToCheck.length > 0) {
+        if (MapData == Map && Map.endZonesToCheck.length > 0) { // onlt applicable in Map not PreviewWindow
             ctx.save() // #6 endZoneShadowClip canvas
 
             ctx.translate(-this.x, -this.y)
@@ -214,7 +215,7 @@ const Player = {
 
         // DRAW BACKGROUND HULL
         ctx.save(); // #6.5 for reverting Player.rotation and Player.jumpValue translations
-        
+
         ctx.fillStyle = this.topColor
 
         ctx.beginPath()
@@ -258,10 +259,10 @@ const Player = {
             ctx.fillStyle = this.botSideColor
 
             ctx.beginPath();
-            ctx.moveTo(upperCorners[2][0],upperCorners[2][1]);
-            ctx.lineTo(upperCorners[3][0],upperCorners[3][1]);
-            ctx.lineTo(lowerCorners[3][0],lowerCorners[3][1]);
-            ctx.lineTo(lowerCorners[2][0],lowerCorners[2][1]);
+            ctx.moveTo(upperCorners[2][0], upperCorners[2][1]);
+            ctx.lineTo(upperCorners[3][0], upperCorners[3][1]);
+            ctx.lineTo(lowerCorners[3][0], lowerCorners[3][1]);
+            ctx.lineTo(lowerCorners[2][0], lowerCorners[2][1]);
             ctx.closePath();
             ctx.fill();
         }
@@ -270,10 +271,10 @@ const Player = {
 
             ctx.fillStyle = this.rightSideColor
             ctx.beginPath();
-            ctx.moveTo(upperCorners[1][0],upperCorners[1][1]);
-            ctx.lineTo(upperCorners[2][0],upperCorners[2][1]);
-            ctx.lineTo(lowerCorners[2][0],lowerCorners[2][1]);
-            ctx.lineTo(lowerCorners[1][0],lowerCorners[1][1]);
+            ctx.moveTo(upperCorners[1][0], upperCorners[1][1]);
+            ctx.lineTo(upperCorners[2][0], upperCorners[2][1]);
+            ctx.lineTo(lowerCorners[2][0], lowerCorners[2][1]);
+            ctx.lineTo(lowerCorners[1][0], lowerCorners[1][1]);
             ctx.closePath();
             ctx.fill();
         }
@@ -283,10 +284,10 @@ const Player = {
             ctx.fillStyle = this.topSideColor
 
             ctx.beginPath();
-            ctx.moveTo(upperCorners[0][0],upperCorners[0][1]);
-            ctx.lineTo(upperCorners[1][0],upperCorners[1][1]);
-            ctx.lineTo(lowerCorners[1][0],lowerCorners[1][1]);
-            ctx.lineTo(lowerCorners[0][0],lowerCorners[0][1]);
+            ctx.moveTo(upperCorners[0][0], upperCorners[0][1]);
+            ctx.lineTo(upperCorners[1][0], upperCorners[1][1]);
+            ctx.lineTo(lowerCorners[1][0], lowerCorners[1][1]);
+            ctx.lineTo(lowerCorners[0][0], lowerCorners[0][1]);
             ctx.closePath();
             ctx.fill();
         }
@@ -296,41 +297,39 @@ const Player = {
             ctx.fillStyle = this.leftSideColor
 
             ctx.beginPath();
-            ctx.moveTo(upperCorners[3][0],upperCorners[3][1]);
-            ctx.lineTo(upperCorners[0][0],upperCorners[0][1]);
-            ctx.lineTo(lowerCorners[0][0],lowerCorners[0][1]);
-            ctx.lineTo(lowerCorners[3][0],lowerCorners[3][1]);
+            ctx.moveTo(upperCorners[3][0], upperCorners[3][1]);
+            ctx.lineTo(upperCorners[0][0], upperCorners[0][1]);
+            ctx.lineTo(lowerCorners[0][0], lowerCorners[0][1]);
+            ctx.lineTo(lowerCorners[3][0], lowerCorners[3][1]);
             ctx.closePath();
             ctx.fill();
         }
 
 
-        // ERASE PARTS OF PLAYER THAT ARE BEHIND WALLS
-
-        // ctx is still at player middle
-        ctx.translate(-this.x, -this.y) // ctx is at map origin
-
-        // Draw playerClip DEBUG (This is being drawn on PlayerCanvas)
-        // ctx.lineWidth = 5
-        // ctx.strokeStyle = "#00ff00"
-        // ctx.stroke(Map.playerClip)
-
-        // ADD CLIP of area behind walls
-        ctx.clip(Map.playerClip)
-
-        // ERASE PLAYER THATS BEHIND CLIP
-        ctx.translate(this.x - midX, this.y - midY) // translate to the top left of the screen / canvas
-        PlayerCanvas.clear()
-
-        // COPY PLAYER TO MAIN CANVAS AFTER ERASE
-        CanvasArea.ctx.drawImage(PlayerCanvas.canvas, 0, 0)
-
-
-
-        // DRAW PLAYER XRAY IF BEHIND WALL (on normal CanvasArea)
+        // ERASE PARTS OF PLAYER THAT ARE BEHIND WALL AND DRAW PLAYER XRAY (if in Map not PreviewWindow)
         if (MapData == Map && Map.wallsToCheck.length != 0) { // could use more precice check here ex: looking to see if theres data in Map.playerClip OPTIMIZE
 
-            // DRAW PLAYER XRAY
+            // ERASE PARTS OF PLAYER THAT ARE BEHIND WALLS
+
+            // ctx is still at player middle
+            ctx.translate(-this.x, -this.y) // ctx is at map origin
+
+            // Draw playerClip DEBUG (This is being drawn on PlayerCanvas)
+            // ctx.lineWidth = 5
+            // ctx.strokeStyle = "#00ff00"
+            // ctx.stroke(Map.playerClip)
+
+            // ADD CLIP of area behind walls
+            ctx.clip(Map.playerClip)
+
+            // ERASE PLAYER THATS BEHIND CLIP
+            ctx.translate(this.x - midX, this.y - midY) // translate to the top left of the screen / canvas
+            PlayerCanvas.clear()
+
+
+
+
+            // DRAW PLAYER XRAY IF BEHIND WALL (draw on normal CanvasArea)
             CanvasArea.ctx.save() // # 7 used to reset the CanvasArea (which hasnt really been used in Player.render)
 
             // This zooming was only done on PlayerCanvas. CanvasArea needs too 
@@ -355,6 +354,9 @@ const Player = {
 
             CanvasArea.ctx.restore() // # 7 resets the CanvasArea to whatever weird state it was in previously
         }
+
+        // COPY PLAYER TO MAIN CANVAS AFTER ERASE
+        CanvasArea.ctx.drawImage(PlayerCanvas.canvas, 0, 0)
 
 
         ctx.restore() // #2 clears ctx.scale for zoom. Also restores Player.x / .y translation or midX midY
@@ -753,7 +755,7 @@ const Player = {
     },
 
     checkCollision: function (arrayOfPlatformsToCheck) {
-        
+
         const playerPoligon = CanvasArea.createPoligon(this.x, this.y, 32, 32, this.lookAngle.getAngleInDegrees() * Math.PI / 180) // player angle converted to rads
 
         for (const platform of arrayOfPlatformsToCheck) {

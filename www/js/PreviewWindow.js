@@ -4,7 +4,7 @@ const PreviewWindow = {
     platforms: [
 
         { // wall
-            "x": 130,
+            "x": 230,
             "y": 270,
             "width": 50,
             "height": 100,
@@ -15,7 +15,7 @@ const PreviewWindow = {
         },
 
         { // endzone
-            "x": 300,
+            "x": 400,
             "y": 245,
             "width": 50,
             "height": 50,
@@ -26,7 +26,7 @@ const PreviewWindow = {
         },
 
         { // platform
-            "x": 225,
+            "x": 325,
             "y": 320,
             "width": 70,
             "height": 70,
@@ -37,14 +37,14 @@ const PreviewWindow = {
     ],
 
     player: {
-        "x": 225,
+        "x": 325,
         "y": 308,
         "angle": 45,
         "jumpValue": 29
     },
 
 
-    //called by buttons
+    // called by buttons
     update: function () { // updates all lighting and shadows
 
         this.style = MapEditor.loadedMap.style
@@ -110,6 +110,9 @@ const PreviewWindow = {
     render: function () {
         CanvasArea.canvas.style.backgroundColor = MapEditor.loadedMap.style.shaded_backgroundColor
 
+        CanvasArea.ctx.save()
+        CanvasArea.ctx.scale(1.5,1.5)
+
         // draw shadows
         this.platforms.forEach(platform => {
             Map.renderPlatformShadow(platform)
@@ -124,5 +127,7 @@ const PreviewWindow = {
         Player.initPlayer(this.player.x, this.player.y, this.player.angle)
         Player.jumpValue = this.player.jumpValue
         Player.render()
+
+        CanvasArea.ctx.restore()
     }
 }

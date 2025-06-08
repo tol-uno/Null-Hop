@@ -1,5 +1,9 @@
 const UserInterface = {
 
+    // The UI, both buttons and custom drawn elements, are positioned in non-scaled coordinated
+    // The canvas coords they use are based on the CSS pixels and do not take into account device DPI
+    // They are only rendered using CanvasArea.scale, their logic is all non-scaled
+
     gamestate: 1,
     // 1: main menu
     // 2: level select map browser
@@ -54,19 +58,19 @@ const UserInterface = {
         // CREATING THE BUTTONS []  []  [] 
 
         // Main Menu BUTTONS
-        btn_play = new Button("midX - 90", 180, 180, "play_button", "", 0, "", function () {
+        btn_play = new Button("midX_UI - 69", 140, 138, "play_button", "", 0, "", function () {
             UserInterface.gamestate = 2;
             UserInterface.renderedButtons = UserInterface.btnGroup_standardMapBrowser
             MapBrowser.state = 1;
             MapBrowser.init()
         })
 
-        btn_settings = new Button("midX - 116.5", 280, 233, "settings_button", "", 0, "", function () {
+        btn_settings = new Button("midX_UI - 90", 215, 180, "settings_button", "", 0, "", function () {
             UserInterface.gamestate = 3;
             UserInterface.renderedButtons = UserInterface.btnGroup_settings
         })
 
-        btn_mapEditor = new Button("midX - 143", 380, 286, "map_editor_button", "", 0, "", function () {
+        btn_mapEditor = new Button("midX_UI - 110", 290, 220, "map_editor_button", "", 0, "", function () {
             UserInterface.gamestate = 7;
             MapEditor.editorState = 0;
             UserInterface.renderedButtons = UserInterface.btnGroup_mapEditorMenu;
@@ -75,7 +79,7 @@ const UserInterface = {
 
 
         // SETTINGS Buttons 
-        btn_reset_settings = new Button("CanvasArea.canvas.width - 300", "CanvasArea.canvas.height - 100", 200, "", "", 0, "Erase Data", function () {
+        btn_reset_settings = new Button("window.outerWidth - 230", "window.outerHeight - 90", 160, "", "", 0, "Erase Data", function () {
 
             const reset = confirm("Reset All Settings and Records?");
             if (reset) {
@@ -108,18 +112,18 @@ const UserInterface = {
 
         })
 
-        btn_sensitivitySlider = new SliderUI(180, 100, 300, 0.1, 3, 10, "Sensitivity", UserInterface.settings.sensitivity, function () {
+        btn_sensitivitySlider = new SliderUI(160, 80, 230, 0.1, 3, 10, "Sensitivity", UserInterface.settings.sensitivity, function () {
             UserInterface.settings.sensitivity = this.value
             UserInterface.writeSettings()
         })
 
-        btn_volumeSlider = new SliderUI(180, 200, 300, 0, 1, 10, "Volume", UserInterface.settings.volume, function () {
+        btn_volumeSlider = new SliderUI(160, 160, 230, 0, 1, 10, "Volume", UserInterface.settings.volume, function () {
             UserInterface.settings.volume = this.value
             UserInterface.writeSettings()
             AudioHandler.setVolumes();
         })
 
-        btn_debugText = new Button(310, 240, 80, "toggle_button", "toggle_button_pressed", 1, "", function (sync) {
+        btn_debugText = new Button(270, 210, 60, "toggle_button", "toggle_button_pressed", 1, "", function (sync) {
             if (sync) {
                 this.toggle = UserInterface.settings.debugText;
             } else {
@@ -135,7 +139,7 @@ const UserInterface = {
             }
         })
 
-        btn_strafeHUD = new Button(310, 300, 80, "toggle_button", "toggle_button_pressed", 1, "", function (sync) {
+        btn_strafeHUD = new Button(270, 280, 60, "toggle_button", "toggle_button_pressed", 1, "", function (sync) {
             if (sync) {
                 this.toggle = UserInterface.settings.strafeHUD;
             } else {
@@ -152,9 +156,8 @@ const UserInterface = {
         })
 
 
-
         // MAP EDITOR MENU BUTTONS
-        btn_new_map = new Button("200", "40", 400, "", "", 0, "Create New Map", function () {
+        btn_new_map = new Button("midX_UI - 150", "40", 300, "", "", 0, "Create New Map", function () {
 
             MapEditor.loadedMap = {
                 "playerStart": {
@@ -205,7 +208,7 @@ const UserInterface = {
             MapEditor.loadedMap.platforms.forEach((platform) => MapEditor.updatePlatformCorners(platform))
         })
 
-        btn_load_map = new Button("200", "140", 400, "", "", 0, "Load A Map", function () {
+        btn_load_map = new Button("midX_UI - 150", "110", 300, "", "", 0, "Load A Map", function () {
             MapEditor.editorState = 5;
 
             UserInterface.gamestate = 2;
@@ -221,7 +224,7 @@ const UserInterface = {
             MapBrowser.init()
         })
 
-        btn_import_map = new Button("200", "240", 400, "", "", 0, "Import Map From File Browser", function () {
+        btn_import_map = new Button("midX_UI - 150", "180", 300, "", "", 0, "Import Map From File Browser", function () {
 
             // LOAD FROM LOCAL FILE SYSTEM 
             const input = document.createElement("input");
@@ -246,7 +249,7 @@ const UserInterface = {
 
         })
 
-        btn_import_map_text = new Button("200", "340", 400, "", "", 0, "Import Map From Copy Paste", function () {
+        btn_import_map_text = new Button("midX_UI - 150", "250", 300, "", "", 0, "Import Map With Copy & Paste", function () {
 
             let mapPaste = prompt("Paste Map Data:");
             if (mapPaste) {
@@ -257,11 +260,11 @@ const UserInterface = {
 
 
         // MAP EDITOR BUTTONS
-        btn_exit_edit = new Button(50, 50, 100, "back_button", "back_button_pressed", 0, "", function () {
+        btn_exit_edit = new Button(45, 40, 70, "back_button", "back_button_pressed", 0, "", function () {
             MapEditor.saveCustomMap()
         })
 
-        btn_add_platform = new Button("CanvasArea.canvas.width - 240", "25", 204, "platform_button", "", 0, "", function () {
+        btn_add_platform = new Button("window.outerWidth - 196", "25", 156, "platform_button", "", 0, "", function () {
 
             const newPlatform = {
                 "x": Math.round(MapEditor.screen.x),
@@ -283,9 +286,10 @@ const UserInterface = {
             // SYNC ALL BUTTONS AND SLIDERS
             btn_angleSlider.updateState(MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].angle)
             btn_wall.func(true) // syncs the wall button's toggle state
+            btn_endzone.func(true) // syncs the endzone button's toggle state
         })
 
-        btn_add_checkpoint = new Button("CanvasArea.canvas.width - 300", "120", 250, "cp_button", "", 0, "", function () {
+        btn_add_checkpoint = new Button("window.outerWidth - 232", "92", 192, "cp_button", "", 0, "", function () {
             const middleX = Math.round(MapEditor.screen.x)
             const middleY = Math.round(MapEditor.screen.y)
             const newCheckPoint = {
@@ -301,7 +305,7 @@ const UserInterface = {
             MapEditor.loadedMap.checkpoints.push(newCheckPoint);
         })
 
-        btn_map_colors = new Button("CanvasArea.canvas.width -388", "25", 126, "map_colors_button", "", 0, "", function () {
+        btn_map_colors = new Button("window.outerWidth - 310", "25", 96, "map_colors_button", "", 0, "", function () {
             MapEditor.editorState = 3 // map colors
 
             PreviewWindow.update()
@@ -309,7 +313,7 @@ const UserInterface = {
             UserInterface.renderedButtons = UserInterface.btnGroup_mapColor
         })
 
-        btn_map_settings = new Button("CanvasArea.canvas.width - 550", "25", 141, "map_settings_button", "", 0, "", function () {
+        btn_map_settings = new Button("window.outerWidth - 440", "25", 108, "map_settings_button", "", 0, "", function () {
             MapEditor.editorState = 4 // map settings
 
             PreviewWindow.update()
@@ -322,7 +326,28 @@ const UserInterface = {
             UserInterface.renderedButtons = UserInterface.btnGroup_mapSettings
         })
 
-        btn_multiSelect = new Button("60", "CanvasArea.canvas.height - 200", 60, "toggle_button", "toggle_button_pressed", 1, "", function (sync) {
+        btn_dragSelect = new Button(45, "window.outerHeight - 230", 60, "toggle_button", "toggle_button_pressed", 1, "", function (sync) {
+            if (MapEditor.loadedMap) { // throws an error otherwise
+                if (sync) {
+                    this.toggle = MapEditor.dragSelect;
+                } else {
+                    if (this.toggle) { // turn off dragSelect
+                        this.toggle = 0;
+                        MapEditor.dragSelect = false
+                        MapEditor.setButtonGroup()
+
+                    } else { // turn on dragSelect and multiSelect (required)
+                        this.toggle = 1;
+                        MapEditor.dragSelect = true
+                        MapEditor.multiSelect = true
+                        btn_multiSelect.func(true)  // sync button's toggle
+                        UserInterface.renderedButtons = UserInterface.btnGroup_dragSelect // hides all other buttons
+                    }
+                }
+            }
+        })
+
+        btn_multiSelect = new Button(45, "window.outerHeight - 150", 60, "toggle_button", "toggle_button_pressed", 1, "", function (sync) {
             if (MapEditor.loadedMap) { // throws an error otherwise
                 if (sync) {
                     this.toggle = MapEditor.multiSelect;
@@ -361,37 +386,16 @@ const UserInterface = {
             }
         })
 
-        btn_dragSelect = new Button("60", "CanvasArea.canvas.height - 300", 60, "toggle_button", "toggle_button_pressed", 1, "", function (sync) {
-            if (MapEditor.loadedMap) { // throws an error otherwise
-                if (sync) {
-                    this.toggle = MapEditor.dragSelect;
-                } else {
-                    if (this.toggle) { // turn off dragSelect
-                        this.toggle = 0;
-                        MapEditor.dragSelect = false
-                        MapEditor.setButtonGroup()
-
-                    } else { // turn on dragSelect and multiSelect (required)
-                        this.toggle = 1;
-                        MapEditor.dragSelect = true
-                        MapEditor.multiSelect = true
-                        btn_multiSelect.func(true)  // sync button's toggle
-                        UserInterface.renderedButtons = UserInterface.btnGroup_dragSelect // hides all other buttons
-                    }
-                }
-            }
-        })
-
-        btn_snappingSlider = new SliderUI("60", "CanvasArea.canvas.height - 60", 170, 0, 50, 0.2, "Snapping", MapEditor.loadedMap ? MapEditor.snapAmount : 0, function () {
+        btn_snappingSlider = new SliderUI(50, "window.outerHeight - 50", 170, 0, 50, 0.2, "Snapping", MapEditor.loadedMap ? MapEditor.snapAmount : 0, function () {
             MapEditor.snapAmount = this.value
         })
 
-        btn_unselect = new Button("CanvasArea.canvas.width - 260", "30", 60, "x_button", "", 0, "", function () {
+        btn_unselect = new Button("window.outerWidth - 250", 34, 45, "x_button", "", 0, "", function () {
             UserInterface.renderedButtons = UserInterface.btnGroup_mapEditorInterface
             MapEditor.selectedElements = []; // No selected platforms
         })
 
-        btn_translate = new Button(0, 0, 50, "translate_button", "", 0, "", function () {
+        btn_translate = new Button(0, 0, 38, "translate_button", "", 0, "", function () {
             // for multiselect:
             // get center average of all selected elements
             // create an array containing each element with its xKey / yKey
@@ -417,10 +421,8 @@ const UserInterface = {
                     item.element = MapEditor.loadedMap.playerStart
                     item.offSet = 32
 
-                    //} else if (MapEditor.selectedElements.some((element) => Array.isArray(element))) { // some() checks if any elements within the array match the given condition
                 } else if (Array.isArray(MapEditor.selectedElements[i])) {
 
-                    //checkpoint = MapEditor.selectedElements.find((element) => Array.isArray(element)) // multi
                     checkpoint = MapEditor.selectedElements[i]
 
                     item.element = MapEditor.loadedMap.checkpoints[checkpoint[0]]
@@ -459,8 +461,8 @@ const UserInterface = {
 
                 // element coords mapped to screen coords
                 // mapToRange(number, inMin, inMax, outMin, outMax)
-                const xMapped = CanvasArea.mapToRange(avgMidX, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, CanvasArea.canvas.width)
-                const yMapped = CanvasArea.mapToRange(avgMidY, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, CanvasArea.canvas.height)
+                const xMapped = CanvasArea.mapToRange(avgMidX, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, window.outerWidth)
+                const yMapped = CanvasArea.mapToRange(avgMidY, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, window.outerHeight)
 
                 // position button in the middle of element(s)
                 if (MapEditor.selectedElements.length > 1) {
@@ -473,38 +475,49 @@ const UserInterface = {
 
             } else if (TouchHandler.dragging) {
 
-                // move button according to touch dragging
+                // MOVE BUTTON according to touch dragging
                 // adjust and pan screen if button is near the edge
                 // move element to rounded and mapped button coords
                 // snap element to snapping slider
 
-                this.x += TouchHandler.dragAmountX * CanvasArea.scale
-                this.y += TouchHandler.dragAmountY * CanvasArea.scale
+                this.x += TouchHandler.dragAmountX
+                this.y += TouchHandler.dragAmountY
 
                 // panning if at edges of screen
-                if (this.x > CanvasArea.canvas.width - 340) { MapEditor.screen.x += 400 / MapEditor.zoom * dt }
+                if (this.x > window.outerWidth - 340) { MapEditor.screen.x += 400 / MapEditor.zoom * dt }
                 if (this.x < 60) { MapEditor.screen.x -= 400 / MapEditor.zoom * dt }
-                if (this.y > CanvasArea.canvas.height - 130) { MapEditor.screen.y += 400 / MapEditor.zoom * dt }
+                if (this.y > window.outerHeight - 130) { MapEditor.screen.y += 400 / MapEditor.zoom * dt }
                 if (this.y < 30) { MapEditor.screen.y -= 400 / MapEditor.zoom * dt }
 
 
                 // MOVING EACH SELECTED ELEMENT TO FOLLOW BUTTON
                 for (let i = 0; i < MapEditor.selectedElements.length; i++) {
-                    let offSetFromBtnX = (avgMidX - conditioningArray[i].element[conditioningArray[i].xKey]) * MapEditor.zoom
-                    let offSetFromBtnY = (avgMidY - conditioningArray[i].element[conditioningArray[i].yKey]) * MapEditor.zoom
 
-                    let xMapped
-                    let yMapped
-                    // this.x and this.y mapped to map coords
-                    // mapToRange(number, inMin, inMax, outMin, outMax)
-                    if (MapEditor.selectedElements.length > 1) { // use offSetFromBtn which is offset from center of all selected items
-                        xMapped = CanvasArea.mapToRange(this.x - offSetFromBtnX + this.width / 2, 0, CanvasArea.canvas.width, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width)
-                        yMapped = CanvasArea.mapToRange(this.y - offSetFromBtnY + this.height / 2, 0, CanvasArea.canvas.height, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height)
-                    } else { // use offset
-                        xMapped = CanvasArea.mapToRange(this.x - (conditioningArray[i].offSet * MapEditor.zoom) + this.width / 2, 0, CanvasArea.canvas.width, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width)
-                        yMapped = CanvasArea.mapToRange(this.y - (conditioningArray[i].offSet * MapEditor.zoom) + this.height / 2, 0, CanvasArea.canvas.height, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height)
+                    let xMapped // where this button is in global map coords
+                    let yMapped // (and sometimes accounting for the offset when multiple platforms are selected)
+
+                    if (MapEditor.selectedElements.length > 1) { // Multiple objects selected
+
+                        // offSetFromBtn (offeset from middle of selection) for each platform is in global coords here
+                        const offSetFromAvgMidGlobalX = (avgMidX - conditioningArray[i].element[conditioningArray[i].xKey])
+                        const offSetFromAvgMidGlobalY = (avgMidY - conditioningArray[i].element[conditioningArray[i].yKey])
+
+                        // Map btn pos from UI coords to global map coords
+                        // mapToRange(number, inMin, inMax, outMin, outMax)
+                        const btnGlobalX = CanvasArea.mapToRange(this.x + this.width / 2, 0, window.outerWidth, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width)
+                        const btnGlobalY = CanvasArea.mapToRange(this.y + this.height / 2, 0, window.outerHeight, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height)
+
+                        xMapped = btnGlobalX - offSetFromAvgMidGlobalX
+                        yMapped = btnGlobalY - offSetFromAvgMidGlobalY
+
+                    } else { // use offset for single item
+
+                        xMapped = CanvasArea.mapToRange(this.x - (conditioningArray[i].offSet * MapEditor.zoom) + this.width / 2, 0, window.outerWidth, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width)
+                        yMapped = CanvasArea.mapToRange(this.y - (conditioningArray[i].offSet * MapEditor.zoom) + this.height / 2, 0, window.outerHeight, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height)
                     }
 
+
+                    // set platform position to (xMapped, yMapped)
                     conditioningArray[i].element[conditioningArray[i].xKey] = Math.round(xMapped)
                     conditioningArray[i].element[conditioningArray[i].yKey] = Math.round(yMapped)
 
@@ -516,7 +529,7 @@ const UserInterface = {
             }
         })
 
-        btn_resize_BL = new Button(0, 0, 50, "scale_button", "", 0, "", function () {
+        btn_resize_BL = new Button(0, 0, 38, "scale_button", "", 0, "", function () {
 
             let platform = MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]]
 
@@ -529,8 +542,8 @@ const UserInterface = {
 
                 // corner coords mapped to screen coords
                 // mapToRange(number, inMin, inMax, outMin, outMax)
-                const cornerMappedX = CanvasArea.mapToRange(platform.x + cornerX, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, CanvasArea.canvas.width)
-                const cornerMappedY = CanvasArea.mapToRange(platform.y + cornerY, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, CanvasArea.canvas.height)
+                const cornerMappedX = CanvasArea.mapToRange(platform.x + cornerX, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, window.outerWidth)
+                const cornerMappedY = CanvasArea.mapToRange(platform.y + cornerY, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, window.outerHeight)
 
                 this.x = cornerMappedX - this.width
                 this.y = cornerMappedY
@@ -539,13 +552,13 @@ const UserInterface = {
             } else if (TouchHandler.dragging) {
 
                 // move button according to touch dragging
-                this.x += TouchHandler.dragAmountX * CanvasArea.scale
-                this.y += TouchHandler.dragAmountY * CanvasArea.scale
+                this.x += TouchHandler.dragAmountX
+                this.y += TouchHandler.dragAmountY
 
                 // panning if at edges of screen
-                if (this.x > CanvasArea.canvas.width - 340) { MapEditor.screen.x += 400 / MapEditor.zoom * dt }
+                if (this.x > window.outerWidth - 340) { MapEditor.screen.x += 400 / MapEditor.zoom * dt }
                 if (this.x < 60) { MapEditor.screen.x -= 400 / MapEditor.zoom * dt }
-                if (this.y > CanvasArea.canvas.height - 130) { MapEditor.screen.y += 400 / MapEditor.zoom * dt }
+                if (this.y > window.outerHeight - 130) { MapEditor.screen.y += 400 / MapEditor.zoom * dt }
                 if (this.y < 30) { MapEditor.screen.y -= 400 / MapEditor.zoom * dt }
 
 
@@ -555,8 +568,8 @@ const UserInterface = {
 
                 // convert pinned coords to SCREEN COORDS
                 // mapToRange(number, inMin, inMax, outMin, outMax)
-                const pinnedX_screenCoords = CanvasArea.mapToRange(pinnedX_mapCoords, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, CanvasArea.canvas.width)
-                const pinnedY_screenCoords = CanvasArea.mapToRange(pinnedY_mapCoords, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, CanvasArea.canvas.height)
+                const pinnedX_screenCoords = CanvasArea.mapToRange(pinnedX_mapCoords, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, window.outerWidth)
+                const pinnedY_screenCoords = CanvasArea.mapToRange(pinnedY_mapCoords, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, window.outerHeight)
 
 
                 // get vector dragFromPinned (unscaled by zoom) (origin is at pin) x value will be neg at 0deg, y val will be pos(down) at 0 deg 
@@ -567,8 +580,8 @@ const UserInterface = {
                 const rotatedDragFromPinned = dragFromPinned.rotate(-platform.angle)
 
                 // set width and height using rotatedDragFromPinned
-                platform.width = Math.round(-rotatedDragFromPinned.x)
-                platform.height = Math.round(rotatedDragFromPinned.y)
+                platform.width = Math.round(-rotatedDragFromPinned.x * CanvasArea.scale)
+                platform.height = Math.round(rotatedDragFromPinned.y * CanvasArea.scale)
 
 
                 // snapping and restricting size
@@ -599,7 +612,7 @@ const UserInterface = {
             }
         })
 
-        btn_resize_BR = new Button(0, 0, 50, "scale_button", "", 0, "", function () {
+        btn_resize_BR = new Button(0, 0, 38, "scale_button", "", 0, "", function () {
 
             let platform = MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]]
 
@@ -612,8 +625,8 @@ const UserInterface = {
 
                 // corner coords mapped to screen coords
                 // mapToRange(number, inMin, inMax, outMin, outMax)
-                const cornerMappedX = CanvasArea.mapToRange(platform.x + cornerX, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, CanvasArea.canvas.width)
-                const cornerMappedY = CanvasArea.mapToRange(platform.y + cornerY, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, CanvasArea.canvas.height)
+                const cornerMappedX = CanvasArea.mapToRange(platform.x + cornerX, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, window.outerWidth)
+                const cornerMappedY = CanvasArea.mapToRange(platform.y + cornerY, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, window.outerHeight)
 
                 this.x = cornerMappedX
                 this.y = cornerMappedY
@@ -622,13 +635,13 @@ const UserInterface = {
             } else if (TouchHandler.dragging) {
 
                 // move button according to touch dragging
-                this.x += TouchHandler.dragAmountX * CanvasArea.scale
-                this.y += TouchHandler.dragAmountY * CanvasArea.scale
+                this.x += TouchHandler.dragAmountX
+                this.y += TouchHandler.dragAmountY
 
                 // panning if at edges of screen
-                if (this.x > CanvasArea.canvas.width - 340) { MapEditor.screen.x += 400 / MapEditor.zoom * dt }
+                if (this.x > window.outerWidth - 340) { MapEditor.screen.x += 400 / MapEditor.zoom * dt }
                 if (this.x < 60) { MapEditor.screen.x -= 400 / MapEditor.zoom * dt }
-                if (this.y > CanvasArea.canvas.height - 130) { MapEditor.screen.y += 400 / MapEditor.zoom * dt }
+                if (this.y > window.outerHeight - 130) { MapEditor.screen.y += 400 / MapEditor.zoom * dt }
                 if (this.y < 30) { MapEditor.screen.y -= 400 / MapEditor.zoom * dt }
 
 
@@ -638,8 +651,8 @@ const UserInterface = {
 
                 // convert pinned coords to SCREEN COORDS
                 // mapToRange(number, inMin, inMax, outMin, outMax)
-                const pinnedX_screenCoords = CanvasArea.mapToRange(pinnedX_mapCoords, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, CanvasArea.canvas.width)
-                const pinnedY_screenCoords = CanvasArea.mapToRange(pinnedY_mapCoords, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, CanvasArea.canvas.height)
+                const pinnedX_screenCoords = CanvasArea.mapToRange(pinnedX_mapCoords, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, window.outerWidth)
+                const pinnedY_screenCoords = CanvasArea.mapToRange(pinnedY_mapCoords, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, window.outerHeight)
 
 
                 // get vector dragFromPinned (unscaled by zoom) (origin is at pin) x value will be pos at 0deg, y val will be pos(down) at 0 deg 
@@ -650,8 +663,8 @@ const UserInterface = {
                 const rotatedDragFromPinned = dragFromPinned.rotate(-platform.angle)
 
                 // set width and height using rotatedDragFromPinned
-                platform.width = Math.round(rotatedDragFromPinned.x)
-                platform.height = Math.round(rotatedDragFromPinned.y)
+                platform.width = Math.round(rotatedDragFromPinned.x * CanvasArea.scale)
+                platform.height = Math.round(rotatedDragFromPinned.y * CanvasArea.scale)
 
 
                 // snapping and restricting size
@@ -682,7 +695,7 @@ const UserInterface = {
             }
         })
 
-        btn_resize_TR = new Button(0, 0, 50, "scale_button", "", 0, "", function () {
+        btn_resize_TR = new Button(0, 0, 38, "scale_button", "", 0, "", function () {
 
             let platform = MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]]
 
@@ -695,8 +708,8 @@ const UserInterface = {
 
                 // corner coords mapped to screen coords
                 // mapToRange(number, inMin, inMax, outMin, outMax)
-                const cornerMappedX = CanvasArea.mapToRange(platform.x + cornerX, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, CanvasArea.canvas.width)
-                const cornerMappedY = CanvasArea.mapToRange(platform.y + cornerY, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, CanvasArea.canvas.height)
+                const cornerMappedX = CanvasArea.mapToRange(platform.x + cornerX, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, window.outerWidth)
+                const cornerMappedY = CanvasArea.mapToRange(platform.y + cornerY, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, window.outerHeight)
 
                 this.x = cornerMappedX
                 this.y = cornerMappedY - this.height
@@ -705,13 +718,13 @@ const UserInterface = {
             } else if (TouchHandler.dragging) {
 
                 // move button according to touch dragging
-                this.x += TouchHandler.dragAmountX * CanvasArea.scale
-                this.y += TouchHandler.dragAmountY * CanvasArea.scale
+                this.x += TouchHandler.dragAmountX
+                this.y += TouchHandler.dragAmountY
 
                 // panning if at edges of screen
-                if (this.x > CanvasArea.canvas.width - 340) { MapEditor.screen.x += 400 / MapEditor.zoom * dt }
+                if (this.x > window.outerWidth - 340) { MapEditor.screen.x += 400 / MapEditor.zoom * dt }
                 if (this.x < 60) { MapEditor.screen.x -= 400 / MapEditor.zoom * dt }
-                if (this.y > CanvasArea.canvas.height - 130) { MapEditor.screen.y += 400 / MapEditor.zoom * dt }
+                if (this.y > window.outerHeight - 130) { MapEditor.screen.y += 400 / MapEditor.zoom * dt }
                 if (this.y < 30) { MapEditor.screen.y -= 400 / MapEditor.zoom * dt }
 
 
@@ -721,8 +734,8 @@ const UserInterface = {
 
                 // convert pinned coords to SCREEN COORDS
                 // mapToRange(number, inMin, inMax, outMin, outMax)
-                const pinnedX_screenCoords = CanvasArea.mapToRange(pinnedX_mapCoords, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, CanvasArea.canvas.width)
-                const pinnedY_screenCoords = CanvasArea.mapToRange(pinnedY_mapCoords, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, CanvasArea.canvas.height)
+                const pinnedX_screenCoords = CanvasArea.mapToRange(pinnedX_mapCoords, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, window.outerWidth)
+                const pinnedY_screenCoords = CanvasArea.mapToRange(pinnedY_mapCoords, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, window.outerHeight)
 
 
                 // get vector dragFromPinned (unscaled by zoom) (origin is at pin) x value will be pos at 0deg, y val will be neg(up) at 0 deg 
@@ -733,8 +746,8 @@ const UserInterface = {
                 const rotatedDragFromPinned = dragFromPinned.rotate(-platform.angle)
 
                 // set width and height using rotatedDragFromPinned
-                platform.width = Math.round(rotatedDragFromPinned.x)
-                platform.height = Math.round(-rotatedDragFromPinned.y)
+                platform.width = Math.round(rotatedDragFromPinned.x * CanvasArea.scale)
+                platform.height = Math.round(-rotatedDragFromPinned.y * CanvasArea.scale)
 
 
                 // snapping and restricting size
@@ -765,7 +778,7 @@ const UserInterface = {
             }
         })
 
-        btn_resize_TL = new Button(0, 0, 50, "scale_button", "", 0, "", function () {
+        btn_resize_TL = new Button(0, 0, 38, "scale_button", "", 0, "", function () {
 
             let platform = MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]]
 
@@ -778,8 +791,8 @@ const UserInterface = {
 
                 // corner coords mapped to screen coords
                 // mapToRange(number, inMin, inMax, outMin, outMax)
-                const cornerMappedX = CanvasArea.mapToRange(platform.x + cornerX, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, CanvasArea.canvas.width)
-                const cornerMappedY = CanvasArea.mapToRange(platform.y + cornerY, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, CanvasArea.canvas.height)
+                const cornerMappedX = CanvasArea.mapToRange(platform.x + cornerX, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, window.outerWidth)
+                const cornerMappedY = CanvasArea.mapToRange(platform.y + cornerY, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, window.outerHeight)
 
                 this.x = cornerMappedX - this.width
                 this.y = cornerMappedY - this.height
@@ -788,13 +801,13 @@ const UserInterface = {
             } else if (TouchHandler.dragging) {
 
                 // move button according to touch dragging
-                this.x += TouchHandler.dragAmountX * CanvasArea.scale
-                this.y += TouchHandler.dragAmountY * CanvasArea.scale
+                this.x += TouchHandler.dragAmountX
+                this.y += TouchHandler.dragAmountY
 
                 // panning if at edges of screen
-                if (this.x > CanvasArea.canvas.width - 340) { MapEditor.screen.x += 400 / MapEditor.zoom * dt }
+                if (this.x > window.outerWidth - 340) { MapEditor.screen.x += 400 / MapEditor.zoom * dt }
                 if (this.x < 60) { MapEditor.screen.x -= 400 / MapEditor.zoom * dt }
-                if (this.y > CanvasArea.canvas.height - 130) { MapEditor.screen.y += 400 / MapEditor.zoom * dt }
+                if (this.y > window.outerHeight - 130) { MapEditor.screen.y += 400 / MapEditor.zoom * dt }
                 if (this.y < 30) { MapEditor.screen.y -= 400 / MapEditor.zoom * dt }
 
 
@@ -804,8 +817,8 @@ const UserInterface = {
 
                 // convert pinned coords to SCREEN COORDS
                 // mapToRange(number, inMin, inMax, outMin, outMax)
-                const pinnedX_screenCoords = CanvasArea.mapToRange(pinnedX_mapCoords, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, CanvasArea.canvas.width)
-                const pinnedY_screenCoords = CanvasArea.mapToRange(pinnedY_mapCoords, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, CanvasArea.canvas.height)
+                const pinnedX_screenCoords = CanvasArea.mapToRange(pinnedX_mapCoords, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, window.outerWidth)
+                const pinnedY_screenCoords = CanvasArea.mapToRange(pinnedY_mapCoords, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, window.outerHeight)
 
 
                 // get vector dragFromPinned (unscaled by zoom) (origin is at pin) x value will be neg at 0deg, y val will be neg(up) at 0 deg 
@@ -816,8 +829,8 @@ const UserInterface = {
                 const rotatedDragFromPinned = dragFromPinned.rotate(-platform.angle)
 
                 // set width and height using rotatedDragFromPinned
-                platform.width = Math.round(-rotatedDragFromPinned.x)
-                platform.height = Math.round(-rotatedDragFromPinned.y)
+                platform.width = Math.round(-rotatedDragFromPinned.x * CanvasArea.scale)
+                platform.height = Math.round(-rotatedDragFromPinned.y * CanvasArea.scale)
 
 
                 // snapping and restricting size
@@ -848,7 +861,7 @@ const UserInterface = {
             }
         })
 
-        btn_angleSlider = new SliderUI("CanvasArea.canvas.width - 250", "250", 170, -45, 45, 1, "Angle", MapEditor.loadedMap ? MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]] : 0, function () {
+        btn_angleSlider = new SliderUI("window.outerWidth - 246", 204, 186, -45, 45, 1, "Angle", MapEditor.loadedMap ? MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]] : 0, function () {
             if (MapEditor.snapAmount > 0) { this.updateState(Math.round(this.value / MapEditor.snapAmount) * MapEditor.snapAmount) }
             if (this.value < this.min) { this.updateState(this.min) } // these are incase snapping pushes the value over or under the limits
             if (this.value > this.max) { this.updateState(this.max) }
@@ -856,17 +869,17 @@ const UserInterface = {
             MapEditor.updatePlatformCorners(MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]])
         })
 
-        btn_playerAngleSlider = new SliderUI("CanvasArea.canvas.width - 250", "250", 170, 0, 360, 1, "Angle", MapEditor.loadedMap ? MapEditor.loadedMap.playerStart : 0, function () {
+        btn_playerAngleSlider = new SliderUI("window.outerWidth - 246", 204, 186, 0, 360, 1, "Angle", MapEditor.loadedMap ? MapEditor.loadedMap.playerStart : 0, function () {
             if (MapEditor.snapAmount > 0) { this.updateState(Math.round(this.value / MapEditor.snapAmount) * MapEditor.snapAmount) }
             MapEditor.loadedMap.playerStart.angle = this.value
         })
 
-        btn_checkpointAngleSlider = new SliderUI("CanvasArea.canvas.width - 250", "280", 170, 0, 360, 1, "Angle", MapEditor.loadedMap ? MapEditor.loadedMap.checkpoints[MapEditor.selectedElements[0][0]] : 0, function () {
+        btn_checkpointAngleSlider = new SliderUI("window.outerWidth - 246", 204, 186, 0, 360, 1, "Angle", MapEditor.loadedMap ? MapEditor.loadedMap.checkpoints[MapEditor.selectedElements[0][0]] : 0, function () {
             if (MapEditor.snapAmount > 0) { this.updateState(Math.round(this.value / MapEditor.snapAmount) * MapEditor.snapAmount) }
             MapEditor.loadedMap.checkpoints[MapEditor.selectedElements[0][0]].angle = this.value
         })
 
-        btn_wall = new Button("CanvasArea.canvas.width - 170", "280", 60, "toggle_button", "toggle_button_pressed", 1, "", function (sync) {
+        btn_wall = new Button("window.outerWidth - 120", 224, 60, "toggle_button", "toggle_button_pressed", 1, "", function (sync) {
             if (MapEditor.loadedMap) { // throws an error otherwise
                 if (sync) {
                     this.toggle = MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].wall ? 1 : 0; // gets initial value of toggle
@@ -882,28 +895,23 @@ const UserInterface = {
             }
         })
 
-        btn_delete_platform = new Button("CanvasArea.canvas.width - 175", "CanvasArea.canvas.height - 100", 120, "delete_button", "", 0, "", function () {
-
-            MapEditor.selectedElements.forEach((element) => { // loop through and delete
-                if (Array.isArray(element)) { // delete checkpoint
-
-                    MapEditor.loadedMap.checkpoints[element[0]] = "remove"
-
-                } else if (element != "playerStart") { // delete platform but DONT delete playerStart
-
-                    MapEditor.loadedMap.platforms[element] = "remove" // set a placeholder which will be removed by .filter
+        btn_endzone = new Button("window.outerWidth - 120", 264, 60, "toggle_button", "toggle_button_pressed", 1, "", function (sync) {
+            if (MapEditor.loadedMap) { // throws an error otherwise
+                if (sync) {
+                    this.toggle = MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].endzone ? 1 : 0; // gets initial value of toggle
+                } else {
+                    if (this.toggle) {
+                        this.toggle = 0;
+                        MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].endzone = 0
+                    } else {
+                        this.toggle = 1;
+                        MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].endzone = 1
+                    }
                 }
-            })
-
-            MapEditor.loadedMap.checkpoints = MapEditor.loadedMap.checkpoints.filter((checkpoint) => checkpoint != "remove");
-            MapEditor.loadedMap.platforms = MapEditor.loadedMap.platforms.filter((platform) => platform != "remove");
-
-            MapEditor.selectedElements = []; // No selected elements after delete
-            UserInterface.renderedButtons = UserInterface.btnGroup_mapEditorInterface
-
+            }
         })
 
-        btn_duplicate_platform = new Button("CanvasArea.canvas.width - 250", "CanvasArea.canvas.height - 185", 200, "", "", 0, "Duplicate", function () {
+        btn_duplicate_platform = new Button("window.outerWidth - 262", "window.outerHeight - 90", 150, "", "", 0, "Duplicate", function () {
             let originPlatform = {
                 x: null,
                 y: null
@@ -941,29 +949,52 @@ const UserInterface = {
                 // SYNC ALL BUTTONS AND SLIDERS
                 btn_angleSlider.updateState(MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].angle)
                 btn_wall.func(true) // syncs the wall button's toggle state
+                btn_endzone.func(true) // syncs the enzone button's toggle state
             }
+        })
+
+        // btn_delete_platform = new Button("window.outerWidth - 99", "window.outerHeight - 90", 55, "delete_button", "", 0, "", function () {
+        btn_delete_platform = new Button("window.outerWidth - 99", "window.outerHeight - 90", 55, "", "", 0, "[]", function () {
+
+            MapEditor.selectedElements.forEach((element) => { // loop through and delete
+                if (Array.isArray(element)) { // delete checkpoint
+
+                    MapEditor.loadedMap.checkpoints[element[0]] = "remove"
+
+                } else if (element != "playerStart") { // delete platform but DONT delete playerStart
+
+                    MapEditor.loadedMap.platforms[element] = "remove" // set a placeholder which will be removed by .filter
+                }
+            })
+
+            MapEditor.loadedMap.checkpoints = MapEditor.loadedMap.checkpoints.filter((checkpoint) => checkpoint != "remove");
+            MapEditor.loadedMap.platforms = MapEditor.loadedMap.platforms.filter((platform) => platform != "remove");
+
+            MapEditor.selectedElements = []; // No selected elements after delete
+            UserInterface.renderedButtons = UserInterface.btnGroup_mapEditorInterface
+
         })
 
 
 
 
         // MAP SETTINGS SLIDERS
-        btn_platformHeightSlider = new SliderUI("CanvasArea.canvas.width - 650", "100", 460, 0, 200, 1, "Platform Height", MapEditor.loadedMap ? MapEditor.loadedMap.style.platformHeight : 0, function () {
+        btn_platformHeightSlider = new SliderUI("midX_UI", 80, 360, 0, 360, 1, "Platform Height", MapEditor.loadedMap ? MapEditor.loadedMap.style.platformHeight : 0, function () {
             MapEditor.loadedMap.style.platformHeight = this.value
             PreviewWindow.update()
         })
 
-        btn_wallHeightSlider = new SliderUI("CanvasArea.canvas.width - 650", "200", 460, 0, 200, 1, "Wall Height", MapEditor.loadedMap ? MapEditor.loadedMap.style.wallHeight : 0, function () {
+        btn_wallHeightSlider = new SliderUI("midX_UI", 140, 360, 0, 360, 1, "Wall Height", MapEditor.loadedMap ? MapEditor.loadedMap.style.wallHeight : 0, function () {
             MapEditor.loadedMap.style.wallHeight = this.value
             PreviewWindow.update()
         })
 
-        btn_lightDirectionSlider = new SliderUI("CanvasArea.canvas.width - 650", "300", 460, 0, 360, 1, "Light Direction", MapEditor.loadedMap ? MapEditor.loadedMap.style.lightDirection : 0, function () {
+        btn_lightDirectionSlider = new SliderUI("midX_UI", 200, 360, 0, 360, 1, "Light Direction", MapEditor.loadedMap ? MapEditor.loadedMap.style.lightDirection : 0, function () {
             MapEditor.loadedMap.style.lightDirection = this.value
             PreviewWindow.update()
         })
 
-        btn_lightPitchSlider = new SliderUI("CanvasArea.canvas.width - 660", "400", 460, 5, 90, 1, "Light Angle", MapEditor.loadedMap ? MapEditor.loadedMap.style.lightPitch : 0, function () {
+        btn_lightPitchSlider = new SliderUI("midX_UI", 260, 360, 5, 90, 1, "Light Angle", MapEditor.loadedMap ? MapEditor.loadedMap.style.lightPitch : 0, function () {
             MapEditor.loadedMap.style.lightPitch = this.value
             PreviewWindow.update()
         })
@@ -971,29 +1002,29 @@ const UserInterface = {
 
 
         // COLOR PICKER BUTTONS AND SLIDERS
-        btn_copyColor = new Button("ColorPicker.x + ColorPicker.width/2 - 125", "ColorPicker.y + ColorPicker.height + 20", 116, "", "", 0, "Copy", function () {
+        btn_copyColor = new Button("ColorPicker.x + 154", "ColorPicker.y + 46", 90, "", "", 0, "Copy", function () {
             ColorPicker.copyColor()
         })
 
-        btn_pasteColor = new Button("ColorPicker.x + ColorPicker.width/2 + 17", "ColorPicker.y + ColorPicker.height + 20", 116, "", "", 0, "Paste", function () {
+        btn_pasteColor = new Button("ColorPicker.x + 254", "ColorPicker.y + 46", 90, "", "", 0, "Paste", function () {
             ColorPicker.pasteColor()
         })
 
-        btn_hueSlider = new SliderUI("ColorPicker.x + 20", "ColorPicker.y + 160", ColorPicker.width - 40, 0, 360, 1, "Hue", ColorPicker.h, function () {
+        btn_hueSlider = new SliderUI("ColorPicker.x + 16", "ColorPicker.y + 148", ColorPicker.width - 32, 0, 360, 1, "Hue", ColorPicker.h, function () {
             ColorPicker.h = this.value
             ColorPicker.updateElementColor()
             ColorPicker.syncGradients()
             if (ColorPicker.editingElement == 1 || ColorPicker.editingElement == 9 || ColorPicker.editingElement == 10) { UserInterface.determineButtonColor() }
         })
 
-        btn_saturationSlider = new SliderUI("ColorPicker.x + 20", "ColorPicker.y + 240", ColorPicker.width - 40, 0, 100, 1, "Saturation", ColorPicker.s, function () {
+        btn_saturationSlider = new SliderUI("ColorPicker.x + 16", "ColorPicker.y + 220", ColorPicker.width - 32, 0, 100, 1, "Saturation", ColorPicker.s, function () {
             ColorPicker.s = this.value
             ColorPicker.updateElementColor()
             ColorPicker.syncGradients()
             if (ColorPicker.editingElement == 1 || ColorPicker.editingElement == 9 || ColorPicker.editingElement == 10) { UserInterface.determineButtonColor() }
         })
 
-        btn_lightnessSlider = new SliderUI("ColorPicker.x + 20", "ColorPicker.y + 320", ColorPicker.width - 40, 0, 100, 1, "Lightness", ColorPicker.l, function () {
+        btn_lightnessSlider = new SliderUI("ColorPicker.x + 16", "ColorPicker.y + 292", ColorPicker.width - 32, 0, 100, 1, "Lightness", ColorPicker.l, function () {
             ColorPicker.l = this.value
             ColorPicker.updateElementColor()
             ColorPicker.syncGradients()
@@ -1014,7 +1045,7 @@ const UserInterface = {
         // 9 direct light
         // 10 ambient light
 
-        btn_backgroundColor = new Button("CanvasArea.canvas.width - 410", "20", 175, "", "", 0, "Background", function () {
+        btn_backgroundColor = new Button(185, 16, 134, "", "", 0, "Background", function () {
             if (this.toggle) {
                 this.toggle = 0;
                 ColorPicker.editingElement = 0
@@ -1029,7 +1060,7 @@ const UserInterface = {
             }
         })
 
-        btn_playerColor = new Button("CanvasArea.canvas.width - 225", "20", 175, "", "", 0, "Player", function () {
+        btn_playerColor = new Button(185, 76, 134, "", "", 0, "Player", function () {
             if (this.toggle) {
                 this.toggle = 0;
                 ColorPicker.editingElement = 0
@@ -1044,97 +1075,7 @@ const UserInterface = {
             }
         })
 
-        btn_platformTopColor = new Button("CanvasArea.canvas.width - 410", "120", 175, "", "", 0, "Platform Top", function () {
-            if (this.toggle) {
-                this.toggle = 0;
-                ColorPicker.editingElement = 0
-            } else {
-                // untoggle all others
-                ColorPicker.toggleAllButtons()
-                this.toggle = 1;
-                ColorPicker.editingElement = 3
-                ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.platformTopColor)
-                ColorPicker.updateSliders()
-                ColorPicker.syncGradients()
-            }
-        })
-
-        btn_platformSideColor = new Button("CanvasArea.canvas.width - 225", "120", 175, "", "", 0, "Platform Side", function () {
-            if (this.toggle) {
-                this.toggle = 0;
-                ColorPicker.editingElement = 0
-            } else {
-                // untoggle all others
-                ColorPicker.toggleAllButtons()
-                this.toggle = 1;
-                ColorPicker.editingElement = 4
-                ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.platformSideColor)
-                ColorPicker.updateSliders()
-                ColorPicker.syncGradients()
-            }
-        })
-
-        btn_wallTopColor = new Button("CanvasArea.canvas.width - 410", "220", 175, "", "", 0, "Wall Top", function () {
-            if (this.toggle) {
-                this.toggle = 0;
-                ColorPicker.editingElement = 0
-            } else {
-                // untoggle all others
-                ColorPicker.toggleAllButtons()
-                this.toggle = 1;
-                ColorPicker.editingElement = 5
-                ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.wallTopColor)
-                ColorPicker.updateSliders()
-                ColorPicker.syncGradients()
-            }
-        })
-
-        btn_wallSideColor = new Button("CanvasArea.canvas.width - 225", "220", 175, "", "", 0, "Wall Side", function () {
-            if (this.toggle) {
-                this.toggle = 0;
-                ColorPicker.editingElement = 0
-            } else {
-                // untoggle all others
-                ColorPicker.toggleAllButtons()
-                this.toggle = 1;
-                ColorPicker.editingElement = 6
-                ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.wallSideColor)
-                ColorPicker.updateSliders()
-                ColorPicker.syncGradients()
-            }
-        })
-
-        btn_endZoneTopColor = new Button("CanvasArea.canvas.width - 410", "320", 175, "", "", 0, "End Zone Top", function () {
-            if (this.toggle) {
-                this.toggle = 0;
-                ColorPicker.editingElement = 0
-            } else {
-                // untoggle all others
-                ColorPicker.toggleAllButtons()
-                this.toggle = 1;
-                ColorPicker.editingElement = 7
-                ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.endZoneTopColor)
-                ColorPicker.updateSliders()
-                ColorPicker.syncGradients()
-            }
-        })
-
-        btn_endZoneSideColor = new Button("CanvasArea.canvas.width - 225", "320", 175, "", "", 0, "End Zone Side", function () {
-            if (this.toggle) {
-                this.toggle = 0;
-                ColorPicker.editingElement = 0
-            } else {
-                // untoggle all others
-                ColorPicker.toggleAllButtons()
-                this.toggle = 1;
-                ColorPicker.editingElement = 8
-                ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.endZoneSideColor)
-                ColorPicker.updateSliders()
-                ColorPicker.syncGradients()
-            }
-        })
-
-        btn_directLightColor = new Button("CanvasArea.canvas.width - 410", "420", 175, "", "", 0, "Direct Light", function () {
+        btn_directLightColor = new Button(325, 16, 134, "", "", 0, "Direct Light", function () {
             if (this.toggle) {
                 this.toggle = 0;
                 ColorPicker.editingElement = 0
@@ -1149,7 +1090,7 @@ const UserInterface = {
             }
         })
 
-        btn_ambientLightColor = new Button("CanvasArea.canvas.width - 225", "420", 175, "", "", 0, "Ambient Light", function () {
+        btn_ambientLightColor = new Button(325, 76, 134, "", "", 0, "Ambient Light", function () {
             if (this.toggle) {
                 this.toggle = 0;
                 ColorPicker.editingElement = 0
@@ -1167,8 +1108,103 @@ const UserInterface = {
 
 
 
+        btn_wallTopColor = new Button(45, "window.outerHeight - 132", 134, "", "", 0, "Wall Top", function () {
+            if (this.toggle) {
+                this.toggle = 0;
+                ColorPicker.editingElement = 0
+            } else {
+                // untoggle all others
+                ColorPicker.toggleAllButtons()
+                this.toggle = 1;
+                ColorPicker.editingElement = 5
+                ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.wallTopColor)
+                ColorPicker.updateSliders()
+                ColorPicker.syncGradients()
+            }
+        })
+
+        btn_wallSideColor = new Button(45, "window.outerHeight - 72", 134, "", "", 0, "Wall Side", function () {
+            if (this.toggle) {
+                this.toggle = 0;
+                ColorPicker.editingElement = 0
+            } else {
+                // untoggle all others
+                ColorPicker.toggleAllButtons()
+                this.toggle = 1;
+                ColorPicker.editingElement = 6
+                ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.wallSideColor)
+                ColorPicker.updateSliders()
+                ColorPicker.syncGradients()
+            }
+        })
+
+        btn_platformTopColor = new Button(185, "window.outerHeight - 132", 134, "", "", 0, "Platform Top", function () {
+            if (this.toggle) {
+                this.toggle = 0;
+                ColorPicker.editingElement = 0
+            } else {
+                // untoggle all others
+                ColorPicker.toggleAllButtons()
+                this.toggle = 1;
+                ColorPicker.editingElement = 3
+                ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.platformTopColor)
+                ColorPicker.updateSliders()
+                ColorPicker.syncGradients()
+            }
+        })
+
+        btn_platformSideColor = new Button(185, "window.outerHeight - 72", 134, "", "", 0, "Platform Side", function () {
+            if (this.toggle) {
+                this.toggle = 0;
+                ColorPicker.editingElement = 0
+            } else {
+                // untoggle all others
+                ColorPicker.toggleAllButtons()
+                this.toggle = 1;
+                ColorPicker.editingElement = 4
+                ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.platformSideColor)
+                ColorPicker.updateSliders()
+                ColorPicker.syncGradients()
+            }
+        })
+
+        btn_endZoneTopColor = new Button(325, "window.outerHeight - 132", 134, "", "", 0, "End Zone Top", function () {
+            if (this.toggle) {
+                this.toggle = 0;
+                ColorPicker.editingElement = 0
+            } else {
+                // untoggle all others
+                ColorPicker.toggleAllButtons()
+                this.toggle = 1;
+                ColorPicker.editingElement = 7
+                ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.endZoneTopColor)
+                ColorPicker.updateSliders()
+                ColorPicker.syncGradients()
+            }
+        })
+
+        btn_endZoneSideColor = new Button(325, "window.outerHeight - 72", 134, "", "", 0, "End Zone Side", function () {
+            if (this.toggle) {
+                this.toggle = 0;
+                ColorPicker.editingElement = 0
+            } else {
+                // untoggle all others
+                ColorPicker.toggleAllButtons()
+                this.toggle = 1;
+                ColorPicker.editingElement = 8
+                ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.endZoneSideColor)
+                ColorPicker.updateSliders()
+                ColorPicker.syncGradients()
+            }
+        })
+
+
+
+
+
+
         // MAP BROWSER BUTTONS
-        btn_custom_maps = new Button(50, "CanvasArea.canvas.height - 150", 175, "custom_maps_button", "", 0, "", function () {
+        btn_custom_maps = new Button(45, "window.outerHeight - 115", 135, "custom_maps_button", "", 0, "", function () {
             UserInterface.gamestate = 2;
 
             // loop through each button (including non-maps eww) and untoggle it. Could be an issue once I add a "play tutorial" toggle / button idk
@@ -1181,7 +1217,7 @@ const UserInterface = {
             MapBrowser.init()
         })
 
-        btn_playMap = new Button("CanvasArea.canvas.width - 300", "CanvasArea.canvas.height - 150", 200, "play_button", "", 0, "", function () {
+        btn_playMap = new Button("window.outerWidth - 230", "window.outerHeight - 115", 150, "play_button", "", 0, "", function () {
 
             MapBrowser.toggleAllButtons()
             MapBrowser.scrollY = 0;
@@ -1201,7 +1237,7 @@ const UserInterface = {
             }
         })
 
-        btn_editMap = new Button("CanvasArea.canvas.width - 300", "CanvasArea.canvas.height - 110", 200, "", "", 0, "Edit Map", async function () {
+        btn_editMap = new Button("window.outerWidth - 230", "window.outerHeight - 85", 150, "", "", 0, "Edit Map", async function () {
 
             // delete shareDiv when leaving browser page
             document.getElementById("shareDiv").remove()
@@ -1217,7 +1253,7 @@ const UserInterface = {
 
         })
 
-        btn_deleteMap = new Button("CanvasArea.canvas.width - 300", "CanvasArea.canvas.height - 200", 200, "", "", 0, "Delete Map", function () {
+        btn_deleteMap = new Button("window.outerWidth - 230", "window.outerHeight - 150", 150, "", "", 0, "Delete Map", function () {
 
             const deleteMap = confirm("Delete Map?");
             if (deleteMap) {
@@ -1244,7 +1280,7 @@ const UserInterface = {
             }
         })
 
-        btn_shareMap = new Button("CanvasArea.canvas.width - 300", "CanvasArea.canvas.height - 290", 200, "", "", 0, "Share Map", function (createDiv) {
+        btn_shareMap = new Button("window.outerWidth - 230", "window.outerHeight - 225", 150, "", "", 0, "Share Map", function (createDiv) {
             // The shareDiv does all the work for this button.
             // createDiv is called by btn_load_map
             // shareDiv is removed by btn_mainMenu, btn_editMap and btn_deleteMap
@@ -1379,7 +1415,7 @@ const UserInterface = {
 
 
         // IN LEVEL Buttons
-        btn_mainMenu = new Button(50, 50, 100, "x_button", "", 0, "", function () {
+        btn_mainMenu = new Button(45, 40, 70, "x_button", "", 0, "", function () {
 
             // UserInterface.gamestate
             // 1: main menu
@@ -1506,7 +1542,7 @@ const UserInterface = {
 
         })
 
-        btn_restart = new Button(50, "CanvasArea.canvas.height - 280", 100, "restart_button", "", 0, "", function () {
+        btn_restart = new Button(45, 130, 70, "restart_button", "", 0, "", function () {
 
             if (Tutorial.isActive) { // restart pressed in tutorial level
                 // DRAW ALERT "Restart Disabled"
@@ -1518,7 +1554,7 @@ const UserInterface = {
             }
         })
 
-        btn_jump = new Button(50, "CanvasArea.canvas.height - 150", 100, "jump_button", "", 0, "", function () {
+        btn_jump = new Button(45, "window.outerHeight - 135", 90, "jump_button", "", 0, "", function () {
             if (UserInterface.levelState == 1) {
                 UserInterface.timerStart = Date.now();
                 UserInterface.levelState = 2;
@@ -1528,17 +1564,17 @@ const UserInterface = {
 
 
         // TUTORIAL BUTTONS
-        btn_next = new Button("CanvasArea.canvas.width - 130", 50, 80, "next_button", "", 0, "", function () {
+        btn_next = new Button("window.outerWidth - 100", 38, 60, "next_button", "", 0, "", function () {
 
             Tutorial.timerStarted = false; // easier to always set these here even if they arent always needed
             Tutorial.animatePos = 0;
             Tutorial.animateVel = 0;
 
             // reset the position and scale because the button is being pulse animated
-            this.x = "CanvasArea.canvas.width - 130"
-            this.y = 50
-            this.width = 80
-            this.height = 80
+            this.x = "window.outerWidth - 100"
+            this.y = 38
+            this.width = 60
+            this.height = 60
 
             if (Tutorial.state == 1) {
                 Tutorial.state++;
@@ -1594,7 +1630,7 @@ const UserInterface = {
 
         })
 
-        btn_playTutorial = new Button("CanvasArea.canvas.width - 450", "CanvasArea.canvas.height - 120", 80, "toggle_button", "toggle_button_pressed", 1, "", function (sync) {
+        btn_playTutorial = new Button("window.outerWidth - 230", "window.outerHeight - 160", 60, "toggle_button", "toggle_button_pressed", 1, "", function (sync) {
             if (sync) {
                 this.toggle = UserInterface.settings.playTutorial;
             } else {
@@ -1670,6 +1706,7 @@ const UserInterface = {
             btn_resize_TL,
             btn_angleSlider,
             btn_wall,
+            btn_endzone,
 
             btn_delete_platform,
             btn_duplicate_platform,
@@ -2110,6 +2147,10 @@ const UserInterface = {
 
     render: function () {
 
+        const ctx = CanvasArea.ctx
+        ctx.save() // UI SCALING SAVE
+        ctx.scale(CanvasArea.scale, CanvasArea.scale) // All UI elements are positioned on original CSS cords. this brings them up to device DPI resolution
+
         this.renderedButtons.forEach(button => { // LOOP RENDERED BUTTONS AND RUN THEIR .render()
             button.render();
         });
@@ -2118,136 +2159,139 @@ const UserInterface = {
             CanvasArea.canvas.style.backgroundColor = "#a3d5e1";
             document.body.style.backgroundColor = "#a3d5e1";
 
-            // Draw title text
-            CanvasArea.ctx.fillStyle = UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
-            CanvasArea.ctx.font = "140px BAHNSCHRIFT"
-            CanvasArea.ctx.fillText("Null Hop", midX - CanvasArea.ctx.measureText("Null Hop").width / 2, 130)
+            // Draw Title Text
+            ctx.fillStyle = UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
+
+            ctx.font = "108px BAHNSCHRIFT";
+            ctx.fillText("Null Hop", midX_UI - ctx.measureText("Null Hop").width / 2, 110)
 
             const menu_background = document.getElementById("menu_background")
-            CanvasArea.ctx.drawImage(menu_background, -30, 15, CanvasArea.canvas.width + 60, (menu_background.height / menu_background.width) * CanvasArea.canvas.width + 60)
-
+            ctx.drawImage(menu_background, -30, 15, window.outerWidth + 60, (menu_background.height / menu_background.width) * window.outerWidth + 60)
         }
 
         if (this.gamestate == 3) { // In Settings
-            CanvasArea.ctx.font = "20px BAHNSCHRIFT";
-            CanvasArea.ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
-            CanvasArea.ctx.fillText("Debug Info", 180, 270)
-            CanvasArea.ctx.fillText("Strafe Helper", 180, 330)
+            ctx.font = "16px BAHNSCHRIFT";
+            ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
+            ctx.fillText("Debug Info", btn_debugText.x - 110, btn_debugText.y + 20)
+            ctx.fillText("Strafe Helper", btn_strafeHUD.x - 110, btn_strafeHUD.y + 20)
 
         }
 
         if (this.gamestate == 6) { // In Level
-            CanvasArea.ctx.fillStyle = UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
+            ctx.fillStyle = UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
 
 
+            // Draw Timer Box
             if (this.levelState !== 3 && Tutorial.isActive == false) {
-                CanvasArea.roundedRect(CanvasArea.canvas.width - 260, 20, 220, 100, 25)
-                CanvasArea.ctx.fill()
+                CanvasArea.roundedRect(window.outerWidth - 220, 32, 170, 75, 15)
+                ctx.fill()
 
-                CanvasArea.ctx.font = "26px BAHNSCHRIFT";
-                CanvasArea.ctx.fillStyle = !UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
+                ctx.font = "20px BAHNSCHRIFT";
+                ctx.fillStyle = !UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
 
-                CanvasArea.ctx.fillText("Time: " + UserInterface.secondsToMinutes(this.timer), CanvasArea.canvas.width - 240, 60)
-                CanvasArea.ctx.fillText("Record: " + UserInterface.secondsToMinutes((this.records[Map.name] == null ? 0 : this.records[Map.name])), CanvasArea.canvas.width - 240, 90);
+                ctx.fillText("Time: " + UserInterface.secondsToMinutes(this.timer), window.outerWidth - 210, 62)
+                ctx.fillText("Record: " + UserInterface.secondsToMinutes((this.records[Map.name] == null ? 0 : this.records[Map.name])), window.outerWidth - 210, 90);
             }
 
 
+            // Draw Speed. ADD COLOR AND SIZE CHANGES TO THIS BASED OFF OF GAIN
             if (this.showVelocity && this.levelState == 2) {
-                CanvasArea.ctx.font = "26px BAHNSCHRIFT";
-                CanvasArea.ctx.fillStyle = UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
-                const offsetY = Tutorial.pausePlayer ? 34 : 60
-                CanvasArea.ctx.fillText("Speed: " + Math.round(Player.velocity.magnitude()), midX - CanvasArea.ctx.measureText("Speed: 00").width / 2, offsetY)
+                ctx.font = "20px BAHNSCHRIFT";
+                ctx.fillStyle = UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
+                const offsetY = Tutorial.pausePlayer ? 26 : 45
+                ctx.fillText("Speed: " + Math.round(Player.velocity.magnitude()), midX_UI - ctx.measureText("Speed: 000").width / 2, offsetY)
             }
 
 
             if (this.settings.debugText == 1) { // DRAWING DEBUG TEXT
-                const textX = 200;
-                CanvasArea.ctx.font = "15px BAHNSCHRIFT";
-                CanvasArea.ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
+                const textX = 150;
+                ctx.font = "8px BAHNSCHRIFT";
+                ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
 
-                CanvasArea.ctx.fillText("fps: " + Math.round(1 / dt), textX, 60);
-                CanvasArea.ctx.fillText("rounded dt: " + Math.round(dt * 10) / 10 + " milliseconds", textX, 80);
-                CanvasArea.ctx.fillText("renderedPlatforms Count: " + Map.renderedPlatforms.length, textX, 100);
-                CanvasArea.ctx.fillText("endZonesToCheck: " + Map.endZonesToCheck, textX, 120);
-                CanvasArea.ctx.fillText("dragging: " + TouchHandler.dragging, textX, 140);
-                CanvasArea.ctx.fillText("cameraZoom: " + Player.speedCameraOffset.zoom, textX, 160);
-                CanvasArea.ctx.fillText("offsetDir: " + Math.round(Player.speedCameraOffset.direction.x) + ", " + Math.round(Player.speedCameraOffset.direction.y), textX, 180);
+                ctx.fillText("fps: " + Math.round(1 / dt), textX, 50);
+                ctx.fillText("rounded dt: " + Math.round(dt * 10) / 10 + " milliseconds", textX, 60);
+                ctx.fillText("renderedPlatforms Count: " + Map.renderedPlatforms.length, textX, 70);
+                ctx.fillText("endZonesToCheck: " + Map.endZonesToCheck, textX, 80);
+                ctx.fillText("dragging: " + TouchHandler.dragging, textX, 90);
+                ctx.fillText("cameraZoom: " + Player.speedCameraOffset.zoom, textX, 100);
+                ctx.fillText("offsetDir: " + Math.round(Player.speedCameraOffset.direction.x) + ", " + Math.round(Player.speedCameraOffset.direction.y), textX, 110);
                 if (TouchHandler.dragging) {
-                    CanvasArea.ctx.fillText("touch x: " + TouchHandler.touches[0].x, textX, 200);
-                    CanvasArea.ctx.fillText("touch y: " + TouchHandler.touches[0].y, textX, 220);
+                    ctx.fillText("touch x: " + TouchHandler.touches[0].x, textX, 120);
+                    ctx.fillText("touch y: " + TouchHandler.touches[0].y, textX, 130);
                 }
-                CanvasArea.ctx.fillText("dragAmountX: " + TouchHandler.dragAmountX, textX, 240);
-                CanvasArea.ctx.fillText("velocity: " + Math.round(Player.velocity.magnitude()), textX, 260);
-                CanvasArea.ctx.fillText("Player pos: " + Math.round(Player.x) + ", " + Math.round(Player.y), textX, 280);
-                CanvasArea.ctx.fillText("lookAngle: " + Player.lookAngle.getAngleInDegrees(), textX, 300);
-                CanvasArea.ctx.fillText("Timer: " + UserInterface.secondsToMinutes(this.timer), textX, 320);
+                ctx.fillText("dragAmountX: " + TouchHandler.dragAmountX, textX, 140);
+                ctx.fillText("velocity: " + Math.round(Player.velocity.magnitude()), textX, 150);
+                ctx.fillText("Player pos: " + Math.round(Player.x) + ", " + Math.round(Player.y), textX, 160);
+                ctx.fillText("lookAngle: " + Player.lookAngle.getAngleInDegrees(), textX, 170);
+                ctx.fillText("Timer: " + UserInterface.secondsToMinutes(this.timer), textX, 180);
 
-
+                /*
                 // DRAWING PLAYER MOVEMENT DEBUG VECTORS
                 // Player wish_velocity
-                CanvasArea.ctx.strokeStyle = "#FF00FF";
-                CanvasArea.ctx.lineWidth = 3
-                CanvasArea.ctx.beginPath();
-                CanvasArea.ctx.moveTo(midX, midY);
-                CanvasArea.ctx.lineTo(midX + Player.wish_velocity.x * 100, midY + Player.wish_velocity.y * 100);
-                CanvasArea.ctx.stroke();
+                ctx.strokeStyle = "#FF00FF";
+                ctx.lineWidth = 2
+                ctx.beginPath();
+                ctx.moveTo(midX_UI, midY_UI);
+                ctx.lineTo(midX_UI + Player.wish_velocity.x * 75, midY_UI + Player.wish_velocity.y * 75);
+                ctx.stroke();
 
                 // Player velocity
-                CanvasArea.ctx.strokeStyle = "#0000FF";
-                CanvasArea.ctx.lineWidth = 4
-                CanvasArea.ctx.beginPath();
-                CanvasArea.ctx.moveTo(midX, midY);
-                CanvasArea.ctx.lineTo(midX + Player.velocity.x, midY + Player.velocity.y);
-                CanvasArea.ctx.stroke();
+                ctx.strokeStyle = "#0000FF";
+                ctx.lineWidth = 4
+                ctx.beginPath();
+                ctx.moveTo(midX_UI, midY_UI);
+                ctx.lineTo(midX_UI + Player.velocity.x, midY_UI + Player.velocity.y);
+                ctx.stroke();
 
                 // Player lookAngle
-                CanvasArea.ctx.strokeStyle = "#FF00FF";
-                CanvasArea.ctx.lineWidth = 2
-                CanvasArea.ctx.beginPath();
-                CanvasArea.ctx.moveTo(midX, midY);
-                CanvasArea.ctx.lineTo(midX + Player.lookAngle.x * 100, midY + Player.lookAngle.y * 100);
-                CanvasArea.ctx.stroke();
+                ctx.strokeStyle = "#FF00FF";
+                ctx.lineWidth = 2
+                ctx.beginPath();
+                ctx.moveTo(midX_UI, midY_UI);
+                ctx.lineTo(midX_UI + Player.lookAngle.x * 100, midY_UI + Player.lookAngle.y * 100);
+                ctx.stroke();
 
-                CanvasArea.ctx.strokeStyle = "#000000"; // resetting
-                CanvasArea.ctx.lineWidth = 1
+                ctx.strokeStyle = "#000000"; // resetting
+                ctx.lineWidth = 1
+                */
             }
 
 
             if (this.settings.strafeHUD == 1) { // STRAFE OPTIMIZER HUD
 
-                const ctx = CanvasArea.ctx
-
-                if (this.settings.debugText == 1) {
+                if (this.settings.debugText == 1) { // disabled
+                    /*
                     // DRAW THE LITTLE GRAPHS UNDER PLAYER
                     ctx.save()
                     ctx.fillStyle = "blue"
-                    ctx.fillRect(midX - 32, midY + 32, 10 * Math.abs(TouchHandler.dragAmountX) * this.settings.sensitivity, 6); // YOUR STRAFE
-                    ctx.fillRect(midX - 32, midY + 42, Player.addSpeed, 6); // ADDSPEED
-                    ctx.fillRect(midX - 32, midY + 52, 320 * airAcceleration * dt, 6); // Top End clip LIMIT
+                    ctx.fillRect(midX_UI - 32, midY_UI + 32, 10 * Math.abs(TouchHandler.dragAmountX) * this.settings.sensitivity, 6); // YOUR STRAFE
+                    ctx.fillRect(midX_UI - 32, midY_UI + 42, Player.addSpeed, 6); // ADDSPEED
+                    ctx.fillRect(midX_UI - 32, midY_UI + 52, 320 * airAcceleration * dt, 6); // Top End clip LIMIT
 
                     // little text for strafeHelper
                     ctx.font = "12px BAHNSCHRIFT";
                     ctx.fillStyle = "white"
-                    ctx.fillText(TouchHandler.dragAmountX * this.settings.sensitivity, midX - 100, midY + 38)
-                    ctx.fillText("addSpeed: " + Player.addSpeed, midX - 100, midY + 48)
-                    ctx.fillText("addSpeed Clip: " + 320 * airAcceleration * dt, midX - 100, midY + 58)
+                    ctx.fillText(TouchHandler.dragAmountX * this.settings.sensitivity, midX_UI - 100, midY_UI + 38)
+                    ctx.fillText("addSpeed: " + Player.addSpeed, midX_UI - 100, midY_UI + 48)
+                    ctx.fillText("addSpeed Clip: " + 320 * airAcceleration * dt, midX_UI - 100, midY_UI + 58)
                     ctx.restore()
+                    */
                 }
 
 
-                if (TouchHandler.dragging && this.levelState != 3) { // check if any button is pressed
+                if (TouchHandler.dragging && this.levelState != 3) {
 
                     let lineUpOffset = 0
-                    if (TouchHandler.touches[0].startX * CanvasArea.scale > midX - 200 && TouchHandler.touches[0].startX * CanvasArea.scale < midX + 200) { // if touched withing slider's X => offset the handle to lineup with finger
-                        lineUpOffset = TouchHandler.touches[0].startX * CanvasArea.scale - midX
+                    if (TouchHandler.touches[0].startX > midX_UI - 150 && TouchHandler.touches[0].startX < midX_UI + 150) { // if touched withing slider's X => offset the handle to lineup with finger
+                        lineUpOffset = TouchHandler.touches[0].startX - midX_UI
                     }
 
-                    let strafeDistanceX = TouchHandler.touches[0].x * CanvasArea.scale - TouchHandler.touches[0].startX * CanvasArea.scale + lineUpOffset
-                    while (strafeDistanceX > 212) { // loop back to negative
-                        strafeDistanceX = -212 + (strafeDistanceX - 212)
+                    let strafeDistanceX = TouchHandler.touches[0].x - TouchHandler.touches[0].startX + lineUpOffset
+                    while (strafeDistanceX > 160) { // loop back to negative
+                        strafeDistanceX = strafeDistanceX - 320
                     }
-                    while (strafeDistanceX < -212) { // loop back to positive
-                        strafeDistanceX = 212 + (strafeDistanceX + 212)
+                    while (strafeDistanceX < -160) { // loop back to positive
+                        strafeDistanceX = strafeDistanceX + 320
                     }
 
 
@@ -2255,18 +2299,18 @@ const UserInterface = {
                     ctx.fillStyle = UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
 
 
-                    // DRAW SLIDER
+                    // DRAW TOUCH HUD SLIDER
                     if (Tutorial.pausePlayer == false) { // as long as Player isnt paused
 
-                        // border
-                        ctx.lineWidth = 4
+                        ctx.lineWidth = 3
 
-                        const radius = 10
-                        const x = midX - 200
-                        const y = CanvasArea.canvas.height - 140
-                        const w = 400
-                        const h = 20
+                        const radius = 8
+                        const x = midX_UI - 150
+                        const y = window.outerHeight - 100
+                        const w = 300
+                        const h = 16
 
+                        // long slider shape
                         ctx.beginPath()
                         ctx.moveTo(x + radius, y) // top line
                         ctx.lineTo(x + w - radius, y)
@@ -2278,16 +2322,15 @@ const UserInterface = {
                         ctx.save() // #2.2
                         ctx.clip()
 
-                        // Handle
+                        // Handle (dot)
                         ctx.beginPath();
-                        ctx.arc(midX + strafeDistanceX, CanvasArea.canvas.height - 130, 8, 0, 2 * Math.PI);
+                        ctx.arc(midX_UI + strafeDistanceX, y + h / 2, 6, 0, 2 * Math.PI);
                         ctx.fill();
 
                         ctx.restore() // #2.2
 
 
-                        // DRAW VERTICAL WARNING
-                        // calculations
+                        // Calculate wheather to DRAW VERTICAL WARNING
                         const averageX = Math.abs(TouchHandler.averageDragX.getAverage())
                         const averageY = Math.abs(TouchHandler.averageDragY.getAverage())
                         if (averageY > 5 * 1 / 60 / dt && averageY > averageX * 1.25) {
@@ -2296,31 +2339,30 @@ const UserInterface = {
                                 setTimeout(() => { UserInterface.showVerticalWarning = false }, 1500); // waits 1 second to hide warning
                             }
                         }
-                        // draw warning
-                        if (this.showVerticalWarning) {
-                            ctx.font = "22px BAHNSCHRIFT";
 
-                            CanvasArea.roundedRect(midX - 200, CanvasArea.canvas.height - 180, ctx.measureText("DON'T SWIPE VERTICAL").width + 30, 30, 12)
+                        ctx.font = "16px BAHNSCHRIFT";
+
+                        // DRAW VERTICAL WARNING
+                        if (this.showVerticalWarning) {
+
+                            CanvasArea.roundedRect(midX_UI - 150, window.outerHeight - 130, ctx.measureText("DON'T SWIPE VERTICAL").width + 24, 24, 8)
                             ctx.fillStyle = UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1
                             ctx.fill()
 
                             ctx.fillStyle = !UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1
-                            ctx.fillText("DON'T SWIPE VERTICAL", midX - 185, CanvasArea.canvas.height - 157)
+                            ctx.fillText("DON'T SWIPE VERTICAL", midX_UI - 138, window.outerHeight - 112)
 
                         }
 
-
-                        // DRAW OVERSTRAFE WARNING
                         if (this.showOverstrafeWarning) {
-                            ctx.font = "22px BAHNSCHRIFT";
 
-                            heightOffset = this.showVerticalWarning ? 38 : 0;
-                            CanvasArea.roundedRect(midX - 200, CanvasArea.canvas.height - 180 - heightOffset, ctx.measureText("TURNING TOO FAST!").width + 30, 30, 12)
+                            heightOffset = this.showVerticalWarning ? 36 : 0;
+                            CanvasArea.roundedRect(midX_UI - 150, window.outerHeight - 130 - heightOffset, ctx.measureText("TURNING TOO FAST!").width + 24, 24, 8)
                             ctx.fillStyle = UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1
                             ctx.fill()
 
                             ctx.fillStyle = !UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1
-                            ctx.fillText("TURNING TOO FAST!", midX - 185, CanvasArea.canvas.height - 157 - heightOffset)
+                            ctx.fillText("TURNING TOO FAST!", midX_UI - 138, window.outerHeight - 120 - heightOffset)
                         }
                     }
                 }
@@ -2328,41 +2370,41 @@ const UserInterface = {
 
 
             // ENDSCREEN
-            if (Player.endSlow == 0) { // level name, your time, record, leaderboards
+            if (Player.endSlow == 0) { // level name, your time, record, medals
 
                 // TIME BOX
                 const timeBox = {
-                    x: midX - (this.leaderboards[Map.name] !== undefined ? 302 : 220),
-                    y: midY - (Tutorial.isActive ? 118 : 140),
-                    width: (this.leaderboards[Map.name] !== undefined ? 652 : 418),
-                    height: 288,
+                    x: midX_UI - (this.leaderboards[Map.name] !== undefined ? 232 : 170),
+                    y: midY_UI - (Tutorial.isActive ? 90 : 108),
+                    width: (this.leaderboards[Map.name] !== undefined ? 500 : 322),
+                    height: 222,
                 }
 
 
                 // HIGHLIGHT MEDAL BOX
                 const highlightBox = {
-                    x: timeBox.x + 400,
+                    x: timeBox.x + 308,
                     y: null, // set later
-                    width: 225,
-                    height: 75,
+                    width: 172,
+                    height: 58,
                 }
 
                 let medal = null
 
 
                 // DRAW BOXES
-                CanvasArea.ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
-                CanvasArea.ctx.strokeStyle = (!UserInterface.darkMode) ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
+                ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
+                ctx.strokeStyle = (!UserInterface.darkMode) ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
 
-                CanvasArea.ctx.save(); // save 3
+                ctx.save(); // save 3
 
-                CanvasArea.ctx.shadowColor = "rgba(0, 0, 0, 0.21)";
-                CanvasArea.ctx.shadowOffsetX = 11
-                CanvasArea.ctx.shadowOffsetY = 11
+                ctx.shadowColor = "rgba(0, 0, 0, 0.21)";
+                ctx.shadowOffsetX = 10
+                ctx.shadowOffsetY = 10
 
                 // time box
-                CanvasArea.roundedRect(timeBox.x, timeBox.y, timeBox.width, timeBox.height, 20)
-                CanvasArea.ctx.fill();
+                CanvasArea.roundedRect(timeBox.x, timeBox.y, timeBox.width, timeBox.height, 15)
+                ctx.fill();
 
                 // highlight medal box
                 if (this.leaderboards[Map.name] !== undefined) {
@@ -2370,82 +2412,83 @@ const UserInterface = {
                     // set hightlight box y and draw it
                     if (UserInterface.timer <= this.leaderboards[Map.name].gold) {
                         medal = 1
-                        highlightBox.y = timeBox.y + 65 - highlightBox.height / 2
+                        highlightBox.y = timeBox.y + 50 - highlightBox.height / 2
                     } else if (UserInterface.timer <= this.leaderboards[Map.name].silver) {
                         medal = 2
                         highlightBox.y = timeBox.y + timeBox.height / 2 - highlightBox.height / 2
                     } else if (UserInterface.timer <= this.leaderboards[Map.name].bronze) {
                         medal = 3
-                        highlightBox.y = timeBox.y + timeBox.height - 65 - highlightBox.height / 2
+                        highlightBox.y = timeBox.y + timeBox.height - 50 - highlightBox.height / 2
                     }
 
                     if (medal !== null) {
-                        CanvasArea.ctx.shadowOffsetX = 7
-                        CanvasArea.ctx.shadowOffsetY = 7
+                        ctx.shadowOffsetX = 8
+                        ctx.shadowOffsetY = 8
 
-                        CanvasArea.roundedRect(highlightBox.x, highlightBox.y, highlightBox.width, highlightBox.height, 15)
-                        CanvasArea.ctx.fill();
+                        CanvasArea.roundedRect(highlightBox.x, highlightBox.y, highlightBox.width, highlightBox.height, 12)
+                        ctx.fill();
 
-                        CanvasArea.ctx.shadowColor = "transparent"
-                        CanvasArea.ctx.lineWidth = 4
-                        CanvasArea.ctx.stroke();
+                        ctx.shadowColor = "transparent"
+                        ctx.lineWidth = 4
+                        ctx.stroke();
                     }
                 }
 
-                CanvasArea.ctx.restore(); // restore 3
+                ctx.restore(); // restore 3
 
 
                 // DRAW END SCREEN TEXT
-                CanvasArea.ctx.fillStyle = (!UserInterface.darkMode) ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
+                ctx.fillStyle = (!UserInterface.darkMode) ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
 
                 // map name
-                CanvasArea.ctx.font = "38px BAHNSCHRIFT";
-                CanvasArea.ctx.fillText(Map.name, timeBox.x + 40, timeBox.y + 70);
+                ctx.font = "30px BAHNSCHRIFT";
+                ctx.fillText(Map.name, timeBox.x + 30, timeBox.y + 54);
 
                 // time
-                CanvasArea.ctx.font = "90px BAHNSCHRIFT";
-                CanvasArea.ctx.fillText(UserInterface.secondsToMinutes(UserInterface.timer), timeBox.x + 40 - 5, timeBox.y + timeBox.height / 2 + 32);
+                ctx.font = "70px BAHNSCHRIFT";
+                ctx.fillText(UserInterface.secondsToMinutes(UserInterface.timer), timeBox.x + 27, timeBox.y + timeBox.height / 2 + 24);
 
                 // record OR new record
-                CanvasArea.ctx.font = "30px BAHNSCHRIFT";
+                ctx.font = "24px BAHNSCHRIFT";
 
                 const recordText = (this.timer == this.records[Map.name]) ? "New Record!  -(" + UserInterface.secondsToMinutes(Math.abs(this.previousRecord - this.records[Map.name])) + ")" : "Best Time: " + UserInterface.secondsToMinutes(this.records[Map.name])
 
-                CanvasArea.ctx.fillText(recordText, timeBox.x + 40, timeBox.y + timeBox.height - 45);
+                ctx.fillText(recordText, timeBox.x + 30, timeBox.y + timeBox.height - 35);
 
 
                 // medals and times
                 if (this.leaderboards[Map.name] !== undefined) {
-                    let halfFontHeight = 10
+                    let halfFontHeight = 8
                     let xOffset = 0
-                    let medalRadius = 16
+                    let medalRadius = 12
                     let medalShadow = false
 
-                    function testMedal(number) { // sets specific parameters for drawMedal
-                        CanvasArea.ctx.font = medal == number ? "38px BAHNSCHRIFT" : "30px BAHNSCHRIFT"
-                        halfFontHeight = medal == number ? 13 : 10
-                        xOffset = medal == number ? 14 : 0
-                        medalRadius = medal == number ? 19 : 16
+                    function testMedal(number) { // sets specific parameters for each drawMedal
+                        ctx.font = medal == number ? "30px BAHNSCHRIFT" : "24px BAHNSCHRIFT"
+                        halfFontHeight = medal == number ? 10 : 8
+                        xOffset = medal == number ? 10 : 0
+                        medalRadius = medal == number ? 15 : 12
                         medalShadow = medal == number ? true : false
-                        CanvasArea.ctx.globalAlpha = (medal == number || medal == null) ? 1 : 0.5
+                        ctx.globalAlpha = (medal == number || medal == null) ? 1 : 0.5
                     }
 
                     testMedal(1)
-                    CanvasArea.ctx.fillText(UserInterface.secondsToMinutes(this.leaderboards[Map.name].gold), timeBox.x + 482 - xOffset, timeBox.y + 65 + halfFontHeight);
-                    CanvasArea.ctx.globalAlpha = 1
-                    this.drawMedal(timeBox.x + 452 - xOffset, timeBox.y + 65, medalRadius, "#f1b62c", "#fde320", 4, medalShadow)
+                    ctx.fillText(UserInterface.secondsToMinutes(this.leaderboards[Map.name].gold), timeBox.x + 370 - xOffset, timeBox.y + 50 + halfFontHeight);
+                    ctx.globalAlpha = 1
+                    this.drawMedal(timeBox.x + 348 - xOffset, timeBox.y + 50, medalRadius, "#f1b62c", "#fde320", 3, medalShadow)
 
                     testMedal(2)
-                    CanvasArea.ctx.fillText(UserInterface.secondsToMinutes(this.leaderboards[Map.name].silver), timeBox.x + 482 - xOffset, timeBox.y + timeBox.height / 2 + halfFontHeight);
-                    CanvasArea.ctx.globalAlpha = 1
-                    this.drawMedal(timeBox.x + 452 - xOffset, timeBox.y + timeBox.height / 2, medalRadius, "#8c9a9b", "#d4d4d6", 4, medalShadow)
+                    ctx.fillText(UserInterface.secondsToMinutes(this.leaderboards[Map.name].silver), timeBox.x + 370 - xOffset, timeBox.y + timeBox.height / 2 + halfFontHeight);
+                    ctx.globalAlpha = 1
+                    this.drawMedal(timeBox.x + 348 - xOffset, timeBox.y + timeBox.height / 2, medalRadius, "#8c9a9b", "#d4d4d6", 3, medalShadow)
 
                     testMedal(3)
-                    CanvasArea.ctx.fillText(UserInterface.secondsToMinutes(this.leaderboards[Map.name].bronze), timeBox.x + 482 - xOffset, timeBox.y + timeBox.height - 65 + halfFontHeight);
-                    CanvasArea.ctx.globalAlpha = 1
-                    this.drawMedal(timeBox.x + 452 - xOffset, timeBox.y + timeBox.height - 65, medalRadius, "#e78b4c", "#f4a46f", 4, medalShadow)
+                    ctx.fillText(UserInterface.secondsToMinutes(this.leaderboards[Map.name].bronze), timeBox.x + 370 - xOffset, timeBox.y + timeBox.height - 50 + halfFontHeight);
+                    ctx.globalAlpha = 1
+                    this.drawMedal(timeBox.x + 348 - xOffset, timeBox.y + timeBox.height - 50, medalRadius, "#e78b4c", "#f4a46f", 3, medalShadow)
                 }
             }
         }
+        ctx.restore() // UI SCALING RESTORE
     }
 }

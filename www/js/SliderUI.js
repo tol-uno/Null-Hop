@@ -23,7 +23,7 @@ class SliderUI {
 
 
     render() {
-        CanvasArea.ctx.lineWidth = 8;
+        CanvasArea.ctx.lineWidth = 6;
         CanvasArea.ctx.lineCap = "round"
         CanvasArea.ctx.fillStyle = CanvasArea.ctx.strokeStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1: UserInterface.lightColor_1;
 
@@ -33,17 +33,17 @@ class SliderUI {
         CanvasArea.ctx.lineTo(this.x + this.width, this.y)
         CanvasArea.ctx.stroke();
 
-        CanvasArea.ctx.font = "20px BAHNSCHRIFT"; // Label
-        CanvasArea.ctx.fillText(this.label + ": " + this.value, this.x, this.y - 30)
+        CanvasArea.ctx.font = "16px BAHNSCHRIFT"; // Label
+        CanvasArea.ctx.fillText(this.label + ": " + this.value, this.x, this.y - 20)
 
         CanvasArea.ctx.beginPath(); // Slider Handle
-        CanvasArea.ctx.arc(this.sliderX, this.y, 15, 0, 2 * Math.PI);
+        CanvasArea.ctx.arc(this.sliderX, this.y, 10, 0, 2 * Math.PI);
         CanvasArea.ctx.fill();
 
         // draw highlight color in slider handle
         CanvasArea.ctx.fillStyle = (!UserInterface.darkMode) ? UserInterface.darkColor_1: UserInterface.lightColor_1;
         CanvasArea.ctx.beginPath();
-        CanvasArea.ctx.arc(this.sliderX, this.y, 10, 0, 2 * Math.PI);
+        CanvasArea.ctx.arc(this.sliderX, this.y, 7, 0, 2 * Math.PI);
         CanvasArea.ctx.fill();
     }
 
@@ -52,16 +52,16 @@ class SliderUI {
 
             if (TouchHandler.dragging) {
 
-                if (TouchHandler.touches[0].x * CanvasArea.scale < this.x) {
+                if (TouchHandler.touches[0].x < this.x) {
                     // set to lowest
                     this.sliderX = this.x
                 } else {
-                    if (TouchHandler.touches[0].x * CanvasArea.scale > this.x + this.width) {
+                    if (TouchHandler.touches[0].x > this.x + this.width) {
                         // set to highest
                         this.sliderX = this.x + this.width
                     } else {
                         // within slider bounds
-                        this.sliderX = TouchHandler.touches[0].x * CanvasArea.scale
+                        this.sliderX = TouchHandler.touches[0].x
                     }
                 }
 

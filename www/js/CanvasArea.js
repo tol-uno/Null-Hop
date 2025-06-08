@@ -14,6 +14,9 @@ const CanvasArea = {
         midX = CanvasArea.canvas.width / 2;
         midY = CanvasArea.canvas.height / 2;
 
+        midX_UI = window.outerWidth / 2 // since UI is position on unscaled canvas
+        midY_UI = window.outerHeight / 2
+
         this.ctx = this.canvas.getContext("2d");
         document.body.insertBefore(this.canvas, document.body.childNodes[0]);
 

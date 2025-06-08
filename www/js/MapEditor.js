@@ -40,10 +40,10 @@ const MapEditor = {
     multiSelect: false,
     dragSelect: false,
     dragSelectMarquee: {
-        x: null, // Math.min(touch.startX, touch.x) * CanvasArea.scale
-        y: null, // Math.min(touch.startY, touch.y) * CanvasArea.scale
-        width: null, // Math.max(touch.startX, touch.x) * CanvasArea.scale - x
-        height: null, // Math.max(touch.startY, touch.y) * CanvasArea.scale - y
+        x: null, // Math.min(touch.startX, touch.x)
+        y: null, // Math.min(touch.startY, touch.y)
+        width: null, // Math.max(touch.startX, touch.x) - x
+        height: null, // Math.max(touch.startY, touch.y) - y
     },
     // allows for showing selection border around platforms without adding them to selectedElements 
     // keeps platforms seperate from ones already selected before dragSelect
@@ -191,10 +191,10 @@ const MapEditor = {
             if (this.dragSelect && TouchHandler.dragging) {
 
                 const touch = TouchHandler.touches[0]
-                this.dragSelectMarquee.x = Math.min(touch.startX, touch.x) * CanvasArea.scale
-                this.dragSelectMarquee.y = Math.min(touch.startY, touch.y) * CanvasArea.scale
-                this.dragSelectMarquee.width = Math.max(touch.startX, touch.x) * CanvasArea.scale - this.dragSelectMarquee.x
-                this.dragSelectMarquee.height = Math.max(touch.startY, touch.y) * CanvasArea.scale - this.dragSelectMarquee.y
+                this.dragSelectMarquee.x = Math.min(touch.startX, touch.x)
+                this.dragSelectMarquee.y = Math.min(touch.startY, touch.y)
+                this.dragSelectMarquee.width = Math.max(touch.startX, touch.x) - this.dragSelectMarquee.x
+                this.dragSelectMarquee.height = Math.max(touch.startY, touch.y) - this.dragSelectMarquee.y
 
                 // marquee rectangle (screen coords) will need to be translated to global map cordinates to compare with platform positions
                 const globalMarqueeCornerTL = this.convertToMapCord(this.dragSelectMarquee.x, this.dragSelectMarquee.y)
@@ -261,13 +261,13 @@ const MapEditor = {
 
                 // Check if playerStart is in marquee
                 const playerStart = this.loadedMap.playerStart
-                const playerStartPoligon = CanvasArea.createPoligon(playerStart.x, playerStart.y, 32, 32, playerStart.angle * Math.PI/180)
+                const playerStartPoligon = CanvasArea.createPoligon(playerStart.x, playerStart.y, 32, 32, playerStart.angle * Math.PI / 180)
 
                 if (CanvasArea.doPolygonsIntersect(marqueePolygon, playerStartPoligon)) {
 
                     // add playerStart to marqueeSelectedElements
                     this.marqueeSelectedElements = this.marqueeSelectedElements.concat("playerStart")
-        
+
                 }
 
             }
@@ -344,11 +344,11 @@ const MapEditor = {
 
                 PreviewWindow.render()
 
-            } else { // not in map color or settings screen SO RENDER MAP 
+            } else { // not in map color or settings screen SO RENDER MAP and UI
 
                 const ctx = CanvasArea.ctx;
 
-                ctx.save() // zooming everything
+                ctx.save() // zooming everything to render MAP first
                 ctx.scale(this.zoom, this.zoom)
 
                 ctx.translate(-this.screen.cornerX, -this.screen.cornerY); // translate to map orgin
@@ -616,23 +616,26 @@ const MapEditor = {
 
                 ctx.restore() // restoring screen.x and screen.y translation and zoom
                 // essentially translating(+screen.x, +screen.y)
-                // END OF SCALED ZOOM RENDERING
+                // END OF ZOOM SCALED MAP RENDERING
 
 
 
                 // MAP EDITOR UI
-                ctx.font = "20px BAHNSCHRIFT";
+                ctx.save() // scale to render UI
+                ctx.scale(CanvasArea.scale, CanvasArea.scale)
 
-                if (this.editorState == 1 || this.editorState == 2) { // Draw Non Side Panel UI. main edit screen or platform edit screen
+                ctx.font = "15px BAHNSCHRIFT";
+
+                if (this.editorState == 1 || this.editorState == 2) { // Draw UI (not Side Panel yet) for Main edit screen or platform edit screen
                     ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
-                    ctx.fillText("Drag Select", btn_dragSelect.x, btn_dragSelect.y - 15);
-                    if (!this.dragSelect) { ctx.fillText("Group Select", btn_multiSelect.x, btn_multiSelect.y - 15); }
+                    ctx.fillText("Drag Select", btn_dragSelect.x, btn_dragSelect.y - 14);
+                    if (!this.dragSelect) { ctx.fillText("Group Select", btn_multiSelect.x, btn_multiSelect.y - 14); }
 
                     // Draw dragSelect rectangle marquee
                     if (this.dragSelect && TouchHandler.dragging) {
-                        ctx.lineWidth = 5
+                        ctx.lineWidth = 4
                         ctx.strokeStyle = ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
-                        ctx.setLineDash([6, 12]);
+                        ctx.setLineDash([6, 10]);
                         ctx.strokeRect(this.dragSelectMarquee.x, this.dragSelectMarquee.y, this.dragSelectMarquee.width, this.dragSelectMarquee.height)
                         ctx.setLineDash([]);
                     }
@@ -640,44 +643,45 @@ const MapEditor = {
 
                 if (this.editorState == 2 && !this.dragSelect) { // DRAWING SIDE PANEL
 
-                    const sidePanel = {// If these change also change the values in UserInterface.touchReleased()
-                        x: CanvasArea.canvas.width - 280,
-                        y: 20,
-                        width: 225,
-                        height: 320
+                    const sidePanel = {// If these change also change the values in MapEditor.touchReleased()
+                        x: window.outerWidth - 262,
+                        y: 22,
+                        width: 218,
+                        height: 292
                     }
 
-                    // SIDE PANEL
+                    // SIDE PANEL BG BOX
                     ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.lightColor_1 : UserInterface.darkColor_1;
-                    CanvasArea.roundedRect(sidePanel.x, sidePanel.y, sidePanel.width, sidePanel.height, 25)
+                    CanvasArea.roundedRect(sidePanel.x, sidePanel.y, sidePanel.width, sidePanel.height, 27.5)
                     ctx.fill()
 
                     ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1 : UserInterface.lightColor_1; // for text
 
                     if (this.multiSelect && this.selectedElements.length > 1) { // MULTISELECTED
 
-                        ctx.fillText("Group Selection", sidePanel.x + 25, sidePanel.y + 100);
-                        ctx.fillText(this.selectedElements.length + " Items", sidePanel.x + 25, sidePanel.y + 130);
+                        ctx.fillText("Group Selection", sidePanel.x + 16, sidePanel.y + 84);
+                        ctx.fillText(this.selectedElements.length + " Items", sidePanel.x + 16, sidePanel.y + 108);
 
                     } else {
 
                         if (this.selectedElements[0] == "playerStart") { // playerStart is selected
-                            ctx.fillText("Player Start", sidePanel.x + 25, sidePanel.y + 100);
-                            ctx.fillText("Position: " + this.loadedMap.playerStart.x + ", " + this.loadedMap.playerStart.y, sidePanel.x + 25, sidePanel.y + 130);
+                            ctx.fillText("Player Start", sidePanel.x + 84, sidePanel.y + 38);
+                            ctx.fillText("Position: " + this.loadedMap.playerStart.x + ", " + this.loadedMap.playerStart.y, sidePanel.x + 16, sidePanel.y + 84);
 
                         } else if (Array.isArray(this.selectedElements[0])) { // checkpoint is selected
-                            ctx.fillText("Checkpoint", sidePanel.x + 25, sidePanel.y + 100);
-                            ctx.fillText("Trigger 1: " + this.loadedMap.checkpoints[this.selectedElements[0][0]].triggerX1 + ", " + this.loadedMap.checkpoints[this.selectedElements[0][0]].triggerY1, sidePanel.x + 25, sidePanel.y + 130);
-                            ctx.fillText("Trigger 2: " + this.loadedMap.checkpoints[this.selectedElements[0][0]].triggerX2 + ", " + this.loadedMap.checkpoints[this.selectedElements[0][0]].triggerY2, sidePanel.x + 25, sidePanel.y + 160);
-                            ctx.fillText("Respawn: " + this.loadedMap.checkpoints[this.selectedElements[0][0]].x + ", " + this.loadedMap.checkpoints[this.selectedElements[0][0]].y, sidePanel.x + 25, sidePanel.y + 190);
+                            ctx.fillText("Checkpoint", sidePanel.x + 84, sidePanel.y + 38);
+                            ctx.fillText("Trigger 1: " + this.loadedMap.checkpoints[this.selectedElements[0][0]].triggerX1 + ", " + this.loadedMap.checkpoints[this.selectedElements[0][0]].triggerY1, sidePanel.x + 16, sidePanel.y + 84);
+                            ctx.fillText("Trigger 2: " + this.loadedMap.checkpoints[this.selectedElements[0][0]].triggerX2 + ", " + this.loadedMap.checkpoints[this.selectedElements[0][0]].triggerY2, sidePanel.x + 16, sidePanel.y + 108);
+                            ctx.fillText("Respawn: " + this.loadedMap.checkpoints[this.selectedElements[0][0]].x + ", " + this.loadedMap.checkpoints[this.selectedElements[0][0]].y, sidePanel.x + 16, sidePanel.y + 132);
 
                         } else { // platform is selected
-                            ctx.fillText("Platform", sidePanel.x + 25, sidePanel.y + 100);
+                            ctx.fillText("Platform", sidePanel.x + 84, sidePanel.y + 38);
                             const approxSignX = (this.loadedMap.platforms[this.selectedElements[0]].x % 1 == 0) ? "" : "~"
                             const approxSignY = (this.loadedMap.platforms[this.selectedElements[0]].y % 1 == 0) ? "" : "~"
-                            ctx.fillText("Position: " + approxSignX + Math.round(this.loadedMap.platforms[this.selectedElements[0]].x) + ", " + approxSignY + Math.round(this.loadedMap.platforms[this.selectedElements[0]].y), sidePanel.x + 25, sidePanel.y + 130);
-                            ctx.fillText("Size: " + this.loadedMap.platforms[this.selectedElements[0]].width + ", " + this.loadedMap.platforms[this.selectedElements[0]].height, sidePanel.x + 25, sidePanel.y + 160);
-                            ctx.fillText("Wall: " + (this.loadedMap.platforms[this.selectedElements[0]].wall ? "Yes" : "No"), sidePanel.x + 25, sidePanel.y + 280)
+                            ctx.fillText("Position: " + approxSignX + Math.round(this.loadedMap.platforms[this.selectedElements[0]].x) + ", " + approxSignY + Math.round(this.loadedMap.platforms[this.selectedElements[0]].y), sidePanel.x + 16, sidePanel.y + 84);
+                            ctx.fillText("Size: " + this.loadedMap.platforms[this.selectedElements[0]].width + ", " + this.loadedMap.platforms[this.selectedElements[0]].height, sidePanel.x + 16, sidePanel.y + 108);
+                            ctx.fillText("Wall: " + (this.loadedMap.platforms[this.selectedElements[0]].wall ? "Yes" : "No"), sidePanel.x + 16, sidePanel.y + 224)
+                            ctx.fillText("End Zone: " + (this.loadedMap.platforms[this.selectedElements[0]].endzone ? "Yes" : "No"), sidePanel.x + 16, sidePanel.y + 264)
                         }
 
                     }
@@ -687,51 +691,51 @@ const MapEditor = {
                 if (UserInterface.settings.debugText == 1) {
 
                     // GENERAL MAP EDITOR DEBUG TEXT
-                    const textX = 200;
+                    const textX = 150;
+                    ctx.font = "8px BAHNSCHRIFT";
                     ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
-                    ctx.fillText("zoom: " + this.zoom, textX, 40)
+            
+                    ctx.fillText("zoom: " + this.zoom, textX, 50)
                     ctx.fillText("screen.x: " + this.screen.x, textX, 60);
-                    ctx.fillText("screen.y: " + this.screen.y, textX, 80);
-                    ctx.fillText("screen.width: " + this.screen.width, textX, 100);
-                    ctx.fillText("screen.height: " + this.screen.height, textX, 120);
-                    ctx.fillText("screen.cornerX: " + this.screen.cornerX, textX, 140);
-                    ctx.fillText("screen.cornerY: " + this.screen.cornerY, textX, 160);
+                    ctx.fillText("screen.y: " + this.screen.y, textX, 70);
+                    ctx.fillText("screen.width: " + this.screen.width, textX, 80);
+                    ctx.fillText("screen.height: " + this.screen.height, textX, 90);
+                    ctx.fillText("screen.cornerX: " + this.screen.cornerX, textX, 100);
+                    ctx.fillText("screen.cornerY: " + this.screen.cornerY, textX, 110);
 
-                    ctx.fillText("rendered platforms: " + this.renderedPlatforms.length, textX, 180);
-                    ctx.fillText("editorState: " + this.editorState, textX, 200);
-                    ctx.fillText("selectedElements: " + this.selectedElements, textX, 220);
+                    ctx.fillText("rendered platforms: " + this.renderedPlatforms.length, textX, 120);
+                    ctx.fillText("editorState: " + this.editorState, textX, 130);
+                    ctx.fillText("selectedElements: " + this.selectedElements, textX, 140);
 
                     if (TouchHandler.dragging) {
 
-                        ctx.fillText("touch (screen cords): " + Math.round(TouchHandler.touches[0].x * CanvasArea.scale) + ", " + Math.round(TouchHandler.touches[0].y * CanvasArea.scale), textX, 240);
-
-                        const touchMapped = this.convertToMapCord(TouchHandler.touches[0].x * CanvasArea.scale, TouchHandler.touches[0].y * CanvasArea.scale)
-
-                        ctx.fillText("touch global map coords: " + Math.round(touchMapped.x) + ", " + Math.round(touchMapped.y), textX, 260);
+                        ctx.fillText("touch (UI cords): " + Math.round(TouchHandler.touches[0].x) + ", " + Math.round(TouchHandler.touches[0].y), textX, 150);
+                        const touchMapped = this.convertToMapCord(TouchHandler.touches[0].x, TouchHandler.touches[0].y)
+                        ctx.fillText("touch global map coords: " + Math.round(touchMapped.x) + ", " + Math.round(touchMapped.y), textX, 160);
 
                         if (this.dragSelect) {
 
                             const globalMarqueeCornerTL = this.convertToMapCord(this.dragSelectMarquee.x, this.dragSelectMarquee.y)
-
                             const globalMarqueeCornerBR = this.convertToMapCord(this.dragSelectMarquee.x + this.dragSelectMarquee.width, this.dragSelectMarquee.y + this.dragSelectMarquee.height)
 
                             ctx.fillText("global marquee: " +
                                 Math.round(globalMarqueeCornerTL.x) + "," +
                                 Math.round(globalMarqueeCornerTL.y) + "," +
                                 Math.round(globalMarqueeCornerBR.x - globalMarqueeCornerTL.x) + "," +
-                                Math.round(globalMarqueeCornerBR.y - globalMarqueeCornerTL.y), textX, 280);
+                                Math.round(globalMarqueeCornerBR.y - globalMarqueeCornerTL.y), textX, 170);
                         }
                     }
 
 
                     if (TouchHandler.zoom.isZooming) { // draw center point between two fingers of zoom
                         ctx.save()
-                        ctx.translate(TouchHandler.zoom.x * CanvasArea.scale, TouchHandler.zoom.y * CanvasArea.scale)
+                        ctx.translate(TouchHandler.zoom.x, TouchHandler.zoom.y)
                         ctx.fillRect(-3, -3, 6, 6)
                         ctx.restore()
                     }
 
                 }
+                ctx.restore() // end of drawing scaled UI
 
             }
 
@@ -745,19 +749,15 @@ const MapEditor = {
             return
         }
 
-        // if released within the edit platform side panel
+        // if released within the edit platform side panel and panel is visible
         // needs to be matched with MapEditor.render() values
-        //     x : CanvasArea.canvas.width - 280,
-        //     y : 20,
-        //     width : 225,
-        //     height : 320
-
         if (
             this.editorState == 2 &&
-            x >= CanvasArea.canvas.width - 280 &&
-            x <= CanvasArea.canvas.width - 280 + 225 &&
-            y >= 20 &&
-            y <= 20 + 320
+            !this.dragSelect && // dragSelect hides side panel
+            x >= window.outerWidth - 262 &&
+            x <= window.outerWidth - 262 + 218 &&
+            y >= 22 &&
+            y <= 22 + 292
         ) {
             return
         }
@@ -903,7 +903,7 @@ const MapEditor = {
                 return
             }
         }) // end of looping through each checkpoint
-        if (clickedCheckpoint) {return} // avoids clicking platform below
+        if (clickedCheckpoint) { return } // avoids clicking platform below
 
 
         // RELEASED ON platform
@@ -1189,9 +1189,9 @@ const MapEditor = {
         }
     },
 
-    convertToMapCord: function (screenX, screenY) { // these need to already be * by CanvasArea.scale
-        const mapX = CanvasArea.mapToRange(screenX, 0, CanvasArea.canvas.width, this.screen.cornerX, this.screen.cornerX + this.screen.width)
-        const mapY = CanvasArea.mapToRange(screenY, 0, CanvasArea.canvas.height, this.screen.cornerY, this.screen.cornerY + this.screen.height)
+    convertToMapCord: function (screenX, screenY) {
+        const mapX = CanvasArea.mapToRange(screenX, 0, window.outerWidth, this.screen.cornerX, this.screen.cornerX + this.screen.width)
+        const mapY = CanvasArea.mapToRange(screenY, 0, window.outerHeight, this.screen.cornerY, this.screen.cornerY + this.screen.height)
 
         return {
             x: mapX,

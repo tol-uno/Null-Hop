@@ -37,7 +37,7 @@ const Tutorial = {
         // ONLY DO THESE CHECKS IF this.isActive
 
         if (this.state == 0) {
-            if ((UserInterface.gamestate == 5 || UserInterface.gamestate == 6) && this.decalLoadState == -1) { // decals havnt started loading yet
+            if ((UserInterface.gamestate == 5 || UserInterface.gamestate == 6) && this.decalLoadState == -1) { // decals havn't started loading yet
                 // INITIATE DECALS
                 this.decalLoadState = 0
 
@@ -190,14 +190,17 @@ const Tutorial = {
 
     render : function() {
         const ctx = CanvasArea.ctx;
-        CanvasArea.ctx.font = "28px BAHNSCHRIFT";
+        ctx.save() // for canvas scaling
+        ctx.scale(CanvasArea.scale, CanvasArea.scale)
+
+        ctx.font = "22px BAHNSCHRIFT";
         const bg_color = UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
         const icon_color = !UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
 
         // TUTORIAL DEBUG TEXT
         if (UserInterface.settings.debugText) {
-            ctx.fillText("state: " + this.state, midX - 200, 34)
-            //ctx.fillText(this.targets, 300, midY)
+            // ctx.fillText("state: " + this.state, midX - 200, 34)
+            // ctx.fillText(this.targets, 300, midY_UI)
         }
 
 
@@ -205,15 +208,15 @@ const Tutorial = {
             const textWidth = ctx.measureText(text).width
 
             ctx.fillStyle = bg_color
-            CanvasArea.roundedRect(midX - 25 - textWidth/2, 50, textWidth + 50, 80, 25)
+            CanvasArea.roundedRect(midX_UI - 20 - textWidth/2, 38, textWidth + 38, 60, 20)
             ctx.fill()
 
             ctx.fillStyle = icon_color
-            ctx.fillText(text, midX - textWidth/2, 100)
+            ctx.fillText(text, midX_UI - textWidth/2, 75)
             
             // resets position of btn_next so that it can pulse
-            btn_next.x = midX + textWidth/2 + 45
-            btn_next.y = 50
+            btn_next.x = midX_UI + textWidth/2 + 34
+            btn_next.y = 40
         }
 
 
@@ -223,11 +226,11 @@ const Tutorial = {
             const animValue = Math.sin(performance.now() * speed);
 
             // Pulse btn_next
-            btn_next.width = 80 + (-1 * animValue * 8)
-            btn_next.height = 80 + (-1 * animValue * 8)
+            btn_next.width = 60 + (-1 * animValue * 8)
+            btn_next.height = 60 + (-1 * animValue * 8)
             // this relies on drawTextPanel reseting btn_next's position every frame
-            btn_next.x += (80 - btn_next.width) / 2
-            btn_next.y += (80 - btn_next.height) / 2
+            btn_next.x += (60 - btn_next.width) / 2
+            btn_next.y += (60 - btn_next.height) / 2
         }
 
 
@@ -238,7 +241,7 @@ const Tutorial = {
 
             if (TouchHandler.dragging == false && Tutorial.timerCompleted) {
                 const image = Tutorial.decalList[0]
-                ctx.drawImage(image, midX - image.width/2 + (animValue * 150), CanvasArea.canvas.height - image.height - 60)
+                ctx.drawImage(image, midX_UI - image.width/2 + (animValue * 116), window.outerHeight - image.height - 36)
             }
         }
 
@@ -261,7 +264,7 @@ const Tutorial = {
 
             if (TouchHandler.dragging == false) {
                 const image = this.decalList[1]
-                ctx.drawImage(image, midX - 250, midY - 60 + (animValue * 50))
+                ctx.drawImage(image, midX_UI - 250, midY_UI - 60 + (animValue * 50))
             }
 
             pulseNextButton()
@@ -275,33 +278,33 @@ const Tutorial = {
             
             ctx.save() // #4
             
-            ctx.translate(midX, midY)
+            ctx.translate(midX_UI, midY_UI)
             ctx.rotate(this.targets[0][0] * Math.PI / 180)
 
             ctx.strokeStyle = Map.style.shadow_platformColor
             ctx.fillStyle = Map.style.shadow_platformColor
-            ctx.lineWidth = 8
+            ctx.lineWidth = 6
             ctx.lineCap = "round"
 
     
             // DRAW TARGET SHADOW
             if (this.targets[0][1] > 0) { // these two blocks could be a function. theyre called twice. Translate the ctx between the two
                 ctx.beginPath()
-                ctx.arc(75, 0, 14, 0, (this.targets[0][1] / 50) * (2 * Math.PI));
+                ctx.arc(58 , 0, 10, 0, (this.targets[0][1] / 50) * (2 * Math.PI));
                 ctx.stroke()
             }
 
             // center dot that appears when looking at target
             if (this.targets[0][1] < 50 ) {
                 ctx.beginPath()
-                ctx.arc(75, 0, 5, 0, 2 * Math.PI);
+                ctx.arc(58, 0, 4, 0, 2 * Math.PI);
                 ctx.fill()
             }
 
 
             // move up for actual targets
             ctx.rotate(-this.targets[0][0] * Math.PI / 180) // have to unrotate first
-            ctx.translate(0, -32)
+            ctx.translate(0, -24)
             ctx.rotate(this.targets[0][0] * Math.PI / 180)
 
             ctx.strokeStyle = bg_color
@@ -311,14 +314,14 @@ const Tutorial = {
             // DRAW ACTUAL TARGET
             if (this.targets[0][1] > 0) {
                 ctx.beginPath()
-                ctx.arc(75, 0, 14, 0, (this.targets[0][1] / 50) * (2 * Math.PI));
+                ctx.arc(58, 0, 10, 0, (this.targets[0][1] / 50) * (2 * Math.PI));
                 ctx.stroke()
             }
 
             // center dot that appears when looking at target
             if (this.targets[0][1] < 50 ) {
                 ctx.beginPath()
-                ctx.arc(75, 0, 5, 0, 2 * Math.PI);
+                ctx.arc(58, 0, 4, 0, 2 * Math.PI);
                 ctx.fill()
             }
 
@@ -336,7 +339,7 @@ const Tutorial = {
             const animValue = Math.sin(performance.now() * speed); // Use a sin wave to occilate between -1 and 1
 
             const image = this.decalList[3]
-            ctx.drawImage(image, btn_jump.x + 150 + (animValue * 20), btn_jump.y + btn_jump.width/2 - image.height/2)
+            ctx.drawImage(image, btn_jump.x + 132 + (animValue * 20), btn_jump.y + btn_jump.width/2 - image.height/2)
         }
 
 
@@ -392,8 +395,10 @@ const Tutorial = {
             const animValue = Math.sin(performance.now() * speed);
 
             const image = this.decalList[3]
-            ctx.drawImage(image, btn_mainMenu.x + 150 + (animValue * 20), btn_mainMenu.y + btn_mainMenu.width/2 - image.height/2)
+            ctx.drawImage(image, btn_mainMenu.x + 110 + (animValue * 20), btn_mainMenu.y + btn_mainMenu.width/2 - image.height/2)
         }
+
+        ctx.restore() // for canvas scaling
 
     },
 
