@@ -484,10 +484,10 @@ const UserInterface = {
                 this.y += TouchHandler.dragAmountY
 
                 // panning if at edges of screen
-                if (this.x > window.outerWidth - 340) { MapEditor.screen.x += 400 / MapEditor.zoom * dt }
+                if (this.x > window.outerWidth - 270) { MapEditor.screen.x += 400 / MapEditor.zoom * dt }
                 if (this.x < 60) { MapEditor.screen.x -= 400 / MapEditor.zoom * dt }
-                if (this.y > window.outerHeight - 130) { MapEditor.screen.y += 400 / MapEditor.zoom * dt }
-                if (this.y < 30) { MapEditor.screen.y -= 400 / MapEditor.zoom * dt }
+                if (this.y > window.outerHeight - 60) { MapEditor.screen.y += 400 / MapEditor.zoom * dt }
+                if (this.y < 12) { MapEditor.screen.y -= 400 / MapEditor.zoom * dt }
 
 
                 // MOVING EACH SELECTED ELEMENT TO FOLLOW BUTTON
@@ -556,10 +556,10 @@ const UserInterface = {
                 this.y += TouchHandler.dragAmountY
 
                 // panning if at edges of screen
-                if (this.x > window.outerWidth - 340) { MapEditor.screen.x += 400 / MapEditor.zoom * dt }
+                if (this.x > window.outerWidth - 270) { MapEditor.screen.x += 400 / MapEditor.zoom * dt }
                 if (this.x < 60) { MapEditor.screen.x -= 400 / MapEditor.zoom * dt }
-                if (this.y > window.outerHeight - 130) { MapEditor.screen.y += 400 / MapEditor.zoom * dt }
-                if (this.y < 30) { MapEditor.screen.y -= 400 / MapEditor.zoom * dt }
+                if (this.y > window.outerHeight - 60) { MapEditor.screen.y += 400 / MapEditor.zoom * dt }
+                if (this.y < 12) { MapEditor.screen.y -= 400 / MapEditor.zoom * dt }
 
 
                 // TR pinned corner MAP COORDS
@@ -639,10 +639,10 @@ const UserInterface = {
                 this.y += TouchHandler.dragAmountY
 
                 // panning if at edges of screen
-                if (this.x > window.outerWidth - 340) { MapEditor.screen.x += 400 / MapEditor.zoom * dt }
+                if (this.x > window.outerWidth - 270) { MapEditor.screen.x += 400 / MapEditor.zoom * dt }
                 if (this.x < 60) { MapEditor.screen.x -= 400 / MapEditor.zoom * dt }
-                if (this.y > window.outerHeight - 130) { MapEditor.screen.y += 400 / MapEditor.zoom * dt }
-                if (this.y < 30) { MapEditor.screen.y -= 400 / MapEditor.zoom * dt }
+                if (this.y > window.outerHeight - 60) { MapEditor.screen.y += 400 / MapEditor.zoom * dt }
+                if (this.y < 12) { MapEditor.screen.y -= 400 / MapEditor.zoom * dt }
 
 
                 // TL pinned corner MAP COORDS
@@ -722,10 +722,10 @@ const UserInterface = {
                 this.y += TouchHandler.dragAmountY
 
                 // panning if at edges of screen
-                if (this.x > window.outerWidth - 340) { MapEditor.screen.x += 400 / MapEditor.zoom * dt }
+                if (this.x > window.outerWidth - 270) { MapEditor.screen.x += 400 / MapEditor.zoom * dt }
                 if (this.x < 60) { MapEditor.screen.x -= 400 / MapEditor.zoom * dt }
-                if (this.y > window.outerHeight - 130) { MapEditor.screen.y += 400 / MapEditor.zoom * dt }
-                if (this.y < 30) { MapEditor.screen.y -= 400 / MapEditor.zoom * dt }
+                if (this.y > window.outerHeight - 60) { MapEditor.screen.y += 400 / MapEditor.zoom * dt }
+                if (this.y < 12) { MapEditor.screen.y -= 400 / MapEditor.zoom * dt }
 
 
                 // BL pinned corner MAP COORDS
@@ -803,14 +803,14 @@ const UserInterface = {
                 // move button according to touch dragging
                 this.x += TouchHandler.dragAmountX
                 this.y += TouchHandler.dragAmountY
-
+                
                 // panning if at edges of screen
-                if (this.x > window.outerWidth - 340) { MapEditor.screen.x += 400 / MapEditor.zoom * dt }
+                if (this.x > window.outerWidth - 270) { MapEditor.screen.x += 400 / MapEditor.zoom * dt }
                 if (this.x < 60) { MapEditor.screen.x -= 400 / MapEditor.zoom * dt }
-                if (this.y > window.outerHeight - 130) { MapEditor.screen.y += 400 / MapEditor.zoom * dt }
-                if (this.y < 30) { MapEditor.screen.y -= 400 / MapEditor.zoom * dt }
+                if (this.y > window.outerHeight - 60) { MapEditor.screen.y += 400 / MapEditor.zoom * dt }
+                if (this.y < 12) { MapEditor.screen.y -= 400 / MapEditor.zoom * dt }
 
-
+                
                 // BR pinned corner MAP COORDS
                 const pinnedX_mapCoords = platform.x + platform.corners[1][0]
                 const pinnedY_mapCoords = platform.y + platform.corners[1][1]
@@ -1204,7 +1204,7 @@ const UserInterface = {
 
 
         // MAP BROWSER BUTTONS
-        btn_custom_maps = new Button(45, "window.outerHeight - 115", 135, "custom_maps_button", "", 0, "", function () {
+        btn_custom_maps = new Button("window.outerWidth - 220", 40, 135, "custom_maps_button", "", 0, "", function () {
             UserInterface.gamestate = 2;
 
             // loop through each button (including non-maps eww) and untoggle it. Could be an issue once I add a "play tutorial" toggle / button idk
@@ -1217,7 +1217,7 @@ const UserInterface = {
             MapBrowser.init()
         })
 
-        btn_playMap = new Button("window.outerWidth - 230", "window.outerHeight - 115", 150, "play_button", "", 0, "", function () {
+        btn_playMap = new Button("window.outerWidth - 220", "window.outerHeight - 115", 150, "play_button", "", 0, "", function () {
 
             MapBrowser.toggleAllButtons()
             MapBrowser.scrollY = 0;
@@ -1237,7 +1237,7 @@ const UserInterface = {
             }
         })
 
-        btn_editMap = new Button("window.outerWidth - 230", "window.outerHeight - 85", 150, "", "", 0, "Edit Map", async function () {
+        btn_editMap = new Button("window.outerWidth - 390", "window.outerHeight - 150", 150, "", "", 0, "Edit Map", async function () {
 
             // delete shareDiv when leaving browser page
             document.getElementById("shareDiv").remove()
@@ -1280,7 +1280,7 @@ const UserInterface = {
             }
         })
 
-        btn_shareMap = new Button("window.outerWidth - 230", "window.outerHeight - 225", 150, "", "", 0, "Share Map", function (createDiv) {
+        btn_shareMap = new Button("window.outerWidth - 230", "window.outerHeight - 85", 150, "", "", 0, "Share Map", function (createDiv) {
             // The shareDiv does all the work for this button.
             // createDiv is called by btn_load_map
             // shareDiv is removed by btn_mainMenu, btn_editMap and btn_deleteMap
@@ -1291,26 +1291,29 @@ const UserInterface = {
                 shareDiv.setAttribute("id", "shareDiv");
                 shareDiv.style.cssText = `
                     position: absolute; 
-                    left: ${btn_shareMap.x / CanvasArea.scale}px;
-                    top: ${btn_shareMap.y / CanvasArea.scale}px;
-                    width: ${btn_shareMap.width / CanvasArea.scale}px;
-                    height: ${btn_shareMap.height / CanvasArea.scale}px;
+                    left: ${btn_shareMap.x}px;
+                    top: ${btn_shareMap.y}px;
+                    width: ${btn_shareMap.width}px;
+                    height: ${btn_shareMap.height}px;
                     // border: solid 2px blue;
                 `
-
+                
                 shareDiv.addEventListener("click", async () => {
 
-                    const mapDataRaw = await UserInterface.readFile(MapBrowser.selectedMapIndex + ".json", "maps")
+                    if (MapBrowser.selectedMapIndex != -1) {
 
-                    const share_data = {
-                        title: MapBrowser.selectedMapIndex, // doesnt do anything on IOS
-                        text: mapDataRaw,
-                    }
+                        const mapDataRaw = await UserInterface.readFile(MapBrowser.selectedMapIndex + ".json", "maps")
 
-                    try {
-                        await navigator.share(share_data);
-                    } catch (err) {
-                        console.log(err)
+                        const share_data = {
+                            title: MapBrowser.selectedMapIndex, // doesnt do anything on IOS
+                            text: mapDataRaw,
+                        }
+
+                        try {
+                            await navigator.share(share_data);
+                        } catch (err) {
+                            console.log(err)
+                        }
                     }
 
                 });
@@ -1324,7 +1327,7 @@ const UserInterface = {
 
 
         // ALL LEVEL BUTTONS
-        btn_level_awakening = new Button(300, 50, 280, "", "", 0, "Awakening", function () {
+        btn_level_awakening = new Button(160, 50, 250, "", "", 0, "Awakening", function () {
             if (this.toggle) {
                 this.toggle = 0;
                 MapBrowser.selectedMapIndex = -1
@@ -1336,7 +1339,7 @@ const UserInterface = {
             }
         })
 
-        btn_level_pitfall = new Button(300, 150, 280, "", "", 0, "Pitfall", function () {
+        btn_level_pitfall = new Button(160, 126, 250, "", "", 0, "Pitfall", function () {
             if (this.toggle) {
                 this.toggle = 0;
                 MapBrowser.selectedMapIndex = -1
@@ -1347,7 +1350,7 @@ const UserInterface = {
             }
         })
 
-        btn_level_cavernAbyss = new Button(300, 250, 280, "", "", 0, "Cavern Abyss", function () {
+        btn_level_cavernAbyss = new Button(160, 202, 250, "", "", 0, "Cavern Abyss", function () {
             if (this.toggle) {
                 this.toggle = 0;
                 MapBrowser.selectedMapIndex = -1
@@ -1358,7 +1361,7 @@ const UserInterface = {
             }
         })
 
-        btn_level_crystals = new Button(300, 350, 280, "", "", 0, "Crystals", function () {
+        btn_level_crystals = new Button(160, 278, 250, "", "", 0, "Crystals", function () {
             if (this.toggle) {
                 this.toggle = 0;
                 MapBrowser.selectedMapIndex = -1
@@ -1369,7 +1372,7 @@ const UserInterface = {
             }
         })
 
-        btn_level_trespass = new Button(300, 450, 280, "", "", 0, "Trespass", function () {
+        btn_level_trespass = new Button(160, 354, 250, "", "", 0, "Trespass", function () {
             if (this.toggle) {
                 this.toggle = 0;
                 MapBrowser.selectedMapIndex = -1
@@ -1380,7 +1383,7 @@ const UserInterface = {
             }
         })
 
-        btn_level_turmoil = new Button(300, 550, 280, "", "", 0, "Turmoil", function () {
+        btn_level_turmoil = new Button(160, 430, 250, "", "", 0, "Turmoil", function () {
             if (this.toggle) {
                 this.toggle = 0;
                 MapBrowser.selectedMapIndex = -1
@@ -1391,7 +1394,7 @@ const UserInterface = {
             }
         })
 
-        btn_level_tangledForest = new Button(300, 650, 280, "", "", 0, "Tangled Forest", function () {
+        btn_level_tangledForest = new Button(160, 506, 250, "", "", 0, "Tangled Forest", function () {
             if (this.toggle) {
                 this.toggle = 0;
                 MapBrowser.selectedMapIndex = -1
@@ -1402,7 +1405,7 @@ const UserInterface = {
             }
         })
 
-        btn_level_forever = new Button(300, 750, 280, "", "", 0, "Forever", function () {
+        btn_level_forever = new Button(160, 582, 250, "", "", 0, "Forever", function () {
             if (this.toggle) {
                 this.toggle = 0;
                 MapBrowser.selectedMapIndex = -1
@@ -1630,7 +1633,7 @@ const UserInterface = {
 
         })
 
-        btn_playTutorial = new Button("window.outerWidth - 230", "window.outerHeight - 160", 60, "toggle_button", "toggle_button_pressed", 1, "", function (sync) {
+        btn_playTutorial = new Button("window.outerWidth - 320", "window.outerHeight - 100", 60, "toggle_button", "toggle_button_pressed", 1, "", function (sync) {
             if (sync) {
                 this.toggle = UserInterface.settings.playTutorial;
             } else {
@@ -2061,7 +2064,8 @@ const UserInterface = {
         CanvasArea.ctx.restore() // save 3a
     },
 
-    getOrdinalSuffix: function (i) { // turns 1 into 1st, 2 into 2nd
+    /*
+    getOrdinalSuffix: function (i) { // turns 1 into 1st, 2 into 2nd UNUSED
         let j = i % 10,
             k = i % 100;
         if (j === 1 && k !== 11) {
@@ -2075,6 +2079,7 @@ const UserInterface = {
         }
         return i + "th";
     },
+    */
 
     truncateText: function (text, clampToWidth) {
         if (CanvasArea.ctx.measureText(text).width > clampToWidth) {

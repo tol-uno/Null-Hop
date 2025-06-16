@@ -134,11 +134,10 @@ const ColorPicker = {
         // rbg text
         ctx.font = "16px BAHNSCHRIFT";
         ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
-        ctx.fillText(CanvasArea.HSLToRGB(this.h, this.s, this.l), this.x + 164, this.y + 36)
+        ctx.fillText(CanvasArea.HSLToRGB(this.h, this.s, this.l), this.x + 164, this.y + 122)
 
         // selected element text
         let selectedColor = null
-
         if (this.editingElement == 1) {selectedColor = "Background"}
         if (this.editingElement == 2) {selectedColor = "Player"}
         if (this.editingElement == 3) {selectedColor = "Platform Top"}
@@ -151,18 +150,18 @@ const ColorPicker = {
         if (this.editingElement == 10) {selectedColor = "Ambient Light"}
 
         if (selectedColor != null) {
-            ctx.fillText(selectedColor, this.x + 180, this.y + 85)
+            ctx.fillText(selectedColor, this.x + 164, this.y + 36)
         }
 
         // draw gradients for each slider
         ctx.fillStyle = this.hueGradient
-        ctx.fillRect(this.x + 16, this.y + 160, this.width - 32, 14)
+        ctx.fillRect(this.x + 16, this.y + 162, this.width - 32, 14)
 
         ctx.fillStyle = this.saturationGradient
         ctx.fillRect(this.x + 16, this.y + 234, this.width - 32, 14)
         
         ctx.fillStyle = this.lightnessGradient
-        ctx.fillRect(this.x + 16, this.y + 308, this.width - 32, 14)
+        ctx.fillRect(this.x + 16, this.y + 306, this.width - 32, 14)
 
         ctx.restore()
     },

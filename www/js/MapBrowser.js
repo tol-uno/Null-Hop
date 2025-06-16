@@ -1,29 +1,35 @@
 const MapBrowser = { // should set back to 0 at some points
-    state : 0, // 0 = disabled, 1 = standard map browser, 2 = custom map browser
+    state: 0, // 0 = disabled, 1 = standard map browser, 2 = custom map browser
     scrollY: 0,
     scrollVel: 0,
-    scrollVelAverager : new Averager(5),
+    scrollVelAverager: new Averager(5),
     scrollAmount: null,
     selectedMapIndex: -1, // -1 == no map selected ... string of map name when a map is selected
     maxScroll: -50,
+    infoBox: {
+        x: window.outerWidth - 470,
+        y: 130,
+        width: 390, // set dynamically in .render()
+        height: 150, // set dynamically
+    },
 
-    init : function() {
+    init: function () {
 
         function setMaxScroll() {
             MapBrowser.maxScroll = -50
             UserInterface.renderedButtons.forEach((button) => {
-                if (button.x == 300) {MapBrowser.maxScroll -= 100}
+                if (button.x == 160) { MapBrowser.maxScroll -= 76 }
             })
-            MapBrowser.maxScroll += 525 // 5 = buttons to offset
-            if (MapBrowser.maxScroll > 0) {MapBrowser.maxScroll = 0} // clipping it incase theres not more than 5 buttons
+            MapBrowser.maxScroll += 200 // bottom padding (empty space at bottom of browsers map list)
+            if (MapBrowser.maxScroll > 0) { MapBrowser.maxScroll = 0 } // clipping it incase theres not more than 5 buttons
         }
 
-        if (this.state == 1) { // Normal map browser
-            
+        if (this.state == 1) { // Normal map browser (MAP BUTTON LAYOUTS ARE SET IN UserInterface)
+
             this.scrollY = 0
             this.scrollVel = 0
             this.selectedMapIndex = -1
-        
+
             setMaxScroll()
         }
 
@@ -35,7 +41,7 @@ const MapBrowser = { // should set back to 0 at some points
 
             // access file system and set up all nessasary map buttons for the browser type
             // a horrible nested mess but it keeps everything firing in the right sequence
-            //function initCustomMapBrowser(path){
+            // function initCustomMapBrowser(path){
 
             window.resolveLocalFileSystemURL(cordova.file.dataDirectory + "maps", function (fileSystem) {
                 var reader = fileSystem.createReader();
@@ -49,8 +55,8 @@ const MapBrowser = { // should set back to 0 at some points
 
                         // create toggle buttons for each map. These can be selected to preview map info. seperate play button will play them 
 
-                        // create these with blank button icons. render() adds text ontop . ALSO CHANGE THE CHECK IN RENDER FUNC
-                        let button = new Button(300, 50 + (100 * mapNumber), 280, "", "", 1, String(mapEntry.name.split(".")[0]), function (sync) {
+                        // create dynamic labeled button. KEEP IN SYNC WITH THE CHECK IN UPDATE AND RENDER FUNCS
+                        let button = new Button(160, 50 + (76 * mapNumber), 250, "", "", 1, String(mapEntry.name.split(".")[0]), function (sync) {
 
                             if (sync) {
                                 // doesnt need to sync toggle state
@@ -77,21 +83,21 @@ const MapBrowser = { // should set back to 0 at some points
                     }) // end of forEach loop                        
                 }, (error) => { console.log(error) });
             }, (error) => { console.log(error) });
-        }        
+        }
     },
-    
-    toggleAllButtons : function() {
+
+    toggleAllButtons: function () {
         UserInterface.renderedButtons.forEach(button => {
             // dont toggle playTutorial
-            if (button.toggle == 1 && button != btn_playTutorial) {button.toggle = 0}
+            if (button.toggle == 1 && button != btn_playTutorial) { button.toggle = 0 }
         })
     },
 
-    update : function() {
+    update: function () {
         // called every frame when gamestate == 2
 
         // changes the position of buttons on scroll
-        if (TouchHandler.dragging == 1 && TouchHandler.touches[0].x > 200 && TouchHandler.touches[0].x < 650) {
+        if (TouchHandler.dragging == 1 && TouchHandler.touches[0].x > 110 && TouchHandler.touches[0].x < 460) {
             if (this.scrollAmount == null) { // start of scroll
                 this.scrollAmount = this.scrollY
             }
@@ -122,12 +128,13 @@ const MapBrowser = { // should set back to 0 at some points
 
 
         // stopping scrolling
-        if (this.scrollY > 0) {this.scrollY = 0}
-        if (this.scrollY < this.maxScroll) {this.scrollY = this.maxScroll}
+        if (this.scrollY > 0) { this.scrollY = 0 }
+        if (this.scrollY < this.maxScroll) { this.scrollY = this.maxScroll }
 
 
+        // applying scroll to buttons
         UserInterface.renderedButtons.forEach((button) => {
-            if (button.x > 100 && button.x < 600) {
+            if (button.x == 160) {
                 button.y = button.savedY + this.scrollY
             }
         })
@@ -137,12 +144,12 @@ const MapBrowser = { // should set back to 0 at some points
         // ENABLING and DISABLING btn_playMap and btn_playTutorial in browsers BESIDES map editor's
 
         if (MapEditor.editorState != 5) { // not in map editors browser
-            
+
             // ADDING AND REMOVING btn_playmap
             if (this.selectedMapIndex != -1 && !UserInterface.renderedButtons.includes(btn_playMap)) {
                 UserInterface.renderedButtons = UserInterface.renderedButtons.concat(btn_playMap)
             }
-            
+
             if (this.selectedMapIndex == -1 && UserInterface.renderedButtons.includes(btn_playMap)) {
                 UserInterface.renderedButtons = UserInterface.renderedButtons.filter(item => item !== btn_playMap);
             }
@@ -159,7 +166,7 @@ const MapBrowser = { // should set back to 0 at some points
         } else {
             // in MapEditors browser
             // btn_editMap, btn_deleteMap, btn_shareMap
-            
+
             if (
                 this.selectedMapIndex != -1 &&
                 !UserInterface.renderedButtons.includes(btn_editMap)
@@ -168,90 +175,79 @@ const MapBrowser = { // should set back to 0 at some points
                 UserInterface.renderedButtons = UserInterface.renderedButtons.concat(btn_deleteMap)
                 UserInterface.renderedButtons = UserInterface.renderedButtons.concat(btn_shareMap)
             }
-            
+
             if (
                 this.selectedMapIndex == -1 &&
                 UserInterface.renderedButtons.includes(btn_editMap)
-            ) {UserInterface.renderedButtons = UserInterface.renderedButtons.slice(0,-3)}
+            ) { UserInterface.renderedButtons = UserInterface.renderedButtons.slice(0, -3) }
 
         }
 
     },
 
-    render : function() {
-        // needs to be called every frame when gamestate == 2
-        // draw labels for maps
-        // desription of maps
+    render: function () {
+        // called every frame when gamestate == 2
+        // draw detail box for maps with title, time, and medals
         const ctx = CanvasArea.ctx;
+        ctx.save() // UI scale save
+        ctx.scale(CanvasArea.scale, CanvasArea.scale)
 
-        // DRAW INFO BOX BG
-        ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1: UserInterface.lightColor_1;
-        const boxHeight = (MapEditor.editorState == 5) ? 160 : 300 // shorter map editor box to give room for 3 buttons
-        CanvasArea.roundedRect(CanvasArea.canvas.width - 500, 50, 400, boxHeight, 25)
-        ctx.fill()
-        
-        // DRAW TEXT INFO BOX
-        ctx.font = "45px BAHNSCHRIFT";
-        ctx.fillStyle = (!UserInterface.darkMode) ? UserInterface.darkColor_1: UserInterface.lightColor_1;
+        // DRAW MAP INFO BOX BG
+        ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
 
-        if (this.selectedMapIndex != -1) { // Write map title and info
-            const mapTitle = UserInterface.truncateText(this.selectedMapIndex, 340)
-            ctx.fillText(mapTitle, CanvasArea.canvas.width - 475, 120)
-
-            ctx.font = "25px BAHNSCHRIFT";
-            const yourRecord = UserInterface.secondsToMinutes((UserInterface.records[this.selectedMapIndex] == undefined ? 0 : UserInterface.records[this.selectedMapIndex]))
-            ctx.fillText("Your Time: " + yourRecord, CanvasArea.canvas.width - 475, 170)
-            if (MapEditor.editorState !== 5 && UserInterface.leaderboards[this.selectedMapIndex] !== undefined) { // if not in MapEditor & leaderboards exist
-                let rank
-                if (UserInterface.records[this.selectedMapIndex] == undefined) {
-                    rank = "None"
-                } else {
-
-                    rank = 1
-                    for (const [key, value] of Object.entries(UserInterface.leaderboards[this.selectedMapIndex])) {
-                        
-                        if (UserInterface.records[this.selectedMapIndex] <= value) { // if your record is less than this leaderboard time
-                            break;
-                        } else {
-                            rank ++
-                        }
-                    }
-                    rank = UserInterface.getOrdinalSuffix(rank)
-                }
-                
-                ctx.fillText("Leaderboard Rank: " + rank, CanvasArea.canvas.width - 475, 220)
-                
-                // GOLD SILVER AND BRONZE ICONS
-                if (rank == "1st") {
-                    ctx.fillStyle = "#fedc32" // gold
-                }
-
-                if (rank == "2nd") {
-                    ctx.fillStyle = "#dbdbdd" // silver
-                }
-
-                if (rank == "3rd") {
-                    ctx.fillStyle = "#f6b386" // bronze
-                }
-
-                CanvasArea.roundedRect(CanvasArea.canvas.width - 200, 186, 34, 34, 10)
-                ctx.fill()
-            }
-
-
-        } else { // no map is selected
-            if (this.state == 1) {
-                ctx.fillText("Select A Map", CanvasArea.canvas.width - 475, 110)
-            }
-
-            if (this.state == 2) {
-                ctx.font = "30px BAHNSCHRIFT";
-                ctx.fillText("Import, or Create", CanvasArea.canvas.width - 475, 100)
-                ctx.fillText("Custom Maps in the", CanvasArea.canvas.width - 475, 140)
-                ctx.fillText("Map Editor", CanvasArea.canvas.width - 475, 180)
+        // change size of map details box depending on if in MapEditor and if there are medals
+        if (MapEditor.editorState == 5) { // in map editor browser
+            this.infoBox.width = 220
+            this.infoBox.height = 120 // for shorter map detail box in map editor's browser
+        } else { // NOT in map editor browser
+            this.infoBox.height = 140
+            if (UserInterface.leaderboards[this.selectedMapIndex] !== undefined) { // if there are medals
+                this.infoBox.width = 390
+                this.infoBox.x = window.outerWidth - 470
+            } else {
+                this.infoBox.width = 220
+                this.infoBox.x = window.outerWidth - 300
             }
         }
 
+        CanvasArea.roundedRect(this.infoBox.x, this.infoBox.y, this.infoBox.width, this.infoBox.height, 20)
+        ctx.fill()
+
+        // DRAW MAP INFO BOX CONTENT
+        ctx.font = "28px BAHNSCHRIFT";
+        ctx.fillStyle = (!UserInterface.darkMode) ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
+
+        if (this.selectedMapIndex != -1) { // Write map title and info
+            const mapTitle = UserInterface.truncateText(this.selectedMapIndex, 190)
+            ctx.fillText(mapTitle, this.infoBox.x + 20, this.infoBox.y + 46)
+
+            if (MapEditor.editorState != 5) { // if not in MapEditor browser
+                // DRAW YOUR TIME
+                ctx.font = "20px BAHNSCHRIFT";
+                const yourRecord = UserInterface.secondsToMinutes((UserInterface.records[this.selectedMapIndex] == undefined ? 0 : UserInterface.records[this.selectedMapIndex]))
+                ctx.fillText("Your Time: " + yourRecord, this.infoBox.x + 20, this.infoBox.y + 120)
+
+                // DRAW METALS
+                if (UserInterface.leaderboards[this.selectedMapIndex] !== undefined) { // if leaderboards exist
+                    // test medals box 
+                    CanvasArea.roundedRect(this.infoBox.x + this.infoBox.width - 170, this.infoBox.y + 20, 150, this.infoBox.height - 40, 10)
+                    ctx.lineWidth = 4
+                    ctx.stroke()
+                }
+            }
+
+        } else { // no map is selected
+            if (this.state == 1) {
+                ctx.fillText("Select A Map", this.infoBox.x + 20, this.infoBox.y + 46)
+            }
+
+            if (this.state == 2) {
+                ctx.font = "20px BAHNSCHRIFT";
+                ctx.fillText("Import, or Create", this.infoBox.x + 20, this.infoBox.y + 40)
+                ctx.fillText("Custom Maps in the", this.infoBox.x + 20, this.infoBox.y + 70)
+                ctx.fillText("Map Editor", this.infoBox.x + 20, this.infoBox.y + 100)
+            }
+        }
 
         // Map BROWSER DEBUG TEXT
         // ctx.font = "15px BAHNSCHRIFT";
@@ -262,6 +258,9 @@ const MapBrowser = { // should set back to 0 at some points
         // ctx.fillText("scrollVel: " + this.scrollVel, 80, 260)
         // ctx.fillText("scrollVelAverager: " + this.scrollVelAverager.frames, 80, 280)
         // ctx.fillText("maxScroll: " + this.maxScroll, 80, 300)
+
+        ctx.restore() // UI scale restore
+
 
     }
 }
