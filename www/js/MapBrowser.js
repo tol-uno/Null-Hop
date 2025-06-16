@@ -229,10 +229,112 @@ const MapBrowser = { // should set back to 0 at some points
 
                 // DRAW METALS
                 if (UserInterface.leaderboards[this.selectedMapIndex] !== undefined) { // if leaderboards exist
-                    // test medals box 
-                    CanvasArea.roundedRect(this.infoBox.x + this.infoBox.width - 170, this.infoBox.y + 20, 150, this.infoBox.height - 40, 10)
-                    ctx.lineWidth = 4
-                    ctx.stroke()
+
+
+
+                    // TIME BOX
+                    const timeBox = {
+                        x: this.infoBox.x + this.infoBox.width - 180,
+                        y: this.infoBox.y, // not used (debug)
+                        width: 172, // not used (debug)
+                        height: this.infoBox.height, // not used (debug)
+                        midY: this.infoBox.y + this.infoBox.height/2,
+                    }
+
+
+                    // HIGHLIGHT MEDAL BOX SPECS
+                    const highlightBox = {
+                        x: timeBox.x,
+                        y: null, // set later
+                        width: 172,
+                        height: 58,
+                    }
+
+                    let medal = null
+
+
+                    // DRAW HIGHLIGHT MEDAL BOX
+                    ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
+                    ctx.strokeStyle = (!UserInterface.darkMode) ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
+
+                    ctx.save(); // save for shadow changes
+
+                    ctx.shadowColor = "rgba(0, 0, 0, 0.21)";
+                    ctx.shadowOffsetX = 10
+                    ctx.shadowOffsetY = 10
+
+
+                    // highlight medal box
+                    const personalBest = UserInterface.records[this.selectedMapIndex] ? UserInterface.records[this.selectedMapIndex] : 99999999
+
+                    // set hightlight box y and draw it
+                    if (personalBest <= UserInterface.leaderboards[this.selectedMapIndex].gold) {
+                        medal = 1
+                        highlightBox.y = timeBox.midY - 50 - highlightBox.height / 2
+                    } else if (personalBest <= UserInterface.leaderboards[this.selectedMapIndex].silver) {
+                        medal = 2
+                        highlightBox.y = timeBox.midY - highlightBox.height / 2
+                    } else if (personalBest <= UserInterface.leaderboards[this.selectedMapIndex].bronze) {
+                        medal = 3
+                        highlightBox.y = timeBox.midY + 50 - highlightBox.height / 2
+                    }
+
+                    if (medal !== null) {
+                        ctx.shadowOffsetX = 8
+                        ctx.shadowOffsetY = 8
+
+                        CanvasArea.roundedRect(highlightBox.x, highlightBox.y, highlightBox.width, highlightBox.height, 12)
+                        ctx.fill();
+
+                        ctx.shadowColor = "transparent"
+                        ctx.lineWidth = 4
+                        ctx.stroke();
+                    }
+
+
+                    ctx.restore(); // restore shadow changes
+
+
+                    // medals and times
+                    let halfFontHeight = 8
+                    let xOffset = 0
+                    let medalRadius = 12
+                    let medalShadow = false
+
+                    function testMedal(number) { // sets specific parameters for each drawMedal
+                        ctx.font = medal == number ? "30px BAHNSCHRIFT" : "24px BAHNSCHRIFT"
+                        halfFontHeight = medal == number ? 10 : 8
+                        xOffset = medal == number ? 10 : 0
+                        medalRadius = medal == number ? 15 : 12
+                        medalShadow = medal == number ? true : false
+                        ctx.globalAlpha = (medal == number || medal == null) ? 1 : 0.5
+                    }
+
+                    ctx.fillStyle = (!UserInterface.darkMode) ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
+
+                    testMedal(1)
+                    ctx.fillText(UserInterface.secondsToMinutes(UserInterface.leaderboards[this.selectedMapIndex].gold), timeBox.x + 58 - xOffset, timeBox.midY - 50 + halfFontHeight);
+                    ctx.globalAlpha = 1
+                    UserInterface.drawMedal(timeBox.x + 36 - xOffset, timeBox.midY - 50, medalRadius, "#f1b62c", "#fde320", 3, medalShadow)
+
+                    testMedal(2)
+                    ctx.fillText(UserInterface.secondsToMinutes(UserInterface.leaderboards[this.selectedMapIndex].silver), timeBox.x + 58 - xOffset, timeBox.midY + halfFontHeight);
+                    ctx.globalAlpha = 1
+                    UserInterface.drawMedal(timeBox.x + 36 - xOffset, timeBox.midY, medalRadius, "#8c9a9b", "#d4d4d6", 3, medalShadow)
+
+                    testMedal(3)
+                    ctx.fillText(UserInterface.secondsToMinutes(UserInterface.leaderboards[this.selectedMapIndex].bronze), timeBox.x + 58 - xOffset, timeBox.midY + 50 + halfFontHeight);
+                    ctx.globalAlpha = 1
+                    UserInterface.drawMedal(timeBox.x + 36 - xOffset, timeBox.midY + 50, medalRadius, "#e78b4c", "#f4a46f", 3, medalShadow)
+
+
+
+
+
+                    // test medals box outline
+                    // CanvasArea.roundedRect(timeBox.x, timeBox.y, timeBox.width, timeBox.height, 5)
+                    // ctx.lineWidth = 1
+                    // ctx.stroke()
                 }
             }
 

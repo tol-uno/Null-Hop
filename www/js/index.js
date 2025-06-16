@@ -53,7 +53,6 @@ function updateGameArea() { // CALLED EVERY FRAME
     
     
     
-    
     // RENDERING OBJECTS
     CanvasArea.clear();
 
@@ -66,7 +65,7 @@ function updateGameArea() { // CALLED EVERY FRAME
         Player.render()
         if (Tutorial.isActive) {
             Tutorial.render();
-        }        
+        }
     }
 
     if (UserInterface.gamestate == 7) {

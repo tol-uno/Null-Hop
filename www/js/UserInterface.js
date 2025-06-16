@@ -27,8 +27,8 @@ const UserInterface = {
     timerStart: null, // set by jump button
     levelState: 1, // 1 = pre-start, 2 = playing level, 3 = in endzone
 
-    leaderboards: {},
-    records: {},
+    leaderboards: {}, // medal times for each map
+    records: {}, // users records (personal bests) for each level theyve completed
     previousRecord: 0,
 
     showVerticalWarning: false,
@@ -810,7 +810,7 @@ const UserInterface = {
                 if (this.y > window.outerHeight - 60) { MapEditor.screen.y += 400 / MapEditor.zoom * dt }
                 if (this.y < 12) { MapEditor.screen.y -= 400 / MapEditor.zoom * dt }
 
-                
+
                 // BR pinned corner MAP COORDS
                 const pinnedX_mapCoords = platform.x + platform.corners[1][0]
                 const pinnedY_mapCoords = platform.y + platform.corners[1][1]

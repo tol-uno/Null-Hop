@@ -640,12 +640,12 @@ const Player = {
             if (this.jumpValue < 0) {
                 this.jumpValue = 0;
                 this.jumpVelocity = 200;
-                // AudioHandler.jumpAudio.play();
-                // AudioHandler.playSound(AudioHandler.jump1Audio)
-                AudioHandler.playSound(AudioHandler[`jump${Math.floor(Math.random() * 3) + 1}Audio`]);
 
-                if (!this.checkCollision(Map.renderedPlatforms.filter(platform => platform.wall == 0))) { // checkCollision on an array of just platforms (no walls)
-                    AudioHandler.splashAudio.play();
+                // play random jump sound
+                AudioHandler.playSound(AudioHandler[`jump${Math.floor(Math.random() * 3) + 1}Audio`], true); 
+
+                if (!this.checkCollision(Map.renderedPlatforms.filter(platform => platform.wall == 0))) { // checkCollision on an array of just renderedPlatforms (no walls)
+                    AudioHandler.playSound(AudioHandler.splashAudio, false);
                     this.speedCameraOffset.zoomAverager.clear()
                     this.teleport();
 
@@ -706,7 +706,7 @@ const Player = {
             // CHECK IF COLLIDING WITH ANY ENDZONES
             if (Map.endZonesToCheck.length > 0) {
                 if (this.checkCollision(Map.endZonesToCheck)) {
-                    AudioHandler.successAudio.play();
+                    AudioHandler.playSound(AudioHandler.successAudio, false);
                     UserInterface.handleRecord();
                     UserInterface.levelState = 3;
                 }
