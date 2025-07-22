@@ -27,7 +27,7 @@ const ColorPicker = {
     l : 75,
 
     syncGradients : function() { // should be called sync
-        const ctx = CanvasArea.ctx;
+        const ctx = UserInterfaceCanvas.ctx;
 
         // all of these (except hue technically) needs to be created every time a slider is changed
         this.hueGradient = ctx.createLinearGradient(this.x + 20, 0, this.x + this.width - 40, 0)
@@ -111,9 +111,9 @@ const ColorPicker = {
     },
 
     render : function() {
-        const ctx = CanvasArea.ctx;
+        const ctx = UserInterfaceCanvas.ctx;
         ctx.save()
-        ctx.scale(CanvasArea.scale, CanvasArea.scale) // All UI elements are positioned on original CSS cords. this brings them up to device DPI resolution
+        // Scaling is done with UserInterface where this render() is called
 
         ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.lightColor_1 : UserInterface.darkColor_1;
 
@@ -121,13 +121,13 @@ const ColorPicker = {
         ctx.lineWidth = 4
 
         // bounding box
-        CanvasArea.roundedRect(this.x, this.y, this.width, this.height, 25)
+        UserInterfaceCanvas.roundedRect(this.x, this.y, this.width, this.height, 25)
         ctx.fill()
         ctx.stroke()
 
         // color showcase box
         ctx.fillStyle = "hsl(" + this.h + ", " + this.s + "%, " + this.l + "%)"
-        CanvasArea.roundedRect(this.x + 20, this.y + 20, 120, 80, 10)
+        UserInterfaceCanvas.roundedRect(this.x + 20, this.y + 20, 120, 80, 10)
         ctx.fill()
         ctx.stroke()
 

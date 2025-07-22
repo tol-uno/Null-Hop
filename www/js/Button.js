@@ -101,10 +101,10 @@ class Button {
                 })
             }, () => {
                 this.width = width;
-                this.height = this.width > 55 ? 55 : this.width
+                this.height = this.width > 56 ? 56 : this.width
 
                 // TRUNCATE LABEL
-                CanvasArea.ctx.font = "18px BAHNSCHRIFT"; // for measuring text
+                UserInterfaceCanvas.ctx.font = "18px BAHNSCHRIFT"; // for measuring text
                 this.shortLabel = UserInterface.truncateText(label, this.width - 40) 
                 
                 
@@ -192,7 +192,7 @@ class Button {
 
     render() {
 
-        CanvasArea.ctx.save()
+        UserInterfaceCanvas.ctx.save()
 
         const shrinkFactor = (this.hasToggleImage) ? 1 : 0.94 // doesnt need to be calculated every frame
 
@@ -201,9 +201,9 @@ class Button {
             let x, y, w, h
 
             if (UserInterface.darkMode == false) {
-                CanvasArea.ctx.fillStyle = (this.toggle == 1 || this.isPressed) ? UserInterface.lightColor_2 : UserInterface.lightColor_1;
+                UserInterfaceCanvas.ctx.fillStyle = (this.toggle == 1 || this.isPressed) ? UserInterface.lightColor_2 : UserInterface.lightColor_1;
             } else {
-                CanvasArea.ctx.fillStyle = (this.toggle == 1 || this.isPressed) ? UserInterface.darkColor_2 : UserInterface.darkColor_1;
+                UserInterfaceCanvas.ctx.fillStyle = (this.toggle == 1 || this.isPressed) ? UserInterface.darkColor_2 : UserInterface.darkColor_1;
             }
 
             if (this.toggle == 1 || this.isPressed) {
@@ -219,14 +219,14 @@ class Button {
             }
 
             const radius = h/2
-            CanvasArea.ctx.beginPath()
-            CanvasArea.ctx.moveTo(x + radius, y) // top line
-            CanvasArea.ctx.lineTo(x + w - radius, y)
-            CanvasArea.ctx.arc(x + w - radius, y + radius, radius, 1.5*Math.PI, 0.5*Math.PI) // right arc
-            CanvasArea.ctx.lineTo(x + radius, y + h)
-            CanvasArea.ctx.arc(x + radius, y + radius, radius, 0.5*Math.PI, 1.5*Math.PI)
+            UserInterfaceCanvas.ctx.beginPath()
+            UserInterfaceCanvas.ctx.moveTo(x + radius, y) // top line
+            UserInterfaceCanvas.ctx.lineTo(x + w - radius, y)
+            UserInterfaceCanvas.ctx.arc(x + w - radius, y + radius, radius, 1.5*Math.PI, 0.5*Math.PI) // right arc
+            UserInterfaceCanvas.ctx.lineTo(x + radius, y + h)
+            UserInterfaceCanvas.ctx.arc(x + radius, y + radius, radius, 0.5*Math.PI, 1.5*Math.PI)
 
-            CanvasArea.ctx.fill()
+            UserInterfaceCanvas.ctx.fill()
 
         } else { // draw image normally
 
@@ -259,18 +259,18 @@ class Button {
             }
 
             // draws whatever icon with whatever pressed state were set above
-            CanvasArea.ctx.drawImage(icon, x, y, w, h)
+            UserInterfaceCanvas.ctx.drawImage(icon, x, y, w, h)
 
         }
 
-        CanvasArea.ctx.restore() // resets to no shadows
+        UserInterfaceCanvas.ctx.restore() // resets to no shadows
 
         if (this.label != "") {
 
-            CanvasArea.ctx.font = "18px BAHNSCHRIFT";
-            CanvasArea.ctx.fillStyle = (!UserInterface.darkMode) ? UserInterface.darkColor_1: UserInterface.lightColor_1;
+            UserInterfaceCanvas.ctx.font = "18px BAHNSCHRIFT";
+            UserInterfaceCanvas.ctx.fillStyle = (!UserInterface.darkMode) ? UserInterface.darkColor_1: UserInterface.lightColor_1;
 
-            CanvasArea.ctx.fillText(this.shortLabel, this.x + (this.width - CanvasArea.ctx.measureText(this.shortLabel).width)/2, this.y + (this.height/2) + 6)
+            UserInterfaceCanvas.ctx.fillText(this.shortLabel, this.x + (this.width - UserInterfaceCanvas.ctx.measureText(this.shortLabel).width)/2, this.y + (this.height/2) + 6)
         }
      
     }

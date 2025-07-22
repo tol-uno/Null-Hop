@@ -189,9 +189,9 @@ const Tutorial = {
 
 
     render : function() {
-        const ctx = CanvasArea.ctx;
+        const ctx = UserInterfaceCanvas.ctx;
         ctx.save() // for canvas scaling
-        ctx.scale(CanvasArea.scale, CanvasArea.scale)
+        ctx.scale(UserInterfaceCanvas.scale, UserInterfaceCanvas.scale)
 
         ctx.font = "22px BAHNSCHRIFT";
         const bg_color = UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
@@ -208,7 +208,7 @@ const Tutorial = {
             const textWidth = ctx.measureText(text).width
 
             ctx.fillStyle = bg_color
-            CanvasArea.roundedRect(midX_UI - 20 - textWidth/2, 38, textWidth + 38, 60, 20)
+            UserInterfaceCanvas.roundedRect(midX_UI - 20 - textWidth/2, 38, textWidth + 38, 60, 20)
             ctx.fill()
 
             ctx.fillStyle = icon_color

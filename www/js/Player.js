@@ -717,7 +717,7 @@ const Player = {
 
         // CHANGING CAMERA ZOOM and OFFSET BASED ON SPEED
         // add current zoom level to averager
-        this.speedCameraOffset.zoomAverager.pushValue(CanvasArea.mapToRange(this.velocity.magnitude(), 100, 1100, 1.5, 0.5))
+        this.speedCameraOffset.zoomAverager.pushValue(UserInterfaceCanvas.mapToRange(this.velocity.magnitude(), 100, 1100, 1.5, 0.5))
 
         // apply averager zoom to actual zoom
         this.speedCameraOffset.zoom = this.speedCameraOffset.zoomAverager.getAverage()

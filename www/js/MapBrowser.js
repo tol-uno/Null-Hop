@@ -185,12 +185,12 @@ const MapBrowser = { // should set back to 0 at some points
 
     },
 
-    render: function () {
+    render: function () { // MOVE TO UserInterface.render()
         // called every frame when gamestate == 2
         // draw detail box for maps with title, time, and medals
-        const ctx = CanvasArea.ctx;
+        const ctx = UserInterfaceCanvas.ctx;
         ctx.save() // UI scale save
-        ctx.scale(CanvasArea.scale, CanvasArea.scale)
+        ctx.scale(UserInterfaceCanvas.scale, UserInterfaceCanvas.scale)
 
         // DRAW MAP INFO BOX BG
         ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
@@ -210,7 +210,7 @@ const MapBrowser = { // should set back to 0 at some points
             }
         }
 
-        CanvasArea.roundedRect(this.infoBox.x, this.infoBox.y, this.infoBox.width, this.infoBox.height, 20)
+        UserInterfaceCanvas.roundedRect(this.infoBox.x, this.infoBox.y, this.infoBox.width, this.infoBox.height, 20)
         ctx.fill()
 
         // DRAW MAP INFO BOX CONTENT
@@ -283,7 +283,7 @@ const MapBrowser = { // should set back to 0 at some points
                         ctx.shadowOffsetX = 8
                         ctx.shadowOffsetY = 8
 
-                        CanvasArea.roundedRect(highlightBox.x, highlightBox.y, highlightBox.width, highlightBox.height, 12)
+                        UserInterfaceCanvas.roundedRect(highlightBox.x, highlightBox.y, highlightBox.width, highlightBox.height, 12)
                         ctx.fill();
 
                         ctx.shadowColor = "transparent"
@@ -332,7 +332,7 @@ const MapBrowser = { // should set back to 0 at some points
 
 
                     // test medals box outline
-                    // CanvasArea.roundedRect(timeBox.x, timeBox.y, timeBox.width, timeBox.height, 5)
+                    // UserInterfaceCanvas.roundedRect(timeBox.x, timeBox.y, timeBox.width, timeBox.height, 5)
                     // ctx.lineWidth = 1
                     // ctx.stroke()
                 }

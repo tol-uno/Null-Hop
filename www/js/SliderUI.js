@@ -23,28 +23,29 @@ class SliderUI {
 
 
     render() {
-        CanvasArea.ctx.lineWidth = 6;
-        CanvasArea.ctx.lineCap = "round"
-        CanvasArea.ctx.fillStyle = CanvasArea.ctx.strokeStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1: UserInterface.lightColor_1;
+        const ctx = UserInterfaceCanvas.ctx
+        ctx.lineWidth = 6;
+        ctx.lineCap = "round"
+        ctx.fillStyle = ctx.strokeStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1: UserInterface.lightColor_1;
 
         
-        CanvasArea.ctx.beginPath(); // Slider Line
-        CanvasArea.ctx.moveTo(this.x, this.y)
-        CanvasArea.ctx.lineTo(this.x + this.width, this.y)
-        CanvasArea.ctx.stroke();
+        ctx.beginPath(); // Slider Line
+        ctx.moveTo(this.x, this.y)
+        ctx.lineTo(this.x + this.width, this.y)
+        ctx.stroke();
 
-        CanvasArea.ctx.font = "16px BAHNSCHRIFT"; // Label
-        CanvasArea.ctx.fillText(this.label + ": " + this.value, this.x, this.y - 20)
+        ctx.font = "16px BAHNSCHRIFT"; // Label
+        ctx.fillText(this.label + ": " + this.value, this.x, this.y - 20)
 
-        CanvasArea.ctx.beginPath(); // Slider Handle
-        CanvasArea.ctx.arc(this.sliderX, this.y, 10, 0, 2 * Math.PI);
-        CanvasArea.ctx.fill();
+        ctx.beginPath(); // Slider Handle
+        ctx.arc(this.sliderX, this.y, 10, 0, 2 * Math.PI);
+        ctx.fill();
 
         // draw highlight color in slider handle
-        CanvasArea.ctx.fillStyle = (!UserInterface.darkMode) ? UserInterface.darkColor_1: UserInterface.lightColor_1;
-        CanvasArea.ctx.beginPath();
-        CanvasArea.ctx.arc(this.sliderX, this.y, 7, 0, 2 * Math.PI);
-        CanvasArea.ctx.fill();
+        ctx.fillStyle = (!UserInterface.darkMode) ? UserInterface.darkColor_1: UserInterface.lightColor_1;
+        ctx.beginPath();
+        ctx.arc(this.sliderX, this.y, 7, 0, 2 * Math.PI);
+        ctx.fill();
     }
 
     update() {

@@ -22,9 +22,10 @@ const CanvasArea = {
 
         prevDateNow = performance.now()
 
-        this.interval = setInterval(updateGameArea, 1000 / 60); // Number sets the taget frame rate. 1000/FPS 
-
         UserInterface.start(); // need to be ran here after canvas is resized in CanvasArea.start()
+        
+        //this.interval = setInterval(updateGameArea, 1000 / 60); // Number sets the taget frame rate. 1000/FPS 
+        requestAnimationFrame(updateGameArea)
     },
 
 
@@ -217,30 +218,6 @@ const CanvasArea = {
         gradient.addColorStop(1, reverse ? color1 : color2)
 
         return gradient
-    },
-
-
-    roundedRect: function (x, y, width, height, radius) { // not perfect corner arcs. could use .arc() instead
-        const ctx = CanvasArea.ctx
-
-        ctx.beginPath();
-        ctx.moveTo(x + radius, y);
-        ctx.lineTo(x + width - radius, y);
-        ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
-        ctx.lineTo(x + width, y + height - radius);
-        ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-        ctx.lineTo(x + radius, y + height);
-        ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
-        ctx.lineTo(x, y + radius);
-        ctx.quadraticCurveTo(x, y, x + radius, y);
-        ctx.closePath();
-    },
-
-
-    mapToRange: function (number, inMin, inMax, outMin, outMax) {
-
-        // MAP TO RANGE: https://stackoverflow.com/questions/10756313/javascript-jquery-map-a-range-of-numbers-to-another-range-of-numbers
-        return (number - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
     },
 
 

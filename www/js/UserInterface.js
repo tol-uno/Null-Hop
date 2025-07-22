@@ -2,7 +2,7 @@ const UserInterface = {
 
     // The UI, both buttons and custom drawn elements, are positioned in non-scaled coordinated
     // The canvas coords they use are based on the CSS pixels and do not take into account device DPI
-    // They are only rendered using CanvasArea.scale, their logic is all non-scaled
+    // They are rendered using an increased UserInterfaceCanvas.scale, their logic is all non-scaled
 
     gamestate: 1,
     // 1: main menu
@@ -386,7 +386,7 @@ const UserInterface = {
             }
         })
 
-        btn_snappingSlider = new SliderUI(50, "window.outerHeight - 50", 170, 0, 50, 0.2, "Snapping", MapEditor.loadedMap ? MapEditor.snapAmount : 0, function () {
+        btn_snappingSlider = new SliderUI(50, "window.outerHeight - 50", 192, 0, 64, 0.5, "Snapping", MapEditor.loadedMap ? MapEditor.snapAmount : 0, function () {
             MapEditor.snapAmount = this.value
         })
 
@@ -461,8 +461,8 @@ const UserInterface = {
 
                 // element coords mapped to screen coords
                 // mapToRange(number, inMin, inMax, outMin, outMax)
-                const xMapped = CanvasArea.mapToRange(avgMidX, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, window.outerWidth)
-                const yMapped = CanvasArea.mapToRange(avgMidY, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, window.outerHeight)
+                const xMapped = UserInterfaceCanvas.mapToRange(avgMidX, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, window.outerWidth)
+                const yMapped = UserInterfaceCanvas.mapToRange(avgMidY, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, window.outerHeight)
 
                 // position button in the middle of element(s)
                 if (MapEditor.selectedElements.length > 1) {
@@ -504,16 +504,16 @@ const UserInterface = {
 
                         // Map btn pos from UI coords to global map coords
                         // mapToRange(number, inMin, inMax, outMin, outMax)
-                        const btnGlobalX = CanvasArea.mapToRange(this.x + this.width / 2, 0, window.outerWidth, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width)
-                        const btnGlobalY = CanvasArea.mapToRange(this.y + this.height / 2, 0, window.outerHeight, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height)
+                        const btnGlobalX = UserInterfaceCanvas.mapToRange(this.x + this.width / 2, 0, window.outerWidth, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width)
+                        const btnGlobalY = UserInterfaceCanvas.mapToRange(this.y + this.height / 2, 0, window.outerHeight, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height)
 
                         xMapped = btnGlobalX - offSetFromAvgMidGlobalX
                         yMapped = btnGlobalY - offSetFromAvgMidGlobalY
 
                     } else { // use offset for single item
 
-                        xMapped = CanvasArea.mapToRange(this.x - (conditioningArray[i].offSet * MapEditor.zoom) + this.width / 2, 0, window.outerWidth, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width)
-                        yMapped = CanvasArea.mapToRange(this.y - (conditioningArray[i].offSet * MapEditor.zoom) + this.height / 2, 0, window.outerHeight, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height)
+                        xMapped = UserInterfaceCanvas.mapToRange(this.x - (conditioningArray[i].offSet * MapEditor.zoom) + this.width / 2, 0, window.outerWidth, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width)
+                        yMapped = UserInterfaceCanvas.mapToRange(this.y - (conditioningArray[i].offSet * MapEditor.zoom) + this.height / 2, 0, window.outerHeight, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height)
                     }
 
 
@@ -542,8 +542,8 @@ const UserInterface = {
 
                 // corner coords mapped to screen coords
                 // mapToRange(number, inMin, inMax, outMin, outMax)
-                const cornerMappedX = CanvasArea.mapToRange(platform.x + cornerX, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, window.outerWidth)
-                const cornerMappedY = CanvasArea.mapToRange(platform.y + cornerY, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, window.outerHeight)
+                const cornerMappedX = UserInterfaceCanvas.mapToRange(platform.x + cornerX, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, window.outerWidth)
+                const cornerMappedY = UserInterfaceCanvas.mapToRange(platform.y + cornerY, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, window.outerHeight)
 
                 this.x = cornerMappedX - this.width
                 this.y = cornerMappedY
@@ -568,8 +568,8 @@ const UserInterface = {
 
                 // convert pinned coords to SCREEN COORDS
                 // mapToRange(number, inMin, inMax, outMin, outMax)
-                const pinnedX_screenCoords = CanvasArea.mapToRange(pinnedX_mapCoords, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, window.outerWidth)
-                const pinnedY_screenCoords = CanvasArea.mapToRange(pinnedY_mapCoords, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, window.outerHeight)
+                const pinnedX_screenCoords = UserInterfaceCanvas.mapToRange(pinnedX_mapCoords, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, window.outerWidth)
+                const pinnedY_screenCoords = UserInterfaceCanvas.mapToRange(pinnedY_mapCoords, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, window.outerHeight)
 
 
                 // get vector dragFromPinned (unscaled by zoom) (origin is at pin) x value will be neg at 0deg, y val will be pos(down) at 0 deg 
@@ -580,8 +580,8 @@ const UserInterface = {
                 const rotatedDragFromPinned = dragFromPinned.rotate(-platform.angle)
 
                 // set width and height using rotatedDragFromPinned
-                platform.width = Math.round(-rotatedDragFromPinned.x * CanvasArea.scale)
-                platform.height = Math.round(rotatedDragFromPinned.y * CanvasArea.scale)
+                platform.width = Math.round(-rotatedDragFromPinned.x * UserInterfaceCanvas.scale)
+                platform.height = Math.round(rotatedDragFromPinned.y * UserInterfaceCanvas.scale)
 
 
                 // snapping and restricting size
@@ -625,8 +625,8 @@ const UserInterface = {
 
                 // corner coords mapped to screen coords
                 // mapToRange(number, inMin, inMax, outMin, outMax)
-                const cornerMappedX = CanvasArea.mapToRange(platform.x + cornerX, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, window.outerWidth)
-                const cornerMappedY = CanvasArea.mapToRange(platform.y + cornerY, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, window.outerHeight)
+                const cornerMappedX = UserInterfaceCanvas.mapToRange(platform.x + cornerX, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, window.outerWidth)
+                const cornerMappedY = UserInterfaceCanvas.mapToRange(platform.y + cornerY, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, window.outerHeight)
 
                 this.x = cornerMappedX
                 this.y = cornerMappedY
@@ -651,8 +651,8 @@ const UserInterface = {
 
                 // convert pinned coords to SCREEN COORDS
                 // mapToRange(number, inMin, inMax, outMin, outMax)
-                const pinnedX_screenCoords = CanvasArea.mapToRange(pinnedX_mapCoords, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, window.outerWidth)
-                const pinnedY_screenCoords = CanvasArea.mapToRange(pinnedY_mapCoords, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, window.outerHeight)
+                const pinnedX_screenCoords = UserInterfaceCanvas.mapToRange(pinnedX_mapCoords, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, window.outerWidth)
+                const pinnedY_screenCoords = UserInterfaceCanvas.mapToRange(pinnedY_mapCoords, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, window.outerHeight)
 
 
                 // get vector dragFromPinned (unscaled by zoom) (origin is at pin) x value will be pos at 0deg, y val will be pos(down) at 0 deg 
@@ -663,8 +663,8 @@ const UserInterface = {
                 const rotatedDragFromPinned = dragFromPinned.rotate(-platform.angle)
 
                 // set width and height using rotatedDragFromPinned
-                platform.width = Math.round(rotatedDragFromPinned.x * CanvasArea.scale)
-                platform.height = Math.round(rotatedDragFromPinned.y * CanvasArea.scale)
+                platform.width = Math.round(rotatedDragFromPinned.x * UserInterfaceCanvas.scale)
+                platform.height = Math.round(rotatedDragFromPinned.y * UserInterfaceCanvas.scale)
 
 
                 // snapping and restricting size
@@ -708,8 +708,8 @@ const UserInterface = {
 
                 // corner coords mapped to screen coords
                 // mapToRange(number, inMin, inMax, outMin, outMax)
-                const cornerMappedX = CanvasArea.mapToRange(platform.x + cornerX, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, window.outerWidth)
-                const cornerMappedY = CanvasArea.mapToRange(platform.y + cornerY, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, window.outerHeight)
+                const cornerMappedX = UserInterfaceCanvas.mapToRange(platform.x + cornerX, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, window.outerWidth)
+                const cornerMappedY = UserInterfaceCanvas.mapToRange(platform.y + cornerY, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, window.outerHeight)
 
                 this.x = cornerMappedX
                 this.y = cornerMappedY - this.height
@@ -734,8 +734,8 @@ const UserInterface = {
 
                 // convert pinned coords to SCREEN COORDS
                 // mapToRange(number, inMin, inMax, outMin, outMax)
-                const pinnedX_screenCoords = CanvasArea.mapToRange(pinnedX_mapCoords, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, window.outerWidth)
-                const pinnedY_screenCoords = CanvasArea.mapToRange(pinnedY_mapCoords, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, window.outerHeight)
+                const pinnedX_screenCoords = UserInterfaceCanvas.mapToRange(pinnedX_mapCoords, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, window.outerWidth)
+                const pinnedY_screenCoords = UserInterfaceCanvas.mapToRange(pinnedY_mapCoords, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, window.outerHeight)
 
 
                 // get vector dragFromPinned (unscaled by zoom) (origin is at pin) x value will be pos at 0deg, y val will be neg(up) at 0 deg 
@@ -746,8 +746,8 @@ const UserInterface = {
                 const rotatedDragFromPinned = dragFromPinned.rotate(-platform.angle)
 
                 // set width and height using rotatedDragFromPinned
-                platform.width = Math.round(rotatedDragFromPinned.x * CanvasArea.scale)
-                platform.height = Math.round(-rotatedDragFromPinned.y * CanvasArea.scale)
+                platform.width = Math.round(rotatedDragFromPinned.x * UserInterfaceCanvas.scale)
+                platform.height = Math.round(-rotatedDragFromPinned.y * UserInterfaceCanvas.scale)
 
 
                 // snapping and restricting size
@@ -791,8 +791,8 @@ const UserInterface = {
 
                 // corner coords mapped to screen coords
                 // mapToRange(number, inMin, inMax, outMin, outMax)
-                const cornerMappedX = CanvasArea.mapToRange(platform.x + cornerX, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, window.outerWidth)
-                const cornerMappedY = CanvasArea.mapToRange(platform.y + cornerY, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, window.outerHeight)
+                const cornerMappedX = UserInterfaceCanvas.mapToRange(platform.x + cornerX, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, window.outerWidth)
+                const cornerMappedY = UserInterfaceCanvas.mapToRange(platform.y + cornerY, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, window.outerHeight)
 
                 this.x = cornerMappedX - this.width
                 this.y = cornerMappedY - this.height
@@ -803,7 +803,7 @@ const UserInterface = {
                 // move button according to touch dragging
                 this.x += TouchHandler.dragAmountX
                 this.y += TouchHandler.dragAmountY
-                
+
                 // panning if at edges of screen
                 if (this.x > window.outerWidth - 270) { MapEditor.screen.x += 400 / MapEditor.zoom * dt }
                 if (this.x < 60) { MapEditor.screen.x -= 400 / MapEditor.zoom * dt }
@@ -817,8 +817,8 @@ const UserInterface = {
 
                 // convert pinned coords to SCREEN COORDS
                 // mapToRange(number, inMin, inMax, outMin, outMax)
-                const pinnedX_screenCoords = CanvasArea.mapToRange(pinnedX_mapCoords, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, window.outerWidth)
-                const pinnedY_screenCoords = CanvasArea.mapToRange(pinnedY_mapCoords, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, window.outerHeight)
+                const pinnedX_screenCoords = UserInterfaceCanvas.mapToRange(pinnedX_mapCoords, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, window.outerWidth)
+                const pinnedY_screenCoords = UserInterfaceCanvas.mapToRange(pinnedY_mapCoords, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, window.outerHeight)
 
 
                 // get vector dragFromPinned (unscaled by zoom) (origin is at pin) x value will be neg at 0deg, y val will be neg(up) at 0 deg 
@@ -829,8 +829,8 @@ const UserInterface = {
                 const rotatedDragFromPinned = dragFromPinned.rotate(-platform.angle)
 
                 // set width and height using rotatedDragFromPinned
-                platform.width = Math.round(-rotatedDragFromPinned.x * CanvasArea.scale)
-                platform.height = Math.round(-rotatedDragFromPinned.y * CanvasArea.scale)
+                platform.width = Math.round(-rotatedDragFromPinned.x * UserInterfaceCanvas.scale)
+                platform.height = Math.round(-rotatedDragFromPinned.y * UserInterfaceCanvas.scale)
 
 
                 // snapping and restricting size
@@ -1297,7 +1297,7 @@ const UserInterface = {
                     height: ${btn_shareMap.height}px;
                     // border: solid 2px blue;
                 `
-                
+
                 shareDiv.addEventListener("click", async () => {
 
                     if (MapBrowser.selectedMapIndex != -1) {
@@ -1327,7 +1327,7 @@ const UserInterface = {
 
 
         // ALL LEVEL BUTTONS
-        btn_level_awakening = new Button(160, 50, 250, "", "", 0, "Awakening", function () {
+        btn_level_awakening = new Button(160, 50, 250, "awakening_button", "", 0, "", function () {
             if (this.toggle) {
                 this.toggle = 0;
                 MapBrowser.selectedMapIndex = -1
@@ -1339,7 +1339,8 @@ const UserInterface = {
             }
         })
 
-        btn_level_pitfall = new Button(160, 126, 250, "", "", 0, "Pitfall", function () {
+        // was y=126 moved down for testing big icons
+        btn_level_pitfall = new Button(160, 658, 250, "", "", 0, "Pitfall", function () {
             if (this.toggle) {
                 this.toggle = 0;
                 MapBrowser.selectedMapIndex = -1
@@ -1418,7 +1419,7 @@ const UserInterface = {
 
 
         // IN LEVEL Buttons
-        btn_mainMenu = new Button(45, 40, 70, "x_button", "", 0, "", function () {
+        btn_mainMenu = new Button(44, 40, 68, "x_button", "", 0, "", function () {
 
             // UserInterface.gamestate
             // 1: main menu
@@ -1545,7 +1546,7 @@ const UserInterface = {
 
         })
 
-        btn_restart = new Button(45, 130, 70, "restart_button", "", 0, "", function () {
+        btn_restart = new Button(44, 130, 68, "restart_button", "", 0, "", function () {
 
             if (Tutorial.isActive) { // restart pressed in tutorial level
                 // DRAW ALERT "Restart Disabled"
@@ -1557,7 +1558,7 @@ const UserInterface = {
             }
         })
 
-        btn_jump = new Button(45, "window.outerHeight - 135", 90, "jump_button", "", 0, "", function () {
+        btn_jump = new Button(44, "window.outerHeight - 132", 92, "jump_button", "", 0, "", function () {
             if (UserInterface.levelState == 1) {
                 UserInterface.timerStart = Date.now();
                 UserInterface.levelState = 2;
@@ -2037,31 +2038,31 @@ const UserInterface = {
     },
 
     drawMedal: function (x, y, radius, fillColor, strokeColor, strokeWidth, shadow) {
-        CanvasArea.ctx.save() // save 3a           
-        CanvasArea.ctx.fillStyle = fillColor
-        CanvasArea.ctx.strokeStyle = strokeColor
-        CanvasArea.ctx.lineWidth = strokeWidth
+        UserInterfaceCanvas.ctx.save() // save 3a           
+        UserInterfaceCanvas.ctx.fillStyle = fillColor
+        UserInterfaceCanvas.ctx.strokeStyle = strokeColor
+        UserInterfaceCanvas.ctx.lineWidth = strokeWidth
 
         if (shadow) {
-            CanvasArea.ctx.save(); // save 3.1
-            CanvasArea.ctx.shadowColor = "rgba(0, 0, 0, 0.21)";
-            CanvasArea.ctx.shadowOffsetX = 4
-            CanvasArea.ctx.shadowOffsetY = 4
-            CanvasArea.ctx.beginPath()
-            CanvasArea.ctx.arc(x, y, radius + strokeWidth / 2, 0, 2 * Math.PI); // (x, y, radius, startAngle, endAngle) strokeWidth/2 bc it pokes out otherwise... not sure why
-            CanvasArea.ctx.closePath()
+            UserInterfaceCanvas.ctx.save(); // save 3.1
+            UserInterfaceCanvas.ctx.shadowColor = "rgba(0, 0, 0, 0.21)";
+            UserInterfaceCanvas.ctx.shadowOffsetX = 4
+            UserInterfaceCanvas.ctx.shadowOffsetY = 4
+            UserInterfaceCanvas.ctx.beginPath()
+            UserInterfaceCanvas.ctx.arc(x, y, radius + strokeWidth / 2, 0, 2 * Math.PI); // (x, y, radius, startAngle, endAngle) strokeWidth/2 bc it pokes out otherwise... not sure why
+            UserInterfaceCanvas.ctx.closePath()
 
-            CanvasArea.ctx.fill()
-            CanvasArea.ctx.restore() // save 3.1
+            UserInterfaceCanvas.ctx.fill()
+            UserInterfaceCanvas.ctx.restore() // save 3.1
         }
 
 
-        CanvasArea.ctx.beginPath()
-        CanvasArea.ctx.arc(x, y, radius, 0, 2 * Math.PI); // (x, y, radius, startAngle, endAngle)
+        UserInterfaceCanvas.ctx.beginPath()
+        UserInterfaceCanvas.ctx.arc(x, y, radius, 0, 2 * Math.PI); // (x, y, radius, startAngle, endAngle)
 
-        CanvasArea.ctx.fill()
-        CanvasArea.ctx.stroke()
-        CanvasArea.ctx.restore() // save 3a
+        UserInterfaceCanvas.ctx.fill()
+        UserInterfaceCanvas.ctx.stroke()
+        UserInterfaceCanvas.ctx.restore() // save 3a
     },
 
     /*
@@ -2082,8 +2083,8 @@ const UserInterface = {
     */
 
     truncateText: function (text, clampToWidth) {
-        if (CanvasArea.ctx.measureText(text).width > clampToWidth) {
-            while (CanvasArea.ctx.measureText(text + "...").width > clampToWidth || text.endsWith(" ")) { // also removes end char if its a space
+        if (UserInterfaceCanvas.ctx.measureText(text).width > clampToWidth) {
+            while (UserInterfaceCanvas.ctx.measureText(text + "...").width > clampToWidth || text.endsWith(" ")) { // also removes end char if its a space
                 text = text.slice(0, -1) // slice off last character
             }
             return text + "..."
@@ -2152,13 +2153,9 @@ const UserInterface = {
 
     render: function () {
 
-        const ctx = CanvasArea.ctx
+        const ctx = UserInterfaceCanvas.ctx
         ctx.save() // UI SCALING SAVE
-        ctx.scale(CanvasArea.scale, CanvasArea.scale) // All UI elements are positioned on original CSS cords. this brings them up to device DPI resolution
-
-        this.renderedButtons.forEach(button => { // LOOP RENDERED BUTTONS AND RUN THEIR .render()
-            button.render();
-        });
+        ctx.scale(UserInterfaceCanvas.scale, UserInterfaceCanvas.scale) // All UI elements are positioned on original CSS cords. this brings them up to device DPI resolution
 
         if (this.gamestate == 1) { // In Main Menu
             CanvasArea.canvas.style.backgroundColor = "#a3d5e1";
@@ -2188,7 +2185,7 @@ const UserInterface = {
 
             // Draw Timer Box
             if (this.levelState !== 3 && Tutorial.isActive == false) {
-                CanvasArea.roundedRect(window.outerWidth - 220, 32, 170, 75, 15)
+                UserInterfaceCanvas.roundedRect(window.outerWidth - 220, 32, 170, 75, 15)
                 ctx.fill()
 
                 ctx.font = "20px BAHNSCHRIFT";
@@ -2350,7 +2347,7 @@ const UserInterface = {
                         // DRAW VERTICAL WARNING
                         if (this.showVerticalWarning) {
 
-                            CanvasArea.roundedRect(midX_UI - 150, window.outerHeight - 130, ctx.measureText("DON'T SWIPE VERTICAL").width + 24, 24, 8)
+                            UserInterfaceCanvas.roundedRect(midX_UI - 150, window.outerHeight - 130, ctx.measureText("DON'T SWIPE VERTICAL").width + 24, 24, 8)
                             ctx.fillStyle = UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1
                             ctx.fill()
 
@@ -2362,7 +2359,7 @@ const UserInterface = {
                         if (this.showOverstrafeWarning) {
 
                             heightOffset = this.showVerticalWarning ? 36 : 0;
-                            CanvasArea.roundedRect(midX_UI - 150, window.outerHeight - 130 - heightOffset, ctx.measureText("TURNING TOO FAST!").width + 24, 24, 8)
+                            UserInterfaceCanvas.roundedRect(midX_UI - 150, window.outerHeight - 130 - heightOffset, ctx.measureText("TURNING TOO FAST!").width + 24, 24, 8)
                             ctx.fillStyle = UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1
                             ctx.fill()
 
@@ -2408,7 +2405,7 @@ const UserInterface = {
                 ctx.shadowOffsetY = 10
 
                 // time box
-                CanvasArea.roundedRect(timeBox.x, timeBox.y, timeBox.width, timeBox.height, 15)
+                UserInterfaceCanvas.roundedRect(timeBox.x, timeBox.y, timeBox.width, timeBox.height, 15)
                 ctx.fill();
 
                 // highlight medal box
@@ -2430,7 +2427,7 @@ const UserInterface = {
                         ctx.shadowOffsetX = 8
                         ctx.shadowOffsetY = 8
 
-                        CanvasArea.roundedRect(highlightBox.x, highlightBox.y, highlightBox.width, highlightBox.height, 12)
+                        UserInterfaceCanvas.roundedRect(highlightBox.x, highlightBox.y, highlightBox.width, highlightBox.height, 12)
                         ctx.fill();
 
                         ctx.shadowColor = "transparent"
@@ -2494,6 +2491,138 @@ const UserInterface = {
                 }
             }
         }
+
+        if (this.gamestate == 7) { // In Map Editor
+
+            if (this.editorState == 3) { // IN COLOR SETTINGS
+                ColorPicker.render()
+            }
+
+            if (MapEditor.loadedMap !== null && MapEditor.editorState != 3 && MapEditor.editorState != 4) {
+
+                // MAP EDITOR UI
+                ctx.save() // to revert map editor canvas state changes
+
+                ctx.font = "15px BAHNSCHRIFT";
+
+                if (MapEditor.editorState == 1 || MapEditor.editorState == 2) { // Draw UI (not Side Panel yet) for Main edit screen or platform edit screen
+                    ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
+                    ctx.fillText("Drag Select", btn_dragSelect.x, btn_dragSelect.y - 14);
+                    if (!MapEditor.dragSelect) { ctx.fillText("Group Select", btn_multiSelect.x, btn_multiSelect.y - 14); }
+
+                    // Draw dragSelect rectangle marquee
+                    if (MapEditor.dragSelect && TouchHandler.dragging) {
+                        ctx.lineWidth = 4
+                        ctx.strokeStyle = ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
+                        ctx.setLineDash([6, 10]);
+                        ctx.strokeRect(MapEditor.dragSelectMarquee.x, MapEditor.dragSelectMarquee.y, MapEditor.dragSelectMarquee.width, MapEditor.dragSelectMarquee.height)
+                        ctx.setLineDash([]);
+                    }
+                }
+
+                if (MapEditor.editorState == 2 && !MapEditor.dragSelect) { // DRAWING SIDE PANEL
+
+                    const sidePanel = {// If these change also change the values in MapEditor.touchReleased()
+                        x: window.outerWidth - 262,
+                        y: 22,
+                        width: 218,
+                        height: 292
+                    }
+
+                    // SIDE PANEL BG BOX
+                    ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.lightColor_1 : UserInterface.darkColor_1;
+                    UserInterfaceCanvas.roundedRect(sidePanel.x, sidePanel.y, sidePanel.width, sidePanel.height, 27.5)
+                    ctx.fill()
+
+                    ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1 : UserInterface.lightColor_1; // for text
+
+                    if (MapEditor.multiSelect && MapEditor.selectedElements.length > 1) { // MULTISELECTED
+
+                        ctx.fillText("Group Selection", sidePanel.x + 16, sidePanel.y + 84);
+                        ctx.fillText(MapEditor.selectedElements.length + " Items", sidePanel.x + 16, sidePanel.y + 108);
+
+                    } else {
+
+                        if (MapEditor.selectedElements[0] == "playerStart") { // playerStart is selected
+                            ctx.fillText("Player Start", sidePanel.x + 84, sidePanel.y + 38);
+                            ctx.fillText("Position: " + MapEditor.loadedMap.playerStart.x + ", " + MapEditor.loadedMap.playerStart.y, sidePanel.x + 16, sidePanel.y + 84);
+
+                        } else if (Array.isArray(MapEditor.selectedElements[0])) { // checkpoint is selected
+                            ctx.fillText("Checkpoint", sidePanel.x + 84, sidePanel.y + 38);
+                            ctx.fillText("Trigger 1: " + MapEditor.loadedMap.checkpoints[MapEditor.selectedElements[0][0]].triggerX1 + ", " + MapEditor.loadedMap.checkpoints[MapEditor.selectedElements[0][0]].triggerY1, sidePanel.x + 16, sidePanel.y + 84);
+                            ctx.fillText("Trigger 2: " + MapEditor.loadedMap.checkpoints[MapEditor.selectedElements[0][0]].triggerX2 + ", " + MapEditor.loadedMap.checkpoints[MapEditor.selectedElements[0][0]].triggerY2, sidePanel.x + 16, sidePanel.y + 108);
+                            ctx.fillText("Respawn: " + MapEditor.loadedMap.checkpoints[MapEditor.selectedElements[0][0]].x + ", " + MapEditor.loadedMap.checkpoints[MapEditor.selectedElements[0][0]].y, sidePanel.x + 16, sidePanel.y + 132);
+
+                        } else { // platform is selected
+                            ctx.fillText("Platform", sidePanel.x + 84, sidePanel.y + 38);
+                            const approxSignX = (MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].x % 1 == 0) ? "" : "~"
+                            const approxSignY = (MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].y % 1 == 0) ? "" : "~"
+                            ctx.fillText("Position: " + approxSignX + Math.round(MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].x) + ", " + approxSignY + Math.round(MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].y), sidePanel.x + 16, sidePanel.y + 84);
+                            ctx.fillText("Size: " + MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].width + ", " + MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].height, sidePanel.x + 16, sidePanel.y + 108);
+                            ctx.fillText("Wall: " + (MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].wall ? "Yes" : "No"), sidePanel.x + 16, sidePanel.y + 224)
+                            ctx.fillText("End Zone: " + (MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].endzone ? "Yes" : "No"), sidePanel.x + 16, sidePanel.y + 264)
+                        }
+
+                    }
+                }
+
+
+                if (UserInterface.settings.debugText == 1) {
+
+                    // GENERAL MAP EDITOR DEBUG TEXT
+                    const textX = 150;
+                    ctx.font = "8px BAHNSCHRIFT";
+                    ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
+
+                    ctx.fillText("zoom: " + MapEditor.zoom, textX, 50)
+                    ctx.fillText("screen.x: " + MapEditor.screen.x, textX, 60);
+                    ctx.fillText("screen.y: " + MapEditor.screen.y, textX, 70);
+                    ctx.fillText("screen.width: " + MapEditor.screen.width, textX, 80);
+                    ctx.fillText("screen.height: " + MapEditor.screen.height, textX, 90);
+                    ctx.fillText("screen.cornerX: " + MapEditor.screen.cornerX, textX, 100);
+                    ctx.fillText("screen.cornerY: " + MapEditor.screen.cornerY, textX, 110);
+
+                    ctx.fillText("rendered platforms: " + MapEditor.renderedPlatforms.length, textX, 120);
+                    ctx.fillText("editorState: " + MapEditor.editorState, textX, 130);
+                    ctx.fillText("selectedElements: " + MapEditor.selectedElements, textX, 140);
+
+                    if (TouchHandler.dragging) {
+
+                        ctx.fillText("touch (UI cords): " + Math.round(TouchHandler.touches[0].x) + ", " + Math.round(TouchHandler.touches[0].y), textX, 150);
+                        const touchMapped = MapEditor.convertToMapCord(TouchHandler.touches[0].x, TouchHandler.touches[0].y)
+                        ctx.fillText("touch global map coords: " + Math.round(touchMapped.x) + ", " + Math.round(touchMapped.y), textX, 160);
+
+                        if (MapEditor.dragSelect) {
+
+                            const globalMarqueeCornerTL = MapEditor.convertToMapCord(MapEditor.dragSelectMarquee.x, MapEditor.dragSelectMarquee.y)
+                            const globalMarqueeCornerBR = MapEditor.convertToMapCord(MapEditor.dragSelectMarquee.x + MapEditor.dragSelectMarquee.width, MapEditor.dragSelectMarquee.y + MapEditor.dragSelectMarquee.height)
+
+                            ctx.fillText("global marquee: " +
+                                Math.round(globalMarqueeCornerTL.x) + "," +
+                                Math.round(globalMarqueeCornerTL.y) + "," +
+                                Math.round(globalMarqueeCornerBR.x - globalMarqueeCornerTL.x) + "," +
+                                Math.round(globalMarqueeCornerBR.y - globalMarqueeCornerTL.y), textX, 170);
+                        }
+                    }
+
+
+                    if (TouchHandler.zoom.isZooming) { // draw center point between two fingers of zoom
+                        ctx.save()
+                        ctx.translate(TouchHandler.zoom.x, TouchHandler.zoom.y)
+                        ctx.fillRect(-3, -3, 6, 6)
+                        ctx.restore()
+                    }
+
+                }
+                ctx.restore() //revert back map editor canvas state changes
+
+            }
+        }
+
+        this.renderedButtons.forEach(button => { // LOOP RENDERED BUTTONS AND RUN THEIR .render()
+            button.render();
+        });
+
         ctx.restore() // UI SCALING RESTORE
     }
 }
