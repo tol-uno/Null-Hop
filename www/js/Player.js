@@ -1,5 +1,3 @@
-import Vector2D3D from "./Vector2D3D";
-
 const Player = {
 
     wish_velocity: new Vector2D3D(0, 0),
@@ -28,8 +26,7 @@ const Player = {
         this.y = y;
         this.restartX = x;
         this.restartY = y;
-        this.lookAngle = new Vector2D3D(1, 0)
-        this.lookAngle = this.lookAngle.rotate(angle)
+        this.lookAngle = new Vector2D3D(1, 0).rotate(angle)
         this.restartAngle = angle;
         this.velocity.set(0, 0)
 
@@ -370,18 +367,18 @@ const Player = {
 
         if (UserInterface.levelState == 1 || UserInterface.levelState == 2) { // if NOT at end screen
 
-            this.lookAngle = this.lookAngle.rotate(TouchHandler.dragAmountX * UserInterface.settings.sensitivity)
+            this.lookAngle.rotate(TouchHandler.dragAmountX * UserInterface.settings.sensitivity)
 
             // Setting wish_velocity
             // normalized unit vector that is perpendicular to lookAngle
             // simulates left or right strafe keys being pressed depending on dragAmount direction
 
             if (TouchHandler.dragAmountX > 0) {
-                this.wish_velocity = this.lookAngle.rotate(90) // look angle is already normalized
+                this.wish_velocity = this.lookAngle.clone().rotate(90) // look angle is already normalized
             }
 
             if (TouchHandler.dragAmountX < 0) {
-                this.wish_velocity = this.lookAngle.rotate(-90) // look angle is already normalized
+                this.wish_velocity = this.lookAngle.clone().rotate(-90) // look angle is already normalized
             }
 
             if (TouchHandler.dragAmountX == 0) { this.wish_velocity.set(0, 0) }
@@ -752,8 +749,7 @@ const Player = {
     },
 
     startLevel: function () {
-        this.velocity.set(150, 0); // 6,0
-        this.velocity = this.velocity.rotate(this.lookAngle.getAngleInDegrees());
+        this.velocity.set(150, 0).rotate(this.lookAngle.getAngleInDegrees());
     },
 
     checkCollision: function (arrayOfPlatformsToCheck) {
@@ -777,10 +773,8 @@ const Player = {
         if (this.checkpointIndex !== -1) {
             this.x = Map.checkpoints[this.checkpointIndex].x;
             this.y = Map.checkpoints[this.checkpointIndex].y;
-            this.lookAngle.set(1, 0)
-            this.lookAngle = this.lookAngle.rotate(Map.checkpoints[this.checkpointIndex].angle)
-            this.velocity.set(100, 0)
-            this.velocity = this.velocity.rotate(this.lookAngle.getAngleInDegrees())
+            this.lookAngle.set(1, 0).rotate(Map.checkpoints[this.checkpointIndex].angle)
+            this.velocity.set(100, 0).rotate(this.lookAngle.getAngleInDegrees())
             this.jumpValue = 0;
             this.jumpVelocity = 200;
         } else {
@@ -791,8 +785,7 @@ const Player = {
     restart: function () { // Called when user hits restart button (not when teleported from water)
         this.x = this.restartX;
         this.y = this.restartY;
-        this.lookAngle.set(1, 0)
-        this.lookAngle = this.lookAngle.rotate(this.restartAngle)
+        this.lookAngle.set(1, 0).rotate(this.restartAngle)
         this.velocity.set(0, 0)
         this.jumpValue = 0;
         this.jumpVelocity = 2;

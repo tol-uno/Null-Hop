@@ -1,4 +1,3 @@
-import Vector2D3D from "./Vector2D3D";
 
 const UserInterface = {
 
@@ -579,7 +578,7 @@ const UserInterface = {
                 const dragFromPinned = new Vector2D3D((this.x + this.width - pinnedX_screenCoords) / MapEditor.zoom, (this.y - pinnedY_screenCoords) / MapEditor.zoom)
 
                 // get rotatedDragFromPinned. (x will always be -, y will always be +)
-                const rotatedDragFromPinned = dragFromPinned.rotate(-platform.angle)
+                const rotatedDragFromPinned = dragFromPinned.clone().rotate(-platform.angle)
 
                 // set width and height using rotatedDragFromPinned
                 platform.width = Math.round(-rotatedDragFromPinned.x * UserInterfaceCanvas.scale)
@@ -662,7 +661,7 @@ const UserInterface = {
                 const dragFromPinned = new Vector2D3D((this.x - pinnedX_screenCoords) / MapEditor.zoom, (this.y - pinnedY_screenCoords) / MapEditor.zoom)
 
                 // get rotatedDragFromPinned. (x will always be -, y will always be +)
-                const rotatedDragFromPinned = dragFromPinned.rotate(-platform.angle)
+                const rotatedDragFromPinned = dragFromPinned.clone().rotate(-platform.angle)
 
                 // set width and height using rotatedDragFromPinned
                 platform.width = Math.round(rotatedDragFromPinned.x * UserInterfaceCanvas.scale)
@@ -745,7 +744,7 @@ const UserInterface = {
                 const dragFromPinned = new Vector2D3D((this.x - pinnedX_screenCoords) / MapEditor.zoom, (this.y + this.height - pinnedY_screenCoords) / MapEditor.zoom)
 
                 // get rotatedDragFromPinned. (x will always be -, y will always be +)
-                const rotatedDragFromPinned = dragFromPinned.rotate(-platform.angle)
+                const rotatedDragFromPinned = dragFromPinned.clone().rotate(-platform.angle)
 
                 // set width and height using rotatedDragFromPinned
                 platform.width = Math.round(rotatedDragFromPinned.x * UserInterfaceCanvas.scale)
@@ -828,7 +827,7 @@ const UserInterface = {
                 const dragFromPinned = new Vector2D3D((this.x + this.width - pinnedX_screenCoords) / MapEditor.zoom, (this.y + this.height - pinnedY_screenCoords) / MapEditor.zoom)
 
                 // get rotatedDragFromPinned. (x will always be +, y will always be +)
-                const rotatedDragFromPinned = dragFromPinned.rotate(-platform.angle)
+                const rotatedDragFromPinned = dragFromPinned.clone().rotate(-platform.angle)
 
                 // set width and height using rotatedDragFromPinned
                 platform.width = Math.round(-rotatedDragFromPinned.x * UserInterfaceCanvas.scale)

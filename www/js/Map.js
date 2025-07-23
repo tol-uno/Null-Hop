@@ -1,5 +1,3 @@
-import Vector2D3D from "./Vector2D3D";
-
 const Map = {
     walls: [],
     renderedPlatforms: [],
