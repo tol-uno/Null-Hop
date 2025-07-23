@@ -17,13 +17,13 @@ const CanvasArea = {
         midX_UI = window.outerWidth / 2 // since UI is position on unscaled canvas
         midY_UI = window.outerHeight / 2
 
-        this.ctx = this.canvas.getContext("2d");
+        this.ctx = this.canvas.getContext('2d', { alpha: false });
         document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+
+        UserInterface.start(); // need to be ran here after canvas is resized in CanvasArea.start()
 
         prevDateNow = performance.now()
 
-        UserInterface.start(); // need to be ran here after canvas is resized in CanvasArea.start()
-        
         //this.interval = setInterval(updateGameArea, 1000 / 60); // Number sets the taget frame rate. 1000/FPS 
         requestAnimationFrame(updateGameArea)
     },

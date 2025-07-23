@@ -1,3 +1,5 @@
+import Vector2D3D from "./Vector2D3D";
+
 const Player = {
 
     wish_velocity: new Vector2D3D(0, 0),

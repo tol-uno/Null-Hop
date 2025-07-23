@@ -25,13 +25,12 @@ function onDeviceReady() { // Called on page load in HMTL
 
 function updateGameArea() { // CALLED EVERY FRAME
 
-    // UPDATING OBJECTS
-    TouchHandler.update();
-    UserInterface.update();
-
     dt = (performance.now() - prevDateNow) / 1000; // Delta Time for FPS independence. dt = amount of seconds between frames
     prevDateNow = performance.now();
 
+    // UPDATING OBJECTS
+    TouchHandler.update();
+    UserInterface.update();
 
     if (UserInterface.gamestate == 2) { // In a MapBrowser
         MapBrowser.update()
@@ -71,7 +70,7 @@ function updateGameArea() { // CALLED EVERY FRAME
 
 
     CanvasArea.clear();
-    UserInterfaceCanvas.clear(); // dont call here kill kill
+    UserInterfaceCanvas.clear()
 
     if (UserInterface.gamestate == 2) { // In a MapBrowser
         MapBrowser.render()

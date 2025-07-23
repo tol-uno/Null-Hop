@@ -1,4 +1,4 @@
-class Vector2D3D {
+export default class Vector2D3D {
 
     // Works as both a 2D or 3D vector
     // rotate and getAngleInDegrees methods only work for 2D vectors

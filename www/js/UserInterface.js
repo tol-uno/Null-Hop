@@ -1,3 +1,5 @@
+import Vector2D3D from "./Vector2D3D";
+
 const UserInterface = {
 
     // The UI, both buttons and custom drawn elements, are positioned in non-scaled coordinated
