@@ -8,7 +8,7 @@ const Map = {
     endZoneShadowClip: new Path2D(),
     playerClip: new Path2D(), // calculated every frame
 
-    initMap: function (name) { // initializing a normal map (not custom)
+    initMap: async function (name, isCustom = false) { // initializing a normal map (not custom)
         this.platforms = [];
         this.playerStart = null;
         this.style = null;
@@ -17,7 +17,17 @@ const Map = {
         this.endZoneShadowClip = new Path2D()
         this.name = name;
 
+        let mapDataRaw;
+        if (isCustom) { // load from custom map directory on device
+            mapDataRaw = await readFile("device", "maps", name + ".json", "text");
+        } else { // load from normal local files
+            mapDataRaw = await readFile("local", "assets/maps/", name + ".json", "text")
+        }
+        
+        this.parseMapData(JSON.parse(mapDataRaw))
 
+        // kill kill kill \/
+    /*
         // GET MAP DIRECTLY THROUGH CORDOVA LOCAL STORAGE  (NORMAL MAP)          
         const mapURL = cordova.file.applicationDirectory + "www/assets/maps/"
 
@@ -39,9 +49,11 @@ const Map = {
                 })
             })
         })
-
+        */
     },
 
+    /*
+    kill
     initCustomMap: async function (name) { // initializing a custom map
         this.platforms = [];
         this.playerStart = null;
@@ -52,11 +64,11 @@ const Map = {
         this.name = name;
 
 
-        const mapDataRaw = await UserInterface.readFile(name + ".json", "maps");
+        const mapDataRaw = await readFile("device", "maps", name + ".json", "text");
         this.parseMapData(JSON.parse(mapDataRaw))
 
     },
-
+    */
 
     // Big function that parses the map data, sets up lighting, shadows, shadow clips, etc
     parseMapData: function (jsonData) {

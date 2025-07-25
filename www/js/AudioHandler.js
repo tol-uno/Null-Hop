@@ -1,80 +1,102 @@
 const AudioHandler = {
+    // REMOVE CORDOVA MEDIA PLUGIN IF THIS WORKS
 
+    /* 
+    new method
+    use web audio to play sounds 
+    use cordova file plugin to read mp3 data
+    */
 
     init: function () {
+        // let musicBuffer;
 
-        // FROM: https://github.com/apache/cordova-plugin-media/issues/182
-        // Need to unescape if path have '%20' component
+        const audioContext = new AudioContext();
 
-        var surfacing_path = decodeURI(cordova.file.applicationDirectory) + "www/assets/audio/surfacing.mp3";
-        var successAudio_path = decodeURI(cordova.file.applicationDirectory) + "www/assets/audio/success.mp3";
-        var jump1Audio_path = decodeURI(cordova.file.applicationDirectory) + "www/assets/audio/jump1.mp3";
-        var jump2Audio_path = decodeURI(cordova.file.applicationDirectory) + "www/assets/audio/jump2.mp3";
-        var jump3Audio_path = decodeURI(cordova.file.applicationDirectory) + "www/assets/audio/jump3.mp3";
-        var splashAudio_path = decodeURI(cordova.file.applicationDirectory) + "www/assets/audio/splash.mp3";
+        // get the audio element
+        const audioElement = document.querySelector("audio"); // USE ID
 
-        // iOS need to remove file://
-        // could use a for loop here. Just throw all the sounds into an array?
-        if (device.platform.toLowerCase() == "ios") {
-            surfacing_path = surfacing_path.replace("file://", "");
-            successAudio_path = successAudio_path.replace("file://", "");
-            jump1Audio_path = jump1Audio_path.replace("file://", "")
-            jump2Audio_path = jump2Audio_path.replace("file://", "")
-            jump3Audio_path = jump3Audio_path.replace("file://", "")
-            splashAudio_path = splashAudio_path.replace("file://", "")
+        // pass it into the audio context
+        const track = audioContext.createMediaElementSource(audioElement);
+
+        this.gainNode = audioContext.createGain();
+
+        track.connect(this.gainNode).connect(audioContext.destination);
+
+        function playTrack() {
+            // Check if context is in suspended state (autoplay policy)
+            if (audioContext.state === "suspended") {
+                audioContext.resume();
+            }
+
+            // Play
+            audioElement.play();
         }
 
-
-        // Media(src, mediaSuccess, mediaError, mediaStatus, mediaDurationUpdate); mediaDurationUpdate is called when duration information becomes available and passes duration
-        this.surfacing = new Media(surfacing_path, null, (error) => { console.log(error); });
-
-        this.jump1Audio = new Media(jump1Audio_path, null, (error) => { console.log(error) })
-        this.jump2Audio = new Media(jump2Audio_path, null, (error) => { console.log(error) })
-        this.jump3Audio = new Media(jump3Audio_path, null, (error) => { console.log(error) })
-        this.successAudio = new Media(successAudio_path, null, (error) => { console.log(error) });
-        this.splashAudio = new Media(splashAudio_path, null, (error) => { console.log(error) })
-
-
-        // ONLY JUMP SOUNDS SEEM TO NEED TO BE CACHED RIGHT NOW..
-        // NOT SURE WHY. THE OTHER SOUNDS ARE PLAYING WITHOUT LAG
-
-        cacheSound(this.jump1Audio)
-        cacheSound(this.jump2Audio)
-        cacheSound(this.jump3Audio)
-
-        function cacheSound(mediaObj) {
-            mediaObj.play();
-
-            setTimeout(() => {
-                mediaObj.stop();
-            }, 490); // stop after 500ms (the silent portion)
-        }
-
-
-        // SET CORRECT VOLUMES
-        // FIX THIS: Needs to be called once all sounds are available
         this.setVolumes();
-        
-        // start music
-        this.playSound(this.surfacing)
 
+        playTrack();
+
+        // const gainNode = audioContext.createGain();
+        // gainNode.connect(audioContext.destination);
+        // gainNode.gain.value = 0.5;
     },
 
+    // Should unload() songs that arent needed -- only cache the one for current level
 
-    playSound: function (mediaObj, skipSilence) {
-        if (UserInterface.settings.volume > 0){
-            if (skipSilence) { mediaObj.seekTo(500) }
-            mediaObj.play()
-        }
+    loadAudioFromFilePlugin: function (audioContext, path, fileName, callback) {
+        window.resolveLocalFileSystemURL(
+            path,
+            function (dirEntry) {
+                dirEntry.getFile(
+                    fileName,
+                    { create: false },
+                    function (fileEntry) {
+                        fileEntry.file(
+                            function (file) {
+                                const reader = new FileReader();
+
+                                reader.onloadend = function () {
+                                    const arrayBuffer = reader.result;
+                                    audioContext.decodeAudioData(
+                                        arrayBuffer,
+                                        function (buffer) {
+                                            callback(null, buffer);
+                                        },
+                                        function (err) {
+                                            callback(err, null);
+                                        }
+                                    );
+                                };
+
+                                reader.onerror = function (e) {
+                                    callback(e, null);
+                                };
+
+                                reader.readAsArrayBuffer(file);
+                            },
+                            function (err) {
+                                callback(err, null);
+                            }
+                        );
+                    },
+                    function (err) {
+                        callback(err, null);
+                    }
+                );
+            },
+            function (err) {
+                callback(err, null);
+            }
+        );
     },
-
 
     setVolumes: function () {
-        this.surfacing.setVolume(UserInterface.settings.volume);
-        this.successAudio.setVolume(UserInterface.settings.volume);
-        this.jump1Audio.setVolume(UserInterface.settings.volume);
-        this.jump2Audio.setVolume(UserInterface.settings.volume);
-        this.jump3Audio.setVolume(UserInterface.settings.volume);
-        this.splashAudio.setVolume(UserInterface.settings.volume);
+        this.gainNode.gain.value = UserInterface.settings.volume;
+        // doesnt work with html audio only webaudio
+        // Howler.volume(UserInterface.settings.volume)
+        // this.song.volume(UserInterface.settings.volume)
+        // this.jumpSoundHowler.volume(UserInterface.settings.volume)
+        // this.successAudio.volume(UserInterface.settings.volume)
+        // this.splashAudio.volume(UserInterface.settings.volume)
     },
-}
+};

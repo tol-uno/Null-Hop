@@ -1229,11 +1229,11 @@ const UserInterface = {
 
             if (MapBrowser.state == 1) { // in normal maps browser
 
-                Map.initMap(MapBrowser.selectedMapIndex);
+                Map.initMap(MapBrowser.selectedMapIndex, false);
 
             } else { // in custom maps browser
 
-                Map.initCustomMap(MapBrowser.selectedMapIndex);
+                Map.initMap(MapBrowser.selectedMapIndex, true);
 
             }
         })
@@ -1247,7 +1247,7 @@ const UserInterface = {
             MapBrowser.scrollVel = 0;
             MapBrowser.scrollY = 0;
 
-            const mapDataRaw = await UserInterface.readFile(MapBrowser.selectedMapIndex + ".json", "maps")
+            const mapDataRaw = await readFile("device", "maps", MapBrowser.selectedMapIndex + ".json", "text")
 
             MapEditor.loadedMap = JSON.parse(mapDataRaw)
             UserInterface.gamestate = 7;
@@ -1786,7 +1786,7 @@ const UserInterface = {
         UserInterface.renderedButtons = this.btnGroup_inLevel;
     },
 
-    readFile: function (fileName, subDirectory = "") { // returns a promise that resolves to raw, unparsed (json usually)
+    readFileOLD: function (fileName, subDirectory = "") { // returns a promise that resolves to raw, unparsed (json usually)
         return new Promise((resolve, reject) => {
             // Resolve dataDirectory URL
             window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function (dataDirectoryEntry) {
@@ -1823,10 +1823,7 @@ const UserInterface = {
                     });
                 }, function (error) {
 
-
                     // Its not able to find the custom maps in the /maps directory for some reason
-
-
 
                     console.log(directoryEntry)
                     console.log("fileName " + fileName)
@@ -1835,6 +1832,8 @@ const UserInterface = {
             }
         });
     },
+
+    
 
     writeFile: function (fileName, blobData, subDirectory = "") { // returns a promise
         // fileName is a string with file extension EX: settings.json
@@ -1881,33 +1880,17 @@ const UserInterface = {
         });
     },
 
-    getLeaderboards: function () {
+    getLeaderboards: async function () {
 
-        // GET leaderboards DIRECTLY THROUGH CORDOVA LOCAL STORAGE (www)       
-        const assetsURL = cordova.file.applicationDirectory + "www/assets/"
+        // Get leaderboards (level medal times) directly through cordova local storage (www)
 
-        window.resolveLocalFileSystemURL(assetsURL, (dirEntry) => {
-
-            dirEntry.getFile("leaderboards.json", { create: false, exclusive: false }, (fileEntry) => {
-
-                fileEntry.file((file) => {
-
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        console.log("successfully read leaderboards.json")
-                        this.leaderboards = JSON.parse(e.target.result)
-                    };
-                    reader.onerror = (e) => alert(e.target.error.name);
-
-                    reader.readAsText(file)
-                })
-            })
-        })
+        const leaderboardData = await readFile("local", "assets/", "leaderboards.json", "text")
+        this.leaderboards = JSON.parse(leaderboardData)
     },
 
     getSettings: async function () {
         try {
-            const settingsData = await this.readFile("settings.json");
+            const settingsData = await readFile("device", "", "settings.json", "text");
             this.settings = JSON.parse(settingsData);
 
             // readFile completes after initiating buttons so need to sync them
@@ -1955,7 +1938,7 @@ const UserInterface = {
     getRecords: async function () {
         try {
 
-            const recordsData = await this.readFile("records.json");
+            const recordsData = await readFile("device", "", "records.json", "text");
             this.records = JSON.parse(recordsData);
 
         } catch (error) {
@@ -2212,7 +2195,7 @@ const UserInterface = {
                 ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
 
                 ctx.fillText("fps: " + Math.round(1 / dt), textX, 50);
-                ctx.fillText("rounded dt: " + Math.round(dt * 10) / 10 + " milliseconds", textX, 60);
+                ctx.fillText("rounded dt: " + Math.round(dt * 1000) / 1000 + " seconds", textX, 60);
                 ctx.fillText("renderedPlatforms Count: " + Map.renderedPlatforms.length, textX, 70);
                 ctx.fillText("endZonesToCheck: " + Map.endZonesToCheck, textX, 80);
                 ctx.fillText("dragging: " + TouchHandler.dragging, textX, 90);

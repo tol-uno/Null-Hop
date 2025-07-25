@@ -1,5 +1,4 @@
 const Player = {
-
     wish_velocity: new Vector2D3D(0, 0),
     velocity: new Vector2D3D(0, 0),
     currentSpeedProjected: 0,
@@ -26,127 +25,151 @@ const Player = {
         this.y = y;
         this.restartX = x;
         this.restartY = y;
-        this.lookAngle = new Vector2D3D(1, 0).rotate(angle)
+        this.lookAngle = new Vector2D3D(1, 0).rotate(angle);
         this.restartAngle = angle;
-        this.velocity.set(0, 0)
+        this.velocity.set(0, 0);
 
-        this.speedCameraOffset.zoomAverager.frames.fill(1.5, 0)
-        this.speedCameraOffset.zoom = 1.5
+        this.speedCameraOffset.zoomAverager.frames.fill(1.5, 0);
+        this.speedCameraOffset.zoom = 1.5;
 
-        this.speedCameraOffset.dirAveragerX.frames.fill(0, 0)
-        this.speedCameraOffset.dirAveragerY.frames.fill(0, 0)
+        this.speedCameraOffset.dirAveragerX.frames.fill(0, 0);
+        this.speedCameraOffset.dirAveragerY.frames.fill(0, 0);
 
-        this.jumpValue = 0
-        this.jumpVelocity = 200
-        this.endSlow = 1
-        this.checkpointIndex = -1
+        this.jumpValue = 0;
+        this.jumpVelocity = 200;
+        this.endSlow = 1;
+        this.checkpointIndex = -1;
     },
 
     setPlayerLighting: function () {
-
         // determine where to pull platforms and styles from
-        const MapData = UserInterface.gamestate == 7 ? MapEditor.loadedMap : Map
+        const MapData = UserInterface.gamestate == 7 ? MapEditor.loadedMap : Map;
 
         // Turning lightDirection and lightPitch into a 3D vector
-        const lightDirection_Rads = MapData.style.lightDirection * (Math.PI / 180)
-        const lightPitch_Rads = MapData.style.lightPitch * (Math.PI / 180) // light pitch = light angle. 0 == flat at the horizon. 90 == directly above
+        const lightDirection_Rads = MapData.style.lightDirection * (Math.PI / 180);
+        const lightPitch_Rads = MapData.style.lightPitch * (Math.PI / 180); // light pitch = light angle. 0 == flat at the horizon. 90 == directly above
 
-        const x = Math.cos(lightDirection_Rads) * Math.cos(lightPitch_Rads)
-        const y = Math.sin(lightDirection_Rads) * Math.cos(lightPitch_Rads)
-        const z = Math.sin(lightPitch_Rads)
+        const x = Math.cos(lightDirection_Rads) * Math.cos(lightPitch_Rads);
+        const y = Math.sin(lightDirection_Rads) * Math.cos(lightPitch_Rads);
+        const z = Math.sin(lightPitch_Rads);
 
-        const directLightVector = new Vector2D3D(x, y, z)
-
+        const directLightVector = new Vector2D3D(x, y, z);
 
         // NORMALS. Optimally these wouldnt be creating new vectors each frame
-        const topNormal = new Vector2D3D(0, 0, -1)
-        const botSideNormal = new Vector2D3D(0, 1, 0).rotate(this.lookAngle.getAngleInDegrees())
-        const rightSideNormal = new Vector2D3D(1, 0, 0).rotate(this.lookAngle.getAngleInDegrees())
-        const topSideNormal = new Vector2D3D(0, -1, 0).rotate(this.lookAngle.getAngleInDegrees())
-        const leftSideNormal = new Vector2D3D(-1, 0, 0).rotate(this.lookAngle.getAngleInDegrees())
+        const topNormal = new Vector2D3D(0, 0, -1);
+        const botSideNormal = new Vector2D3D(0, 1, 0).rotate(this.lookAngle.getAngleInDegrees());
+        const rightSideNormal = new Vector2D3D(1, 0, 0).rotate(this.lookAngle.getAngleInDegrees());
+        const topSideNormal = new Vector2D3D(0, -1, 0).rotate(this.lookAngle.getAngleInDegrees());
+        const leftSideNormal = new Vector2D3D(-1, 0, 0).rotate(this.lookAngle.getAngleInDegrees());
 
         // angleDifference result will be between 0 and PI radians
         // if angleDifference is > PI/2 (90 deg) then side is in light. Otherwise no direct light is hitting it
         // if angleDifference is < PI/2 (90 deg) then side is in shadow & litPercent = 0
 
-        litPercentTop = Math.cos(Math.PI - topNormal.angleDifference(directLightVector)) // known as geometry term
-        if (litPercentTop < 0) { litPercentTop = 0 } // clamp to 0 to 1
+        litPercentTop = Math.cos(Math.PI - topNormal.angleDifference(directLightVector)); // known as geometry term
+        if (litPercentTop < 0) {
+            litPercentTop = 0;
+        } // clamp to 0 to 1
 
-        let litPercentBotSide = Math.cos(Math.PI - botSideNormal.angleDifference(directLightVector))
-        if (litPercentBotSide < 0) { litPercentBotSide = 0 }
+        let litPercentBotSide = Math.cos(
+            Math.PI - botSideNormal.angleDifference(directLightVector)
+        );
+        if (litPercentBotSide < 0) {
+            litPercentBotSide = 0;
+        }
 
-        let litPercentRightSide = Math.cos(Math.PI - rightSideNormal.angleDifference(directLightVector))
-        if (litPercentRightSide < 0) { litPercentRightSide = 0 }
+        let litPercentRightSide = Math.cos(
+            Math.PI - rightSideNormal.angleDifference(directLightVector)
+        );
+        if (litPercentRightSide < 0) {
+            litPercentRightSide = 0;
+        }
 
-        let litPercentTopSide = Math.cos(Math.PI - topSideNormal.angleDifference(directLightVector))
-        if (litPercentTopSide < 0) { litPercentTopSide = 0 }
+        let litPercentTopSide = Math.cos(
+            Math.PI - topSideNormal.angleDifference(directLightVector)
+        );
+        if (litPercentTopSide < 0) {
+            litPercentTopSide = 0;
+        }
 
-        let litPercentLeftSide = Math.cos(Math.PI - leftSideNormal.angleDifference(directLightVector))
-        if (litPercentLeftSide < 0) { litPercentLeftSide = 0 }
+        let litPercentLeftSide = Math.cos(
+            Math.PI - leftSideNormal.angleDifference(directLightVector)
+        );
+        if (litPercentLeftSide < 0) {
+            litPercentLeftSide = 0;
+        }
 
-
-        this.topColor = CanvasArea.getShadedColor(MapData.style.playerColor, litPercentTop)
-        this.botSideColor = CanvasArea.getShadedColor(MapData.style.playerColor, litPercentBotSide)
-        this.rightSideColor = CanvasArea.getShadedColor(MapData.style.playerColor, litPercentRightSide)
-        this.topSideColor = CanvasArea.getShadedColor(MapData.style.playerColor, litPercentTopSide)
-        this.leftSideColor = CanvasArea.getShadedColor(MapData.style.playerColor, litPercentLeftSide)
-
+        this.topColor = CanvasArea.getShadedColor(MapData.style.playerColor, litPercentTop);
+        this.botSideColor = CanvasArea.getShadedColor(MapData.style.playerColor, litPercentBotSide);
+        this.rightSideColor = CanvasArea.getShadedColor(
+            MapData.style.playerColor,
+            litPercentRightSide
+        );
+        this.topSideColor = CanvasArea.getShadedColor(MapData.style.playerColor, litPercentTopSide);
+        this.leftSideColor = CanvasArea.getShadedColor(
+            MapData.style.playerColor,
+            litPercentLeftSide
+        );
     },
 
-    renderLowerShadow: function () { // used by map
+    renderLowerShadow: function () {
+        // used by map
         const ctx = CanvasArea.ctx;
 
-        const MapData = UserInterface.gamestate == 7 ? MapEditor.loadedMap : Map // to use in PreviewWindow
+        const MapData = UserInterface.gamestate == 7 ? MapEditor.loadedMap : Map; // to use in PreviewWindow
 
         ctx.save(); // #1
-        ctx.translate(this.x, this.y + MapData.style.platformHeight)
-        ctx.rotate(this.lookAngle.getAngleInDegrees() * Math.PI / 180); // rotating canvas
+        ctx.translate(this.x, this.y + MapData.style.platformHeight);
+        ctx.rotate((this.lookAngle.getAngleInDegrees() * Math.PI) / 180); // rotating canvas
         ctx.fillStyle = MapData.style.shadow_backgroundColor;
-        ctx.fillRect(-15, -15, 30, 30)
+        ctx.fillRect(-15, -15, 30, 30);
         ctx.restore(); // #1
     },
 
     render: function () {
-
         // Player is drawn on a seperate PlayerCanvas.
         // On PlayerCanvas, parts of the player that
         // are behind walls are erased using Map.playerClip
         // PlayerCanvas is then pasted onto the main CanvasArea
 
-        this.setPlayerLighting()
+        this.setPlayerLighting();
 
         const ctx = PlayerCanvas.ctx;
-        PlayerCanvas.clear()
+        PlayerCanvas.clear();
 
-        const MapData = UserInterface.gamestate == 7 ? MapEditor.loadedMap : Map // to use in PreviewWindow
+        const MapData = UserInterface.gamestate == 7 ? MapEditor.loadedMap : Map; // to use in PreviewWindow
 
+        ctx.save(); // #2 For scaling the canvas for zoom
 
-
-        ctx.save() // #2 For scaling the canvas for zoom
-
-
-        if (MapData == Map) { // in actual level
-            ctx.scale(this.speedCameraOffset.zoom, this.speedCameraOffset.zoom)
+        if (MapData == Map) {
+            // in actual level
+            ctx.scale(this.speedCameraOffset.zoom, this.speedCameraOffset.zoom);
 
             ctx.translate(
-                (CanvasArea.canvas.width / this.speedCameraOffset.zoom - CanvasArea.canvas.width) / 2 + this.speedCameraOffset.direction.x,
-                (CanvasArea.canvas.height / this.speedCameraOffset.zoom - CanvasArea.canvas.height) / 2 + this.speedCameraOffset.direction.y,
-            )
+                (CanvasArea.canvas.width / this.speedCameraOffset.zoom - CanvasArea.canvas.width) /
+                    2 +
+                    this.speedCameraOffset.direction.x,
+                (CanvasArea.canvas.height / this.speedCameraOffset.zoom -
+                    CanvasArea.canvas.height) /
+                    2 +
+                    this.speedCameraOffset.direction.y
+            );
 
             ctx.translate(midX, midY); // translate to center of the screen
-        } else { // in preview window
-            ctx.translate(this.x, this.y) // translate to wherever player is at on screen
+        } else {
+            // in preview window
+            ctx.translate(this.x, this.y); // translate to wherever player is at on screen
         }
-
 
         // LOWER SHADOW IS DRAWN BY MAP
         // DRAWING UPPER SHADOW HERE (drawn twice, once while over platform and once while over endzone)
 
         // SHADOW OVER PLATFORM
-        ctx.save() // #5 upperShadowClip canvas 
+        ctx.save(); // #5 upperShadowClip canvas
 
-        if (MapData == Map) { // only set upper shadow clip if in Map not PreviewWindow
-            ctx.translate(-this.x, -this.y) // ctx goes to map origin to set clip
+        if (MapData == Map) {
+            // only set upper shadow clip if in Map not PreviewWindow
+            ctx.translate(-this.x, -this.y); // ctx goes to map origin to set clip
 
             // Draw standard shadowClip DEBUG
             // ctx.lineWidth = 5
@@ -157,20 +180,19 @@ const Player = {
             ctx.translate(this.x, this.y); // reset ctx to middle of player at middle of screen
         }
 
-        ctx.rotate(this.lookAngle.getAngleInDegrees() * Math.PI / 180)
+        ctx.rotate((this.lookAngle.getAngleInDegrees() * Math.PI) / 180);
 
         ctx.fillStyle = MapData.style.shadow_platformColor;
-        ctx.fillRect(-15, -15, 30, 30)
+        ctx.fillRect(-15, -15, 30, 30);
 
-        ctx.restore() // #5 clears upperShadowClip
-
-
+        ctx.restore(); // #5 clears upperShadowClip
 
         // SHADOW OVER ENDZONE
-        if (MapData == Map && Map.endZonesToCheck.length > 0) { // onlt applicable in Map not PreviewWindow
-            ctx.save() // #6 endZoneShadowClip canvas
+        if (MapData == Map && Map.endZonesToCheck.length > 0) {
+            // onlt applicable in Map not PreviewWindow
+            ctx.save(); // #6 endZoneShadowClip canvas
 
-            ctx.translate(-this.x, -this.y)
+            ctx.translate(-this.x, -this.y);
 
             // Draw endZoneShadowClip DEBUG
             // ctx.lineWidth = 3
@@ -180,72 +202,75 @@ const Player = {
             ctx.clip(Map.endZoneShadowClip);
             ctx.translate(this.x, this.y);
 
-            ctx.rotate(this.lookAngle.getAngleInDegrees() * Math.PI / 180)
+            ctx.rotate((this.lookAngle.getAngleInDegrees() * Math.PI) / 180);
 
             ctx.fillStyle = Map.style.shadow_endzoneColor;
-            ctx.fillRect(-15, -15, 30, 30)
+            ctx.fillRect(-15, -15, 30, 30);
 
-            ctx.restore() // #6 clears endZoneShadowClip
+            ctx.restore(); // #6 clears endZoneShadowClip
         }
-
 
         // GENERATE player.hull
         // (0, -this.jumpValue) used here because createPoligon returns global coords and we want local to player
-        const cornersPolygon = CanvasArea.createPoligon(0, -this.jumpValue, 32, 32, this.lookAngle.getAngleInDegrees() * Math.PI / 180)
+        const cornersPolygon = CanvasArea.createPoligon(
+            0,
+            -this.jumpValue,
+            32,
+            32,
+            (this.lookAngle.getAngleInDegrees() * Math.PI) / 180
+        );
 
-        const lowerCorners = [ // topLeft, topRight, bottomRight, bottomLeft
+        const lowerCorners = [
+            // topLeft, topRight, bottomRight, bottomLeft
             [cornersPolygon[0].x, cornersPolygon[0].y],
             [cornersPolygon[1].x, cornersPolygon[1].y],
             [cornersPolygon[2].x, cornersPolygon[2].y],
-            [cornersPolygon[3].x, cornersPolygon[3].y]
-        ]
+            [cornersPolygon[3].x, cornersPolygon[3].y],
+        ];
 
         const upperCorners = [
             [cornersPolygon[0].x, cornersPolygon[0].y - 32],
             [cornersPolygon[1].x, cornersPolygon[1].y - 32],
             [cornersPolygon[2].x, cornersPolygon[2].y - 32],
-            [cornersPolygon[3].x, cornersPolygon[3].y - 32]
-        ]
+            [cornersPolygon[3].x, cornersPolygon[3].y - 32],
+        ];
 
-        const allHullPoints = lowerCorners.concat(upperCorners)
+        const allHullPoints = lowerCorners.concat(upperCorners);
 
-        this.hull = CanvasArea.convexHull(allHullPoints)
-
+        this.hull = CanvasArea.convexHull(allHullPoints);
 
         // DRAW BACKGROUND HULL
         ctx.save(); // #6.5 for reverting Player.rotation and Player.jumpValue translations
 
-        ctx.fillStyle = this.topColor
+        ctx.fillStyle = this.topColor;
 
-        ctx.beginPath()
-        ctx.moveTo(this.hull[0][0], this.hull[0][1])
+        ctx.beginPath();
+        ctx.moveTo(this.hull[0][0], this.hull[0][1]);
         for (let i = this.hull.length - 1; i > 0; i--) {
-            ctx.lineTo(this.hull[i][0], this.hull[i][1])
+            ctx.lineTo(this.hull[i][0], this.hull[i][1]);
         }
-        ctx.closePath()
-        ctx.fill()
-
+        ctx.closePath();
+        ctx.fill();
 
         // DRAWING PLAYER TOP
         ctx.translate(0, -this.jumpValue - 32);
-        ctx.rotate(this.lookAngle.getAngleInDegrees() * Math.PI / 180) // rotating canvas
+        ctx.rotate((this.lookAngle.getAngleInDegrees() * Math.PI) / 180); // rotating canvas
         ctx.fillStyle = this.topColor;
-        ctx.fillRect(-16, -16, 32, 32)
+        ctx.fillRect(-16, -16, 32, 32);
 
         // Draw players top arrow
         ctx.strokeStyle = "#00000030";
-        ctx.lineWidth = 2
+        ctx.lineWidth = 2;
 
         ctx.beginPath();
         ctx.moveTo(8, 0);
         ctx.lineTo(-5, -7);
         ctx.lineTo(-5, 7);
-        ctx.lineTo(8, 0)
+        ctx.lineTo(8, 0);
         ctx.stroke();
 
         ctx.restore(); // #6.5 leaves player rotation and jump value translation
         // ctx is now back at player coords with no jumpvalue
-
 
         // SIDES OF PLAYER
         const loopedAngle = this.lookAngle.getAngleInDegrees();
@@ -253,9 +278,10 @@ const Player = {
         // at lookAngle == 0 the player is facing to the right. BOT WALL refers to the bottom wall when lookAnlge == 0
         // lowerCorners & upperCorners order: topLeft, topRight, bottomRight, bottomLeft
 
-        if (loopedAngle > 270 || loopedAngle < 90) { // BOT WALL
+        if (loopedAngle > 270 || loopedAngle < 90) {
+            // BOT WALL
 
-            ctx.fillStyle = this.botSideColor
+            ctx.fillStyle = this.botSideColor;
 
             ctx.beginPath();
             ctx.moveTo(upperCorners[2][0], upperCorners[2][1]);
@@ -266,9 +292,10 @@ const Player = {
             ctx.fill();
         }
 
-        if (0 < loopedAngle && loopedAngle < 180) { // RIGHT WALL
+        if (0 < loopedAngle && loopedAngle < 180) {
+            // RIGHT WALL
 
-            ctx.fillStyle = this.rightSideColor
+            ctx.fillStyle = this.rightSideColor;
             ctx.beginPath();
             ctx.moveTo(upperCorners[1][0], upperCorners[1][1]);
             ctx.lineTo(upperCorners[2][0], upperCorners[2][1]);
@@ -278,9 +305,10 @@ const Player = {
             ctx.fill();
         }
 
-        if (90 < loopedAngle && loopedAngle < 270) { // TOP WALL
+        if (90 < loopedAngle && loopedAngle < 270) {
+            // TOP WALL
 
-            ctx.fillStyle = this.topSideColor
+            ctx.fillStyle = this.topSideColor;
 
             ctx.beginPath();
             ctx.moveTo(upperCorners[0][0], upperCorners[0][1]);
@@ -291,9 +319,10 @@ const Player = {
             ctx.fill();
         }
 
-        if (180 < loopedAngle && loopedAngle < 360) { // LEFT WALL
+        if (180 < loopedAngle && loopedAngle < 360) {
+            // LEFT WALL
 
-            ctx.fillStyle = this.leftSideColor
+            ctx.fillStyle = this.leftSideColor;
 
             ctx.beginPath();
             ctx.moveTo(upperCorners[3][0], upperCorners[3][1]);
@@ -304,14 +333,14 @@ const Player = {
             ctx.fill();
         }
 
-
         // ERASE PARTS OF PLAYER THAT ARE BEHIND WALL AND DRAW PLAYER XRAY (if in Map not PreviewWindow)
-        if (MapData == Map && Map.wallsToCheck.length != 0) { // could use more precice check here ex: looking to see if theres data in Map.playerClip OPTIMIZE
+        if (MapData == Map && Map.wallsToCheck.length != 0) {
+            // could use more precice check here ex: looking to see if theres data in Map.playerClip OPTIMIZE
 
             // ERASE PARTS OF PLAYER THAT ARE BEHIND WALLS
 
             // ctx is still at player middle
-            ctx.translate(-this.x, -this.y) // ctx is at map origin
+            ctx.translate(-this.x, -this.y); // ctx is at map origin
 
             // Draw playerClip DEBUG (This is being drawn on PlayerCanvas)
             // ctx.lineWidth = 5
@@ -319,73 +348,76 @@ const Player = {
             // ctx.stroke(Map.playerClip)
 
             // ADD CLIP of area behind walls
-            ctx.clip(Map.playerClip)
+            ctx.clip(Map.playerClip);
 
             // ERASE PLAYER THATS BEHIND CLIP
-            ctx.translate(this.x - midX, this.y - midY) // translate to the top left of the screen / canvas
-            PlayerCanvas.clear()
-
-
-
+            ctx.translate(this.x - midX, this.y - midY); // translate to the top left of the screen / canvas
+            PlayerCanvas.clear();
 
             // DRAW PLAYER XRAY IF BEHIND WALL (draw on normal CanvasArea)
-            CanvasArea.ctx.save() // # 7 used to reset the CanvasArea (which hasnt really been used in Player.render)
+            CanvasArea.ctx.save(); // # 7 used to reset the CanvasArea (which hasnt really been used in Player.render)
 
-            // This zooming was only done on PlayerCanvas. CanvasArea needs too 
-            CanvasArea.ctx.scale(this.speedCameraOffset.zoom, this.speedCameraOffset.zoom)
+            // This zooming was only done on PlayerCanvas. CanvasArea needs too
+            CanvasArea.ctx.scale(this.speedCameraOffset.zoom, this.speedCameraOffset.zoom);
             CanvasArea.ctx.translate(
-                (CanvasArea.canvas.width / this.speedCameraOffset.zoom - CanvasArea.canvas.width) / 2 + this.speedCameraOffset.direction.x,
-                (CanvasArea.canvas.height / this.speedCameraOffset.zoom - CanvasArea.canvas.height) / 2 + this.speedCameraOffset.direction.y,
-            )
+                (CanvasArea.canvas.width / this.speedCameraOffset.zoom - CanvasArea.canvas.width) /
+                    2 +
+                    this.speedCameraOffset.direction.x,
+                (CanvasArea.canvas.height / this.speedCameraOffset.zoom -
+                    CanvasArea.canvas.height) /
+                    2 +
+                    this.speedCameraOffset.direction.y
+            );
 
-            CanvasArea.ctx.translate(-this.x + midX, -this.y + midY) // Map origin ??
+            CanvasArea.ctx.translate(-this.x + midX, -this.y + midY); // Map origin ??
 
-            CanvasArea.ctx.clip(Map.playerClip)
+            CanvasArea.ctx.clip(Map.playerClip);
 
             CanvasArea.ctx.translate(this.x, this.y); // middle of player ??
-            CanvasArea.ctx.rotate(this.lookAngle.getAngleInDegrees() * Math.PI / 180)
+            CanvasArea.ctx.rotate((this.lookAngle.getAngleInDegrees() * Math.PI) / 180);
 
-            CanvasArea.ctx.strokeStyle = this.topColor
-            CanvasArea.ctx.lineWidth = 2
-            CanvasArea.ctx.beginPath()
-            CanvasArea.ctx.strokeRect(-16, -16, 32, 32)
-            CanvasArea.ctx.stroke()
+            CanvasArea.ctx.strokeStyle = this.topColor;
+            CanvasArea.ctx.lineWidth = 2;
+            CanvasArea.ctx.beginPath();
+            CanvasArea.ctx.strokeRect(-16, -16, 32, 32);
+            CanvasArea.ctx.stroke();
 
-            CanvasArea.ctx.restore() // # 7 resets the CanvasArea to whatever weird state it was in previously
+            CanvasArea.ctx.restore(); // # 7 resets the CanvasArea to whatever weird state it was in previously
         }
 
         // COPY PLAYER TO MAIN CANVAS AFTER ERASE
-        CanvasArea.ctx.drawImage(PlayerCanvas.canvas, 0, 0)
+        CanvasArea.ctx.drawImage(PlayerCanvas.canvas, 0, 0);
 
-
-        ctx.restore() // #2 clears ctx.scale for zoom. Also restores Player.x / .y translation or midX midY
+        ctx.restore(); // #2 clears ctx.scale for zoom. Also restores Player.x / .y translation or midX midY
     },
 
     update: function () {
-
         //TouchHandler.dragAmountX = dt // debugTurn
 
-        if (UserInterface.levelState == 1 || UserInterface.levelState == 2) { // if NOT at end screen
+        if (UserInterface.levelState == 1 || UserInterface.levelState == 2) {
+            // if NOT at end screen
 
-            this.lookAngle.rotate(TouchHandler.dragAmountX * UserInterface.settings.sensitivity)
+            this.lookAngle.rotate(TouchHandler.dragAmountX * UserInterface.settings.sensitivity);
 
             // Setting wish_velocity
             // normalized unit vector that is perpendicular to lookAngle
             // simulates left or right strafe keys being pressed depending on dragAmount direction
 
             if (TouchHandler.dragAmountX > 0) {
-                this.wish_velocity = this.lookAngle.clone().rotate(90) // look angle is already normalized
+                this.wish_velocity = this.lookAngle.clone().rotate(90); // look angle is already normalized
             }
 
             if (TouchHandler.dragAmountX < 0) {
-                this.wish_velocity = this.lookAngle.clone().rotate(-90) // look angle is already normalized
+                this.wish_velocity = this.lookAngle.clone().rotate(-90); // look angle is already normalized
             }
 
-            if (TouchHandler.dragAmountX == 0) { this.wish_velocity.set(0, 0) }
-
+            if (TouchHandler.dragAmountX == 0) {
+                this.wish_velocity.set(0, 0);
+            }
         }
 
-        if (UserInterface.levelState == 2) { // 1 = pre-start, 2 = playing level, 3 = in endzone
+        if (UserInterface.levelState == 2) {
+            // 1 = pre-start, 2 = playing level, 3 = in endzone
 
             // ALL MOVEMENT CALCULATIONS BASED OFF QUAKE 1 CODE
             // BUILT MOSTLY FROM zweek's video on how airstrafing works
@@ -398,7 +430,6 @@ const Player = {
             // https://www.youtube.com/watch?v=rTsXO6Zicls
             // https://steamcommunity.com/sharedfiles/filedetails/?id=184184420
             // https://github.com/myria666/qMovementDoc/blob/main/Quake_s_Player_Movement.pdf
-
 
             // SUEDO QUAKE 1 CODE
             /*
@@ -443,33 +474,29 @@ const Player = {
             }
             */
 
-
-
             // currentSpeedProjected is a measurment of how closely the wish_velocity aligns with the actual velocity vector
             this.currentSpeedProjected = this.velocity.dotProduct(this.wish_velocity); // Vector projection of Current_velocity onto wish_velocity
-
 
             // maxVelocity replaces the action of clipping wish_speed to 30 --- maxVelocity == 30
             this.addSpeed = maxVelocity - this.currentSpeedProjected;
 
-
-
             // show overstrafe warning BROKEN
-            if (this.addSpeed > 320 * airAcceleration * dt) { // 11:04 in zweeks video shows why u lose speed
+            if (this.addSpeed > 320 * airAcceleration * dt) {
+                // 11:04 in zweeks video shows why u lose speed
                 if (UserInterface.showOverstrafeWarning == false) {
                     UserInterface.showOverstrafeWarning = true;
-                    setTimeout(() => { UserInterface.showOverstrafeWarning = false }, 1500); // wait 1.5 seconds to hide warning
+                    setTimeout(() => {
+                        UserInterface.showOverstrafeWarning = false;
+                    }, 1500); // wait 1.5 seconds to hide warning
                 }
             }
 
             // new simplified stuff that replaces commented code block below \/
-            this.addSpeed = Math.max(0, this.addSpeed)
-            this.addSpeed = Math.min(this.addSpeed, 320 * airAcceleration * dt)
+            this.addSpeed = Math.max(0, this.addSpeed);
+            this.addSpeed = Math.min(this.addSpeed, 320 * airAcceleration * dt);
 
-
-            this.velocity.x += (this.addSpeed * this.wish_velocity.x)
-            this.velocity.y += (this.addSpeed * this.wish_velocity.y)
-
+            this.velocity.x += this.addSpeed * this.wish_velocity.x;
+            this.velocity.y += this.addSpeed * this.wish_velocity.y;
 
             // THIS IS A MORE VERBOSE VERSION OF THE THIS SECTION THAT FOLLOWS THE QUAKE CODE CLOSER BUT IS NOT AS CLEAR AS ABOVE
             /*
@@ -502,21 +529,20 @@ const Player = {
             }
             */
 
-
-
             // velocity applied to player coords after checking wall collisions
 
             // CHECK IF COLLIDING WITH WALLS
-            Map.wallsToCheck.forEach(wall => {
-
+            Map.wallsToCheck.forEach((wall) => {
                 function isColliding(player, wall) {
                     // Calculate relative position of player to the center of the wall
                     const relativeX = player.x - wall.x;
                     const relativeY = player.y - wall.y;
 
                     // Rotate the relative position of the player around the origin (center of the wall)
-                    const rotatedX = relativeX * Math.cos(-wall.angleRad) - relativeY * Math.sin(-wall.angleRad);
-                    const rotatedY = relativeX * Math.sin(-wall.angleRad) + relativeY * Math.cos(-wall.angleRad);
+                    const rotatedX =
+                        relativeX * Math.cos(-wall.angleRad) - relativeY * Math.sin(-wall.angleRad);
+                    const rotatedY =
+                        relativeX * Math.sin(-wall.angleRad) + relativeY * Math.cos(-wall.angleRad);
 
                     // Calculate closest point on the rotated rectangle to the player
                     let closestX = Math.max(-wall.width / 2, Math.min(rotatedX, wall.width / 2));
@@ -527,16 +553,21 @@ const Player = {
                     const distanceY = rotatedY - closestY;
                     const distanceSquared = distanceX * distanceX + distanceY * distanceY;
 
-                    if (distanceSquared <= (18 * 18)) {  // 16 is the player's collision radius (18 is used)
+                    if (distanceSquared <= 18 * 18) {
+                        // 16 is the player's collision radius (18 is used)
                         // Collision detected
 
                         let collisionX, collisionY;
                         let playerInsideWall = false;
 
                         // Check if the center of player is inside the wall
-                        if (rotatedX >= -wall.width / 2 && rotatedX <= wall.width / 2 && rotatedY >= -wall.height / 2 && rotatedY <= wall.height / 2) {
+                        if (
+                            rotatedX >= -wall.width / 2 &&
+                            rotatedX <= wall.width / 2 &&
+                            rotatedY >= -wall.height / 2 &&
+                            rotatedY <= wall.height / 2
+                        ) {
                             playerInsideWall = true;
-
 
                             // If inside, find the nearest edge
                             const halfWidth = wall.width / 2;
@@ -557,7 +588,10 @@ const Player = {
                                     // Right edge
                                     closestX = wall.width / 2;
                                 }
-                                collisionY = -closestX * Math.sin(-wall.angleRad) + closestY * Math.cos(-wall.angleRad) + wall.y;
+                                collisionY =
+                                    -closestX * Math.sin(-wall.angleRad) +
+                                    closestY * Math.cos(-wall.angleRad) +
+                                    wall.y;
                             } else {
                                 // Nearest edge is top or bottom
                                 if (dyTop < dyBottom) {
@@ -567,17 +601,30 @@ const Player = {
                                     // Bottom edge
                                     closestY = wall.height / 2;
                                 }
-                                collisionX = closestX * Math.cos(-wall.angleRad) + closestY * Math.sin(-wall.angleRad) + wall.x;
+                                collisionX =
+                                    closestX * Math.cos(-wall.angleRad) +
+                                    closestY * Math.sin(-wall.angleRad) +
+                                    wall.x;
                             }
                         }
 
                         // Calculate global collision point by moving closestX/Y into global coords by rotating and translating it
-                        collisionX = closestX * Math.cos(-wall.angleRad) + closestY * Math.sin(-wall.angleRad) + wall.x;
-                        collisionY = -closestX * Math.sin(-wall.angleRad) + closestY * Math.cos(-wall.angleRad) + wall.y;
+                        collisionX =
+                            closestX * Math.cos(-wall.angleRad) +
+                            closestY * Math.sin(-wall.angleRad) +
+                            wall.x;
+                        collisionY =
+                            -closestX * Math.sin(-wall.angleRad) +
+                            closestY * Math.cos(-wall.angleRad) +
+                            wall.y;
 
                         // Calculate normal vector of collision
-                        const normalVector = new Vector2D3D(player.x - collisionX, player.y - collisionY);
-                        if (playerInsideWall) { // if inside the wall the vector needs to be flipped to point the right way
+                        const normalVector = new Vector2D3D(
+                            player.x - collisionX,
+                            player.y - collisionY
+                        );
+                        if (playerInsideWall) {
+                            // if inside the wall the vector needs to be flipped to point the right way
                             normalVector.x *= -1;
                             normalVector.y *= -1;
                         }
@@ -588,21 +635,22 @@ const Player = {
                             normal: normalVector,
                             collisionPoint: {
                                 x: collisionX,
-                                y: collisionY
-                            }
+                                y: collisionY,
+                            },
                         };
                     }
 
                     // No collision detected
                     return {
-                        collided: false
+                        collided: false,
                     };
                 }
 
-
                 function adjustVelocity(playerMovementVector, wallNormalVector) {
                     // Calculate the dot product of player movement vector and wall normal vector
-                    const dotProduct = playerMovementVector.x * wallNormalVector.x + playerMovementVector.y * wallNormalVector.y;
+                    const dotProduct =
+                        playerMovementVector.x * wallNormalVector.x +
+                        playerMovementVector.y * wallNormalVector.y;
 
                     // If the dot product is negative, it means the player is moving towards the wall
                     if (dotProduct < 0) {
@@ -612,28 +660,21 @@ const Player = {
                     }
                 }
 
-
-
-                const collisionData = isColliding(Player, wall)
+                const collisionData = isColliding(Player, wall);
                 if (collisionData.collided) {
                     //console.log("collided!")
 
-                    adjustVelocity(this.velocity, collisionData.normal)
+                    adjustVelocity(this.velocity, collisionData.normal);
 
                     // bounce player backwards from being inside wall
-                    this.x = collisionData.collisionPoint.x + collisionData.normal.x * 20
-                    this.y = collisionData.collisionPoint.y + collisionData.normal.y * 20
-
-
+                    this.x = collisionData.collisionPoint.x + collisionData.normal.x * 20;
+                    this.y = collisionData.collisionPoint.y + collisionData.normal.y * 20;
                 }
-
-            })
-
+            });
 
             // APPLYING VELOCITY
             this.x += this.velocity.x * dt;
             this.y += this.velocity.y * dt;
-
 
             // JUMPING
             if (this.jumpValue < 0) {
@@ -641,34 +682,44 @@ const Player = {
                 this.jumpVelocity = 200;
 
                 // play random jump sound
-                AudioHandler.playSound(AudioHandler[`jump${Math.floor(Math.random() * 3) + 1}Audio`], true); 
+                // AudioHandler.playSound(AudioHandler[`jump${Math.floor(Math.random() * 3) + 1}Audio`], true);
+                // AudioHandler.jumpSoundHowler.play();
 
-                if (!this.checkCollision(Map.renderedPlatforms.filter(platform => platform.wall == 0))) { // checkCollision on an array of just renderedPlatforms (no walls)
-                    AudioHandler.playSound(AudioHandler.splashAudio, false);
-                    this.speedCameraOffset.zoomAverager.clear()
+                if (
+                    !this.checkCollision(
+                        Map.renderedPlatforms.filter((platform) => platform.wall == 0)
+                    )
+                ) {
+                    // checkCollision on an array of just renderedPlatforms (no walls)
+                    // AudioHandler.splashAudio.play();
+                    this.speedCameraOffset.zoomAverager.clear();
                     this.teleport();
-
                 }
             } else {
                 this.jumpValue += this.jumpVelocity * dt;
                 this.jumpVelocity -= gravity * dt;
             }
 
-
             // CHECK if colliding with checkpoint triggers
-            Map.checkpoints.forEach(checkpoint => {
-
-                const distance = pDistance(this.x, this.y, checkpoint.triggerX1, checkpoint.triggerY1, checkpoint.triggerX2, checkpoint.triggerY2)
+            Map.checkpoints.forEach((checkpoint) => {
+                const distance = pDistance(
+                    this.x,
+                    this.y,
+                    checkpoint.triggerX1,
+                    checkpoint.triggerY1,
+                    checkpoint.triggerX2,
+                    checkpoint.triggerY2
+                );
                 // console.log("distance to " + checkpoint + ": " + distance)
 
-                if (distance <= 16) { // COLLIDING WITH CP TRIGGER
-                    this.checkpointIndex = Map.checkpoints.indexOf(checkpoint) // could do this with a callback index function?
+                if (distance <= 16) {
+                    // COLLIDING WITH CP TRIGGER
+                    this.checkpointIndex = Map.checkpoints.indexOf(checkpoint); // could do this with a callback index function?
                     // console.log(this.checkpointIndex);
                 }
 
                 // gets minumum distance to line segment from point: https://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment
                 function pDistance(x, y, x1, y1, x2, y2) {
-
                     const A = x - x1;
                     const B = y - y1;
                     const C = x2 - x1;
@@ -677,7 +728,8 @@ const Player = {
                     const dot = A * C + B * D;
                     const len_sq = C * C + D * D;
                     let param = -1;
-                    if (len_sq != 0) //in case of 0 length line
+                    if (len_sq != 0)
+                        //in case of 0 length line
                         param = dot / len_sq;
 
                     let xx, yy;
@@ -685,12 +737,10 @@ const Player = {
                     if (param < 0) {
                         xx = x1;
                         yy = y1;
-                    }
-                    else if (param > 1) {
+                    } else if (param > 1) {
                         xx = x2;
                         yy = y2;
-                    }
-                    else {
+                    } else {
                         xx = x1 + param * C;
                         yy = y1 + param * D;
                     }
@@ -701,44 +751,47 @@ const Player = {
                 }
             });
 
-
             // CHECK IF COLLIDING WITH ANY ENDZONES
             if (Map.endZonesToCheck.length > 0) {
                 if (this.checkCollision(Map.endZonesToCheck)) {
-                    AudioHandler.playSound(AudioHandler.successAudio, false);
+                    // AudioHandler.successAudio.play()
                     UserInterface.handleRecord();
                     UserInterface.levelState = 3;
                 }
             }
         }
 
-
-
         // CHANGING CAMERA ZOOM and OFFSET BASED ON SPEED
         // add current zoom level to averager
-        this.speedCameraOffset.zoomAverager.pushValue(UserInterfaceCanvas.mapToRange(this.velocity.magnitude(), 100, 1100, 1.5, 0.5))
+        this.speedCameraOffset.zoomAverager.pushValue(
+            UserInterfaceCanvas.mapToRange(this.velocity.magnitude(), 100, 1100, 1.5, 0.5)
+        );
 
         // apply averager zoom to actual zoom
-        this.speedCameraOffset.zoom = this.speedCameraOffset.zoomAverager.getAverage()
+        this.speedCameraOffset.zoom = this.speedCameraOffset.zoomAverager.getAverage();
 
         // add current offset direction to averager
-        this.speedCameraOffset.dirAveragerX.pushValue(-this.velocity.x / 5)
-        this.speedCameraOffset.dirAveragerY.pushValue(-this.velocity.y / 5)
+        this.speedCameraOffset.dirAveragerX.pushValue(-this.velocity.x / 5);
+        this.speedCameraOffset.dirAveragerY.pushValue(-this.velocity.y / 5);
 
         // apply averager offset direction to actual offset direction
-        this.speedCameraOffset.direction.x = this.speedCameraOffset.dirAveragerX.getAverage()
-        this.speedCameraOffset.direction.y = this.speedCameraOffset.dirAveragerY.getAverage()
+        this.speedCameraOffset.direction.x = this.speedCameraOffset.dirAveragerX.getAverage();
+        this.speedCameraOffset.direction.y = this.speedCameraOffset.dirAveragerY.getAverage();
 
-
-
-        if (UserInterface.levelState == 3) { // SLOW DOWN MOVEMENT AFTER HITTING END ZONE
+        if (UserInterface.levelState == 3) {
+            // SLOW DOWN MOVEMENT AFTER HITTING END ZONE
             // if (this.endSlow > 0.02) {this.endSlow = (this.endSlow * 0.95);} else {this.endSlow = 0} // THIS NEEDS TO BE FPS INDEPENDENT
-            if (this.endSlow > 0) { this.endSlow -= 2 * dt } else { this.endSlow = 0 }
+            if (this.endSlow > 0) {
+                this.endSlow -= 2 * dt;
+            } else {
+                this.endSlow = 0;
+            }
 
             this.x += this.velocity.x * dt * this.endSlow; // MOVE FORWARD AT ANGLE BASED ON VELOCITY
             this.y += this.velocity.y * dt * this.endSlow;
 
-            if (this.jumpValue < 0) { // JUMPING
+            if (this.jumpValue < 0) {
+                // JUMPING
                 this.jumpValue = 0;
                 this.jumpVelocity = 200;
             } else {
@@ -753,11 +806,22 @@ const Player = {
     },
 
     checkCollision: function (arrayOfPlatformsToCheck) {
-
-        const playerPoligon = CanvasArea.createPoligon(this.x, this.y, 32, 32, this.lookAngle.getAngleInDegrees() * Math.PI / 180) // player angle converted to rads
+        const playerPoligon = CanvasArea.createPoligon(
+            this.x,
+            this.y,
+            32,
+            32,
+            (this.lookAngle.getAngleInDegrees() * Math.PI) / 180
+        ); // player angle converted to rads
 
         for (const platform of arrayOfPlatformsToCheck) {
-            const platformPoligon = CanvasArea.createPoligon(platform.x, platform.y, platform.width, platform.height, platform.angleRad)
+            const platformPoligon = CanvasArea.createPoligon(
+                platform.x,
+                platform.y,
+                platform.width,
+                platform.height,
+                platform.angleRad
+            );
 
             if (CanvasArea.doPolygonsIntersect(playerPoligon, platformPoligon)) {
                 return true; // breaks out of loop once at least one collision is detected
@@ -767,14 +831,13 @@ const Player = {
         return false;
     },
 
-
-
-    teleport: function () { // Called when player hits the water
+    teleport: function () {
+        // Called when player hits the water
         if (this.checkpointIndex !== -1) {
             this.x = Map.checkpoints[this.checkpointIndex].x;
             this.y = Map.checkpoints[this.checkpointIndex].y;
-            this.lookAngle.set(1, 0).rotate(Map.checkpoints[this.checkpointIndex].angle)
-            this.velocity.set(100, 0).rotate(this.lookAngle.getAngleInDegrees())
+            this.lookAngle.set(1, 0).rotate(Map.checkpoints[this.checkpointIndex].angle);
+            this.velocity.set(100, 0).rotate(this.lookAngle.getAngleInDegrees());
             this.jumpValue = 0;
             this.jumpVelocity = 200;
         } else {
@@ -782,18 +845,18 @@ const Player = {
         }
     },
 
-    restart: function () { // Called when user hits restart button (not when teleported from water)
+    restart: function () {
+        // Called when user hits restart button (not when teleported from water)
         this.x = this.restartX;
         this.y = this.restartY;
-        this.lookAngle.set(1, 0).rotate(this.restartAngle)
-        this.velocity.set(0, 0)
+        this.lookAngle.set(1, 0).rotate(this.restartAngle);
+        this.velocity.set(0, 0);
         this.jumpValue = 0;
         this.jumpVelocity = 2;
         this.endSlow = 1;
-        this.speedCameraOffset.zoomAverager.frames.fill(1.5, 0)
-        this.speedCameraOffset.zoom = 1.5
-        this.speedCameraOffset.dirAveragerX.frames.fill(0, 0)
-        this.speedCameraOffset.dirAveragerY.frames.fill(0, 0)
-
-    }
-}
+        this.speedCameraOffset.zoomAverager.frames.fill(1.5, 0);
+        this.speedCameraOffset.zoom = 1.5;
+        this.speedCameraOffset.dirAveragerX.frames.fill(0, 0);
+        this.speedCameraOffset.dirAveragerY.frames.fill(0, 0);
+    },
+};

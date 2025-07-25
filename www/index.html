@@ -1,62 +1,67 @@
 <!DOCTYPE html>
 <html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0, minimum-scale = 1, maximum-scale = 1, viewport-fit=cover, user-scalable = no"
+        />
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport"
-        content="width=device-width, initial-scale=1.0, minimum-scale = 1, maximum-scale = 1, viewport-fit=cover, user-scalable = no">
+        <title>Null Hop</title>
+        <meta name="description" content="A Tribute to Bhop" />
 
-    <title>Null Hop</title>
-    <meta name="description" content="A Tribute to Bhop" />
+        <link rel="stylesheet" type="text/css" href="css/index.css" />
 
-    <link rel="stylesheet" type="text/css" href="css/index.css" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black" />
 
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+        <link rel="icon" type="image/x-icon" href="assets/images/favicon.ico" />
 
-    <link rel="icon" type="image/x-icon" href="assets/images/favicon.ico">
-
-    <!-- Cordova's default header stuff. -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: https://ssl.gstatic.com 'unsafe-eval'; 
+        <!-- Cordova's default header stuff. -->
+        <meta
+            http-equiv="Content-Security-Policy"
+            content="default-src 'self' data: https://ssl.gstatic.com 'unsafe-eval'; 
         style-src 'self' 'unsafe-inline'; 
         media-src 'self' file:; 
-        img-src 'self' blob: data: content:;">
+        img-src 'self' blob: data: content:;"
+        />
 
-    <meta name="format-detection" content="telephone=no">
-    <meta name="msapplication-tap-highlight" content="no">
-    <meta name="color-scheme" content="light dark">
+        <meta name="format-detection" content="telephone=no" />
+        <meta name="msapplication-tap-highlight" content="no" />
+        <meta name="color-scheme" content="light dark" />
+    </head>
 
-</head>
+    <body>
+        <img id="menu_background" src="assets/images/menu_background.png" style="display: none" />
 
-<body>
+        <audio id="surfacing" src="assets/audio/surfacing.mp3"></audio>
+        <audio id="JumpSFX" src="assets/audio/JumpSFX.mp3"></audio>
 
-    <img id="menu_background" src="assets/images/menu_background.png" style="display:none;" />
+        <script src="cordova.js"></script>
+        <script src="js/index.js"></script>
 
+        <!-- <script src="js/howler.core.min.js"></script> -->
 
-    <script src="cordova.js"></script>
-    <script src="js/index.js"></script>
+        <script src="js/Utilities.js"></script>
 
-    <script src="js/Button.js"></script>
-    <script src="js/SliderUI.js"></script>
-    <script src="js/Vector2D3D.js"></script>
-    <script src="js/Averager.js"></script>
-    <!-- <script src="js/QueueItem.js"></script> -->
+        <script src="js/Button.js"></script>
+        <script src="js/SliderUI.js"></script>
+        <script src="js/Vector2D3D.js"></script>
+        <script src="js/Averager.js"></script>
+        <!-- <script src="js/QueueItem.js"></script> -->
 
-    <script src="js/CanvasArea.js"></script>
-    <script src="js/PlayerCanvas.js"></script>
-    <script src="js/TouchHandler.js"></script>
-    <script src="js/AudioHandler.js"></script>
-    <script src="js/UserInterface.js"></script>
-    <script src="js/UserInterfaceCanvas.js"></script>
-    <script src="js/MapBrowser.js"></script>
-    <script src="js/MapEditor.js"></script>
-    <script src="js/ColorPicker.js"></script>
-    <script src="js/PreviewWindow.js"></script>
-    <script src="js/Tutorial.js"></script>
-    <script src="js/Map.js"></script>
-    <script src="js/Player.js"></script>
-
-
-</body>
-
+        <script src="js/CanvasArea.js"></script>
+        <script src="js/PlayerCanvas.js"></script>
+        <script src="js/TouchHandler.js"></script>
+        <script src="js/AudioHandler.js"></script>
+        <script src="js/UserInterface.js"></script>
+        <script src="js/UserInterfaceCanvas.js"></script>
+        <script src="js/MapBrowser.js"></script>
+        <script src="js/MapEditor.js"></script>
+        <script src="js/ColorPicker.js"></script>
+        <script src="js/PreviewWindow.js"></script>
+        <script src="js/Tutorial.js"></script>
+        <script src="js/Map.js"></script>
+        <script src="js/Player.js"></script>
+    </body>
 </html>

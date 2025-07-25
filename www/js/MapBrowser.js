@@ -41,7 +41,6 @@ const MapBrowser = { // should set back to 0 at some points
 
             // access file system and set up all nessasary map buttons for the browser type
             // a horrible nested mess but it keeps everything firing in the right sequence
-            // function initCustomMapBrowser(path){
 
             window.resolveLocalFileSystemURL(cordova.file.dataDirectory + "maps", function (fileSystem) {
                 var reader = fileSystem.createReader();
