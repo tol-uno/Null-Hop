@@ -37,7 +37,7 @@ function readFile(baseDirectory = "local", subDirectory = "", fileName, readData
                     (subDirEntry) => {
                         // Step 3: Get the file inside the subdirectory
                         subDirEntry.getFile(
-                            fileName,Re
+                            fileName,
                             { create: false },
                             (fileEntry) => {
                                 // Step 4: Read the file using the appropriate FileReader method

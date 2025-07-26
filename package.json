@@ -16,8 +16,7 @@
     "cordova-browser": "^7.0.0",
     "cordova-ios": "^7.1.1",
     "cordova-plugin-device": "^2.1.0",
-    "cordova-plugin-file": "^8.0.1",
-    "cordova-plugin-media": "^7.0.0"
+    "cordova-plugin-file": "^8.0.1"
   },
   "cordova": {
     "platforms": [
@@ -26,10 +25,7 @@
     ],
     "plugins": {
       "cordova-plugin-device": {},
-      "cordova-plugin-file": {},
-      "cordova-plugin-media": {
-        "KEEP_AVAUDIOSESSION_ALWAYS_ACTIVE": "NO"
-      }
+      "cordova-plugin-file": {}
     }
   }
 }

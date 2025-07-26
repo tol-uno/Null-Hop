@@ -20,8 +20,6 @@ const CanvasArea = {
         this.ctx = this.canvas.getContext('2d', { alpha: false });
         document.body.insertBefore(this.canvas, document.body.childNodes[0]);
 
-        UserInterface.start(); // need to be ran here after canvas is resized in CanvasArea.start()
-
         prevDateNow = performance.now()
 
         //this.interval = setInterval(updateGameArea, 1000 / 60); // Number sets the taget frame rate. 1000/FPS 

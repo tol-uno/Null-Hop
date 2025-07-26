@@ -1,0 +1,21 @@
+{
+    "name": "cordova-plugin-override-mute-switch-ios",
+    "version": "1.0.0",
+    "description": "A Cordova plugin to override the iOS mute switch and force audio playback.",
+    "cordova": {
+      "id": "cordova-plugin-override-mute-switch-ios",
+      "platforms": ["ios"]
+    },
+    "keywords": [
+      "cordova",
+      "plugin",
+      "ios",
+      "audio",
+      "mute",
+      "switch",
+      "override"
+    ],
+    "author": "Your Name",
+    "license": "MIT"
+}
+  

@@ -683,7 +683,7 @@ const Player = {
 
                 // play random jump sound
                 // AudioHandler.playSound(AudioHandler[`jump${Math.floor(Math.random() * 3) + 1}Audio`], true);
-                // AudioHandler.jumpSoundHowler.play();
+                AudioHandler.playAudio(AudioHandler.JumpSFXBuffer, { volume: 0.8 })
 
                 if (
                     !this.checkCollision(
@@ -691,7 +691,7 @@ const Player = {
                     )
                 ) {
                     // checkCollision on an array of just renderedPlatforms (no walls)
-                    // AudioHandler.splashAudio.play();
+                    AudioHandler.playAudio(AudioHandler.splashBuffer, { volume: 0.4 })
                     this.speedCameraOffset.zoomAverager.clear();
                     this.teleport();
                 }
@@ -754,7 +754,7 @@ const Player = {
             // CHECK IF COLLIDING WITH ANY ENDZONES
             if (Map.endZonesToCheck.length > 0) {
                 if (this.checkCollision(Map.endZonesToCheck)) {
-                    // AudioHandler.successAudio.play()
+                    AudioHandler.playAudio(AudioHandler.successBuffer, { volume: 0.6 })
                     UserInterface.handleRecord();
                     UserInterface.levelState = 3;
                 }

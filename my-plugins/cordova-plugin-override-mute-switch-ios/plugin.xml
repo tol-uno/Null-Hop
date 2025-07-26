@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin id="cordova-plugin-override-mute-switch-ios"
+        version="1.0.0"
+        xmlns="http://apache.org/cordova/ns/plugins/1.0">
+
+  <name>OverrideMuteSwitchIOS</name>
+
+  <js-module src="www/OverrideMuteSwitchIOS.js" name="OverrideMuteSwitchIOS">
+    <clobbers target="OverrideMuteSwitchIOS" />
+  </js-module>
+
+    <!-- ios -->
+    <platform name="ios">
+        <source-file src="src/ios/OverrideMuteSwitchIOS.m" />
+        <header-file src="src/ios/OverrideMuteSwitchIOS.h" />
+        <resource-file src="src/ios/test-sound.mp3" />
+
+        <config-file parent="/*" target="config.xml">
+        <feature name="OverrideMuteSwitchIOS">
+            <param name="ios-package" value="OverrideMuteSwitchIOS" />
+            <param name="onload" value="true" />
+        </feature>
+        </config-file>
+    </platform>
+
+</plugin>

@@ -15,20 +15,6 @@ const TouchHandler = {
     averageDragX: new Averager(30),
     averageDragY: new Averager(30),
 
-    /*
-    
-    New theory
-    The event Listeners run whenever regardles of fram rate. 
-    Therfore previous touch is updated ouside of the frame's view
-    Therefore the touch is shorter than it should be
-
-    Removing setting previousX in touchmove fixed the issue but introduced a bug
-    Using the two finger method is broken
-    When a touch is released the previousX is still where the release was
-    The distance from where the release was and where the current touch is, is fucked up
-    
-    */
-
 
     init: function () {
         window.addEventListener("touchstart", e => {
@@ -75,9 +61,6 @@ const TouchHandler = {
                 // updating this touch within this.touches
                 const touchIndex = this.touches.findIndex(t => t.identifier == touch.identifier)
 
-                // WE DONT WANT TO UPDATE PREVIOUS TOUCH HERE KILL
-                // this.touches[touchIndex].previousX = this.touches[touchIndex].x
-                // this.touches[touchIndex].previousY = this.touches[touchIndex].y
                 this.touches[touchIndex].x = touch.x
                 this.touches[touchIndex].y = touch.y
             }

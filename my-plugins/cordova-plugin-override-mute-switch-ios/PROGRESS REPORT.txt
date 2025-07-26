@@ -1,0 +1,47 @@
+Cordova iOS Mute Switch Override Summary
+
+Goal:
+I’m building a mobile-only Cordova game that uses the Web Audio API to play sound. I want the game to play audio even when the iOS device's mute switch is turned ON, similar to how many games behave on iPhone.
+
+Problem:
+By default, iOS mutes WebView audio (including Web Audio API) when the device's mute switch is ON, even if the audio is playing correctly in JavaScript.
+
+Despite correctly using the Web Audio API in my game (via a custom AudioHandler), audio doesn’t play while the mute switch is active.
+
+Attempted Solution:
+We explored creating a custom Cordova plugin to override iOS's mute behavior. The plugin does the following:
+
+Sets the audio session category to AVAudioSessionCategoryPlayback using native Objective-C.
+Activates the session with [session setActive:YES].
+Confirms it’s wired up correctly by sending success callbacks and console logs from both Objective-C and JavaScript.
+I named the plugin cordova-plugin-override-mute-switch-ios.
+
+Test Method:
+We added a method to the plugin to play a native MP3 file using AVAudioPlayer. A silent version of this file was created to allow continuous playback without audible interference.
+
+We tested:
+
+Playing the file once via JavaScript (OverrideMuteSwitchIOS.playTestSound())
+Repeatedly playing it with setInterval()
+Setting it to loop indefinitely via Objective-C with audioPlayer.numberOfLoops = -1
+The goal was to hold the AVAudioSession open, tricking iOS into allowing Web Audio playback despite the mute switch being on.
+
+Result:
+Although the native sound plays perfectly even while the mute switch is on, Web Audio remains muted in the WebView, even with the silent loop running continuously in the background.
+
+This suggests that the active AVAudioSession from native playback does not consistently enable audio playback for Web Audio API in Cordova WebViews — at least not on the test device used.
+
+Status:
+As of now, the approach successfully verifies:
+
+The Cordova plugin is functional
+Native audio plays while muted
+Web Audio remains silent while muted — even when AVAudioSession is held open via a looping native sound
+Next Steps (for future ChatGPT sessions):
+When I return to this problem, possible follow-ups might include:
+
+Alternative strategies for unmuting Web Audio in iOS WebViews (e.g. WebKit flags, iOS-specific hacks, using native audio for core sounds)
+Investigating whether hybrid or Capacitor apps solve this more reliably
+Verifying if this issue persists across multiple iOS versions or devices
+Embedding audio natively via AVAudioPlayer or integrating audio playback into a custom native view controller.
+Exploring use of the Media plugin or background audio permissions as a workaround.

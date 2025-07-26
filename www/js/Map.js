@@ -25,50 +25,7 @@ const Map = {
         }
         
         this.parseMapData(JSON.parse(mapDataRaw))
-
-        // kill kill kill \/
-    /*
-        // GET MAP DIRECTLY THROUGH CORDOVA LOCAL STORAGE  (NORMAL MAP)          
-        const mapURL = cordova.file.applicationDirectory + "www/assets/maps/"
-
-        window.resolveLocalFileSystemURL(mapURL, (dirEntry) => {
-
-            dirEntry.getFile(name + ".json", { create: false, exclusive: false }, (fileEntry) => {
-                console.log("fileEntry:")
-                console.log(fileEntry)
-
-                fileEntry.file((file) => {
-
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        this.parseMapData(JSON.parse(e.target.result))
-                    };
-                    reader.onerror = (e) => alert(e.target.error.name);
-
-                    reader.readAsText(file)
-                })
-            })
-        })
-        */
     },
-
-    /*
-    kill
-    initCustomMap: async function (name) { // initializing a custom map
-        this.platforms = [];
-        this.playerStart = null;
-        this.style = null;
-        this.checkpoints = [];
-        this.upperShadowClip = new Path2D()
-        this.endZoneShadowClip = new Path2D()
-        this.name = name;
-
-
-        const mapDataRaw = await readFile("device", "maps", name + ".json", "text");
-        this.parseMapData(JSON.parse(mapDataRaw))
-
-    },
-    */
 
     // Big function that parses the map data, sets up lighting, shadows, shadow clips, etc
     parseMapData: function (jsonData) {

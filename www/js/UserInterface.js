@@ -106,7 +106,7 @@ const UserInterface = {
                 btn_debugText.func(true)
                 btn_strafeHUD.func(true)
                 btn_playTutorial.func(true)
-                AudioHandler.setVolumes();
+                AudioHandler.setVolume(UserInterface.settings.volume);
 
                 console.log("records and settings cleared")
             }
@@ -120,8 +120,8 @@ const UserInterface = {
 
         btn_volumeSlider = new SliderUI(160, 160, 230, 0, 1, 10, "Volume", UserInterface.settings.volume, function () {
             UserInterface.settings.volume = this.value
+            AudioHandler.setVolume(UserInterface.settings.volume);
             UserInterface.writeSettings()
-            AudioHandler.setVolumes();
         })
 
         btn_debugText = new Button(270, 210, 60, "toggle_button", "toggle_button_pressed", 1, "", function (sync) {
@@ -1296,14 +1296,15 @@ const UserInterface = {
                     top: ${btn_shareMap.y}px;
                     width: ${btn_shareMap.width}px;
                     height: ${btn_shareMap.height}px;
-                    // border: solid 2px blue;
+                    border: solid 2px blue;
+                    z-index: 2;
                 `
 
                 shareDiv.addEventListener("click", async () => {
 
                     if (MapBrowser.selectedMapIndex != -1) {
 
-                        const mapDataRaw = await UserInterface.readFile(MapBrowser.selectedMapIndex + ".json", "maps")
+                        const mapDataRaw = await readFile("device", "maps/", MapBrowser.selectedMapIndex + ".json", "text")
 
                         const share_data = {
                             title: MapBrowser.selectedMapIndex, // doesnt do anything on IOS
@@ -1888,7 +1889,40 @@ const UserInterface = {
         this.leaderboards = JSON.parse(leaderboardData)
     },
 
+
     getSettings: async function () {
+        try {
+            const settingsData = await readFile("device", "", "settings.json", "text");
+            this.settings = JSON.parse(settingsData);
+        } catch (error) {
+            if (error === "Failed to getFile: 1") {
+                // File doesn't exist: initialize default settings
+                this.settings = {
+                    sensitivity: 0.5,
+                    volume: 0.1,
+                    debugText: 0,
+                    strafeHUD: 1,
+                    playTutorial: 1
+                };
+                this.writeSettings();
+                
+            } else {
+                console.error("Error while getting settings:", error);
+                return;
+            }
+        }
+    
+        // Sync UI after settings are ready
+        btn_sensitivitySlider.updateState(UserInterface.settings.sensitivity)
+        btn_volumeSlider.updateState(UserInterface.settings.volume)
+        btn_debugText.func(true)
+        btn_strafeHUD.func(true)
+        btn_playTutorial.func(true)
+        AudioHandler.setVolume(UserInterface.settings.volume);
+    },
+    
+    /*
+    getSettingsOLD: async function () {
         try {
             const settingsData = await readFile("device", "", "settings.json", "text");
             this.settings = JSON.parse(settingsData);
@@ -1899,8 +1933,7 @@ const UserInterface = {
             btn_debugText.func(true)
             btn_strafeHUD.func(true)
             btn_playTutorial.func(true)
-
-            AudioHandler.setVolumes();
+            AudioHandler.setVolume(UserInterface.settings.volume);
 
         } catch (error) {
             if (error == "Failed to getFile: 1") { // file doesnt exist
@@ -1922,13 +1955,14 @@ const UserInterface = {
                 btn_debugText.func(true)
                 btn_strafeHUD.func(true)
                 btn_playTutorial.func(true)
-                AudioHandler.setVolumes();
+                AudioHandler.setVolume(UserInterface.settings.volume);
 
             } else {
                 console.error("Error while getting settings:", error);
             }
         }
     },
+    */
 
     writeSettings: function () {
         const settingsBlob = new Blob([JSON.stringify(this.settings, null, 2)], { type: "application/json" });
