@@ -473,166 +473,182 @@ const Map = {
     },
 
 
-    renderPlatformShadow: function (platform) {
+    renderPlatform: function (ctx, MapData, platform) {
+        const adjustedHeight = platform.wall ? MapData.style.wallHeight : 0; // for adding height to walls
 
-        // where to pull syles from: Map or PreviewWindow
-        const MapData = UserInterface.gamestate == 7 ? MapEditor.loadedMap : Map
+        // DRAW BACKGROUND HULL
+        ctx.fillStyle = platform.shaded_topColor;
+
+        ctx.beginPath();
+        ctx.moveTo(platform.x + platform.hull[0][0], platform.y + platform.hull[0][1]);
+        for (let i = platform.hull.length - 1; i > 0; i--) {
+            ctx.lineTo(platform.x + platform.hull[i][0], platform.y + platform.hull[i][1]);
+        }
+        ctx.closePath();
+        ctx.fill();
+
+        // SIDES OF PLATFORMS
+        // THESE SHOULD BE SAVED BY MAPEDITOR IN GLOBAL COORDS ALREADY
+        // platform angles should only be max of 45 and -45 in mapData
+        // corners array order: BL BR TR TL
+
+        // ALWAYS RENDER BOTTOM SIDE. side2
+        ctx.fillStyle = platform.shaded_sideColor2;
+        ctx.beginPath();
+        ctx.moveTo(
+            platform.x + platform.corners[1][0],
+            platform.y + platform.corners[1][1] - adjustedHeight
+        ); // BR
+        ctx.lineTo(
+            platform.x + platform.corners[0][0],
+            platform.y + platform.corners[0][1] - adjustedHeight
+        ); // BL
+        ctx.lineTo(
+            platform.x + platform.corners[0][0],
+            platform.y + platform.corners[0][1] + MapData.style.platformHeight
+        ); // BL + height
+        ctx.lineTo(
+            platform.x + platform.corners[1][0],
+            platform.y + platform.corners[1][1] + MapData.style.platformHeight
+        ); // BR + height
+        ctx.closePath();
+        ctx.fill();
+
+        if (platform.angle < 0) {
+            // side1 left side
+            ctx.fillStyle = platform.shaded_sideColor1;
+            ctx.beginPath();
+            ctx.moveTo(
+                platform.x + platform.corners[0][0],
+                platform.y + platform.corners[0][1] - adjustedHeight
+            ); // BL
+            ctx.lineTo(
+                platform.x + platform.corners[3][0],
+                platform.y + platform.corners[3][1] - adjustedHeight
+            ); // TL
+            ctx.lineTo(
+                platform.x + platform.corners[3][0],
+                platform.y + platform.corners[3][1] + MapData.style.platformHeight
+            ); // TL + height
+            ctx.lineTo(
+                platform.x + platform.corners[0][0],
+                platform.y + platform.corners[0][1] + MapData.style.platformHeight
+            ); // BL + height
+            ctx.closePath();
+            ctx.fill();
+        } else if (platform.angle > 0) {
+            // side3 right side
+            ctx.fillStyle = platform.shaded_sideColor3;
+            ctx.beginPath();
+            ctx.moveTo(
+                platform.x + platform.corners[1][0],
+                platform.y + platform.corners[1][1] - adjustedHeight
+            ); // BR
+            ctx.lineTo(
+                platform.x + platform.corners[2][0],
+                platform.y + platform.corners[2][1] - adjustedHeight
+            ); // TR
+            ctx.lineTo(
+                platform.x + platform.corners[2][0],
+                platform.y + platform.corners[2][1] + MapData.style.platformHeight
+            ); // TR + height
+            ctx.lineTo(
+                platform.x + platform.corners[1][0],
+                platform.y + platform.corners[1][1] + MapData.style.platformHeight
+            ); // BR + height
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        // PLATFORM RENDERING DEBUG TEXT
+        /*
+        if (UserInterface.settings.debugText == 1) {
+            ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
+            ctx.font = "12px BAHNSCHRIFT"
+            ctx.fillText("angle: " + platform.angle, 0, 20);
+            ctx.fillText("position: " + platform.x + ", " + platform.y, 0 , 40)
+            ctx.fillText("size: " + platform.width + ", " + platform.height, 0 , 60)
+            
+            // Drawing split line
+            ctx.strokeStyle = "#00FF00"
+            ctx.lineWidth = 1
+            ctx.beginPath()
+            ctx.moveTo(platform.leftMostCornerX, platform.leftMostCornerY)
+            ctx.lineTo(platform.rightMostCornerX, platform.rightMostCornerY)
+            ctx.stroke()
+        }
+        */
+    },
+
+
+    render: function () {
+        // Renders Player lower shadow, platforms shadows, platforms, and checkpoints
+
+        /*
+        Map rendering pipeline:
+
+        Scale And Translate canvas.ctx origin (which == map origin) so that player is drawn in middle of canvas
+        Draw lower Player shadow
+        Draw all platform shadows (one draw call)
+
+        */
 
         const ctx = CanvasArea.ctx;
-        ctx.save(); // #21
-        ctx.translate(platform.x, platform.y);
 
+        // Where to pull syles from: Map or PreviewWindow
+        const MapData = UserInterface.gamestate == 7 ? MapEditor.loadedMap : Map;
+
+        ctx.save(); // #19
+
+        const camera = Player.speedCameraOffset;
+
+        const cameraTargetX = Player.x - camera.direction.x;
+        const cameraTargetY = Player.y - camera.direction.y;
+        
+        const translateX = midX - cameraTargetX * camera.zoom;
+        const translateY = midY - cameraTargetY * camera.zoom;
+
+        // old code that does the same but isnt as logically understandle
+        // const translateX = midX - (Player.x - camera.direction.x) * camera.zoom;
+        // const translateY = midY - (Player.y - camera.direction.y) * camera.zoom;
+
+        ctx.setTransform(camera.zoom, 0, 0, camera.zoom, translateX, translateY);
+
+        // Set color for all shadows
         ctx.fillStyle = MapData.style.shadow_backgroundColor;
 
         ctx.beginPath();
 
-        // console.log(platform.shadowPoints)
-        ctx.moveTo(platform.shadowPoints[0][0], platform.shadowPoints[0][1]); // this comes up in debug a lot. last time was because of wrong references to platforms and styles arrays
-        for (let i = platform.shadowPoints.length - 1; i > 0; i--) {
-            ctx.lineTo(platform.shadowPoints[i][0], platform.shadowPoints[i][1]);
+
+        // RENDER PLAYER LOWER SHADOW. FIX!! NOT ROTATED -- ADD ROTATIION ONCE PLAYER VERTECES ARE ACCESABLE.
+        // ALSO JUST PLOT POLYGON AND THEN FILL ALONG WITH ALL THE PLATFORM SHADOWS BELOW
+        // ctx.rotate((this.lookAngle.getAngleInDegrees() * Math.PI) / 180); // rotating canvas OLD CODE
+        ctx.fillRect(Player.x - 15, Player.y - 15 + MapData.style.platformHeight, 30, 30)
+
+        // DRAW ALL SHADOWS IN renderedPlatforms
+        for (const platform of this.renderedPlatforms) {
+            ctx.moveTo(platform.x + platform.shadowPoints[0][0], platform.y + platform.shadowPoints[0][1]);
+            for (let i = platform.shadowPoints.length - 1; i > 0; i--) {
+                ctx.lineTo(platform.x + platform.shadowPoints[i][0], platform.y + platform.shadowPoints[i][1]);
+            }
+            ctx.closePath();
         }
-
-        ctx.closePath();
-        ctx.fill();
+        ctx.fill() // Fill all lower shadows (players and platforms)
 
 
-        ctx.restore(); // #21
-    },
-
-
-    renderPlatform: function (platform) { // seperate function to render platforms so that it can be called at different times (ex. called after drawing Player inorder to render infront)
-
-        const ctx = CanvasArea.ctx;
-
-        // determine whether rendering for Map or PreviewWindow
-        const MapData = UserInterface.gamestate == 7 ? MapEditor.loadedMap : Map
-        const adjustedHeight = platform.wall ? MapData.style.wallHeight : 0 // for adding height to walls
-
-
-        // DRAW BACKGROUND HULL
-        ctx.save()
-        ctx.translate(platform.x, platform.y)
-        ctx.fillStyle = platform.shaded_topColor
-
-        ctx.beginPath()
-        ctx.moveTo(platform.hull[0][0], platform.hull[0][1]) // this comes up in debug a lot. last time was because of wrong references to platforms and styles arrays
-        for (let i = platform.hull.length - 1; i > 0; i--) {
-            ctx.lineTo(platform.hull[i][0], platform.hull[i][1])
+        // DRAW ALL PLATFORMS IN renderedPlatforms
+        for (const platform of this.renderedPlatforms) {
+            Map.renderPlatform(ctx, MapData, platform);
         }
-        ctx.closePath()
-        ctx.fill()
-
-        ctx.restore()
-
-
-
-        // DRAW PLATFORM TOP (using moveTo, lineTo, and fill with platform's corners)
-        ctx.save()
-
-        ctx.translate(platform.x, platform.y - adjustedHeight)
-        ctx.fillStyle = platform.shaded_topColor
-        ctx.beginPath()
-        ctx.moveTo(platform.corners[0][0], platform.corners[0][1]) // BL corner
-        ctx.lineTo(platform.corners[1][0], platform.corners[1][1]) // BR corner
-        ctx.lineTo(platform.corners[2][0], platform.corners[2][1]) // TR corner
-        ctx.lineTo(platform.corners[3][0], platform.corners[3][1]) // TL corner
-        ctx.closePath()
-        ctx.fill()
-
-        ctx.restore()
-
-
-        // SIDES OF PLATFORMS
-        // platform angles should only be max of 45 and -45 in mapData
-        // corners array order: BL BR TR TL
-
-        ctx.save() // ALWAYS RENDER BOTTOM SIDE. side2
-        ctx.translate(platform.x, platform.y)
-        ctx.fillStyle = platform.shaded_sideColor2
-        ctx.beginPath()
-        ctx.moveTo(platform.corners[1][0], platform.corners[1][1] - adjustedHeight); // BR
-        ctx.lineTo(platform.corners[0][0], platform.corners[0][1] - adjustedHeight); // BL
-        ctx.lineTo(platform.corners[0][0], platform.corners[0][1] + MapData.style.platformHeight); // BL + height
-        ctx.lineTo(platform.corners[1][0], platform.corners[1][1] + MapData.style.platformHeight); // BR + height
-        ctx.closePath()
-        ctx.fill()
-
-        if (platform.angle > 0) { // side3 right side
-            ctx.fillStyle = platform.shaded_sideColor3
-            ctx.beginPath()
-            ctx.moveTo(platform.corners[1][0], platform.corners[1][1] - adjustedHeight); // BR
-            ctx.lineTo(platform.corners[2][0], platform.corners[2][1] - adjustedHeight); // TR
-            ctx.lineTo(platform.corners[2][0], platform.corners[2][1] + MapData.style.platformHeight); // TR + height
-            ctx.lineTo(platform.corners[1][0], platform.corners[1][1] + MapData.style.platformHeight); // BR + height
-            ctx.closePath()
-            ctx.fill()
-        }
-
-        if (platform.angle < 0) { // side1 left side
-            ctx.fillStyle = platform.shaded_sideColor1
-            ctx.beginPath()
-            ctx.moveTo(platform.corners[0][0], platform.corners[0][1] - adjustedHeight); // BL
-            ctx.lineTo(platform.corners[3][0], platform.corners[3][1] - adjustedHeight); // TL
-            ctx.lineTo(platform.corners[3][0], platform.corners[3][1] + MapData.style.platformHeight); // TL + height
-            ctx.lineTo(platform.corners[0][0], platform.corners[0][1] + MapData.style.platformHeight); // BL + height
-            ctx.closePath()
-            ctx.fill()
-        }
-
-        // PLATFORM RENDERING DEBUG TEXT
-        if (UserInterface.settings.debugText == 1) {
-            ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
-            ctx.font = "12px BAHNSCHRIFT"
-            // ctx.fillText("angle: " + platform.angle, 0, 20);
-            // ctx.fillText("position: " + platform.x + ", " + platform.y, 0 , 40)
-            // ctx.fillText("size: " + platform.width + ", " + platform.height, 0 , 60)
-        }
-
-        // Drawing split line
-        // ctx.strokeStyle = "#00FF00"
-        // ctx.lineWidth = 1
-        // ctx.beginPath()
-        // ctx.moveTo(platform.leftMostCornerX, platform.leftMostCornerY)
-        // ctx.lineTo(platform.rightMostCornerX, platform.rightMostCornerY)
-        // ctx.stroke()
-
-        ctx.restore()
-    },
-
-
-    render: function () { // Renders Player lower shadow, platforms shadows, platforms, and checkpoints
-
-
-        const ctx = CanvasArea.ctx;
-
-        ctx.save(); // #19
-        ctx.scale(Player.speedCameraOffset.zoom, Player.speedCameraOffset.zoom)
-
-        ctx.translate(
-            (CanvasArea.canvas.width / Player.speedCameraOffset.zoom - CanvasArea.canvas.width) / 2 + Player.speedCameraOffset.direction.x,
-            (CanvasArea.canvas.height / Player.speedCameraOffset.zoom - CanvasArea.canvas.height) / 2 + Player.speedCameraOffset.direction.y,
-        )
-
-        ctx.translate(-Player.x + midX, -Player.y + midY); // move canvas when drawing platforms then restore. midX is center of canvas width
-
-        Player.renderLowerShadow()
-
-        // LOOP TO DRAW renderedPlatforms SHADOWS
-        this.renderedPlatforms.forEach(platform => {
-            Map.renderPlatformShadow(platform)
-        })
-
-        // LOOP TO DRAW renderedPlatforms PLATFORMS
-        this.renderedPlatforms.forEach(platform => {
-            Map.renderPlatform(platform)
-        })
 
 
         // Draw checkpoints if Debugging
         if (UserInterface.settings.debugText == 1) {
-            this.checkpoints.forEach(checkpoint => {
-                ctx.strokeStyle = UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1
-                ctx.lineWidth = 4
+            this.checkpoints.forEach((checkpoint) => {
+                ctx.strokeStyle = UserInterface.darkMode
+                    ? UserInterface.darkColor_1
+                    : UserInterface.lightColor_1;
+                ctx.lineWidth = 4;
                 ctx.beginPath();
                 ctx.moveTo(checkpoint.triggerX1, checkpoint.triggerY1);
                 ctx.lineTo(checkpoint.triggerX2, checkpoint.triggerY2);
@@ -640,8 +656,7 @@ const Map = {
             });
         }
 
-
         ctx.restore(); // #19
-
     },
+
 }

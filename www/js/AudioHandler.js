@@ -1,9 +1,6 @@
 const AudioHandler = {
-
-    /* 
-    use cordova file plugin to read mp3 data
-    use web audio to play sounds
-    */
+    // use cordova file plugin to read mp3 data
+    // use web audio to play sounds
 
     init: function () {
         this.audioContext = new AudioContext();
