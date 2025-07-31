@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="com.masonpowers.www" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+<widget id="com.mel.www" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>Null Hop</name>
     <description>A Jumping Journey</description>
     <author email="masonpowers46@gmail.com" href="https://masonpowers.com">
@@ -26,8 +26,16 @@
         <preference name="SuppressesLongPressGesture" value="true" />
         <preference name="Suppresses3DTouchGesture" value="true" />
         <preference name="Allow3DTouchLinkPreview" value="false" />
+        <preference name="deployment-target" value="12.0" />
 
-
+        <!-- These are set to suppress messages in xcode console -->
+        <preference name="AllowNewWindows" value="false" />
+        <preference name="AllowsAirPlayForMediaPlayback" value="true" />
+        <preference name="LimitsNavigationsToAppBoundDomains" value="false" />
+        <preference name="InspectableWebview" value="true" />
+        <preference name="AllowBackForwardNavigationGestures" value="false" />
+        <preference name="AutoHideSplashScreen" value="true" />
+        
         <!-- APP ICONS -->
         <!-- iphone notification 20pt -->
         <icon src="res/ios/icon-20@2x.png" width="40" height="40" />

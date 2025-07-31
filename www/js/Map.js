@@ -598,7 +598,7 @@ const Map = {
         // Where to pull syles from: Map or PreviewWindow
         const MapData = UserInterface.gamestate == 7 ? MapEditor.loadedMap : Map;
 
-        ctx.save(); // #19
+        // ctx.save(); // #19 kill
 
         const camera = Player.speedCameraOffset;
 
@@ -656,7 +656,8 @@ const Map = {
             });
         }
 
-        ctx.restore(); // #19
+        ctx.setTransform(1, 0, 0, 1, 0, 0); // resets ctx to identity matrix
+        // ctx.restore(); // #19
     },
 
 }
