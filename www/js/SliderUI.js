@@ -44,7 +44,7 @@ class SliderUI {
         // draw highlight color in slider handle
         ctx.fillStyle = (!UserInterface.darkMode) ? UserInterface.darkColor_1: UserInterface.lightColor_1;
         ctx.beginPath();
-        ctx.arc(this.sliderX, this.y, 7, 0, 2 * Math.PI);
+        ctx.arc(this.sliderX, this.y, 5, 0, 2 * Math.PI);
         ctx.fill();
     }
 

@@ -1,8 +1,8 @@
 document.addEventListener("deviceready", onDeviceReady, false);
 
 // change these 3 to const
-let airAcceleration = 100; // the sharpness your allowed to turn at
-let maxVelocity = 30; // wish_speed is clipped to this in quake. Here, maxVelocity replaces wish_speed
+let airAcceleration = 150; // the sharpness your allowed to turn at
+let maxVelocity = 32; // wish_speed is clipped to this in quake. Here, maxVelocity replaces wish_speed
 let gravity = 500;
 let prevDateNow;
 let dt = 1 / 60; // delta time always has a 1 frame delay

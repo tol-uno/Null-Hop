@@ -59,28 +59,191 @@ const UserInterface = {
         // CREATING THE BUTTONS []  []  [] 
 
         // Main Menu BUTTONS
-        btn_play = new Button("midX_UI - 69", 140, 138, "play_button", "", 0, "", function () {
+        btn_play = new Button(midX_UI - 55, 148, 110, "play_button", "", 0, "", function () {
             UserInterface.gamestate = 2;
             UserInterface.renderedButtons = UserInterface.btnGroup_standardMapBrowser
             MapBrowser.state = 1;
             MapBrowser.init()
         })
 
-        btn_settings = new Button("midX_UI - 90", 215, 180, "settings_button", "", 0, "", function () {
+        btn_settings = new Button(midX_UI - 83, 228, 166, "settings_button", "", 0, "", function () {
             UserInterface.gamestate = 3;
             UserInterface.renderedButtons = UserInterface.btnGroup_settings
         })
 
-        btn_mapEditor = new Button("midX_UI - 110", 290, 220, "map_editor_button", "", 0, "", function () {
-            UserInterface.gamestate = 7;
-            MapEditor.editorState = 0;
-            UserInterface.renderedButtons = UserInterface.btnGroup_mapEditorMenu;
+        btn_mapEditor = new Button(midX_UI - 99.5, 308, 199, "map_editor_button", "", 0, "", function () {
+            
+            MapEditor.editorState = 5;
+
+            UserInterface.gamestate = 2;
+
+            UserInterface.renderedButtons = UserInterface.btnGroup_mapEditorBrowser;
+
+            // ADDING DIV OVERLAY FOR SHARE BUTTON
+            btn_shareMap.func(true) // runs the createDiv function of the button
+
+            MapBrowser.state = 2
+            MapBrowser.init()
         })
 
 
+        // IN LEVEL Buttons
+        btn_mainMenu = new Button(44, 40, 68, "x_button", "", 0, "", function () {
+
+            // UserInterface.gamestate
+            // 1: main menu
+            // 2: level select (MapBrowser)
+            // 3: settings
+            // 4: store
+            // 5: loading map page
+            // 6: in level
+            // 7: in map editor
+
+            // UserInterface.levelState
+            // 1 = pre-start
+            // 2 = playing level
+            // 3 = in endzone
+
+            // MapEditor.editorState
+            // 1 = main map edit screen
+            // 2 = platform edit menu
+            // 3 = map color page
+            // 4 = map settings page
+            // 5 = MapEditor MapBrowser screen
+
+            // MapBrowser.state
+            // 0 = disabled
+            // 1 = standard map browser
+            // 2 = custom map browser
+
+            // in one of the 3 MapBrowsers
+            if (UserInterface.gamestate == 2) {
+
+                // in STANDARD map browser
+                if (MapBrowser.state == 1) {
+                    // goto main menu
+                    MapBrowser.state = 0;
+                    MapBrowser.scrollY = 0;
+                    MapBrowser.selectedMapIndex = -1;
+                    UserInterface.gamestate = 1;
+                    // loop through each button (including non-maps eww) and untoggle it. DO I NEED THIS?
+                    UserInterface.renderedButtons.forEach((button) => {
+                        if (button.toggle == 1 && button != btn_playTutorial) {
+                            button.toggle = 0;
+                        }
+                    });
+                    UserInterface.renderedButtons = UserInterface.btnGroup_mainMenu;
+                    return;
+                }
+
+                // in CUSTOM map browser -- could be the one you play maps from or the map editor
+                if (MapBrowser.state == 2) {
+                    
+                    // go back to standard map browser OR to main main menu if in Map Editor
+                    
+                    // in MapEditor's map browser
+                    if (MapEditor.editorState == 5) {
+                        // goto main menu
+                        MapBrowser.state = 0;
+                        MapBrowser.scrollY = 0;
+                        MapBrowser.selectedMapIndex = -1;
+
+                        UserInterface.gamestate = 1;
+                        MapEditor.editorState = 0;
+
+                        UserInterface.renderedButtons = UserInterface.btnGroup_mainMenu;
+                        document.getElementById("shareDiv").remove();
+                        return;
+                    }
+
+                    // goto play standard map browser
+                    MapBrowser.state = 1;
+                    UserInterface.renderedButtons = UserInterface.btnGroup_standardMapBrowser;
+                    MapBrowser.init();
+                    return;
+                }
+
+            }
+
+            if (UserInterface.gamestate == 3) { // in Settings page
+                // goto main menu
+                UserInterface.gamestate = 1
+                UserInterface.renderedButtons = UserInterface.btnGroup_mainMenu;
+                return
+            }
+
+            if (UserInterface.gamestate == 5) { // in Loading Map page
+                // goto standard map browser
+                UserInterface.gamestate = 2;
+                MapBrowser.state = 1;
+                UserInterface.renderedButtons = UserInterface.btnGroup_standardMapBrowser;
+                MapBrowser.init();
+                return
+            }
+
+            if (UserInterface.gamestate == 6) { // in Map Level
+                // goto back to map browser
+                // either standard or custom depending on MapBrowser state
+                UserInterface.gamestate = 2;
+                
+                UserInterface.timer = 0;
+                UserInterface.levelState = 1;
+
+                if (MapBrowser.state == 1) {
+                    UserInterface.renderedButtons = UserInterface.btnGroup_standardMapBrowser;
+                } else {
+                    UserInterface.renderedButtons = UserInterface.btnGroup_customMapBrowser;
+                }
+
+                MapBrowser.init();
+
+                if (Tutorial.isActive) { // leaving tutorial level
+                    if (Tutorial.state >= 18) {
+                        btn_playTutorial.released(true) // toggle tutorial button to be false after completing it
+                    }
+
+                    Tutorial.reset()
+                }
+
+                return
+            }
+
+            if (UserInterface.gamestate == 7) { // in MapEditor
+                
+                // btn_mainMenu only appears in map settings or map color pages while in MapEditor
+                // goto MapEditor main map editing screen
+                UserInterface.renderedButtons = UserInterface.btnGroup_mapEditorInterface
+                MapEditor.editorState = 1;
+                return
+                
+            }
+
+
+        })
+
+        btn_restart = new Button(44, 128, 68, "restart_button", "", 0, "", function () {
+
+            if (Tutorial.isActive) { // restart pressed in tutorial level
+                // DRAW ALERT "Restart Disabled"
+            } else {
+                UserInterface.timer = 0;
+                UserInterface.levelState = 1;
+                Player.checkpointIndex = -1;
+                Player.restart();
+            }
+        })
+
+        btn_jump = new Button(44, window.outerHeight - 136, 96, "jump_button", "", 0, "", function () {
+            if (UserInterface.levelState == 1) {
+                UserInterface.timerStart = Date.now();
+                UserInterface.levelState = 2;
+                Player.startLevel();
+            }
+        })
+
 
         // SETTINGS Buttons 
-        btn_reset_settings = new Button("window.outerWidth - 230", "window.outerHeight - 90", 160, "", "", 0, "Erase Data", function () {
+        btn_reset_settings = new Button(window.outerWidth - 230, window.outerHeight - 90, 160, "", "", 0, "Erase Data", function () {
 
             const reset = confirm("Reset All Settings and Records?");
             if (reset) {
@@ -157,8 +320,43 @@ const UserInterface = {
         })
 
 
-        // MAP EDITOR MENU BUTTONS
-        btn_new_map = new Button("midX_UI - 150", "40", 300, "", "", 0, "Create New Map", function () {
+
+        // MAP BROWSER BUTTONS
+        btn_custom_maps = new Button(window.outerWidth - 283, 40, 239, "custom_maps_button", "", 0, "", function () {
+            UserInterface.gamestate = 2;
+
+            // loop through each button (including non-maps eww) and untoggle it. Could be an issue once I add a "play tutorial" toggle / button idk
+            UserInterface.renderedButtons.forEach(button => {
+                if (button.toggle == 1 && button != btn_playTutorial) { button.toggle = 0 }
+            })
+
+            UserInterface.renderedButtons = UserInterface.btnGroup_customMapBrowser
+            MapBrowser.state = 2
+            MapBrowser.init()
+        })
+
+        btn_playMap = new Button(window.outerWidth - 154, window.outerHeight - 104, 110, "play_button", "", 0, "", function () {
+
+            MapBrowser.toggleAllButtons()
+            MapBrowser.scrollY = 0;
+            MapBrowser.scrollVel = 0;
+
+            UserInterface.gamestate = 5;
+            UserInterface.renderedButtons = [btn_mainMenu];
+
+            if (MapBrowser.state == 1) { // in normal maps browser
+
+                Map.initMap(MapBrowser.selectedMapIndex, false);
+
+            } else { // in custom maps browser
+
+                Map.initMap(MapBrowser.selectedMapIndex, true);
+
+            }
+        })
+
+        // MapEditor browser buttons
+        btn_new_map = new Button(window.outerWidth - 438, 40, 169, "new_map_button", "", 0, "", function () {
 
             MapEditor.loadedMap = {
                 "playerStart": {
@@ -168,16 +366,16 @@ const UserInterface = {
                 },
                 "checkpoints": [],
                 "style": {
-                    "backgroundColor": "rgba(163,213,225)",
-                    "playerColor": "rgba(239,238,236)",
+                    "backgroundColor": "rgba(139,202,218)",
+                    "playerColor": "rgba(240,240,240)",
                     "platformTopColor": "rgba(209,70,63)",
                     "platformSideColor": "rgba(209,70,63)",
                     "wallTopColor": "rgba(125,94,49)",
                     "wallSideColor": "rgba(125,94,49)",
                     "endZoneTopColor": "rgba(255,218,98)",
                     "endZoneSideColor": "rgba(255,218,98)",
-                    "directLight": "rba(128,128,128)",
-                    "ambientLight": "rba(170,191,197)",
+                    "directLight": "rgba(89,89,89)",
+                    "ambientLight": "rgba(191,191,191)",
                     "platformHeight": 25,
                     "wallHeight": 50,
                     "lightDirection": 180,
@@ -207,50 +405,56 @@ const UserInterface = {
 
             // calculates the initial hypotenuse angleRad and corners for each platform
             MapEditor.loadedMap.platforms.forEach((platform) => MapEditor.updatePlatformCorners(platform))
+
+            // delete shareDiv when leaving browser page
+            document.getElementById("shareDiv").remove()
+
+            UserInterface.gamestate = 7;
         })
 
-        btn_load_map = new Button("midX_UI - 150", "110", 300, "", "", 0, "Load A Map", function () {
-            MapEditor.editorState = 5;
+        // UPDATE THIS BUTTON TO INCLUDE FUNCTIONALITY OF btn_import_map_text BUTTON
+        btn_import_map = new Button(window.outerWidth - 244, 40, 200, "import_map_button", "", 0, "", function () {
+        
+                // LOAD FROM LOCAL FILE SYSTEM
+                const input = document.createElement("input");
+                input.type = "file";
+                input.accept = ".txt"; // or "application/json"
+                document.body.appendChild(input);
+        
+                input.addEventListener('change', function () {
+                    const file = input.files[0];
+                    if (!file) return;
+        
+                    const reader = new FileReader();
+        
+                    reader.onload = (e) => {
+                        try {
+                            // Attempt to parse the JSON from the file
+                            MapEditor.loadedMap = JSON.parse(e.target.result);
+                            UserInterface.gamestate = 7;
+        
+                            // remove shareDiv when leaving browser page
+                            document.getElementById("shareDiv").remove()
 
-            UserInterface.gamestate = 2;
-
-            UserInterface.renderedButtons = UserInterface.btnGroup_editMapBrowser;
-
-
-            // ADDING DIV OVERLAY FOR SHARE BUTTON
-            btn_shareMap.func(true) // runs the createDiv function of the button
-
-
-            MapBrowser.state = 2
-            MapBrowser.init()
+                        } catch (error) {
+                            alert("Failed to load map: " + error.message);
+                        }
+                    };
+        
+                    reader.onerror = (e) => {
+                        alert("Error reading file: " + e.target.error.name);
+                    };
+        
+                    reader.readAsText(file);
+        
+                    // Clean up input after use
+                    document.body.removeChild(input);
+                });
+        
+                input.click(); // Trigger the file dialog
         })
-
-        btn_import_map = new Button("midX_UI - 150", "180", 300, "", "", 0, "Import Map From File Browser", function () {
-
-            // LOAD FROM LOCAL FILE SYSTEM 
-            const input = document.createElement("input");
-            input.type = "file";
-            input.accept = ".text";
-            document.body.appendChild(input);
-            input.click();
-
-            input.addEventListener('change', function () {
-                const file = input.files[0]
-
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    MapEditor.loadedMap = JSON.parse(e.target.result)
-                };
-                reader.onerror = (e) => alert(e.target.error.name);
-
-                reader.readAsText(file)
-            })
-
-            input.remove();
-
-        })
-
-        btn_import_map_text = new Button("midX_UI - 150", "250", 300, "", "", 0, "Import Map With Copy & Paste", function () {
+        
+        btn_import_map_text = new Button(midX_UI - 150, 250, 300, "", "", 0, "Import Map With Copy & Paste", function () {
 
             let mapPaste = prompt("Paste Map Data:");
             if (mapPaste) {
@@ -259,13 +463,293 @@ const UserInterface = {
 
         })
 
+        btn_editMap = new Button(window.outerWidth - 388, window.outerHeight - 102, 168, "edit_map_button", "", 0, "", async function () {
+
+            // delete shareDiv when leaving browser page
+            document.getElementById("shareDiv").remove()
+
+            MapBrowser.toggleAllButtons()
+            MapBrowser.scrollVel = 0;
+            MapBrowser.scrollY = 0;
+
+            const mapDataRaw = await readFile("device", "maps", MapBrowser.selectedMapIndex + ".json", "text")
+
+            MapEditor.loadedMap = JSON.parse(mapDataRaw)
+            UserInterface.gamestate = 7;
+
+        })
+
+        btn_shareMap = new Button(window.outerWidth - 196, window.outerHeight - 102, 64, "share_button", "", 0, "", function (createDiv) {
+            // The shareDiv does all the work for this button.
+            // createDiv is called by btn_mapEditor
+            // shareDiv is removed by btn_mainMenu, btn_editMap and btn_deleteMap
+
+
+            if (createDiv) { // called with this tag by btn_mapEditor
+                const shareDiv = document.createElement('div');
+                shareDiv.setAttribute("id", "shareDiv");
+                shareDiv.style.cssText = `
+                    position: absolute; 
+                    left: ${btn_shareMap.x}px;
+                    top: ${btn_shareMap.y}px;
+                    width: ${btn_shareMap.width}px;
+                    height: ${btn_shareMap.height}px;
+                    /* border: solid 2px blue; */
+                    z-index: 2;
+                `
+
+                shareDiv.addEventListener("click", async () => {
+
+                    if (MapBrowser.selectedMapIndex != -1) {
+
+                        const mapDataRaw = await readFile("device", "maps/", MapBrowser.selectedMapIndex + ".json", "text")
+
+                        const share_data = {
+                            title: MapBrowser.selectedMapIndex, // doesnt do anything on IOS
+                            text: mapDataRaw,
+                        }
+
+                        try {
+                            await navigator.share(share_data);
+                        } catch (err) {
+                            console.log(err)
+                        }
+                    }
+
+                });
+
+                document.body.appendChild(shareDiv);
+
+            }
+
+        })
+
+        btn_deleteMap = new Button(window.outerWidth - 108, window.outerHeight - 102, 64, "trash_button", "", 0, "", function () {
+
+            const deleteMap = confirm("Delete Map?");
+            if (deleteMap) {
+
+                window.resolveLocalFileSystemURL(cordova.file.dataDirectory + "maps", (fileSystem) => {
+                    var reader = fileSystem.createReader();
+                    reader.readEntries((entries) => {
+                        fileSystem.getFile(MapBrowser.selectedMapIndex + ".json", { create: false }, (fileEntry) => {
+                            fileEntry.remove((file) => {
+                                alert("Map Deleted");
+                                
+                                // delete shareDiv (avoids it getting duplicated when clicking btn_mapEditor below)
+                                document.getElementById("shareDiv").remove()
+
+                                // reload map editor map browser by pressing btn_mapEditor again
+                                btn_mapEditor.released(true)
+                            }, function (error) {
+                                alert("error occurred: " + error.code);
+                            }, function () {
+                                alert("file does not exist");
+                            });
+                        });
+                    });
+                });
+            }
+        })
+
+
+
+        // ALL LEVEL BUTTONS
+        btn_level_awakening = new Button(144, 40, 256, "awakening_button", "awakening_button_pressed", 0, "", function () {
+            if (this.toggle) {
+                this.toggle = 0;
+                MapBrowser.selectedMapIndex = -1
+            } else {
+                MapBrowser.toggleAllButtons()
+                this.toggle = 1;
+                MapBrowser.selectedMapIndex = "Awakening"
+                if (UserInterface.settings.playTutorial) { Tutorial.isActive = true }
+            }
+        })
+
+        btn_level_pitfall = new Button(144, 184, 256, "pitfall_button", "pitfall_button_pressed", 0, "", function () {
+            if (this.toggle) {
+                this.toggle = 0;
+                MapBrowser.selectedMapIndex = -1
+            } else {
+                MapBrowser.toggleAllButtons()
+                this.toggle = 1;
+                MapBrowser.selectedMapIndex = "Pitfall"
+            }
+        })
+
+        btn_level_cavernAbyss = new Button(144, 328, 256, "cavern_abyss_button", "cavern_abyss_button_pressed", 0, "", function () {
+            if (this.toggle) {
+                this.toggle = 0;
+                MapBrowser.selectedMapIndex = -1
+            } else {
+                MapBrowser.toggleAllButtons()
+                this.toggle = 1;
+                MapBrowser.selectedMapIndex = "Cavern Abyss"
+            }
+        })
+
+        btn_level_crystals = new Button(144, 472, 256, "crystals_button", "", 0, "", function () {
+            if (this.toggle) {
+                this.toggle = 0;
+                MapBrowser.selectedMapIndex = -1
+            } else {
+                MapBrowser.toggleAllButtons()
+                this.toggle = 1;
+                MapBrowser.selectedMapIndex = "Crystals"
+            }
+        })
+
+        btn_level_trespass = new Button(144, 616, 256, "trespass_button", "", 0, "", function () {
+            if (this.toggle) {
+                this.toggle = 0;
+                MapBrowser.selectedMapIndex = -1
+            } else {
+                MapBrowser.toggleAllButtons()
+                this.toggle = 1;
+                MapBrowser.selectedMapIndex = "Trespass"
+            }
+        })
+
+        btn_level_turmoil = new Button(144, 760, 256, "turmoil_button", "", 0, "", function () {
+            if (this.toggle) {
+                this.toggle = 0;
+                MapBrowser.selectedMapIndex = -1
+            } else {
+                MapBrowser.toggleAllButtons()
+                this.toggle = 1;
+                MapBrowser.selectedMapIndex = "Turmoil"
+            }
+        })
+
+        btn_level_tangledForest = new Button(144, 904, 256, "tangled_forest_button", "", 0, "", function () {
+            if (this.toggle) {
+                this.toggle = 0;
+                MapBrowser.selectedMapIndex = -1
+            } else {
+                MapBrowser.toggleAllButtons()
+                this.toggle = 1;
+                MapBrowser.selectedMapIndex = "Tangled Forest"
+            }
+        })
+
+        btn_level_pinnacle = new Button(144, 1048, 256, "pinnacle_button", "", 0, "", function () {
+            if (this.toggle) {
+                this.toggle = 0;
+                MapBrowser.selectedMapIndex = -1
+            } else {
+                MapBrowser.toggleAllButtons()
+                this.toggle = 1;
+                MapBrowser.selectedMapIndex = "Pinnacle"
+            }
+        })
+
+        btn_level_forever = new Button(144, 1192, 256, "forever_button", "", 0, "", function () {
+            if (this.toggle) {
+                this.toggle = 0;
+                MapBrowser.selectedMapIndex = -1
+            } else {
+                MapBrowser.toggleAllButtons()
+                this.toggle = 1;
+                MapBrowser.selectedMapIndex = "Forever"
+            }
+        })
+
+
+        // TUTORIAL BUTTONS
+        btn_next = new Button(window.outerWidth - 100, 38, 60, "next_button", "", 0, "", function () {
+
+            Tutorial.timerStarted = false; // easier to always set these here even if they arent always needed
+            Tutorial.animatePos = 0;
+            Tutorial.animateVel = 0;
+
+            // reset the position and scale because the button is being pulse animated
+            this.x = window.outerWidth - 100
+            this.y = 38
+            this.width = 60
+            this.height = 60
+
+            if (Tutorial.state == 1) {
+                Tutorial.state++;
+                UserInterface.renderedButtons = [btn_mainMenu, btn_next]
+                return
+            }
+
+            if (Tutorial.state == 2) {
+                Tutorial.state++; // going into STATE 3
+                UserInterface.renderedButtons = [btn_mainMenu]
+
+                Player.lookAngle.set(0, -1) // so that ur NOT already looking at a target
+                return
+            }
+
+            // state 3 progresses to 5 when all targets are completed
+
+            // state 5 uses jump button to progress
+
+            // state 6 progresses to 7 automatically after 2 secs
+
+            if (Tutorial.state == 7) {
+                Tutorial.state++; // going into STATE 8
+                UserInterface.renderedButtons = UserInterface.btnGroup_inLevel
+                return
+            }
+
+            // 8 to 9 on user swipe
+
+            // 9 to 10 on checkpoint
+
+            // 10 to 11 on user swipe
+
+            // 11 to 12 on checkpoint
+
+            // 12 to 13 on user swipe
+
+            // 13 to 14 on checkpoint
+
+            // 14 to 15 on user swipe
+
+            // 15 to 16 on checkpoint
+
+            // 16 to 17 on user swipe
+
+            // 17 to 18 on level end
+
+            if (Tutorial.state == 18) {
+                Tutorial.state++; // going into STATE 19
+                UserInterface.renderedButtons = UserInterface.btnGroup_inLevel
+                return
+            }
+
+        })
+
+        btn_playTutorial = new Button(window.outerWidth - 256, window.outerHeight - 86, 64, "toggle_button", "toggle_button_pressed", 1, "", function (sync) {
+            if (sync) {
+                this.toggle = UserInterface.settings.playTutorial;
+            } else {
+                console.log("PLAY TUT TOGGLED")
+                if (this.toggle == 1) {
+                    this.toggle = 0;
+                    Tutorial.isActive = false
+                    UserInterface.settings.playTutorial = 0
+                    UserInterface.writeSettings()
+                } else {
+                    this.toggle = 1;
+                    Tutorial.isActive = true
+                    UserInterface.settings.playTutorial = 1
+                    UserInterface.writeSettings()
+                }
+            }
+        })
+
+
 
         // MAP EDITOR BUTTONS
-        btn_exit_edit = new Button(45, 40, 70, "back_button", "back_button_pressed", 0, "", function () {
+        btn_exit_edit = new Button(44, 40, 68, "back_button", "", 0, "", function () {
             MapEditor.saveCustomMap()
         })
 
-        btn_add_platform = new Button("window.outerWidth - 196", "25", 156, "platform_button", "", 0, "", function () {
+        btn_add_platform = new Button(window.outerWidth - 196, 25, 156, "platform_button", "", 0, "", function () {
 
             const newPlatform = {
                 "x": Math.round(MapEditor.screen.x),
@@ -290,7 +774,7 @@ const UserInterface = {
             btn_endzone.func(true) // syncs the endzone button's toggle state
         })
 
-        btn_add_checkpoint = new Button("window.outerWidth - 232", "92", 192, "cp_button", "", 0, "", function () {
+        btn_add_checkpoint = new Button(window.outerWidth - 232, 92, 192, "cp_button", "", 0, "", function () {
             const middleX = Math.round(MapEditor.screen.x)
             const middleY = Math.round(MapEditor.screen.y)
             const newCheckPoint = {
@@ -306,15 +790,14 @@ const UserInterface = {
             MapEditor.loadedMap.checkpoints.push(newCheckPoint);
         })
 
-        btn_map_colors = new Button("window.outerWidth - 310", "25", 96, "map_colors_button", "", 0, "", function () {
+        btn_map_colors = new Button(window.outerWidth - 310, 25, 96, "map_colors_button", "", 0, "", function () {
             MapEditor.editorState = 3 // map colors
-
+            ColorPicker.editingElement = 0
             PreviewWindow.update()
-
-            UserInterface.renderedButtons = UserInterface.btnGroup_mapColor
+            UserInterface.renderedButtons = UserInterface.btnGroup_colorPickerState1
         })
 
-        btn_map_settings = new Button("window.outerWidth - 440", "25", 108, "map_settings_button", "", 0, "", function () {
+        btn_map_settings = new Button(window.outerWidth - 440, 25, 108, "map_settings_button", "", 0, "", function () {
             MapEditor.editorState = 4 // map settings
 
             PreviewWindow.update()
@@ -327,7 +810,7 @@ const UserInterface = {
             UserInterface.renderedButtons = UserInterface.btnGroup_mapSettings
         })
 
-        btn_dragSelect = new Button(45, "window.outerHeight - 230", 60, "toggle_button", "toggle_button_pressed", 1, "", function (sync) {
+        btn_dragSelect = new Button(45, window.outerHeight - 230, 60, "toggle_button", "toggle_button_pressed", 1, "", function (sync) {
             if (MapEditor.loadedMap) { // throws an error otherwise
                 if (sync) {
                     this.toggle = MapEditor.dragSelect;
@@ -348,7 +831,7 @@ const UserInterface = {
             }
         })
 
-        btn_multiSelect = new Button(45, "window.outerHeight - 150", 60, "toggle_button", "toggle_button_pressed", 1, "", function (sync) {
+        btn_multiSelect = new Button(45, window.outerHeight - 150, 60, "toggle_button", "toggle_button_pressed", 1, "", function (sync) {
             if (MapEditor.loadedMap) { // throws an error otherwise
                 if (sync) {
                     this.toggle = MapEditor.multiSelect;
@@ -387,11 +870,11 @@ const UserInterface = {
             }
         })
 
-        btn_snappingSlider = new SliderUI(50, "window.outerHeight - 50", 192, 0, 64, 0.5, "Snapping", MapEditor.loadedMap ? MapEditor.snapAmount : 0, function () {
+        btn_snappingSlider = new SliderUI(50, window.outerHeight - 50, 192, 0, 64, 0.5, "Snapping", MapEditor.loadedMap ? MapEditor.snapAmount : 0, function () {
             MapEditor.snapAmount = this.value
         })
 
-        btn_unselect = new Button("window.outerWidth - 250", 34, 45, "x_button", "", 0, "", function () {
+        btn_unselect = new Button(window.outerWidth - 250, 34, 45, "x_button", "", 0, "", function () {
             UserInterface.renderedButtons = UserInterface.btnGroup_mapEditorInterface
             MapEditor.selectedElements = []; // No selected platforms
         })
@@ -420,7 +903,7 @@ const UserInterface = {
 
                 if (MapEditor.selectedElements[i] == "playerStart") { // if playerStart is selected
                     item.element = MapEditor.loadedMap.playerStart
-                    item.offSet = 32
+                    item.offSet = 32 / MapEditor.zoom
 
                 } else if (Array.isArray(MapEditor.selectedElements[i])) {
 
@@ -530,7 +1013,7 @@ const UserInterface = {
             }
         })
 
-        btn_resize_BL = new Button(0, 0, 38, "scale_button", "", 0, "", function () {
+        btn_resize_BL = new Button(0, 0, 38, "scale_button_2", "", 0, "", function () {
 
             let platform = MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]]
 
@@ -613,7 +1096,7 @@ const UserInterface = {
             }
         })
 
-        btn_resize_BR = new Button(0, 0, 38, "scale_button", "", 0, "", function () {
+        btn_resize_BR = new Button(0, 0, 38, "scale_button_1", "", 0, "", function () {
 
             let platform = MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]]
 
@@ -696,7 +1179,7 @@ const UserInterface = {
             }
         })
 
-        btn_resize_TR = new Button(0, 0, 38, "scale_button", "", 0, "", function () {
+        btn_resize_TR = new Button(0, 0, 38, "scale_button_2", "", 0, "", function () {
 
             let platform = MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]]
 
@@ -779,7 +1262,7 @@ const UserInterface = {
             }
         })
 
-        btn_resize_TL = new Button(0, 0, 38, "scale_button", "", 0, "", function () {
+        btn_resize_TL = new Button(0, 0, 38, "scale_button_1", "", 0, "", function () {
 
             let platform = MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]]
 
@@ -862,7 +1345,7 @@ const UserInterface = {
             }
         })
 
-        btn_angleSlider = new SliderUI("window.outerWidth - 246", 204, 186, -45, 45, 1, "Angle", MapEditor.loadedMap ? MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]] : 0, function () {
+        btn_angleSlider = new SliderUI(window.outerWidth - 246, 204, 186, -45, 45, 1, "Angle", MapEditor.loadedMap ? MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]] : 0, function () {
             if (MapEditor.snapAmount > 0) { this.updateState(Math.round(this.value / MapEditor.snapAmount) * MapEditor.snapAmount) }
             if (this.value < this.min) { this.updateState(this.min) } // these are incase snapping pushes the value over or under the limits
             if (this.value > this.max) { this.updateState(this.max) }
@@ -870,17 +1353,17 @@ const UserInterface = {
             MapEditor.updatePlatformCorners(MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]])
         })
 
-        btn_playerAngleSlider = new SliderUI("window.outerWidth - 246", 204, 186, 0, 360, 1, "Angle", MapEditor.loadedMap ? MapEditor.loadedMap.playerStart : 0, function () {
+        btn_playerAngleSlider = new SliderUI(window.outerWidth - 246, 204, 186, 0, 360, 1, "Angle", MapEditor.loadedMap ? MapEditor.loadedMap.playerStart : 0, function () {
             if (MapEditor.snapAmount > 0) { this.updateState(Math.round(this.value / MapEditor.snapAmount) * MapEditor.snapAmount) }
             MapEditor.loadedMap.playerStart.angle = this.value
         })
 
-        btn_checkpointAngleSlider = new SliderUI("window.outerWidth - 246", 204, 186, 0, 360, 1, "Angle", MapEditor.loadedMap ? MapEditor.loadedMap.checkpoints[MapEditor.selectedElements[0][0]] : 0, function () {
+        btn_checkpointAngleSlider = new SliderUI(window.outerWidth - 246, 204, 186, 0, 360, 1, "Angle", MapEditor.loadedMap ? MapEditor.loadedMap.checkpoints[MapEditor.selectedElements[0][0]] : 0, function () {
             if (MapEditor.snapAmount > 0) { this.updateState(Math.round(this.value / MapEditor.snapAmount) * MapEditor.snapAmount) }
             MapEditor.loadedMap.checkpoints[MapEditor.selectedElements[0][0]].angle = this.value
         })
 
-        btn_wall = new Button("window.outerWidth - 120", 224, 60, "toggle_button", "toggle_button_pressed", 1, "", function (sync) {
+        btn_wall = new Button(window.outerWidth - 120, 224, 60, "toggle_button", "toggle_button_pressed", 1, "", function (sync) {
             if (MapEditor.loadedMap) { // throws an error otherwise
                 if (sync) {
                     this.toggle = MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].wall ? 1 : 0; // gets initial value of toggle
@@ -896,7 +1379,7 @@ const UserInterface = {
             }
         })
 
-        btn_endzone = new Button("window.outerWidth - 120", 264, 60, "toggle_button", "toggle_button_pressed", 1, "", function (sync) {
+        btn_endzone = new Button(window.outerWidth - 120, 264, 60, "toggle_button", "toggle_button_pressed", 1, "", function (sync) {
             if (MapEditor.loadedMap) { // throws an error otherwise
                 if (sync) {
                     this.toggle = MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].endzone ? 1 : 0; // gets initial value of toggle
@@ -912,7 +1395,7 @@ const UserInterface = {
             }
         })
 
-        btn_duplicate_platform = new Button("window.outerWidth - 262", "window.outerHeight - 90", 150, "", "", 0, "Duplicate", function () {
+        btn_duplicate_platform = new Button(window.outerWidth - 262, window.outerHeight - 90, 150, "", "", 0, "Duplicate", function () {
             let originPlatform = {
                 x: null,
                 y: null
@@ -954,8 +1437,7 @@ const UserInterface = {
             }
         })
 
-        // btn_delete_platform = new Button("window.outerWidth - 99", "window.outerHeight - 90", 55, "delete_button", "", 0, "", function () {
-        btn_delete_platform = new Button("window.outerWidth - 99", "window.outerHeight - 90", 55, "", "", 0, "[]", function () {
+        btn_delete_element = new Button(window.outerWidth - 99, window.outerHeight - 90, 56, "trash_button", "", 0, "", function () {
 
             MapEditor.selectedElements.forEach((element) => { // loop through and delete
                 if (Array.isArray(element)) { // delete checkpoint
@@ -980,22 +1462,22 @@ const UserInterface = {
 
 
         // MAP SETTINGS SLIDERS
-        btn_platformHeightSlider = new SliderUI("midX_UI", 80, 360, 0, 360, 1, "Platform Height", MapEditor.loadedMap ? MapEditor.loadedMap.style.platformHeight : 0, function () {
+        btn_platformHeightSlider = new SliderUI(midX_UI, 80, 360, 0, 360, 1, "Platform Height", MapEditor.loadedMap ? MapEditor.loadedMap.style.platformHeight : 0, function () {
             MapEditor.loadedMap.style.platformHeight = this.value
             PreviewWindow.update()
         })
 
-        btn_wallHeightSlider = new SliderUI("midX_UI", 140, 360, 0, 360, 1, "Wall Height", MapEditor.loadedMap ? MapEditor.loadedMap.style.wallHeight : 0, function () {
+        btn_wallHeightSlider = new SliderUI(midX_UI, 140, 360, 0, 360, 1, "Wall Height", MapEditor.loadedMap ? MapEditor.loadedMap.style.wallHeight : 0, function () {
             MapEditor.loadedMap.style.wallHeight = this.value
             PreviewWindow.update()
         })
 
-        btn_lightDirectionSlider = new SliderUI("midX_UI", 200, 360, 0, 360, 1, "Light Direction", MapEditor.loadedMap ? MapEditor.loadedMap.style.lightDirection : 0, function () {
+        btn_lightDirectionSlider = new SliderUI(midX_UI, 200, 360, 0, 360, 1, "Light Direction", MapEditor.loadedMap ? MapEditor.loadedMap.style.lightDirection : 0, function () {
             MapEditor.loadedMap.style.lightDirection = this.value
             PreviewWindow.update()
         })
 
-        btn_lightPitchSlider = new SliderUI("midX_UI", 260, 360, 5, 90, 1, "Light Angle", MapEditor.loadedMap ? MapEditor.loadedMap.style.lightPitch : 0, function () {
+        btn_lightPitchSlider = new SliderUI(midX_UI, 260, 360, 5, 90, 1, "Light Angle", MapEditor.loadedMap ? MapEditor.loadedMap.style.lightPitch : 0, function () {
             MapEditor.loadedMap.style.lightPitch = this.value
             PreviewWindow.update()
         })
@@ -1003,35 +1485,39 @@ const UserInterface = {
 
 
         // COLOR PICKER BUTTONS AND SLIDERS
-        btn_copyColor = new Button("ColorPicker.x + 154", "ColorPicker.y + 46", 90, "", "", 0, "Copy", function () {
+        btn_copyColor = new Button(ColorPicker.x + 154, ColorPicker.y + 46, 90, "", "", 0, "Copy", function () {
             ColorPicker.copyColor()
         })
 
-        btn_pasteColor = new Button("ColorPicker.x + 254", "ColorPicker.y + 46", 90, "", "", 0, "Paste", function () {
+        btn_pasteColor = new Button(ColorPicker.x + 254, ColorPicker.y + 46, 90, "", "", 0, "Paste", function () {
             ColorPicker.pasteColor()
         })
 
-        btn_hueSlider = new SliderUI("ColorPicker.x + 16", "ColorPicker.y + 148", ColorPicker.width - 32, 0, 360, 1, "Hue", ColorPicker.h, function () {
+        btn_hueSlider = new SliderUI(ColorPicker.x + 16, ColorPicker.y + 148, ColorPicker.width - 32, 0, 360, 1, "Hue", ColorPicker.h, function () {
             ColorPicker.h = this.value
             ColorPicker.updateElementColor()
             ColorPicker.syncGradients()
             if (ColorPicker.editingElement == 1 || ColorPicker.editingElement == 9 || ColorPicker.editingElement == 10) { UserInterface.determineButtonColor() }
         })
 
-        btn_saturationSlider = new SliderUI("ColorPicker.x + 16", "ColorPicker.y + 220", ColorPicker.width - 32, 0, 100, 1, "Saturation", ColorPicker.s, function () {
+        btn_saturationSlider = new SliderUI(ColorPicker.x + 16, ColorPicker.y + 220, ColorPicker.width - 32, 0, 100, 1, "Saturation", ColorPicker.s, function () {
             ColorPicker.s = this.value
             ColorPicker.updateElementColor()
             ColorPicker.syncGradients()
             if (ColorPicker.editingElement == 1 || ColorPicker.editingElement == 9 || ColorPicker.editingElement == 10) { UserInterface.determineButtonColor() }
         })
 
-        btn_lightnessSlider = new SliderUI("ColorPicker.x + 16", "ColorPicker.y + 292", ColorPicker.width - 32, 0, 100, 1, "Lightness", ColorPicker.l, function () {
+        btn_lightnessSlider = new SliderUI(ColorPicker.x + 16, ColorPicker.y + 292, ColorPicker.width - 32, 0, 100, 1, "Lightness", ColorPicker.l, function () {
             ColorPicker.l = this.value
             ColorPicker.updateElementColor()
             ColorPicker.syncGradients()
             if (ColorPicker.editingElement == 1 || ColorPicker.editingElement == 9 || ColorPicker.editingElement == 10) { UserInterface.determineButtonColor() }
         })
 
+        btn_unselectColor = new Button(window.outerWidth - 480, 32, 44, "x_button", "", 0, "", function () {
+            UserInterface.renderedButtons = UserInterface.btnGroup_colorPickerState1
+            ColorPicker.editingElement = 0;
+        })
 
         // SET COLOR BUTTONS
         // 0 nothing
@@ -1046,614 +1532,123 @@ const UserInterface = {
         // 9 direct light
         // 10 ambient light
 
-        btn_backgroundColor = new Button(185, 16, 134, "", "", 0, "Background", function () {
+        btn_backgroundColor = new Button(window.outerWidth - 498, 32, 208, "background_button", "", 0, "", function () {
+            ColorPicker.editingElement = 1
+            UserInterface.renderedButtons = UserInterface.btnGroup_colorPickerState2
+            ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.backgroundColor)
+            ColorPicker.updateSliders()
+            ColorPicker.syncGradients()
+        })
+
+        btn_playerColor = new Button(window.outerWidth - 498, 116, 208, "player_button", "", 0, "", function () {
+            ColorPicker.editingElement = 2
+            UserInterface.renderedButtons = UserInterface.btnGroup_colorPickerState2
+            ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.playerColor)
+            ColorPicker.updateSliders()
+            ColorPicker.syncGradients()
+        })
+
+        btn_directLightColor = new Button(window.outerWidth - 270, 32, 226, "direct_light_button", "", 0, "", function () {
+            ColorPicker.editingElement = 9
+            UserInterface.renderedButtons = UserInterface.btnGroup_colorPickerState2
+            ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.directLight)
+            ColorPicker.updateSliders()
+            ColorPicker.syncGradients()
+        })
+
+        btn_ambientLightColor = new Button(window.outerWidth - 270, 116, 226, "ambient_light_button", "", 0, "", function () {
+            ColorPicker.editingElement = 10
+            UserInterface.renderedButtons = UserInterface.btnGroup_colorPickerState2
+            ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.ambientLight)
+            ColorPicker.updateSliders()
+            ColorPicker.syncGradients()
+        })
+
+        btn_wallTopColor = new Button(window.outerWidth - 726, window.outerHeight - 172, 152, "top_button", "", 0, "", function () {
+            ColorPicker.editingElement = 5
+            UserInterface.renderedButtons = UserInterface.btnGroup_colorPickerState2
+            ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.wallTopColor)
+            ColorPicker.updateSliders()
+            ColorPicker.syncGradients()
+        })
+
+        btn_wallSideColor = new Button(window.outerWidth - 726, window.outerHeight - 96, 152, "side_button", "", 0, "", function () {
+            ColorPicker.editingElement = 6
+            UserInterface.renderedButtons = UserInterface.btnGroup_colorPickerState2
+            ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.wallSideColor)
+            ColorPicker.updateSliders()
+            ColorPicker.syncGradients()
+        })
+        
+        btn_platformTopColor = new Button(window.outerWidth - 498, window.outerHeight - 172, 152, "top_button", "", 0, "", function () {
+            ColorPicker.editingElement = 3
+            UserInterface.renderedButtons = UserInterface.btnGroup_colorPickerState2
+            ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.platformTopColor)
+            ColorPicker.updateSliders()
+            ColorPicker.syncGradients()
+        })
+
+        btn_platformSideColor = new Button(window.outerWidth - 498, window.outerHeight - 96, 152, "side_button", "", 0, "", function () {
+            ColorPicker.editingElement = 4
+            UserInterface.renderedButtons = UserInterface.btnGroup_colorPickerState2
+            ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.platformSideColor)
+            ColorPicker.updateSliders()
+            ColorPicker.syncGradients()
+        })
+
+        btn_endZoneTopColor = new Button(window.outerWidth - 270, window.outerHeight - 172, 152, "top_button", "", 0, "", function () {
+            ColorPicker.editingElement = 7
+            UserInterface.renderedButtons = UserInterface.btnGroup_colorPickerState2
+            ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.endZoneTopColor)
+            ColorPicker.updateSliders()
+            ColorPicker.syncGradients()
+        })
+
+        btn_endZoneSideColor = new Button(window.outerWidth - 270, window.outerHeight - 96, 152, "side_button", "", 0, "", function () {
+            ColorPicker.editingElement = 8
+            UserInterface.renderedButtons = UserInterface.btnGroup_colorPickerState2
+            ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.endZoneSideColor)
+            ColorPicker.updateSliders()
+            ColorPicker.syncGradients()
+        })
+
+        btn_lockWallColors = new Button(window.outerWidth - 570, window.outerHeight - 130, 56, "lock_button", "lock_button_pressed", 0, "", function () {
             if (this.toggle) {
                 this.toggle = 0;
-                ColorPicker.editingElement = 0
+                ColorPicker.lockWallColors = true;
+                MapEditor.loadedMap.style.wallSideColor = MapEditor.loadedMap.style.wallTopColor
+                PreviewWindow.update()
             } else {
-                // untoggle all others
-                ColorPicker.toggleAllButtons()
                 this.toggle = 1;
-                ColorPicker.editingElement = 1
-                ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.backgroundColor)
-                ColorPicker.updateSliders()
-                ColorPicker.syncGradients()
+                ColorPicker.lockWallColors = false;
             }
         })
-
-        btn_playerColor = new Button(185, 76, 134, "", "", 0, "Player", function () {
+        
+        btn_lockPlatformColors = new Button(window.outerWidth - 342, window.outerHeight - 130, 56, "lock_button", "lock_button_pressed", 0, "", function () {
             if (this.toggle) {
                 this.toggle = 0;
-                ColorPicker.editingElement = 0
+                ColorPicker.lockPlatformColors = true;
+                MapEditor.loadedMap.style.platformSideColor = MapEditor.loadedMap.style.platformTopColor
+                PreviewWindow.update()
             } else {
-                // untoggle all others
-                ColorPicker.toggleAllButtons()
                 this.toggle = 1;
-                ColorPicker.editingElement = 2
-                ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.playerColor)
-                ColorPicker.updateSliders()
-                ColorPicker.syncGradients()
+                ColorPicker.lockPlatformColors = false;
             }
         })
 
-        btn_directLightColor = new Button(325, 16, 134, "", "", 0, "Direct Light", function () {
+        btn_lockEndzoneColors = new Button(window.outerWidth - 114, window.outerHeight - 130, 56, "lock_button", "lock_button_pressed", 0, "", function () {
             if (this.toggle) {
                 this.toggle = 0;
-                ColorPicker.editingElement = 0
+                ColorPicker.lockEndzoneColors = true;
+                MapEditor.loadedMap.style.endZoneSideColor = MapEditor.loadedMap.style.endZoneTopColor
+                PreviewWindow.update()
             } else {
-                // untoggle all others
-                ColorPicker.toggleAllButtons()
                 this.toggle = 1;
-                ColorPicker.editingElement = 9
-                ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.directLight)
-                ColorPicker.updateSliders()
-                ColorPicker.syncGradients()
-            }
-        })
-
-        btn_ambientLightColor = new Button(325, 76, 134, "", "", 0, "Ambient Light", function () {
-            if (this.toggle) {
-                this.toggle = 0;
-                ColorPicker.editingElement = 0
-            } else {
-                // untoggle all others
-                ColorPicker.toggleAllButtons()
-                this.toggle = 1;
-                ColorPicker.editingElement = 10
-                ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.ambientLight)
-                ColorPicker.updateSliders()
-                ColorPicker.syncGradients()
+                ColorPicker.lockEndzoneColors = false;
             }
         })
 
 
-
-
-        btn_wallTopColor = new Button(45, "window.outerHeight - 132", 134, "", "", 0, "Wall Top", function () {
-            if (this.toggle) {
-                this.toggle = 0;
-                ColorPicker.editingElement = 0
-            } else {
-                // untoggle all others
-                ColorPicker.toggleAllButtons()
-                this.toggle = 1;
-                ColorPicker.editingElement = 5
-                ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.wallTopColor)
-                ColorPicker.updateSliders()
-                ColorPicker.syncGradients()
-            }
-        })
-
-        btn_wallSideColor = new Button(45, "window.outerHeight - 72", 134, "", "", 0, "Wall Side", function () {
-            if (this.toggle) {
-                this.toggle = 0;
-                ColorPicker.editingElement = 0
-            } else {
-                // untoggle all others
-                ColorPicker.toggleAllButtons()
-                this.toggle = 1;
-                ColorPicker.editingElement = 6
-                ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.wallSideColor)
-                ColorPicker.updateSliders()
-                ColorPicker.syncGradients()
-            }
-        })
-
-        btn_platformTopColor = new Button(185, "window.outerHeight - 132", 134, "", "", 0, "Platform Top", function () {
-            if (this.toggle) {
-                this.toggle = 0;
-                ColorPicker.editingElement = 0
-            } else {
-                // untoggle all others
-                ColorPicker.toggleAllButtons()
-                this.toggle = 1;
-                ColorPicker.editingElement = 3
-                ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.platformTopColor)
-                ColorPicker.updateSliders()
-                ColorPicker.syncGradients()
-            }
-        })
-
-        btn_platformSideColor = new Button(185, "window.outerHeight - 72", 134, "", "", 0, "Platform Side", function () {
-            if (this.toggle) {
-                this.toggle = 0;
-                ColorPicker.editingElement = 0
-            } else {
-                // untoggle all others
-                ColorPicker.toggleAllButtons()
-                this.toggle = 1;
-                ColorPicker.editingElement = 4
-                ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.platformSideColor)
-                ColorPicker.updateSliders()
-                ColorPicker.syncGradients()
-            }
-        })
-
-        btn_endZoneTopColor = new Button(325, "window.outerHeight - 132", 134, "", "", 0, "End Zone Top", function () {
-            if (this.toggle) {
-                this.toggle = 0;
-                ColorPicker.editingElement = 0
-            } else {
-                // untoggle all others
-                ColorPicker.toggleAllButtons()
-                this.toggle = 1;
-                ColorPicker.editingElement = 7
-                ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.endZoneTopColor)
-                ColorPicker.updateSliders()
-                ColorPicker.syncGradients()
-            }
-        })
-
-        btn_endZoneSideColor = new Button(325, "window.outerHeight - 72", 134, "", "", 0, "End Zone Side", function () {
-            if (this.toggle) {
-                this.toggle = 0;
-                ColorPicker.editingElement = 0
-            } else {
-                // untoggle all others
-                ColorPicker.toggleAllButtons()
-                this.toggle = 1;
-                ColorPicker.editingElement = 8
-                ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.endZoneSideColor)
-                ColorPicker.updateSliders()
-                ColorPicker.syncGradients()
-            }
-        })
-
-
-
-
-
-
-        // MAP BROWSER BUTTONS
-        btn_custom_maps = new Button("window.outerWidth - 220", 40, 135, "custom_maps_button", "", 0, "", function () {
-            UserInterface.gamestate = 2;
-
-            // loop through each button (including non-maps eww) and untoggle it. Could be an issue once I add a "play tutorial" toggle / button idk
-            UserInterface.renderedButtons.forEach(button => {
-                if (button.toggle == 1 && button != btn_playTutorial) { button.toggle = 0 }
-            })
-
-            UserInterface.renderedButtons = UserInterface.btnGroup_customMapBrowser
-            MapBrowser.state = 2
-            MapBrowser.init()
-        })
-
-        btn_playMap = new Button("window.outerWidth - 220", "window.outerHeight - 115", 150, "play_button", "", 0, "", function () {
-
-            MapBrowser.toggleAllButtons()
-            MapBrowser.scrollY = 0;
-            MapBrowser.scrollVel = 0;
-
-            UserInterface.gamestate = 5;
-            UserInterface.renderedButtons = [btn_mainMenu];
-
-            if (MapBrowser.state == 1) { // in normal maps browser
-
-                Map.initMap(MapBrowser.selectedMapIndex, false);
-
-            } else { // in custom maps browser
-
-                Map.initMap(MapBrowser.selectedMapIndex, true);
-
-            }
-        })
-
-        btn_editMap = new Button("window.outerWidth - 390", "window.outerHeight - 150", 150, "", "", 0, "Edit Map", async function () {
-
-            // delete shareDiv when leaving browser page
-            document.getElementById("shareDiv").remove()
-
-            MapBrowser.toggleAllButtons()
-            MapBrowser.scrollVel = 0;
-            MapBrowser.scrollY = 0;
-
-            const mapDataRaw = await readFile("device", "maps", MapBrowser.selectedMapIndex + ".json", "text")
-
-            MapEditor.loadedMap = JSON.parse(mapDataRaw)
-            UserInterface.gamestate = 7;
-
-        })
-
-        btn_deleteMap = new Button("window.outerWidth - 230", "window.outerHeight - 150", 150, "", "", 0, "Delete Map", function () {
-
-            const deleteMap = confirm("Delete Map?");
-            if (deleteMap) {
-
-                window.resolveLocalFileSystemURL(cordova.file.dataDirectory + "maps", (fileSystem) => {
-                    var reader = fileSystem.createReader();
-                    reader.readEntries((entries) => {
-                        fileSystem.getFile(MapBrowser.selectedMapIndex + ".json", { create: false }, (fileEntry) => {
-                            fileEntry.remove((file) => {
-                                alert("Map Deleted");
-                                // delete shareDiv (its created again by btn_load_map)
-                                document.getElementById("shareDiv").remove()
-
-                                // reload browser by pressing btn_load_map again
-                                btn_load_map.released(true)
-                            }, function (error) {
-                                alert("error occurred: " + error.code);
-                            }, function () {
-                                alert("file does not exist");
-                            });
-                        });
-                    });
-                });
-            }
-        })
-
-        btn_shareMap = new Button("window.outerWidth - 230", "window.outerHeight - 85", 150, "", "", 0, "Share Map", function (createDiv) {
-            // The shareDiv does all the work for this button.
-            // createDiv is called by btn_load_map
-            // shareDiv is removed by btn_mainMenu, btn_editMap and btn_deleteMap
-
-
-            if (createDiv) { // called with this tag by btn_load_map
-                const shareDiv = document.createElement('div');
-                shareDiv.setAttribute("id", "shareDiv");
-                shareDiv.style.cssText = `
-                    position: absolute; 
-                    left: ${btn_shareMap.x}px;
-                    top: ${btn_shareMap.y}px;
-                    width: ${btn_shareMap.width}px;
-                    height: ${btn_shareMap.height}px;
-                    border: solid 2px blue;
-                    z-index: 2;
-                `
-
-                shareDiv.addEventListener("click", async () => {
-
-                    if (MapBrowser.selectedMapIndex != -1) {
-
-                        const mapDataRaw = await readFile("device", "maps/", MapBrowser.selectedMapIndex + ".json", "text")
-
-                        const share_data = {
-                            title: MapBrowser.selectedMapIndex, // doesnt do anything on IOS
-                            text: mapDataRaw,
-                        }
-
-                        try {
-                            await navigator.share(share_data);
-                        } catch (err) {
-                            console.log(err)
-                        }
-                    }
-
-                });
-
-                document.body.appendChild(shareDiv);
-
-            }
-
-        })
-
-
-
-        // ALL LEVEL BUTTONS
-        btn_level_awakening = new Button(160, 50, 250, "awakening_button", "", 0, "", function () {
-            if (this.toggle) {
-                this.toggle = 0;
-                MapBrowser.selectedMapIndex = -1
-            } else {
-                MapBrowser.toggleAllButtons()
-                this.toggle = 1;
-                MapBrowser.selectedMapIndex = "Awakening"
-                if (UserInterface.settings.playTutorial) { Tutorial.isActive = true }
-            }
-        })
-
-        // was y=126 moved down for testing big icons
-        btn_level_pitfall = new Button(160, 658, 250, "", "", 0, "Pitfall", function () {
-            if (this.toggle) {
-                this.toggle = 0;
-                MapBrowser.selectedMapIndex = -1
-            } else {
-                MapBrowser.toggleAllButtons()
-                this.toggle = 1;
-                MapBrowser.selectedMapIndex = "Pitfall"
-            }
-        })
-
-        btn_level_cavernAbyss = new Button(160, 202, 250, "", "", 0, "Cavern Abyss", function () {
-            if (this.toggle) {
-                this.toggle = 0;
-                MapBrowser.selectedMapIndex = -1
-            } else {
-                MapBrowser.toggleAllButtons()
-                this.toggle = 1;
-                MapBrowser.selectedMapIndex = "Cavern Abyss"
-            }
-        })
-
-        btn_level_crystals = new Button(160, 278, 250, "", "", 0, "Crystals", function () {
-            if (this.toggle) {
-                this.toggle = 0;
-                MapBrowser.selectedMapIndex = -1
-            } else {
-                MapBrowser.toggleAllButtons()
-                this.toggle = 1;
-                MapBrowser.selectedMapIndex = "Crystals"
-            }
-        })
-
-        btn_level_trespass = new Button(160, 354, 250, "", "", 0, "Trespass", function () {
-            if (this.toggle) {
-                this.toggle = 0;
-                MapBrowser.selectedMapIndex = -1
-            } else {
-                MapBrowser.toggleAllButtons()
-                this.toggle = 1;
-                MapBrowser.selectedMapIndex = "Trespass"
-            }
-        })
-
-        btn_level_turmoil = new Button(160, 430, 250, "", "", 0, "Turmoil", function () {
-            if (this.toggle) {
-                this.toggle = 0;
-                MapBrowser.selectedMapIndex = -1
-            } else {
-                MapBrowser.toggleAllButtons()
-                this.toggle = 1;
-                MapBrowser.selectedMapIndex = "Turmoil"
-            }
-        })
-
-        btn_level_tangledForest = new Button(160, 506, 250, "", "", 0, "Tangled Forest", function () {
-            if (this.toggle) {
-                this.toggle = 0;
-                MapBrowser.selectedMapIndex = -1
-            } else {
-                MapBrowser.toggleAllButtons()
-                this.toggle = 1;
-                MapBrowser.selectedMapIndex = "Tangled Forest"
-            }
-        })
-
-        btn_level_forever = new Button(160, 582, 250, "", "", 0, "Forever", function () {
-            if (this.toggle) {
-                this.toggle = 0;
-                MapBrowser.selectedMapIndex = -1
-            } else {
-                MapBrowser.toggleAllButtons()
-                this.toggle = 1;
-                MapBrowser.selectedMapIndex = "Forever"
-            }
-        })
-
-
-        // IN LEVEL Buttons
-        btn_mainMenu = new Button(44, 40, 68, "x_button", "", 0, "", function () {
-
-            // UserInterface.gamestate
-            // 1: main menu
-            // 2: level select (MapBrowser)
-            // 3: settings
-            // 4: store
-            // 5: loading map page
-            // 6: in level
-            // 7: in map editor
-
-            // UserInterface.levelState
-            // 1 = pre-start
-            // 2 = playing level
-            // 3 = in endzone
-
-            // MapEditor.editorState
-            // 0 = map new/import/load screen. mapeditor's main menu
-            // 1 = main map edit screen
-            // 2 = platform edit menu
-            // 3 = map color page
-            // 4 = map settings page
-            // 5 = MapEditor MapBrowser screen
-
-            // MapBrowser.state
-            // 0 = disabled
-            // 1 = standard map browser
-            // 2 = custom map browser
-
-            if (UserInterface.gamestate == 2) { // in MapBrowser
-                if (MapEditor.editorState == 5) { // in MapEditor's MapBrowser
-
-                    // goto MapEditor's main menu
-                    MapBrowser.state = 0;
-                    MapBrowser.scrollY = 0;
-                    MapBrowser.selectedMapIndex = -1;
-
-                    UserInterface.gamestate = 7;
-                    MapEditor.editorState = 0;
-                    UserInterface.renderedButtons = UserInterface.btnGroup_mapEditorMenu
-
-                    document.getElementById("shareDiv").remove()
-
-                    return
-                }
-
-                if (MapBrowser.state == 1) { // in play standard map browser
-                    // goto main menu
-                    MapBrowser.state = 0;
-                    MapBrowser.scrollY = 0;
-                    MapBrowser.selectedMapIndex = -1;
-                    UserInterface.gamestate = 1
-                    // loop through each button (including non-maps eww) and untoggle it
-                    UserInterface.renderedButtons.forEach(button => {
-                        if (button.toggle == 1 && button != btn_playTutorial) { button.toggle = 0 }
-                    })
-                    UserInterface.renderedButtons = UserInterface.btnGroup_mainMenu;
-                    return
-                }
-
-                if (MapBrowser.state == 2) { // in play custom map browser
-                    // goto play standard map browser
-                    MapBrowser.state = 1;
-                    UserInterface.renderedButtons = UserInterface.btnGroup_standardMapBrowser
-                    MapBrowser.init();
-                    return
-                }
-            }
-
-            if (UserInterface.gamestate == 3) { // in Settings page
-                // goto main menu
-                UserInterface.gamestate = 1
-                UserInterface.renderedButtons = UserInterface.btnGroup_mainMenu;
-                return
-            }
-
-            if (UserInterface.gamestate == 5) { // in Loading Map page
-                // goto standard map browser
-                UserInterface.gamestate = 2;
-                MapBrowser.state = 1;
-                UserInterface.renderedButtons = UserInterface.btnGroup_standardMapBrowser;
-                MapBrowser.init();
-                return
-            }
-
-            if (UserInterface.gamestate == 6) { // in Map
-                // goto standard map browser
-                UserInterface.timer = 0;
-                UserInterface.levelState = 1;
-
-                UserInterface.gamestate = 2;
-                MapBrowser.state = 1;
-                UserInterface.renderedButtons = UserInterface.btnGroup_standardMapBrowser;
-                MapBrowser.init();
-
-
-                if (Tutorial.isActive) { // leaving tutorial level
-                    if (Tutorial.state >= 18) {
-                        btn_playTutorial.released(true) // toggle tutorial button to be false after completing it
-                    }
-
-                    Tutorial.reset()
-                }
-
-                return
-            }
-
-            if (UserInterface.gamestate == 7) { // in MapEditor
-
-                if (MapEditor.editorState == 0) { // MapEditor main menu
-                    // goto main menu
-                    UserInterface.gamestate = 1;
-                    UserInterface.renderedButtons = UserInterface.btnGroup_mainMenu;
-                    return
-                }
-
-                if (MapEditor.editorState == 3 || MapEditor.editorState == 4) { // in map settings or map color pages 
-                    // goto MapEditor main edit screen
-                    UserInterface.renderedButtons = UserInterface.btnGroup_mapEditorInterface
-                    MapEditor.editorState = 1;
-                    return
-                }
-            }
-
-
-        })
-
-        btn_restart = new Button(44, 130, 68, "restart_button", "", 0, "", function () {
-
-            if (Tutorial.isActive) { // restart pressed in tutorial level
-                // DRAW ALERT "Restart Disabled"
-            } else {
-                UserInterface.timer = 0;
-                UserInterface.levelState = 1;
-                Player.checkpointIndex = -1;
-                Player.restart();
-            }
-        })
-
-        btn_jump = new Button(44, "window.outerHeight - 132", 92, "jump_button", "", 0, "", function () {
-            if (UserInterface.levelState == 1) {
-                UserInterface.timerStart = Date.now();
-                UserInterface.levelState = 2;
-                Player.startLevel();
-            }
-        })
-
-
-        // TUTORIAL BUTTONS
-        btn_next = new Button("window.outerWidth - 100", 38, 60, "next_button", "", 0, "", function () {
-
-            Tutorial.timerStarted = false; // easier to always set these here even if they arent always needed
-            Tutorial.animatePos = 0;
-            Tutorial.animateVel = 0;
-
-            // reset the position and scale because the button is being pulse animated
-            this.x = "window.outerWidth - 100"
-            this.y = 38
-            this.width = 60
-            this.height = 60
-
-            if (Tutorial.state == 1) {
-                Tutorial.state++;
-                UserInterface.renderedButtons = [btn_mainMenu, btn_next]
-                return
-            }
-
-            if (Tutorial.state == 2) {
-                Tutorial.state++; // going into STATE 3
-                UserInterface.renderedButtons = [btn_mainMenu]
-
-                Player.lookAngle.set(0, -1) // so that ur NOT already looking at a target
-                return
-            }
-
-            // state 3 progresses to 5 when all targets are completed
-
-            // state 5 uses jump button to progress
-
-            // state 6 progresses to 7 automatically after 2 secs
-
-            if (Tutorial.state == 7) {
-                Tutorial.state++; // going into STATE 8
-                UserInterface.renderedButtons = UserInterface.btnGroup_inLevel
-                return
-            }
-
-            // 8 to 9 on user swipe
-
-            // 9 to 10 on checkpoint
-
-            // 10 to 11 on user swipe
-
-            // 11 to 12 on checkpoint
-
-            // 12 to 13 on user swipe
-
-            // 13 to 14 on checkpoint
-
-            // 14 to 15 on user swipe
-
-            // 15 to 16 on checkpoint
-
-            // 16 to 17 on user swipe
-
-            // 17 to 18 on level end
-
-            if (Tutorial.state == 18) {
-                Tutorial.state++; // going into STATE 19
-                UserInterface.renderedButtons = UserInterface.btnGroup_inLevel
-                return
-            }
-
-        })
-
-        btn_playTutorial = new Button("window.outerWidth - 320", "window.outerHeight - 100", 60, "toggle_button", "toggle_button_pressed", 1, "", function (sync) {
-            if (sync) {
-                this.toggle = UserInterface.settings.playTutorial;
-            } else {
-                console.log("PLAY TUT TOGGLED")
-                if (this.toggle == 1) {
-                    this.toggle = 0;
-                    Tutorial.isActive = false
-                    UserInterface.settings.playTutorial = 0
-                    UserInterface.writeSettings()
-                } else {
-                    this.toggle = 1;
-                    Tutorial.isActive = true
-                    UserInterface.settings.playTutorial = 1
-                    UserInterface.writeSettings()
-                }
-            }
-        })
 
         // GROUPS OF BUTTONS TO RENDER ON DIFFERENT PAGES
         this.btnGroup_mainMenu = [btn_play, btn_settings, btn_mapEditor]
@@ -1668,31 +1663,37 @@ const UserInterface = {
             btn_level_trespass,
             btn_level_turmoil,
             btn_level_tangledForest,
+            btn_level_pinnacle,
             btn_level_forever,
         ]
         this.btnGroup_customMapBrowser = [btn_mainMenu]
-        this.btnGroup_editMapBrowser = [btn_mainMenu]
-        this.btnGroup_mapEditorMenu = [btn_mainMenu, btn_new_map, btn_load_map, btn_import_map, btn_import_map_text]
+        this.btnGroup_mapEditorBrowser = [btn_mainMenu, btn_new_map, btn_import_map]
         this.btnGroup_mapEditorInterface = [btn_exit_edit, btn_add_platform, btn_map_colors, btn_map_settings, btn_add_checkpoint, btn_dragSelect, btn_multiSelect, btn_snappingSlider]
         this.btnGroup_inLevel = [btn_mainMenu, btn_restart, btn_jump];
-        this.btnGroup_mapColor = [
+        this.btnGroup_colorPickerState1 = [
             btn_mainMenu,
+            btn_backgroundColor,
+            btn_playerColor,
+            btn_wallTopColor,
+            btn_wallSideColor,
+            btn_platformTopColor,
+            btn_platformSideColor,
+            btn_endZoneTopColor,
+            btn_endZoneSideColor,
+            btn_directLightColor,
+            btn_ambientLightColor,
+            btn_lockWallColors,
+            btn_lockPlatformColors,
+            btn_lockEndzoneColors
+        ];
+        this.btnGroup_colorPickerState2 = [
+            btn_mainMenu,
+            btn_unselectColor,
             btn_copyColor,
             btn_pasteColor,
             btn_hueSlider,
             btn_saturationSlider,
             btn_lightnessSlider,
-
-            btn_backgroundColor,
-            btn_playerColor,
-            btn_platformTopColor,
-            btn_platformSideColor,
-            btn_wallTopColor,
-            btn_wallSideColor,
-            btn_endZoneTopColor,
-            btn_endZoneSideColor,
-            btn_directLightColor,
-            btn_ambientLightColor,
         ];
         this.btnGroup_mapSettings = [
             btn_mainMenu,
@@ -1714,7 +1715,7 @@ const UserInterface = {
             btn_wall,
             btn_endzone,
 
-            btn_delete_platform,
+            btn_delete_element,
             btn_duplicate_platform,
             btn_dragSelect,
             btn_multiSelect,
@@ -1737,7 +1738,7 @@ const UserInterface = {
             btn_translate,
             btn_checkpointAngleSlider,
 
-            btn_delete_platform,
+            btn_delete_element,
             btn_dragSelect,
             btn_multiSelect,
             btn_snappingSlider
@@ -1746,7 +1747,7 @@ const UserInterface = {
             btn_exit_edit,
             btn_unselect,
 
-            btn_delete_platform,
+            btn_delete_element,
             btn_duplicate_platform,
             btn_translate,
             btn_dragSelect,
@@ -1786,56 +1787,7 @@ const UserInterface = {
         UserInterface.gamestate = 6;
         UserInterface.renderedButtons = this.btnGroup_inLevel;
     },
-
-    readFileOLD: function (fileName, subDirectory = "") { // returns a promise that resolves to raw, unparsed (json usually)
-        return new Promise((resolve, reject) => {
-            // Resolve dataDirectory URL
-            window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function (dataDirectoryEntry) {
-                if (subDirectory !== "") {
-                    // Access given subDirectory in dataDirectory
-                    dataDirectoryEntry.getDirectory(subDirectory, { create: false }, function (subDirectoryEntry) {
-                        readFileAsText(subDirectoryEntry);
-                    }, function (error) {
-                        reject("Failed to get subDirectory: " + error.code);
-                    });
-                } else {
-                    // Read from main dataDirectory
-                    readFileAsText(dataDirectoryEntry);
-                }
-            }, function (error) {
-                reject("Failed to resolve dataDirectory: " + error.code);
-            });
-
-            // Function to read file as text
-            function readFileAsText(directoryEntry) {
-                directoryEntry.getFile(fileName, { create: false }, function (fileEntry) {
-                    fileEntry.file(function (file) {
-                        const reader = new FileReader();
-                        reader.onloadend = function () {
-                            console.log("Successfully read file: " + fileName);
-                            resolve(this.result);
-                        };
-                        reader.onerror = function () {
-                            reject("Failed to read file: " + fileName);
-                        };
-                        reader.readAsText(file);
-                    }, function (error) {
-                        reject("Failed to get fileEntry.file: " + error.code);
-                    });
-                }, function (error) {
-
-                    // Its not able to find the custom maps in the /maps directory for some reason
-
-                    console.log(directoryEntry)
-                    console.log("fileName " + fileName)
-                    reject("Failed to getFile: " + error.code);
-                });
-            }
-        });
-    },
-
     
-
     writeFile: function (fileName, blobData, subDirectory = "") { // returns a promise
         // fileName is a string with file extension EX: settings.json
         // blobData = new Blob([JSON.stringify(exportObj, null, 2)], { type: "application/json" });
@@ -1920,49 +1872,6 @@ const UserInterface = {
         btn_playTutorial.func(true)
         AudioHandler.setVolume(UserInterface.settings.volume);
     },
-    
-    /*
-    getSettingsOLD: async function () {
-        try {
-            const settingsData = await readFile("device", "", "settings.json", "text");
-            this.settings = JSON.parse(settingsData);
-
-            // readFile completes after initiating buttons so need to sync them
-            btn_sensitivitySlider.updateState(UserInterface.settings.sensitivity)
-            btn_volumeSlider.updateState(UserInterface.settings.volume)
-            btn_debugText.func(true)
-            btn_strafeHUD.func(true)
-            btn_playTutorial.func(true)
-            AudioHandler.setVolume(UserInterface.settings.volume);
-
-        } catch (error) {
-            if (error == "Failed to getFile: 1") { // file doesnt exist
-
-                // If settings file doesn't exist or is empty, initialize default settings
-                this.settings = {
-                    "sensitivity": 0.5,
-                    "volume": 0.1,
-                    "debugText": 0,
-                    "strafeHUD": 1,
-                    "playTutorial": 1
-                };
-
-                this.writeSettings(); // Write the default settings to file
-
-                // readFile completes after initiating buttons so need to sync them
-                btn_sensitivitySlider.updateState(UserInterface.settings.sensitivity)
-                btn_volumeSlider.updateState(UserInterface.settings.volume)
-                btn_debugText.func(true)
-                btn_strafeHUD.func(true)
-                btn_playTutorial.func(true)
-                AudioHandler.setVolume(UserInterface.settings.volume);
-
-            } else {
-                console.error("Error while getting settings:", error);
-            }
-        }
-    },
-    */
 
     writeSettings: function () {
         const settingsBlob = new Blob([JSON.stringify(this.settings, null, 2)], { type: "application/json" });
@@ -2037,7 +1946,7 @@ const UserInterface = {
         // luminance = (0.299 * R + 0.587 * G + 0.114 * B)/255
         // console.log("luminance: " + luminance)
 
-        this.darkMode = (luminance > 0.8) ? true : false;
+        this.darkMode = (luminance > 0.78) ? true : false;
 
     },
 
@@ -2056,31 +1965,27 @@ const UserInterface = {
     },
 
     drawMedal: function (x, y, radius, fillColor, strokeColor, strokeWidth, shadow) {
-        UserInterfaceCanvas.ctx.save() // save 3a           
+        // radius is accounts for stroke -- stroke is drawn inside of shape
+        const oldFill = UserInterfaceCanvas.ctx.fillStyle
+
+        if (shadow) {
+            UserInterfaceCanvas.ctx.fillStyle = "rgba(0, 0, 0, 0.25)"
+            UserInterfaceCanvas.ctx.beginPath()
+            UserInterfaceCanvas.ctx.arc(x + 3, y + 3, radius, 0, 2 * Math.PI); // (x, y, radius, startAngle, endAngle)
+            UserInterfaceCanvas.ctx.fill()
+        }
+
         UserInterfaceCanvas.ctx.fillStyle = fillColor
         UserInterfaceCanvas.ctx.strokeStyle = strokeColor
         UserInterfaceCanvas.ctx.lineWidth = strokeWidth
 
-        if (shadow) {
-            UserInterfaceCanvas.ctx.save(); // save 3.1
-            UserInterfaceCanvas.ctx.shadowColor = "rgba(0, 0, 0, 0.21)";
-            UserInterfaceCanvas.ctx.shadowOffsetX = 4
-            UserInterfaceCanvas.ctx.shadowOffsetY = 4
-            UserInterfaceCanvas.ctx.beginPath()
-            UserInterfaceCanvas.ctx.arc(x, y, radius + strokeWidth / 2, 0, 2 * Math.PI); // (x, y, radius, startAngle, endAngle) strokeWidth/2 bc it pokes out otherwise... not sure why
-            UserInterfaceCanvas.ctx.closePath()
-
-            UserInterfaceCanvas.ctx.fill()
-            UserInterfaceCanvas.ctx.restore() // save 3.1
-        }
-
-
         UserInterfaceCanvas.ctx.beginPath()
-        UserInterfaceCanvas.ctx.arc(x, y, radius, 0, 2 * Math.PI); // (x, y, radius, startAngle, endAngle)
+        UserInterfaceCanvas.ctx.arc(x, y, radius - strokeWidth/2, 0, 2 * Math.PI); // (x, y, radius, startAngle, endAngle)
 
         UserInterfaceCanvas.ctx.fill()
         UserInterfaceCanvas.ctx.stroke()
-        UserInterfaceCanvas.ctx.restore() // save 3a
+
+        UserInterfaceCanvas.ctx.fillStyle = oldFill
     },
 
     /*
@@ -2177,7 +2082,6 @@ const UserInterface = {
 
         if (this.gamestate == 1) { // In Main Menu
             CanvasArea.canvas.style.backgroundColor = "#a3d5e1";
-            document.body.style.backgroundColor = "#a3d5e1";
 
             // Draw Title Text
             ctx.fillStyle = UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
@@ -2512,7 +2416,7 @@ const UserInterface = {
 
         if (this.gamestate == 7) { // In Map Editor
 
-            if (this.editorState == 3) { // IN COLOR SETTINGS
+            if (MapEditor.editorState == 3) { // IN COLOR SETTINGS
                 ColorPicker.render()
             }
 

@@ -189,7 +189,6 @@ const Map = {
 
         // FINISH UP AND MOVE ON
         CanvasArea.canvas.style.backgroundColor = this.style.shaded_backgroundColor;
-        document.body.style.backgroundColor = this.style.shaded_backgroundColor;
 
         Player.initPlayer(this.playerStart.x, this.playerStart.y, this.playerStart.angle)
 
@@ -598,8 +597,6 @@ const Map = {
         // Where to pull syles from: Map or PreviewWindow
         const MapData = UserInterface.gamestate == 7 ? MapEditor.loadedMap : Map;
 
-        // ctx.save(); // #19 kill
-
         const camera = Player.speedCameraOffset;
 
         const cameraTargetX = Player.x - camera.direction.x;
@@ -625,7 +622,7 @@ const Map = {
         // ctx.rotate((this.lookAngle.getAngleInDegrees() * Math.PI) / 180); // rotating canvas OLD CODE
         ctx.fillRect(Player.x - 15, Player.y - 15 + MapData.style.platformHeight, 30, 30)
 
-        // DRAW ALL SHADOWS IN renderedPlatforms
+        // DRAW ALL PLATFORM SHADOWS IN renderedPlatforms
         for (const platform of this.renderedPlatforms) {
             ctx.moveTo(platform.x + platform.shadowPoints[0][0], platform.y + platform.shadowPoints[0][1]);
             for (let i = platform.shadowPoints.length - 1; i > 0; i--) {
@@ -657,7 +654,6 @@ const Map = {
         }
 
         ctx.setTransform(1, 0, 0, 1, 0, 0); // resets ctx to identity matrix
-        // ctx.restore(); // #19
     },
 
 }

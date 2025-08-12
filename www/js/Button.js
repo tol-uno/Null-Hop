@@ -1,216 +1,193 @@
 class Button {
     constructor(x, y, width, image, image_pressed, togglable, label, func) {
-        this.x = eval(x);
-        this.y = eval(y);
-        this.savedX = x;
-        this.savedY = y;
-
-
-        // GET ICON DIRECTLY THROUGH CORDOVA LOCAL STORAGE   
-        const buttonURL = cordova.file.applicationDirectory + "www/assets/images/buttons/"
-        
-        window.resolveLocalFileSystemURL(buttonURL, (dirEntry) => {
-
-            // GETTING ICONS FOR IMAGE PARAMETER
-            dirEntry.getFile(image + ".svg", {create: false, exclusive: false}, (fileEntry) => {
-
-                fileEntry.file( (file) => {
-
-                    const reader = new FileReader();
-                    
-                    reader.onload = (e) => {
-
-                        // create SVG elements documents
-                        // CAN COMBINE ALL INITs HERE
-                        const lightSVG = new DOMParser().parseFromString(e.target.result, "image/svg+xml").documentElement;
-                        const lightSVG_p = new DOMParser().parseFromString(e.target.result, "image/svg+xml").documentElement;
-                        
-                        const darkSVG = new DOMParser().parseFromString(e.target.result, "image/svg+xml").documentElement;
-                        const darkSVG_p = new DOMParser().parseFromString(e.target.result, "image/svg+xml").documentElement;
-                        
-
-                        // edit fills to to be light/dark modes
-                        lightSVG.getElementById("bg").style.fill = UserInterface.lightColor_1
-                        lightSVG.getElementById("icon").style.fill = UserInterface.darkColor_1
-                        lightSVG_p.getElementById("bg").style.fill = UserInterface.lightColor_2
-                        lightSVG_p.getElementById("icon").style.fill = UserInterface.darkColor_2
-
-                        darkSVG.getElementById("bg").style.fill = UserInterface.darkColor_1
-                        darkSVG.getElementById("icon").style.fill= UserInterface.lightColor_1
-                        darkSVG_p.getElementById("bg").style.fill = UserInterface.darkColor_2
-                        darkSVG_p.getElementById("icon").style.fill= UserInterface.lightColor_2
-
-                        
-                        // converts svg element to string
-                        const lightSVG_string = new XMLSerializer().serializeToString(lightSVG);
-                        const lightSVG_p_string = new XMLSerializer().serializeToString(lightSVG_p);
-
-                        const darkSVG_string = new XMLSerializer().serializeToString(darkSVG);
-                        const darkSVG_p_string = new XMLSerializer().serializeToString(darkSVG_p);
-
-
-                        // Converting SVG text string to blob for image source
-                        // https://medium.com/@benjamin.black/using-blob-from-svg-text-as-image-source-2a8947af7a8e
-                        const lightSVG_blob = new Blob([lightSVG_string], {type: 'image/svg+xml'});
-                        const lightSVG_p_blob = new Blob([lightSVG_p_string], {type: 'image/svg+xml'});
-
-                        const darkSVG_blob = new Blob([darkSVG_string], {type: 'image/svg+xml'});
-                        const darkSVG_p_blob = new Blob([darkSVG_p_string], {type: 'image/svg+xml'});
-
-
-                        // create links for adding to source of img
-                        const lightSVG_url = URL.createObjectURL(lightSVG_blob);
-                        const lightSVG_p_url = URL.createObjectURL(lightSVG_p_blob);
-
-                        const darkSVG_url = URL.createObjectURL(darkSVG_blob);
-                        const darkSVG_p_url = URL.createObjectURL(darkSVG_p_blob);
-
-
-                        // add these svg links as src to two images
-                        this.lightIcon = new Image()
-                        this.lightIcon_p = new Image()
-
-                        this.darkIcon = new Image()
-                        this.darkIcon_p = new Image()
-
-                        this.lightIcon.addEventListener("load", () => {URL.revokeObjectURL(lightSVG_url)}, {once: true});
-                        this.lightIcon_p.addEventListener("load", () => {URL.revokeObjectURL(lightSVG_p_url)}, {once: true});
-
-                        this.darkIcon.addEventListener("load", () => {URL.revokeObjectURL(darkSVG_url)}, {once: true});
-                        this.darkIcon_p.addEventListener("load", () => {URL.revokeObjectURL(darkSVG_p_url)}, {once: true});
-
-                        // Waits till after the images are loaded to get their aspect ratios
-                        // COULD MOVE TO A FUNCTION ELSEWERE THAT IS JUST CALLED
-                        this.lightIcon.addEventListener("load", () => { // just uses another random event listener... yuck
-                            this.image = this.lightIcon
-                            this.width = width
-                            this.height = this.width * (this.image.height / this.image.width)
-                        }, {once: true});
-
-                        this.lightIcon.src = lightSVG_url
-                        this.lightIcon_p.src = lightSVG_p_url
-
-                        this.darkIcon.src = darkSVG_url
-                        this.darkIcon_p.src = darkSVG_p_url
-
-
-                    };
-                    reader.onerror = (e) => alert(e.target.error.name);
-        
-                    reader.readAsText(file)
-                })
-            }, () => {
-                this.width = width;
-                this.height = this.width > 56 ? 56 : this.width
-
-                // TRUNCATE LABEL
-                UserInterfaceCanvas.ctx.font = "18px BAHNSCHRIFT"; // for measuring text
-                this.shortLabel = UserInterface.truncateText(label, this.width - 40) 
-                
-                
-            });
-
-
-            // GETTING IMAGE_PRESSED. messy to do most of this code twice but... 
-            if (image_pressed !== "") {
-                dirEntry.getFile(image_pressed + ".svg", {create: false, exclusive: false}, (fileEntry) => {
-
-                    fileEntry.file( (file) => {
-    
-                        const reader = new FileReader();
-                        
-                        reader.onload = (e) => {
-    
-                            // create SVG elements documents
-                            // CAN COMBINE ALL INITs HERE
-                            const lightSVG = new DOMParser().parseFromString(e.target.result, "image/svg+xml").documentElement;
-                            const darkSVG = new DOMParser().parseFromString(e.target.result, "image/svg+xml").documentElement;
-                            
-    
-                            // edit fills to to be light/dark modes
-                            lightSVG.getElementById("bg").style.fill = UserInterface.lightColor_1
-                            lightSVG.getElementById("icon").style.fill = UserInterface.darkColor_1
-    
-                            darkSVG.getElementById("bg").style.fill = UserInterface.darkColor_1
-                            darkSVG.getElementById("icon").style.fill= UserInterface.lightColor_1
-
-                            
-                            // converts svg element to string
-                            const lightSVG_string = new XMLSerializer().serializeToString(lightSVG);    
-                            const darkSVG_string = new XMLSerializer().serializeToString(darkSVG);
-    
-    
-                            // Converting SVG text string to blob for image source
-                            // https://medium.com/@benjamin.black/using-blob-from-svg-text-as-image-source-2a8947af7a8e
-                            const lightSVG_blob = new Blob([lightSVG_string], {type: 'image/svg+xml'});    
-                            const darkSVG_blob = new Blob([darkSVG_string], {type: 'image/svg+xml'});
-    
-    
-                            // create links for adding to source of img
-                            const lightSVG_url = URL.createObjectURL(lightSVG_blob);
-                            const darkSVG_url = URL.createObjectURL(darkSVG_blob);
-    
-    
-                            // add these svg links as src to two images
-                            this.lightIcon_toggled = new Image()    
-                            this.darkIcon_toggled = new Image()
-    
-                            this.lightIcon_toggled.addEventListener("load", () => {URL.revokeObjectURL(lightSVG_url)}, {once: true});    
-                            this.darkIcon_toggled.addEventListener("load", () => {URL.revokeObjectURL(darkSVG_url)}, {once: true});
-    
-
-                            this.lightIcon_toggled.src = lightSVG_url    
-                            this.darkIcon_toggled.src = darkSVG_url
-
-                            this.hasToggleImage = true
-    
-                        };
-                        reader.onerror = (e) => alert(e.target.error.name);
-            
-                        reader.readAsText(file)
-                    })
-                });
-            }
-
-
-        })
-        
-
-        this.isPressed = false
+        this.x = x
+        this.y = y
+        this.savedX = x; // unused
+        this.savedY = y; // used by Map Browser
+        this.width = width;
+        this.image = image;
+        this.image_pressed = image_pressed;
+        this.label = label;
         this.func = func;
 
-        this.toggle = 0
-        if (togglable) {
-            this.func(true) // runs the released function with the "sync" tag to sync button's toggle state
+        this.isPressed = false;
+
+        this.toggle = 0; // Some buttons are togglable like MapBrowser's Map buttons and toggle switches
+        if (togglable) { 
+            this.func(true); // runs the released function with the "sync" tag to sync button's toggle state
+        } // dont set "togglable" true unless toggle button has a (sync) flag in its function
+
+        this.ready = false
+        this.init();
+    }
+
+    async init() {
+        if (this.image !== "") {
+            const rawImageSvgText = await readFile(
+                "local",
+                "assets/images/buttons/",
+                this.image + ".svg",
+                "text"
+            );
+
+            // create 4 differnt color versions by replacing fills and strokes in svg string
+            const lightSvgText = replaceSvgColors(
+                rawImageSvgText,
+                UserInterface.lightColor_1,
+                UserInterface.darkColor_1
+            );
+            const lightPressedSvgText = replaceSvgColors(
+                rawImageSvgText,
+                UserInterface.lightColor_2,
+                UserInterface.darkColor_2
+            );
+
+            const darkSvgText = replaceSvgColors(
+                rawImageSvgText,
+                UserInterface.darkColor_1,
+                UserInterface.lightColor_1
+            );
+            const darkPressedSvgText = replaceSvgColors(
+                rawImageSvgText,
+                UserInterface.darkColor_2,
+                UserInterface.lightColor_2
+            );
+
+            // creating images from the svg text
+            // FIX FIX FIX could use one this.icon and generate the correct image on the fly
+            // (depending on how fast createImageFromSvgText is)
+            this.lightIcon = await createImageFromSvgText(lightSvgText);
+            this.lightIcon_p = await createImageFromSvgText(lightPressedSvgText);
+            this.darkIcon = await createImageFromSvgText(darkSvgText);
+            this.darkIcon_p = await createImageFromSvgText(darkPressedSvgText);
+
+            // Get the original SVGs aspect ratio and use it to set height
+            // this.width isnt always the same as the SVGs width -- that's why ratio is needed
+            this.height = this.width * (this.lightIcon.height / this.lightIcon.width);
+        } else {
+            // NO image given -- set 56px height & use label for dynamic button
+            this.height = this.width > 56 ? 56 : this.width;
+            // TRUNCATE LABEL
+            UserInterfaceCanvas.ctx.font = "20px BAHNSCHRIFT"; // for measuring text
+            this.label = UserInterface.truncateText(this.label, this.width - 40);
         }
 
+        // Set up independent image_pressed icon for buttons with a visually different pressed state.
+        // Toggle switches are only buttons that use this right now.
+        if (this.image_pressed !== "") {
+            const rawImagePressedSvgText = await readFile(
+                "local",
+                "assets/images/buttons/",
+                this.image_pressed + ".svg",
+                "text"
+            );
 
-        // shortLabel set in asych function above ^
-        this.label = label
+            // create 2 light and dark versions by replacing fills and strokes in svg string
+            const lightSvgText = replaceSvgColors(
+                rawImagePressedSvgText,
+                UserInterface.lightColor_1,
+                UserInterface.darkColor_1
+            );
 
+            const darkSvgText = replaceSvgColors(
+                rawImagePressedSvgText,
+                UserInterface.darkColor_1,
+                UserInterface.lightColor_1
+            );
+
+            this.lightIcon_toggled = await createImageFromSvgText(lightSvgText);
+            this.darkIcon_toggled = await createImageFromSvgText(darkSvgText);
+
+            this.hasToggleImage = true;
+        }
+
+        // Tells .render() that its safe to draw the icons
+        this.ready = true;
+
+        // Utility functions used in init()
+        function replaceSvgColors(svgString, newBackgroundColor, newForegroundColor) {
+            let newSvgString = svgString;
+
+            // Replace fills
+            newSvgString = newSvgString.replace(
+                /fill=(["'])\s*#?(?:fff(?:fff)?|white)\s*\1/gi,
+                `fill="${newBackgroundColor}"`
+            );
+            newSvgString = newSvgString.replace(
+                /fill=(["'])\s*#?(?:000(?:000)?|black)\s*\1/gi,
+                `fill="${newForegroundColor}"`
+            );
+
+            // Replace strokes
+            newSvgString = newSvgString.replace(
+                /stroke=(["'])\s*#?(?:fff(?:fff)?|white)\s*\1/gi,
+                `stroke="${newBackgroundColor}"`
+            );
+            newSvgString = newSvgString.replace(
+                /stroke=(["'])\s*#?(?:000(?:000)?|black)\s*\1/gi,
+                `stroke="${newForegroundColor}"`
+            );
+
+            return newSvgString;
+        }
+
+        async function createImageFromSvgText(svgText) {
+            return new Promise((resolve, reject) => {
+                // Promise resolves when the image is ready
+                const svgBlob = new Blob([svgText], { type: "image/svg+xml" });
+                const url = URL.createObjectURL(svgBlob);
+
+                const img = new Image();
+                img.onload = () => {
+                    URL.revokeObjectURL(url);
+                    resolve(img);
+                };
+                img.onerror = (e) => {
+                    console.error("createImageFromSvgText failed: ", e);
+                    reject(e);
+                };
+                img.src = url;
+            });
+        }
     }
 
     render() {
+        if (!this.ready) {
+            return
+        }
 
-        UserInterfaceCanvas.ctx.save()
+        const shrinkFactor = this.hasToggleImage ? 1 : 0.94; // doesnt need to be calculated every frame
 
-        const shrinkFactor = (this.hasToggleImage) ? 1 : 0.94 // doesnt need to be calculated every frame
+        // // Draw Shadow
+        // if (!this.isPressed) {
+        //     UserInterfaceCanvas.roundedRect(this.x + 4, this.y + 4, this.width, this.height, this.height/2)
+        //     UserInterfaceCanvas.ctx.fillStyle = "rgba(0,0,0,0.25)"
+        //     UserInterfaceCanvas.ctx.fill()
+        // }
 
-        if (this.image == null) { // dynamically draw button (no icon)
 
-            let x, y, w, h
+        if (this.image == "") {
+            // dynamically draw button (no icon)
+
+            let x, y, w, h;
 
             if (UserInterface.darkMode == false) {
-                UserInterfaceCanvas.ctx.fillStyle = (this.toggle == 1 || this.isPressed) ? UserInterface.lightColor_2 : UserInterface.lightColor_1;
+                UserInterfaceCanvas.ctx.fillStyle =
+                    this.toggle == 1 || this.isPressed
+                        ? UserInterface.lightColor_2
+                        : UserInterface.lightColor_1;
             } else {
-                UserInterfaceCanvas.ctx.fillStyle = (this.toggle == 1 || this.isPressed) ? UserInterface.darkColor_2 : UserInterface.darkColor_1;
+                UserInterfaceCanvas.ctx.fillStyle =
+                    this.toggle == 1 || this.isPressed
+                        ? UserInterface.darkColor_2
+                        : UserInterface.darkColor_1;
             }
 
             if (this.toggle == 1 || this.isPressed) {
-                w = this.width * shrinkFactor
-                h = this.height * shrinkFactor
-                x = this.x + ((this.width - w) / 2)
-                y = this.y + ((this.height - h) / 2)
+                w = this.width * shrinkFactor;
+                h = this.height * shrinkFactor;
+                x = this.x + (this.width - w) / 2;
+                y = this.y + (this.height - h) / 2;
             } else {
                 w = this.width;
                 h = this.height;
@@ -218,39 +195,70 @@ class Button {
                 y = this.y;
             }
 
-            const radius = h/2
-            UserInterfaceCanvas.ctx.beginPath()
-            UserInterfaceCanvas.ctx.moveTo(x + radius, y) // top line
-            UserInterfaceCanvas.ctx.lineTo(x + w - radius, y)
-            UserInterfaceCanvas.ctx.arc(x + w - radius, y + radius, radius, 1.5*Math.PI, 0.5*Math.PI) // right arc
-            UserInterfaceCanvas.ctx.lineTo(x + radius, y + h)
-            UserInterfaceCanvas.ctx.arc(x + radius, y + radius, radius, 0.5*Math.PI, 1.5*Math.PI)
+            const radius = h / 2;
+            UserInterfaceCanvas.ctx.beginPath();
+            UserInterfaceCanvas.ctx.moveTo(x + radius, y); // top line
+            UserInterfaceCanvas.ctx.lineTo(x + w - radius, y);
+            UserInterfaceCanvas.ctx.arc(
+                x + w - radius,
+                y + radius,
+                radius,
+                1.5 * Math.PI,
+                0.5 * Math.PI
+            ); // right arc
+            UserInterfaceCanvas.ctx.lineTo(x + radius, y + h);
+            UserInterfaceCanvas.ctx.arc(
+                x + radius,
+                y + radius,
+                radius,
+                0.5 * Math.PI,
+                1.5 * Math.PI
+            );
 
-            UserInterfaceCanvas.ctx.fill()
+            UserInterfaceCanvas.ctx.fill();
 
-        } else { // draw image normally
+            // ADJUST TEXT SIZE TO SHRINK IF PRESSED
+            const fontSize = this.toggle == 1 || this.isPressed ? 20 * shrinkFactor : 20;
+            UserInterfaceCanvas.ctx.font = `${fontSize}px BAHNSCHRIFT`;
+            UserInterfaceCanvas.ctx.fillStyle = !UserInterface.darkMode
+                ? UserInterface.darkColor_1
+                : UserInterface.lightColor_1;
 
-            let icon, x, y, w, h
+            UserInterfaceCanvas.ctx.fillText(
+                this.label,
+                this.x + (this.width - UserInterfaceCanvas.ctx.measureText(this.label).width) / 2,
+                this.y + this.height / 2 + 6
+            );
+        } else {
+            // Draw SVG image icon normally
 
-            if (UserInterface.darkMode == false) { // light mode
+            let icon, x, y, w, h;
+
+            if (UserInterface.darkMode == false) {
+                // light mode
                 if (this.hasToggleImage) {
-                    icon = (this.toggle == 1 || this.isPressed) ? this.lightIcon_toggled : this.lightIcon;
+                    icon =
+                        this.toggle == 1 || this.isPressed
+                            ? this.lightIcon_toggled
+                            : this.lightIcon;
                 } else {
-                    icon = (this.toggle == 1 || this.isPressed) ? this.lightIcon_p : this.lightIcon;
+                    icon = this.toggle == 1 || this.isPressed ? this.lightIcon_p : this.lightIcon;
                 }
-            } else { // dark mode
+            } else {
+                // dark mode
                 if (this.hasToggleImage) {
-                    icon = (this.toggle == 1 || this.isPressed) ? this.darkIcon_toggled : this.darkIcon;
+                    icon =
+                        this.toggle == 1 || this.isPressed ? this.darkIcon_toggled : this.darkIcon;
                 } else {
-                    icon = (this.toggle == 1 || this.isPressed) ? this.darkIcon_p : this.darkIcon;
+                    icon = this.toggle == 1 || this.isPressed ? this.darkIcon_p : this.darkIcon;
                 }
             }
 
             if (this.toggle == 1 || this.isPressed) {
-                w = this.width * shrinkFactor
-                h = this.height * shrinkFactor
-                x = this.x + ((this.width - w) / 2)
-                y = this.y + ((this.height - h) / 2)
+                w = this.width * shrinkFactor;
+                h = this.height * shrinkFactor;
+                x = this.x + (this.width - w) / 2;
+                y = this.y + (this.height - h) / 2;
             } else {
                 w = this.width;
                 h = this.height;
@@ -259,20 +267,8 @@ class Button {
             }
 
             // draws whatever icon with whatever pressed state were set above
-            UserInterfaceCanvas.ctx.drawImage(icon, x, y, w, h)
-
+            UserInterfaceCanvas.ctx.drawImage(icon, x, y, w, h);
         }
-
-        UserInterfaceCanvas.ctx.restore() // resets to no shadows
-
-        if (this.label != "") {
-
-            UserInterfaceCanvas.ctx.font = "18px BAHNSCHRIFT";
-            UserInterfaceCanvas.ctx.fillStyle = (!UserInterface.darkMode) ? UserInterface.darkColor_1: UserInterface.lightColor_1;
-
-            UserInterfaceCanvas.ctx.fillText(this.shortLabel, this.x + (this.width - UserInterfaceCanvas.ctx.measureText(this.shortLabel).width)/2, this.y + (this.height/2) + 6)
-        }
-     
     }
 
     pressed() {
@@ -280,8 +276,10 @@ class Button {
         // any release event calls released() on applicable buttons then sets isPressed = false on every rendered button
     }
 
-    released(override) { // overide ignores the requirement to be pressed before released
-        if (override || this.isPressed) {this.func()}
+    released(override) {
+        // overide ignores the requirement to be pressed before released
+        if (override || this.isPressed) {
+            this.func();
+        }
     }
-
 }

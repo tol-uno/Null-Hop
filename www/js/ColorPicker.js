@@ -10,7 +10,7 @@ const ColorPicker = {
     copiedColor : null,
 
     editingElement : 0, 
-    // 0 nothing
+    // 0 nothing (in selection screen)
     // 1 bg
     // 2 player
     // 3 platform top
@@ -20,7 +20,11 @@ const ColorPicker = {
     // 7 end top
     // 8 end side
     // 9 direct light
-    // 10 ambient light
+    // 10 ambiennt light
+
+    lockWallColors : true,
+    lockPlatformColors : true,
+    lockEndzoneColors : true,
 
     h : 117,
     s : 34,
@@ -89,7 +93,7 @@ const ColorPicker = {
         this.lightnessGradient.addColorStop(1, "hsla(" + this.h + ", 100%, 100%, 1)");
     },
 
-    toggleAllButtons : function() {
+    toggleAllButtons : function() { // shouldnt need Kill
         UserInterface.renderedButtons.forEach(button => {
             button.toggle = 0
         })
@@ -112,58 +116,146 @@ const ColorPicker = {
 
     render : function() {
         const ctx = UserInterfaceCanvas.ctx;
-        ctx.save()
-        // Scaling is done with UserInterface where this render() is called
+        // Scaling is done in UserInterface where this ColorPicker.render() is called
 
-        ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.lightColor_1 : UserInterface.darkColor_1;
 
-        ctx.strokeStyle = (!UserInterface.darkMode) ? UserInterface.lightColor_1 : UserInterface.darkColor_1
-        ctx.lineWidth = 4
+        if (this.editingElement == 0) { // showing all color/element selection buttons
+            // DRAW COLORS BEHIND BUTTONS
+            
+            // Background
+            ctx.fillStyle = MapEditor.loadedMap.style.backgroundColor
+            UserInterfaceCanvas.roundedRect(btn_backgroundColor.x + 8, btn_backgroundColor.y + 8, btn_backgroundColor.width - 16, btn_backgroundColor.height - 16, btn_backgroundColor.height/2)
+            ctx.fill()
 
-        // bounding box
-        UserInterfaceCanvas.roundedRect(this.x, this.y, this.width, this.height, 25)
-        ctx.fill()
-        ctx.stroke()
+            // Player
+            ctx.fillStyle = MapEditor.loadedMap.style.playerColor
+            UserInterfaceCanvas.roundedRect(btn_playerColor.x + 8, btn_playerColor.y + 8, btn_playerColor.width - 16, btn_playerColor.height - 16, btn_playerColor.height/2)
+            ctx.fill()
 
-        // color showcase box
-        ctx.fillStyle = "hsl(" + this.h + ", " + this.s + "%, " + this.l + "%)"
-        UserInterfaceCanvas.roundedRect(this.x + 20, this.y + 20, 120, 80, 10)
-        ctx.fill()
-        ctx.stroke()
+            // Direct Light
+            ctx.fillStyle = MapEditor.loadedMap.style.directLight
+            UserInterfaceCanvas.roundedRect(btn_directLightColor.x + 8, btn_directLightColor.y + 8, btn_directLightColor.width - 16, btn_directLightColor.height - 16, btn_directLightColor.height/2)
+            ctx.fill()
+            
+            // Ambient Light
+            ctx.fillStyle = MapEditor.loadedMap.style.ambientLight
+            UserInterfaceCanvas.roundedRect(btn_ambientLightColor.x + 8, btn_ambientLightColor.y + 8, btn_ambientLightColor.width - 16, btn_ambientLightColor.height - 16, btn_ambientLightColor.height/2)
+            ctx.fill()
 
-        // rbg text
-        ctx.font = "16px BAHNSCHRIFT";
-        ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
-        ctx.fillText(CanvasArea.HSLToRGB(this.h, this.s, this.l), this.x + 164, this.y + 122)
+            // Walls
+            ctx.fillStyle = MapEditor.loadedMap.style.wallTopColor
+            UserInterfaceCanvas.roundedRect(btn_wallTopColor.x + 8, btn_wallTopColor.y + 8, btn_wallTopColor.width - 16, btn_wallTopColor.height - 16, btn_wallTopColor.height/2)
+            ctx.fill()
+            ctx.fillStyle = MapEditor.loadedMap.style.wallSideColor
+            UserInterfaceCanvas.roundedRect(btn_wallSideColor.x + 8, btn_wallSideColor.y + 8, btn_wallSideColor.width - 16, btn_wallSideColor.height - 16, btn_wallSideColor.height/2)
+            ctx.fill()
 
-        // selected element text
-        let selectedColor = null
-        if (this.editingElement == 1) {selectedColor = "Background"}
-        if (this.editingElement == 2) {selectedColor = "Player"}
-        if (this.editingElement == 3) {selectedColor = "Platform Top"}
-        if (this.editingElement == 4) {selectedColor = "Platform Side"}
-        if (this.editingElement == 5) {selectedColor = "Wall Top"}
-        if (this.editingElement == 6) {selectedColor = "Wall Side"}    
-        if (this.editingElement == 7) {selectedColor = "End Zone Top"}
-        if (this.editingElement == 8) {selectedColor = "End Zone Side"}
-        if (this.editingElement == 9) {selectedColor = "Sun Light"}
-        if (this.editingElement == 10) {selectedColor = "Ambient Light"}
+            // Platforms
+            ctx.fillStyle = MapEditor.loadedMap.style.platformTopColor
+            UserInterfaceCanvas.roundedRect(btn_platformTopColor.x + 8, btn_platformTopColor.y + 8, btn_platformTopColor.width - 16, btn_platformTopColor.height - 16, btn_platformTopColor.height/2)
+            ctx.fill()
+            ctx.fillStyle = MapEditor.loadedMap.style.platformSideColor
+            UserInterfaceCanvas.roundedRect(btn_platformSideColor.x + 8, btn_platformSideColor.y + 8, btn_platformSideColor.width - 16, btn_platformSideColor.height - 16, btn_platformSideColor.height/2)
+            ctx.fill()
 
-        if (selectedColor != null) {
-            ctx.fillText(selectedColor, this.x + 164, this.y + 36)
+            // Endzones
+            ctx.fillStyle = MapEditor.loadedMap.style.endZoneTopColor
+            UserInterfaceCanvas.roundedRect(btn_endZoneTopColor.x + 8, btn_endZoneTopColor.y + 8, btn_endZoneTopColor.width - 16, btn_endZoneTopColor.height - 16, btn_endZoneTopColor.height/2)
+            ctx.fill()
+            ctx.fillStyle = MapEditor.loadedMap.style.endZoneSideColor
+            UserInterfaceCanvas.roundedRect(btn_endZoneSideColor.x + 8, btn_endZoneSideColor.y + 8, btn_endZoneSideColor.width - 16, btn_endZoneSideColor.height - 16, btn_endZoneSideColor.height/2)
+            ctx.fill()
+
+
+            // DRAW ELEMENT TEXT ABOVE BOTTONS 
+            ctx.fillStyle = (!UserInterface.darkMode) ? UserInterface.lightColor_1 : UserInterface.darkColor_1
+            ctx.font = "28px BAHNSCHRIFT"
+            ctx.fillText("Walls", btn_wallTopColor.x + 41, btn_wallTopColor.y - 12)
+            ctx.fillText("Platforms", btn_platformTopColor.x + 14, btn_platformTopColor.y - 12)
+            ctx.fillText("Endzones", btn_endZoneTopColor.x + 15, btn_endZoneTopColor.y - 12)
+            
+
+            // DRAW LINE BETWEEN TOP AND SIDE BUTTONS IF LOCKED
+            ctx.strokeStyle = (!UserInterface.darkMode) ? UserInterface.lightColor_1 : UserInterface.darkColor_1
+            ctx.lineWidth = 8;
+            ctx.lineCap = "round";
+            
+            drawLockLine(this.lockWallColors, btn_lockWallColors)
+            drawLockLine(this.lockPlatformColors, btn_lockPlatformColors)
+            drawLockLine(this.lockEndzoneColors, btn_lockEndzoneColors)
+            ctx.setLineDash([])
+
+            function drawLockLine(lockToCheck, button) {
+                if (lockToCheck) {
+                    ctx.setLineDash([])
+                } else {
+                    ctx.setLineDash([0, 14])
+                }
+                
+                const x = button.x
+                const y = button.y
+
+                ctx.beginPath();
+                ctx.moveTo(x + 4, y - 12);
+                ctx.lineTo(x + 12, y - 12);
+                ctx.arcTo(x + 28, y - 12, x + 28, y + 4, 16);
+                ctx.lineTo(x + 28, y + 52);
+                ctx.arcTo(x + 28, y + 68, x + 12, y + 68, 16);
+                ctx.lineTo(x + 4, y + 68);
+                ctx.stroke();
+            }
+
+        } else {
+
+            ctx.fillStyle = UserInterface.darkMode ? UserInterface.lightColor_1 : UserInterface.darkColor_1;
+
+            ctx.strokeStyle = (!UserInterface.darkMode) ? UserInterface.lightColor_1 : UserInterface.darkColor_1
+            ctx.lineWidth = 4
+    
+            // bounding box
+            UserInterfaceCanvas.roundedRect(this.x, this.y, this.width, this.height, 25)
+            ctx.fill()
+            ctx.stroke()
+    
+            // color showcase box
+            ctx.fillStyle = "hsl(" + this.h + ", " + this.s + "%, " + this.l + "%)"
+            UserInterfaceCanvas.roundedRect(this.x + 20, this.y + 20, 120, 80, 10)
+            ctx.fill()
+            ctx.stroke()
+    
+            // rbg text
+            ctx.font = "16px BAHNSCHRIFT";
+            ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
+            ctx.fillText(CanvasArea.HSLToRGB(this.h, this.s, this.l), this.x + 164, this.y + 122)
+    
+            // selected element text
+            let selectedColor = null
+            if (this.editingElement == 1) {selectedColor = "Background"}
+            if (this.editingElement == 2) {selectedColor = "Player"}
+            if (this.editingElement == 3) {selectedColor = "Platform Tops"}
+            if (this.editingElement == 4) {selectedColor = "Platform Sides"}
+            if (this.editingElement == 5) {selectedColor = this.lockWallColors ? "Walls" : "Wall Tops"}
+            if (this.editingElement == 6) {selectedColor = this.lockWallColors ? "Walls" : "Wall Sides"}    
+            if (this.editingElement == 7) {selectedColor = "Endzone Tops"}
+            if (this.editingElement == 8) {selectedColor = "Endzone Sides"}
+            if (this.editingElement == 9) {selectedColor = "Direct Light"}
+            if (this.editingElement == 10) {selectedColor = "Ambient Light"}
+    
+            if (selectedColor != null) {
+                ctx.fillText(selectedColor, this.x + 164, this.y + 36)
+            }
+    
+            // draw gradients for each slider
+            ctx.fillStyle = this.hueGradient
+            ctx.fillRect(this.x + 16, this.y + 162, this.width - 32, 14)
+    
+            ctx.fillStyle = this.saturationGradient
+            ctx.fillRect(this.x + 16, this.y + 234, this.width - 32, 14)
+            
+            ctx.fillStyle = this.lightnessGradient
+            ctx.fillRect(this.x + 16, this.y + 306, this.width - 32, 14)
+    
         }
-
-        // draw gradients for each slider
-        ctx.fillStyle = this.hueGradient
-        ctx.fillRect(this.x + 16, this.y + 162, this.width - 32, 14)
-
-        ctx.fillStyle = this.saturationGradient
-        ctx.fillRect(this.x + 16, this.y + 234, this.width - 32, 14)
-        
-        ctx.fillStyle = this.lightnessGradient
-        ctx.fillRect(this.x + 16, this.y + 306, this.width - 32, 14)
-
-        ctx.restore()
     },
 
     getColor : function() {
@@ -215,34 +307,34 @@ const ColorPicker = {
         if (this.editingElement == 0) {return}
 
         if (this.editingElement == 1) {
-            CanvasArea.canvas.style.backgroundColor = MapEditor.loadedMap.style.backgroundColor = ColorPicker.getColor()
+            MapEditor.loadedMap.style.backgroundColor = ColorPicker.getColor()
         }
 
         if (this.editingElement == 2) {
             MapEditor.loadedMap.style.playerColor = ColorPicker.getColor()
         }
 
-        if (this.editingElement == 3) {
+        if (this.editingElement == 3 || (this.editingElement == 4 && this.lockPlatformColors)) {
             MapEditor.loadedMap.style.platformTopColor = ColorPicker.getColor()
         }
         
-        if (this.editingElement == 4) {
+        if (this.editingElement == 4 || (this.editingElement == 3 && this.lockPlatformColors)) {
             MapEditor.loadedMap.style.platformSideColor = ColorPicker.getColor()
         }
 
-        if (this.editingElement == 5) {
+        if (this.editingElement == 5 || (this.editingElement == 6 && this.lockWallColors)) {
             MapEditor.loadedMap.style.wallTopColor = ColorPicker.getColor()
         }
         
-        if (this.editingElement == 6) {
+        if (this.editingElement == 6 || (this.editingElement == 5 && this.lockWallColors)) {
             MapEditor.loadedMap.style.wallSideColor = ColorPicker.getColor()
         }
         
-        if (this.editingElement == 7) {
+        if (this.editingElement == 7 || (this.editingElement == 8 && this.lockEndzoneColors)) {
             MapEditor.loadedMap.style.endZoneTopColor = ColorPicker.getColor()
         }
         
-        if (this.editingElement == 8) {
+        if (this.editingElement == 8 || (this.editingElement == 7 && this.lockEndzoneColors)) {
             MapEditor.loadedMap.style.endZoneSideColor = ColorPicker.getColor()
         }
 

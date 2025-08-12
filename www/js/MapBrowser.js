@@ -1,24 +1,27 @@
 const MapBrowser = { // should set back to 0 at some points
-    state: 0, // 0 = disabled, 1 = standard map browser, 2 = custom map browser
+    // 0 = disabled
+    // 1 = standard map browser
+    // 2 = custom map browser
+    state: 0, 
     scrollY: 0,
     scrollVel: 0,
     scrollVelAverager: new Averager(5),
     scrollAmount: null,
     selectedMapIndex: -1, // -1 == no map selected ... string of map name when a map is selected
-    maxScroll: -50,
+    maxScroll: -40,
     infoBox: {
-        x: window.outerWidth - 470,
-        y: 130,
-        width: 390, // set dynamically in .render()
-        height: 150, // set dynamically
+        x: window.outerWidth - 444,
+        y: 128,
+        width: 400, // set dynamically in .render()
+        height: 162, // set dynamically
     },
 
     init: function () {
 
         function setMaxScroll() {
-            MapBrowser.maxScroll = -50
+            MapBrowser.maxScroll = -40
             UserInterface.renderedButtons.forEach((button) => {
-                if (button.x == 160) { MapBrowser.maxScroll -= 76 }
+                if (button.x == 144) { MapBrowser.maxScroll -= 144 }
             })
             MapBrowser.maxScroll += 200 // bottom padding (empty space at bottom of browsers map list)
             if (MapBrowser.maxScroll > 0) { MapBrowser.maxScroll = 0 } // clipping it incase theres not more than 5 buttons
@@ -55,7 +58,7 @@ const MapBrowser = { // should set back to 0 at some points
                         // create toggle buttons for each map. These can be selected to preview map info. seperate play button will play them 
 
                         // create dynamic labeled button. KEEP IN SYNC WITH THE CHECK IN UPDATE AND RENDER FUNCS
-                        let button = new Button(160, 50 + (76 * mapNumber), 250, "", "", 1, String(mapEntry.name.split(".")[0]), function (sync) {
+                        let button = new Button(144, 50 + (76 * mapNumber), 256, "", "", 1, String(mapEntry.name.split(".")[0]), function (sync) {
 
                             if (sync) {
                                 // doesnt need to sync toggle state
@@ -95,7 +98,7 @@ const MapBrowser = { // should set back to 0 at some points
     update: function () {
         // called every frame when gamestate == 2
 
-        // changes the position of buttons on scroll
+        // change the position of buttons on scroll
         if (TouchHandler.dragging == 1 && TouchHandler.touches[0].x > 110 && TouchHandler.touches[0].x < 460) {
             if (this.scrollAmount == null) { // start of scroll
                 this.scrollAmount = this.scrollY
@@ -133,7 +136,7 @@ const MapBrowser = { // should set back to 0 at some points
 
         // applying scroll to buttons
         UserInterface.renderedButtons.forEach((button) => {
-            if (button.x == 160) {
+            if (button.x == 144) {
                 button.y = button.savedY + this.scrollY
             }
         })
@@ -142,29 +145,29 @@ const MapBrowser = { // should set back to 0 at some points
 
         // ENABLING and DISABLING btn_playMap and btn_playTutorial in browsers BESIDES map editor's
 
-        if (MapEditor.editorState != 5) { // not in map editors browser
+        if (MapEditor.editorState !== 5) { // not in map editors browser
 
-            // ADDING AND REMOVING btn_playmap
+            // ADDING btn_playmap
             if (this.selectedMapIndex != -1 && !UserInterface.renderedButtons.includes(btn_playMap)) {
                 UserInterface.renderedButtons = UserInterface.renderedButtons.concat(btn_playMap)
             }
-
+            // REMOVING  btn_playmap
             if (this.selectedMapIndex == -1 && UserInterface.renderedButtons.includes(btn_playMap)) {
                 UserInterface.renderedButtons = UserInterface.renderedButtons.filter(item => item !== btn_playMap);
             }
 
             // ADDING AND REMOVING btn_playTutorial
-            if (this.selectedMapIndex == "Awakening" && !UserInterface.renderedButtons.includes(btn_playTutorial)) {
+            if (this.state == 1 && this.selectedMapIndex == "Awakening" && !UserInterface.renderedButtons.includes(btn_playTutorial)) {
                 UserInterface.renderedButtons = UserInterface.renderedButtons.concat(btn_playTutorial)
             }
 
-            if (this.selectedMapIndex != "Awakening" && UserInterface.renderedButtons.includes(btn_playTutorial)) {
+            if (this.state == 1 && this.selectedMapIndex != "Awakening" && UserInterface.renderedButtons.includes(btn_playTutorial)) {
                 UserInterface.renderedButtons = UserInterface.renderedButtons.filter(item => item !== btn_playTutorial);
             }
 
         } else {
             // in MapEditors browser
-            // btn_editMap, btn_deleteMap, btn_shareMap
+            // ADD AND REMOVE: btn_editMap, btn_shareMap, btn_deleteMap
 
             if (
                 this.selectedMapIndex != -1 &&
@@ -194,171 +197,147 @@ const MapBrowser = { // should set back to 0 at some points
         // DRAW MAP INFO BOX BG
         ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
 
-        // change size of map details box depending on if in MapEditor and if there are medals
-        if (MapEditor.editorState == 5) { // in map editor browser
-            this.infoBox.width = 220
-            this.infoBox.height = 120 // for shorter map detail box in map editor's browser
-        } else { // NOT in map editor browser
-            this.infoBox.height = 140
-            if (UserInterface.leaderboards[this.selectedMapIndex] !== undefined) { // if there are medals
-                this.infoBox.width = 390
-                this.infoBox.x = window.outerWidth - 470
-            } else {
-                this.infoBox.width = 220
-                this.infoBox.x = window.outerWidth - 300
-            }
-        }
-
-        UserInterfaceCanvas.roundedRect(this.infoBox.x, this.infoBox.y, this.infoBox.width, this.infoBox.height, 20)
+        UserInterfaceCanvas.roundedRect(this.infoBox.x, this.infoBox.y, this.infoBox.width, this.infoBox.height, 24)
         ctx.fill()
 
-        // DRAW MAP INFO BOX CONTENT
-        ctx.font = "28px BAHNSCHRIFT";
+        // DRAW infoBox's MAP NAME, TIME, AND MEDALS
+        ctx.font = "32px BAHNSCHRIFT";
         ctx.fillStyle = (!UserInterface.darkMode) ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
 
         if (this.selectedMapIndex != -1) { // Write map title and info
-            const mapTitle = UserInterface.truncateText(this.selectedMapIndex, 190)
-            ctx.fillText(mapTitle, this.infoBox.x + 20, this.infoBox.y + 46)
+            
+            const mapHasMedals = (UserInterface.leaderboards[this.selectedMapIndex] !== undefined)
 
-            if (MapEditor.editorState != 5) { // if not in MapEditor browser
-                // DRAW YOUR TIME
-                ctx.font = "20px BAHNSCHRIFT";
-                const yourRecord = UserInterface.secondsToMinutes((UserInterface.records[this.selectedMapIndex] == undefined ? 0 : UserInterface.records[this.selectedMapIndex]))
-                ctx.fillText("Your Time: " + yourRecord, this.infoBox.x + 20, this.infoBox.y + 120)
+            const mapTitle = UserInterface.truncateText(this.selectedMapIndex, mapHasMedals ? 200: 380)
 
-                // DRAW METALS
-                if (UserInterface.leaderboards[this.selectedMapIndex] !== undefined) { // if leaderboards exist
+            ctx.fillText(mapTitle, this.infoBox.x + 18, this.infoBox.y + 70)
+
+            // DRAW YOUR TIME
+            ctx.font = "18px BAHNSCHRIFT";
+            const yourRecord = UserInterface.secondsToMinutes((UserInterface.records[this.selectedMapIndex] == undefined ? 0 : UserInterface.records[this.selectedMapIndex]))
+            ctx.fillText("Your Time: " + yourRecord, this.infoBox.x + 18, this.infoBox.y + 115)
+
+            // DRAW METALS
+            if (mapHasMedals) { // if leaderboard medal list exists
+
+                // TIME BOX
+                const timeBox = {
+                    x: this.infoBox.x + this.infoBox.width - 176,
+                    y: this.infoBox.y, // not used (debug)
+                    width: 164,
+                    height: this.infoBox.height, // not used (debug)
+                    midY: this.infoBox.y + this.infoBox.height/2,
+                }
+
+                // HIGHLIGHT MEDAL BOX SPECS
+                const yourMedalBox = {
+                    width: 164,
+                    height: 46,
+                    x: timeBox.x,
+                    y: timeBox.midY - 23, // adjust later -- this is at silver position
+                }
+
+                // DRAWING BOX THAT HIGHLIGHTS YOUR MEDAL
+                const personalBest = UserInterface.records[this.selectedMapIndex] ? UserInterface.records[this.selectedMapIndex] : 999999999
+                let medal = null
+
+                // set yourMedalBox.y
+                if (personalBest <= UserInterface.leaderboards[this.selectedMapIndex].gold) {
+                    medal = 1
+                    yourMedalBox.y -= yourMedalBox.height
+                } else if (personalBest <= UserInterface.leaderboards[this.selectedMapIndex].silver) {
+                    medal = 2 
+                } else if (personalBest <= UserInterface.leaderboards[this.selectedMapIndex].bronze) {
+                    medal = 3
+                    yourMedalBox.y += yourMedalBox.height
+                }
 
 
-
-                    // TIME BOX
-                    const timeBox = {
-                        x: this.infoBox.x + this.infoBox.width - 180,
-                        y: this.infoBox.y, // not used (debug)
-                        width: 172, // not used (debug)
-                        height: this.infoBox.height, // not used (debug)
-                        midY: this.infoBox.y + this.infoBox.height/2,
-                    }
-
-
-                    // HIGHLIGHT MEDAL BOX SPECS
-                    const highlightBox = {
-                        x: timeBox.x,
-                        y: null, // set later
-                        width: 172,
-                        height: 58,
-                    }
-
-                    let medal = null
-
-
-                    // DRAW HIGHLIGHT MEDAL BOX
+                // draw highlight box
+                if (medal !== null) {
+                    // draw medal box shadow first 
+                    ctx.fillStyle = "rgba(0, 0, 0, 0.25)"
+                    UserInterfaceCanvas.roundedRect(yourMedalBox.x + 6, yourMedalBox.y + 6, yourMedalBox.width, yourMedalBox.height, 12) // radius is slightly bigger for shadow
+                    ctx.fill()
+                
+                    // draw actual box
                     ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
                     ctx.strokeStyle = (!UserInterface.darkMode) ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
-
-                    ctx.save(); // save for shadow changes
-
-                    ctx.shadowColor = "rgba(0, 0, 0, 0.21)";
-                    ctx.shadowOffsetX = 10
-                    ctx.shadowOffsetY = 10
-
-
-                    // highlight medal box
-                    const personalBest = UserInterface.records[this.selectedMapIndex] ? UserInterface.records[this.selectedMapIndex] : 99999999
-
-                    // set hightlight box y and draw it
-                    if (personalBest <= UserInterface.leaderboards[this.selectedMapIndex].gold) {
-                        medal = 1
-                        highlightBox.y = timeBox.midY - 50 - highlightBox.height / 2
-                    } else if (personalBest <= UserInterface.leaderboards[this.selectedMapIndex].silver) {
-                        medal = 2
-                        highlightBox.y = timeBox.midY - highlightBox.height / 2
-                    } else if (personalBest <= UserInterface.leaderboards[this.selectedMapIndex].bronze) {
-                        medal = 3
-                        highlightBox.y = timeBox.midY + 50 - highlightBox.height / 2
-                    }
-
-                    if (medal !== null) {
-                        ctx.shadowOffsetX = 8
-                        ctx.shadowOffsetY = 8
-
-                        UserInterfaceCanvas.roundedRect(highlightBox.x, highlightBox.y, highlightBox.width, highlightBox.height, 12)
-                        ctx.fill();
-
-                        ctx.shadowColor = "transparent"
-                        ctx.lineWidth = 4
-                        ctx.stroke();
-                    }
-
-
-                    ctx.restore(); // restore shadow changes
-
-
-                    // medals and times
-                    let halfFontHeight = 8
-                    let xOffset = 0
-                    let medalRadius = 12
-                    let medalShadow = false
-
-                    function testMedal(number) { // sets specific parameters for each drawMedal
-                        ctx.font = medal == number ? "30px BAHNSCHRIFT" : "24px BAHNSCHRIFT"
-                        halfFontHeight = medal == number ? 10 : 8
-                        xOffset = medal == number ? 10 : 0
-                        medalRadius = medal == number ? 15 : 12
-                        medalShadow = medal == number ? true : false
-                        ctx.globalAlpha = (medal == number || medal == null) ? 1 : 0.5
-                    }
-
-                    ctx.fillStyle = (!UserInterface.darkMode) ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
-
-                    testMedal(1)
-                    ctx.fillText(UserInterface.secondsToMinutes(UserInterface.leaderboards[this.selectedMapIndex].gold), timeBox.x + 58 - xOffset, timeBox.midY - 50 + halfFontHeight);
-                    ctx.globalAlpha = 1
-                    UserInterface.drawMedal(timeBox.x + 36 - xOffset, timeBox.midY - 50, medalRadius, "#f1b62c", "#fde320", 3, medalShadow)
-
-                    testMedal(2)
-                    ctx.fillText(UserInterface.secondsToMinutes(UserInterface.leaderboards[this.selectedMapIndex].silver), timeBox.x + 58 - xOffset, timeBox.midY + halfFontHeight);
-                    ctx.globalAlpha = 1
-                    UserInterface.drawMedal(timeBox.x + 36 - xOffset, timeBox.midY, medalRadius, "#8c9a9b", "#d4d4d6", 3, medalShadow)
-
-                    testMedal(3)
-                    ctx.fillText(UserInterface.secondsToMinutes(UserInterface.leaderboards[this.selectedMapIndex].bronze), timeBox.x + 58 - xOffset, timeBox.midY + 50 + halfFontHeight);
-                    ctx.globalAlpha = 1
-                    UserInterface.drawMedal(timeBox.x + 36 - xOffset, timeBox.midY + 50, medalRadius, "#e78b4c", "#f4a46f", 3, medalShadow)
-
-
-
-
-
-                    // test medals box outline
-                    // UserInterfaceCanvas.roundedRect(timeBox.x, timeBox.y, timeBox.width, timeBox.height, 5)
-                    // ctx.lineWidth = 1
-                    // ctx.stroke()
+                    UserInterfaceCanvas.roundedRect(yourMedalBox.x, yourMedalBox.y, yourMedalBox.width, yourMedalBox.height, 10)
+                    ctx.lineWidth = 4
+                    ctx.fill();
+                    ctx.stroke();
                 }
+
+
+                // medals and times
+                let halfFontHeight = 8
+                let xOffset = 0
+                let medalRadius = 12
+                let medalShadow = false
+                let edgeWidth = 3
+
+                function setMedalParameters(number) { // sets specific parameters for each drawMedal
+                    ctx.font = medal == number ? "30px BAHNSCHRIFT" : "24px BAHNSCHRIFT"
+                    halfFontHeight = medal == number ? 10 : 8
+                    xOffset = medal == number ? 18 : 0
+                    medalRadius = medal == number ? 16 : 12
+                    medalShadow = medal == number ? true : false
+                    edgeWidth = medal == number ? 4 : 3
+                    ctx.globalAlpha = (medal == number || medal == null) ? 1 : 0.5
+                }
+
+                ctx.fillStyle = (!UserInterface.darkMode) ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
+                ctx.textAlign = "right"
+
+                setMedalParameters(1)
+                ctx.fillText(UserInterface.secondsToMinutes(UserInterface.leaderboards[this.selectedMapIndex].gold), timeBox.x + timeBox.width - 6, timeBox.midY - 46 + halfFontHeight);
+                ctx.globalAlpha = 1
+                UserInterface.drawMedal(timeBox.x + timeBox.width - 124 - xOffset, timeBox.midY - 46, medalRadius, "#F1B62C", "#FDE320", edgeWidth, medalShadow)
+
+                setMedalParameters(2)
+                ctx.fillText(UserInterface.secondsToMinutes(UserInterface.leaderboards[this.selectedMapIndex].silver), timeBox.x + timeBox.width - 6, timeBox.midY + halfFontHeight);
+                ctx.globalAlpha = 1
+                UserInterface.drawMedal(timeBox.x + timeBox.width - 124 - xOffset, timeBox.midY, medalRadius, "#8C9A9B", "#D4D4D6", edgeWidth, medalShadow)
+
+                setMedalParameters(3)
+                ctx.fillText(UserInterface.secondsToMinutes(UserInterface.leaderboards[this.selectedMapIndex].bronze), timeBox.x + timeBox.width - 6, timeBox.midY + 46 + halfFontHeight);
+                ctx.globalAlpha = 1
+                UserInterface.drawMedal(timeBox.x + timeBox.width - 124 - xOffset, timeBox.midY + 46, medalRadius, "#E6823E", "#F4A46F", edgeWidth, medalShadow)
+
+                ctx.textAlign = "left"
+            }
+
+            // DRAW "Play Tutorial" TEXT
+            if (this.state == 1 && this.selectedMapIndex == "Awakening") {
+
+                ctx.font = "24px BAHNSCHRIFT";
+                ctx.fillStyle = (!UserInterface.darkMode) ? UserInterface.lightColor_1 : UserInterface.darkColor_1;
+                ctx.fillText("Play Tutorial", window.outerWidth - 404, window.outerHeight - 62)
             }
 
         } else { // no map is selected
             if (this.state == 1) {
-                ctx.fillText("Select A Map", this.infoBox.x + 20, this.infoBox.y + 46)
+                ctx.font = "32px BAHNSCHRIFT";
+                ctx.fillText("Select A Map", this.infoBox.x + 18, this.infoBox.y + 70)
             }
 
             if (this.state == 2) {
-                ctx.font = "20px BAHNSCHRIFT";
-                ctx.fillText("Import, or Create", this.infoBox.x + 20, this.infoBox.y + 40)
-                ctx.fillText("Custom Maps in the", this.infoBox.x + 20, this.infoBox.y + 70)
-                ctx.fillText("Map Editor", this.infoBox.x + 20, this.infoBox.y + 100)
+                ctx.font = "24px BAHNSCHRIFT";
+                ctx.fillText("Import, or Create Custom ", this.infoBox.x + 58, this.infoBox.y + 64)
+                ctx.fillText("Maps in the Map Editor", this.infoBox.x + 70, this.infoBox.y + 98)
             }
         }
 
         // Map BROWSER DEBUG TEXT
-        // ctx.font = "15px BAHNSCHRIFT";
+        // ctx.font = "8px BAHNSCHRIFT";
         // ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1: UserInterface.lightColor_1;
-        // ctx.fillText("MapIndex: " + this.selectedMapIndex, 80, 200)
-        // ctx.fillText("scrollAmount: " + this.scrollAmount, 80, 220)
-        // ctx.fillText("scrollY: " + this.scrollY, 80, 240)
-        // ctx.fillText("scrollVel: " + this.scrollVel, 80, 260)
-        // ctx.fillText("scrollVelAverager: " + this.scrollVelAverager.frames, 80, 280)
-        // ctx.fillText("maxScroll: " + this.maxScroll, 80, 300)
+        // ctx.fillText("MapIndex: " + this.selectedMapIndex, 44, 200)
+        // ctx.fillText("scrollAmount: " + this.scrollAmount, 44, 210)
+        // ctx.fillText("scrollY: " + this.scrollY, 44, 220)
+        // ctx.fillText("scrollVel: " + this.scrollVel, 44, 230)
+        // ctx.fillText("scrollVelAverager: " + this.scrollVelAverager.frames, 44, 240)
+        // ctx.fillText("maxScroll: " + this.maxScroll, 44, 250)
 
         ctx.restore() // UI scale restore
 

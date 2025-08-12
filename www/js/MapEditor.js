@@ -1,7 +1,7 @@
 const MapEditor = {
 
     editorState: 0,
-    // 0 = map new/import/load screen
+    // 0 = disabled
     // 1 = main map edit screen
     // 2 = platform edit menu
     // 3 = map color page
@@ -59,7 +59,7 @@ const MapEditor = {
     update: function () {
 
         // when map is loaded for editing
-        if (this.editorState == 0 || this.editorState == 5) { // 0 == new/load map screen OR map browser screen
+        if (this.editorState == 5) { // in MapBrowser screen
             if (this.loadedMap !== null) { // if map is loaded then switch to Main Map Edit screen
 
                 CanvasArea.canvas.style.backgroundColor = this.loadedMap.style.backgroundColor; // set bg color here so it only triggers once not every render frame
@@ -895,7 +895,7 @@ const MapEditor = {
 
 
         function exitEdit() { // reset everything
-            MapEditor.editorState = 0;
+            
             MapEditor.loadedMap = null;
             MapEditor.screen.x = 0;
             MapEditor.screen.y = 0;
@@ -910,7 +910,7 @@ const MapEditor = {
             MapEditor.selectedElements = [];
             btn_snappingSlider.updateState(0);
 
-            UserInterface.renderedButtons = UserInterface.btnGroup_mapEditorMenu
+            btn_mapEditor.released(true); // press the main menu's Map Editor button to set up Map Editor Browser
         }
 
 
