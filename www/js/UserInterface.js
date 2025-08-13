@@ -233,7 +233,7 @@ const UserInterface = {
             }
         })
 
-        btn_jump = new Button(44, window.outerHeight - 136, 96, "jump_button", "", 0, "", function () {
+        btn_jump = new Button(44, screenHeightUI - 136, 96, "jump_button", "", 0, "", function () {
             if (UserInterface.levelState == 1) {
                 UserInterface.timerStart = Date.now();
                 UserInterface.levelState = 2;
@@ -243,7 +243,7 @@ const UserInterface = {
 
 
         // SETTINGS Buttons 
-        btn_reset_settings = new Button(window.outerWidth - 230, window.outerHeight - 90, 160, "", "", 0, "Erase Data", function () {
+        btn_reset_settings = new Button(screenWidthUI - 230, screenHeightUI - 90, 160, "", "", 0, "Erase Data", function () {
 
             const reset = confirm("Reset All Settings and Records?");
             if (reset) {
@@ -322,7 +322,7 @@ const UserInterface = {
 
 
         // MAP BROWSER BUTTONS
-        btn_custom_maps = new Button(window.outerWidth - 283, 40, 239, "custom_maps_button", "", 0, "", function () {
+        btn_custom_maps = new Button(screenWidthUI - 283, 40, 239, "custom_maps_button", "", 0, "", function () {
             UserInterface.gamestate = 2;
 
             // loop through each button (including non-maps eww) and untoggle it. Could be an issue once I add a "play tutorial" toggle / button idk
@@ -335,7 +335,7 @@ const UserInterface = {
             MapBrowser.init()
         })
 
-        btn_playMap = new Button(window.outerWidth - 154, window.outerHeight - 104, 110, "play_button", "", 0, "", function () {
+        btn_playMap = new Button(screenWidthUI - 154, screenHeightUI - 104, 110, "play_button", "", 0, "", function () {
 
             MapBrowser.toggleAllButtons()
             MapBrowser.scrollY = 0;
@@ -356,7 +356,7 @@ const UserInterface = {
         })
 
         // MapEditor browser buttons
-        btn_new_map = new Button(window.outerWidth - 438, 40, 169, "new_map_button", "", 0, "", function () {
+        btn_new_map = new Button(screenWidthUI - 438, 40, 169, "new_map_button", "", 0, "", function () {
 
             MapEditor.loadedMap = {
                 "playerStart": {
@@ -413,7 +413,7 @@ const UserInterface = {
         })
 
         // UPDATE THIS BUTTON TO INCLUDE FUNCTIONALITY OF btn_import_map_text BUTTON
-        btn_import_map = new Button(window.outerWidth - 244, 40, 200, "import_map_button", "", 0, "", function () {
+        btn_import_map = new Button(screenWidthUI - 244, 40, 200, "import_map_button", "", 0, "", function () {
         
                 // LOAD FROM LOCAL FILE SYSTEM
                 const input = document.createElement("input");
@@ -463,7 +463,7 @@ const UserInterface = {
 
         })
 
-        btn_editMap = new Button(window.outerWidth - 388, window.outerHeight - 102, 168, "edit_map_button", "", 0, "", async function () {
+        btn_editMap = new Button(screenWidthUI - 388, screenHeightUI - 102, 168, "edit_map_button", "", 0, "", async function () {
 
             // delete shareDiv when leaving browser page
             document.getElementById("shareDiv").remove()
@@ -479,7 +479,7 @@ const UserInterface = {
 
         })
 
-        btn_shareMap = new Button(window.outerWidth - 196, window.outerHeight - 102, 64, "share_button", "", 0, "", function (createDiv) {
+        btn_shareMap = new Button(screenWidthUI - 196, screenHeightUI - 102, 64, "share_button", "", 0, "", function (createDiv) {
             // The shareDiv does all the work for this button.
             // createDiv is called by btn_mapEditor
             // shareDiv is removed by btn_mainMenu, btn_editMap and btn_deleteMap
@@ -524,7 +524,7 @@ const UserInterface = {
 
         })
 
-        btn_deleteMap = new Button(window.outerWidth - 108, window.outerHeight - 102, 64, "trash_button", "", 0, "", function () {
+        btn_deleteMap = new Button(screenWidthUI - 108, screenHeightUI - 102, 64, "trash_button", "", 0, "", function () {
 
             const deleteMap = confirm("Delete Map?");
             if (deleteMap) {
@@ -657,14 +657,14 @@ const UserInterface = {
 
 
         // TUTORIAL BUTTONS
-        btn_next = new Button(window.outerWidth - 100, 38, 60, "next_button", "", 0, "", function () {
+        btn_next = new Button(screenWidthUI - 100, 38, 60, "next_button", "", 0, "", function () {
 
             Tutorial.timerStarted = false; // easier to always set these here even if they arent always needed
             Tutorial.animatePos = 0;
             Tutorial.animateVel = 0;
 
             // reset the position and scale because the button is being pulse animated
-            this.x = window.outerWidth - 100
+            this.x = screenWidthUI - 100
             this.y = 38
             this.width = 60
             this.height = 60
@@ -723,7 +723,7 @@ const UserInterface = {
 
         })
 
-        btn_playTutorial = new Button(window.outerWidth - 256, window.outerHeight - 86, 64, "toggle_button", "toggle_button_pressed", 1, "", function (sync) {
+        btn_playTutorial = new Button(screenWidthUI - 256, screenHeightUI - 86, 64, "toggle_button", "toggle_button_pressed", 1, "", function (sync) {
             if (sync) {
                 this.toggle = UserInterface.settings.playTutorial;
             } else {
@@ -749,7 +749,7 @@ const UserInterface = {
             MapEditor.saveCustomMap()
         })
 
-        btn_add_platform = new Button(window.outerWidth - 196, 25, 156, "platform_button", "", 0, "", function () {
+        btn_add_platform = new Button(screenWidthUI - 196, 25, 156, "platform_button", "", 0, "", function () {
 
             const newPlatform = {
                 "x": Math.round(MapEditor.screen.x),
@@ -774,7 +774,7 @@ const UserInterface = {
             btn_endzone.func(true) // syncs the endzone button's toggle state
         })
 
-        btn_add_checkpoint = new Button(window.outerWidth - 232, 92, 192, "cp_button", "", 0, "", function () {
+        btn_add_checkpoint = new Button(screenWidthUI - 232, 92, 192, "cp_button", "", 0, "", function () {
             const middleX = Math.round(MapEditor.screen.x)
             const middleY = Math.round(MapEditor.screen.y)
             const newCheckPoint = {
@@ -790,14 +790,14 @@ const UserInterface = {
             MapEditor.loadedMap.checkpoints.push(newCheckPoint);
         })
 
-        btn_map_colors = new Button(window.outerWidth - 310, 25, 96, "map_colors_button", "", 0, "", function () {
+        btn_map_colors = new Button(screenWidthUI - 310, 25, 96, "map_colors_button", "", 0, "", function () {
             MapEditor.editorState = 3 // map colors
             ColorPicker.editingElement = 0
             PreviewWindow.update()
             UserInterface.renderedButtons = UserInterface.btnGroup_colorPickerState1
         })
 
-        btn_map_settings = new Button(window.outerWidth - 440, 25, 108, "map_settings_button", "", 0, "", function () {
+        btn_map_settings = new Button(screenWidthUI - 440, 25, 108, "map_settings_button", "", 0, "", function () {
             MapEditor.editorState = 4 // map settings
 
             PreviewWindow.update()
@@ -810,7 +810,7 @@ const UserInterface = {
             UserInterface.renderedButtons = UserInterface.btnGroup_mapSettings
         })
 
-        btn_dragSelect = new Button(45, window.outerHeight - 230, 60, "toggle_button", "toggle_button_pressed", 1, "", function (sync) {
+        btn_dragSelect = new Button(45, screenHeightUI - 230, 60, "toggle_button", "toggle_button_pressed", 1, "", function (sync) {
             if (MapEditor.loadedMap) { // throws an error otherwise
                 if (sync) {
                     this.toggle = MapEditor.dragSelect;
@@ -831,7 +831,7 @@ const UserInterface = {
             }
         })
 
-        btn_multiSelect = new Button(45, window.outerHeight - 150, 60, "toggle_button", "toggle_button_pressed", 1, "", function (sync) {
+        btn_multiSelect = new Button(45, screenHeightUI - 150, 60, "toggle_button", "toggle_button_pressed", 1, "", function (sync) {
             if (MapEditor.loadedMap) { // throws an error otherwise
                 if (sync) {
                     this.toggle = MapEditor.multiSelect;
@@ -870,11 +870,11 @@ const UserInterface = {
             }
         })
 
-        btn_snappingSlider = new SliderUI(50, window.outerHeight - 50, 192, 0, 64, 0.5, "Snapping", MapEditor.loadedMap ? MapEditor.snapAmount : 0, function () {
+        btn_snappingSlider = new SliderUI(50, screenHeightUI - 50, 192, 0, 64, 0.5, "Snapping", MapEditor.loadedMap ? MapEditor.snapAmount : 0, function () {
             MapEditor.snapAmount = this.value
         })
 
-        btn_unselect = new Button(window.outerWidth - 250, 34, 45, "x_button", "", 0, "", function () {
+        btn_unselect = new Button(screenWidthUI - 250, 34, 45, "x_button", "", 0, "", function () {
             UserInterface.renderedButtons = UserInterface.btnGroup_mapEditorInterface
             MapEditor.selectedElements = []; // No selected platforms
         })
@@ -945,8 +945,8 @@ const UserInterface = {
 
                 // element coords mapped to screen coords
                 // mapToRange(number, inMin, inMax, outMin, outMax)
-                const xMapped = UserInterfaceCanvas.mapToRange(avgMidX, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, window.outerWidth)
-                const yMapped = UserInterfaceCanvas.mapToRange(avgMidY, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, window.outerHeight)
+                const xMapped = UserInterfaceCanvas.mapToRange(avgMidX, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, screenWidthUI)
+                const yMapped = UserInterfaceCanvas.mapToRange(avgMidY, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, screenHeightUI)
 
                 // position button in the middle of element(s)
                 if (MapEditor.selectedElements.length > 1) {
@@ -968,9 +968,9 @@ const UserInterface = {
                 this.y += TouchHandler.dragAmountY
 
                 // panning if at edges of screen
-                if (this.x > window.outerWidth - 270) { MapEditor.screen.x += 400 / MapEditor.zoom * dt }
+                if (this.x > screenWidthUI - 270) { MapEditor.screen.x += 400 / MapEditor.zoom * dt }
                 if (this.x < 60) { MapEditor.screen.x -= 400 / MapEditor.zoom * dt }
-                if (this.y > window.outerHeight - 60) { MapEditor.screen.y += 400 / MapEditor.zoom * dt }
+                if (this.y > screenHeightUI - 60) { MapEditor.screen.y += 400 / MapEditor.zoom * dt }
                 if (this.y < 12) { MapEditor.screen.y -= 400 / MapEditor.zoom * dt }
 
 
@@ -988,16 +988,16 @@ const UserInterface = {
 
                         // Map btn pos from UI coords to global map coords
                         // mapToRange(number, inMin, inMax, outMin, outMax)
-                        const btnGlobalX = UserInterfaceCanvas.mapToRange(this.x + this.width / 2, 0, window.outerWidth, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width)
-                        const btnGlobalY = UserInterfaceCanvas.mapToRange(this.y + this.height / 2, 0, window.outerHeight, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height)
+                        const btnGlobalX = UserInterfaceCanvas.mapToRange(this.x + this.width / 2, 0, screenWidthUI, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width)
+                        const btnGlobalY = UserInterfaceCanvas.mapToRange(this.y + this.height / 2, 0, screenHeightUI, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height)
 
                         xMapped = btnGlobalX - offSetFromAvgMidGlobalX
                         yMapped = btnGlobalY - offSetFromAvgMidGlobalY
 
                     } else { // use offset for single item
 
-                        xMapped = UserInterfaceCanvas.mapToRange(this.x - (conditioningArray[i].offSet * MapEditor.zoom) + this.width / 2, 0, window.outerWidth, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width)
-                        yMapped = UserInterfaceCanvas.mapToRange(this.y - (conditioningArray[i].offSet * MapEditor.zoom) + this.height / 2, 0, window.outerHeight, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height)
+                        xMapped = UserInterfaceCanvas.mapToRange(this.x - (conditioningArray[i].offSet * MapEditor.zoom) + this.width / 2, 0, screenWidthUI, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width)
+                        yMapped = UserInterfaceCanvas.mapToRange(this.y - (conditioningArray[i].offSet * MapEditor.zoom) + this.height / 2, 0, screenHeightUI, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height)
                     }
 
 
@@ -1026,8 +1026,8 @@ const UserInterface = {
 
                 // corner coords mapped to screen coords
                 // mapToRange(number, inMin, inMax, outMin, outMax)
-                const cornerMappedX = UserInterfaceCanvas.mapToRange(platform.x + cornerX, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, window.outerWidth)
-                const cornerMappedY = UserInterfaceCanvas.mapToRange(platform.y + cornerY, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, window.outerHeight)
+                const cornerMappedX = UserInterfaceCanvas.mapToRange(platform.x + cornerX, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, screenWidthUI)
+                const cornerMappedY = UserInterfaceCanvas.mapToRange(platform.y + cornerY, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, screenHeightUI)
 
                 this.x = cornerMappedX - this.width
                 this.y = cornerMappedY
@@ -1040,9 +1040,9 @@ const UserInterface = {
                 this.y += TouchHandler.dragAmountY
 
                 // panning if at edges of screen
-                if (this.x > window.outerWidth - 270) { MapEditor.screen.x += 400 / MapEditor.zoom * dt }
+                if (this.x > screenWidthUI - 270) { MapEditor.screen.x += 400 / MapEditor.zoom * dt }
                 if (this.x < 60) { MapEditor.screen.x -= 400 / MapEditor.zoom * dt }
-                if (this.y > window.outerHeight - 60) { MapEditor.screen.y += 400 / MapEditor.zoom * dt }
+                if (this.y > screenHeightUI - 60) { MapEditor.screen.y += 400 / MapEditor.zoom * dt }
                 if (this.y < 12) { MapEditor.screen.y -= 400 / MapEditor.zoom * dt }
 
 
@@ -1052,8 +1052,8 @@ const UserInterface = {
 
                 // convert pinned coords to SCREEN COORDS
                 // mapToRange(number, inMin, inMax, outMin, outMax)
-                const pinnedX_screenCoords = UserInterfaceCanvas.mapToRange(pinnedX_mapCoords, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, window.outerWidth)
-                const pinnedY_screenCoords = UserInterfaceCanvas.mapToRange(pinnedY_mapCoords, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, window.outerHeight)
+                const pinnedX_screenCoords = UserInterfaceCanvas.mapToRange(pinnedX_mapCoords, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, screenWidthUI)
+                const pinnedY_screenCoords = UserInterfaceCanvas.mapToRange(pinnedY_mapCoords, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, screenHeightUI)
 
 
                 // get vector dragFromPinned (unscaled by zoom) (origin is at pin) x value will be neg at 0deg, y val will be pos(down) at 0 deg 
@@ -1109,8 +1109,8 @@ const UserInterface = {
 
                 // corner coords mapped to screen coords
                 // mapToRange(number, inMin, inMax, outMin, outMax)
-                const cornerMappedX = UserInterfaceCanvas.mapToRange(platform.x + cornerX, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, window.outerWidth)
-                const cornerMappedY = UserInterfaceCanvas.mapToRange(platform.y + cornerY, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, window.outerHeight)
+                const cornerMappedX = UserInterfaceCanvas.mapToRange(platform.x + cornerX, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, screenWidthUI)
+                const cornerMappedY = UserInterfaceCanvas.mapToRange(platform.y + cornerY, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, screenHeightUI)
 
                 this.x = cornerMappedX
                 this.y = cornerMappedY
@@ -1123,9 +1123,9 @@ const UserInterface = {
                 this.y += TouchHandler.dragAmountY
 
                 // panning if at edges of screen
-                if (this.x > window.outerWidth - 270) { MapEditor.screen.x += 400 / MapEditor.zoom * dt }
+                if (this.x > screenWidthUI - 270) { MapEditor.screen.x += 400 / MapEditor.zoom * dt }
                 if (this.x < 60) { MapEditor.screen.x -= 400 / MapEditor.zoom * dt }
-                if (this.y > window.outerHeight - 60) { MapEditor.screen.y += 400 / MapEditor.zoom * dt }
+                if (this.y > screenHeightUI - 60) { MapEditor.screen.y += 400 / MapEditor.zoom * dt }
                 if (this.y < 12) { MapEditor.screen.y -= 400 / MapEditor.zoom * dt }
 
 
@@ -1135,8 +1135,8 @@ const UserInterface = {
 
                 // convert pinned coords to SCREEN COORDS
                 // mapToRange(number, inMin, inMax, outMin, outMax)
-                const pinnedX_screenCoords = UserInterfaceCanvas.mapToRange(pinnedX_mapCoords, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, window.outerWidth)
-                const pinnedY_screenCoords = UserInterfaceCanvas.mapToRange(pinnedY_mapCoords, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, window.outerHeight)
+                const pinnedX_screenCoords = UserInterfaceCanvas.mapToRange(pinnedX_mapCoords, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, screenWidthUI)
+                const pinnedY_screenCoords = UserInterfaceCanvas.mapToRange(pinnedY_mapCoords, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, screenHeightUI)
 
 
                 // get vector dragFromPinned (unscaled by zoom) (origin is at pin) x value will be pos at 0deg, y val will be pos(down) at 0 deg 
@@ -1192,8 +1192,8 @@ const UserInterface = {
 
                 // corner coords mapped to screen coords
                 // mapToRange(number, inMin, inMax, outMin, outMax)
-                const cornerMappedX = UserInterfaceCanvas.mapToRange(platform.x + cornerX, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, window.outerWidth)
-                const cornerMappedY = UserInterfaceCanvas.mapToRange(platform.y + cornerY, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, window.outerHeight)
+                const cornerMappedX = UserInterfaceCanvas.mapToRange(platform.x + cornerX, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, screenWidthUI)
+                const cornerMappedY = UserInterfaceCanvas.mapToRange(platform.y + cornerY, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, screenHeightUI)
 
                 this.x = cornerMappedX
                 this.y = cornerMappedY - this.height
@@ -1206,9 +1206,9 @@ const UserInterface = {
                 this.y += TouchHandler.dragAmountY
 
                 // panning if at edges of screen
-                if (this.x > window.outerWidth - 270) { MapEditor.screen.x += 400 / MapEditor.zoom * dt }
+                if (this.x > screenWidthUI - 270) { MapEditor.screen.x += 400 / MapEditor.zoom * dt }
                 if (this.x < 60) { MapEditor.screen.x -= 400 / MapEditor.zoom * dt }
-                if (this.y > window.outerHeight - 60) { MapEditor.screen.y += 400 / MapEditor.zoom * dt }
+                if (this.y > screenHeightUI - 60) { MapEditor.screen.y += 400 / MapEditor.zoom * dt }
                 if (this.y < 12) { MapEditor.screen.y -= 400 / MapEditor.zoom * dt }
 
 
@@ -1218,8 +1218,8 @@ const UserInterface = {
 
                 // convert pinned coords to SCREEN COORDS
                 // mapToRange(number, inMin, inMax, outMin, outMax)
-                const pinnedX_screenCoords = UserInterfaceCanvas.mapToRange(pinnedX_mapCoords, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, window.outerWidth)
-                const pinnedY_screenCoords = UserInterfaceCanvas.mapToRange(pinnedY_mapCoords, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, window.outerHeight)
+                const pinnedX_screenCoords = UserInterfaceCanvas.mapToRange(pinnedX_mapCoords, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, screenWidthUI)
+                const pinnedY_screenCoords = UserInterfaceCanvas.mapToRange(pinnedY_mapCoords, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, screenHeightUI)
 
 
                 // get vector dragFromPinned (unscaled by zoom) (origin is at pin) x value will be pos at 0deg, y val will be neg(up) at 0 deg 
@@ -1275,8 +1275,8 @@ const UserInterface = {
 
                 // corner coords mapped to screen coords
                 // mapToRange(number, inMin, inMax, outMin, outMax)
-                const cornerMappedX = UserInterfaceCanvas.mapToRange(platform.x + cornerX, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, window.outerWidth)
-                const cornerMappedY = UserInterfaceCanvas.mapToRange(platform.y + cornerY, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, window.outerHeight)
+                const cornerMappedX = UserInterfaceCanvas.mapToRange(platform.x + cornerX, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, screenWidthUI)
+                const cornerMappedY = UserInterfaceCanvas.mapToRange(platform.y + cornerY, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, screenHeightUI)
 
                 this.x = cornerMappedX - this.width
                 this.y = cornerMappedY - this.height
@@ -1289,9 +1289,9 @@ const UserInterface = {
                 this.y += TouchHandler.dragAmountY
 
                 // panning if at edges of screen
-                if (this.x > window.outerWidth - 270) { MapEditor.screen.x += 400 / MapEditor.zoom * dt }
+                if (this.x > screenWidthUI - 270) { MapEditor.screen.x += 400 / MapEditor.zoom * dt }
                 if (this.x < 60) { MapEditor.screen.x -= 400 / MapEditor.zoom * dt }
-                if (this.y > window.outerHeight - 60) { MapEditor.screen.y += 400 / MapEditor.zoom * dt }
+                if (this.y > screenHeightUI - 60) { MapEditor.screen.y += 400 / MapEditor.zoom * dt }
                 if (this.y < 12) { MapEditor.screen.y -= 400 / MapEditor.zoom * dt }
 
 
@@ -1301,8 +1301,8 @@ const UserInterface = {
 
                 // convert pinned coords to SCREEN COORDS
                 // mapToRange(number, inMin, inMax, outMin, outMax)
-                const pinnedX_screenCoords = UserInterfaceCanvas.mapToRange(pinnedX_mapCoords, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, window.outerWidth)
-                const pinnedY_screenCoords = UserInterfaceCanvas.mapToRange(pinnedY_mapCoords, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, window.outerHeight)
+                const pinnedX_screenCoords = UserInterfaceCanvas.mapToRange(pinnedX_mapCoords, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, screenWidthUI)
+                const pinnedY_screenCoords = UserInterfaceCanvas.mapToRange(pinnedY_mapCoords, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, screenHeightUI)
 
 
                 // get vector dragFromPinned (unscaled by zoom) (origin is at pin) x value will be neg at 0deg, y val will be neg(up) at 0 deg 
@@ -1345,7 +1345,7 @@ const UserInterface = {
             }
         })
 
-        btn_angleSlider = new SliderUI(window.outerWidth - 246, 204, 186, -45, 45, 1, "Angle", MapEditor.loadedMap ? MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]] : 0, function () {
+        btn_angleSlider = new SliderUI(screenWidthUI - 246, 204, 186, -45, 45, 1, "Angle", MapEditor.loadedMap ? MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]] : 0, function () {
             if (MapEditor.snapAmount > 0) { this.updateState(Math.round(this.value / MapEditor.snapAmount) * MapEditor.snapAmount) }
             if (this.value < this.min) { this.updateState(this.min) } // these are incase snapping pushes the value over or under the limits
             if (this.value > this.max) { this.updateState(this.max) }
@@ -1353,17 +1353,17 @@ const UserInterface = {
             MapEditor.updatePlatformCorners(MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]])
         })
 
-        btn_playerAngleSlider = new SliderUI(window.outerWidth - 246, 204, 186, 0, 360, 1, "Angle", MapEditor.loadedMap ? MapEditor.loadedMap.playerStart : 0, function () {
+        btn_playerAngleSlider = new SliderUI(screenWidthUI - 246, 204, 186, 0, 360, 1, "Angle", MapEditor.loadedMap ? MapEditor.loadedMap.playerStart : 0, function () {
             if (MapEditor.snapAmount > 0) { this.updateState(Math.round(this.value / MapEditor.snapAmount) * MapEditor.snapAmount) }
             MapEditor.loadedMap.playerStart.angle = this.value
         })
 
-        btn_checkpointAngleSlider = new SliderUI(window.outerWidth - 246, 204, 186, 0, 360, 1, "Angle", MapEditor.loadedMap ? MapEditor.loadedMap.checkpoints[MapEditor.selectedElements[0][0]] : 0, function () {
+        btn_checkpointAngleSlider = new SliderUI(screenWidthUI - 246, 204, 186, 0, 360, 1, "Angle", MapEditor.loadedMap ? MapEditor.loadedMap.checkpoints[MapEditor.selectedElements[0][0]] : 0, function () {
             if (MapEditor.snapAmount > 0) { this.updateState(Math.round(this.value / MapEditor.snapAmount) * MapEditor.snapAmount) }
             MapEditor.loadedMap.checkpoints[MapEditor.selectedElements[0][0]].angle = this.value
         })
 
-        btn_wall = new Button(window.outerWidth - 120, 224, 60, "toggle_button", "toggle_button_pressed", 1, "", function (sync) {
+        btn_wall = new Button(screenWidthUI - 120, 224, 60, "toggle_button", "toggle_button_pressed", 1, "", function (sync) {
             if (MapEditor.loadedMap) { // throws an error otherwise
                 if (sync) {
                     this.toggle = MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].wall ? 1 : 0; // gets initial value of toggle
@@ -1379,7 +1379,7 @@ const UserInterface = {
             }
         })
 
-        btn_endzone = new Button(window.outerWidth - 120, 264, 60, "toggle_button", "toggle_button_pressed", 1, "", function (sync) {
+        btn_endzone = new Button(screenWidthUI - 120, 264, 60, "toggle_button", "toggle_button_pressed", 1, "", function (sync) {
             if (MapEditor.loadedMap) { // throws an error otherwise
                 if (sync) {
                     this.toggle = MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].endzone ? 1 : 0; // gets initial value of toggle
@@ -1395,7 +1395,7 @@ const UserInterface = {
             }
         })
 
-        btn_duplicate_platform = new Button(window.outerWidth - 262, window.outerHeight - 90, 150, "", "", 0, "Duplicate", function () {
+        btn_duplicate_platform = new Button(screenWidthUI - 262, screenHeightUI - 90, 150, "", "", 0, "Duplicate", function () {
             let originPlatform = {
                 x: null,
                 y: null
@@ -1437,7 +1437,7 @@ const UserInterface = {
             }
         })
 
-        btn_delete_element = new Button(window.outerWidth - 99, window.outerHeight - 90, 56, "trash_button", "", 0, "", function () {
+        btn_delete_element = new Button(screenWidthUI - 99, screenHeightUI - 90, 56, "trash_button", "", 0, "", function () {
 
             MapEditor.selectedElements.forEach((element) => { // loop through and delete
                 if (Array.isArray(element)) { // delete checkpoint
@@ -1514,7 +1514,7 @@ const UserInterface = {
             if (ColorPicker.editingElement == 1 || ColorPicker.editingElement == 9 || ColorPicker.editingElement == 10) { UserInterface.determineButtonColor() }
         })
 
-        btn_unselectColor = new Button(window.outerWidth - 480, 32, 44, "x_button", "", 0, "", function () {
+        btn_unselectColor = new Button(screenWidthUI - 480, 32, 44, "x_button", "", 0, "", function () {
             UserInterface.renderedButtons = UserInterface.btnGroup_colorPickerState1
             ColorPicker.editingElement = 0;
         })
@@ -1532,7 +1532,7 @@ const UserInterface = {
         // 9 direct light
         // 10 ambient light
 
-        btn_backgroundColor = new Button(window.outerWidth - 498, 32, 208, "background_button", "", 0, "", function () {
+        btn_backgroundColor = new Button(screenWidthUI - 498, 32, 208, "background_button", "", 0, "", function () {
             ColorPicker.editingElement = 1
             UserInterface.renderedButtons = UserInterface.btnGroup_colorPickerState2
             ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.backgroundColor)
@@ -1540,7 +1540,7 @@ const UserInterface = {
             ColorPicker.syncGradients()
         })
 
-        btn_playerColor = new Button(window.outerWidth - 498, 116, 208, "player_button", "", 0, "", function () {
+        btn_playerColor = new Button(screenWidthUI - 498, 116, 208, "player_button", "", 0, "", function () {
             ColorPicker.editingElement = 2
             UserInterface.renderedButtons = UserInterface.btnGroup_colorPickerState2
             ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.playerColor)
@@ -1548,7 +1548,7 @@ const UserInterface = {
             ColorPicker.syncGradients()
         })
 
-        btn_directLightColor = new Button(window.outerWidth - 270, 32, 226, "direct_light_button", "", 0, "", function () {
+        btn_directLightColor = new Button(screenWidthUI - 270, 32, 226, "direct_light_button", "", 0, "", function () {
             ColorPicker.editingElement = 9
             UserInterface.renderedButtons = UserInterface.btnGroup_colorPickerState2
             ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.directLight)
@@ -1556,7 +1556,7 @@ const UserInterface = {
             ColorPicker.syncGradients()
         })
 
-        btn_ambientLightColor = new Button(window.outerWidth - 270, 116, 226, "ambient_light_button", "", 0, "", function () {
+        btn_ambientLightColor = new Button(screenWidthUI - 270, 116, 226, "ambient_light_button", "", 0, "", function () {
             ColorPicker.editingElement = 10
             UserInterface.renderedButtons = UserInterface.btnGroup_colorPickerState2
             ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.ambientLight)
@@ -1564,7 +1564,7 @@ const UserInterface = {
             ColorPicker.syncGradients()
         })
 
-        btn_wallTopColor = new Button(window.outerWidth - 726, window.outerHeight - 172, 152, "top_button", "", 0, "", function () {
+        btn_wallTopColor = new Button(screenWidthUI - 726, screenHeightUI - 172, 152, "top_button", "", 0, "", function () {
             ColorPicker.editingElement = 5
             UserInterface.renderedButtons = UserInterface.btnGroup_colorPickerState2
             ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.wallTopColor)
@@ -1572,7 +1572,7 @@ const UserInterface = {
             ColorPicker.syncGradients()
         })
 
-        btn_wallSideColor = new Button(window.outerWidth - 726, window.outerHeight - 96, 152, "side_button", "", 0, "", function () {
+        btn_wallSideColor = new Button(screenWidthUI - 726, screenHeightUI - 96, 152, "side_button", "", 0, "", function () {
             ColorPicker.editingElement = 6
             UserInterface.renderedButtons = UserInterface.btnGroup_colorPickerState2
             ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.wallSideColor)
@@ -1580,7 +1580,7 @@ const UserInterface = {
             ColorPicker.syncGradients()
         })
         
-        btn_platformTopColor = new Button(window.outerWidth - 498, window.outerHeight - 172, 152, "top_button", "", 0, "", function () {
+        btn_platformTopColor = new Button(screenWidthUI - 498, screenHeightUI - 172, 152, "top_button", "", 0, "", function () {
             ColorPicker.editingElement = 3
             UserInterface.renderedButtons = UserInterface.btnGroup_colorPickerState2
             ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.platformTopColor)
@@ -1588,7 +1588,7 @@ const UserInterface = {
             ColorPicker.syncGradients()
         })
 
-        btn_platformSideColor = new Button(window.outerWidth - 498, window.outerHeight - 96, 152, "side_button", "", 0, "", function () {
+        btn_platformSideColor = new Button(screenWidthUI - 498, screenHeightUI - 96, 152, "side_button", "", 0, "", function () {
             ColorPicker.editingElement = 4
             UserInterface.renderedButtons = UserInterface.btnGroup_colorPickerState2
             ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.platformSideColor)
@@ -1596,7 +1596,7 @@ const UserInterface = {
             ColorPicker.syncGradients()
         })
 
-        btn_endZoneTopColor = new Button(window.outerWidth - 270, window.outerHeight - 172, 152, "top_button", "", 0, "", function () {
+        btn_endZoneTopColor = new Button(screenWidthUI - 270, screenHeightUI - 172, 152, "top_button", "", 0, "", function () {
             ColorPicker.editingElement = 7
             UserInterface.renderedButtons = UserInterface.btnGroup_colorPickerState2
             ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.endZoneTopColor)
@@ -1604,7 +1604,7 @@ const UserInterface = {
             ColorPicker.syncGradients()
         })
 
-        btn_endZoneSideColor = new Button(window.outerWidth - 270, window.outerHeight - 96, 152, "side_button", "", 0, "", function () {
+        btn_endZoneSideColor = new Button(screenWidthUI - 270, screenHeightUI - 96, 152, "side_button", "", 0, "", function () {
             ColorPicker.editingElement = 8
             UserInterface.renderedButtons = UserInterface.btnGroup_colorPickerState2
             ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.endZoneSideColor)
@@ -1612,7 +1612,7 @@ const UserInterface = {
             ColorPicker.syncGradients()
         })
 
-        btn_lockWallColors = new Button(window.outerWidth - 570, window.outerHeight - 130, 56, "lock_button", "lock_button_pressed", 0, "", function () {
+        btn_lockWallColors = new Button(screenWidthUI - 570, screenHeightUI - 130, 56, "lock_button", "lock_button_pressed", 0, "", function () {
             if (this.toggle) {
                 this.toggle = 0;
                 ColorPicker.lockWallColors = true;
@@ -1624,7 +1624,7 @@ const UserInterface = {
             }
         })
         
-        btn_lockPlatformColors = new Button(window.outerWidth - 342, window.outerHeight - 130, 56, "lock_button", "lock_button_pressed", 0, "", function () {
+        btn_lockPlatformColors = new Button(screenWidthUI - 342, screenHeightUI - 130, 56, "lock_button", "lock_button_pressed", 0, "", function () {
             if (this.toggle) {
                 this.toggle = 0;
                 ColorPicker.lockPlatformColors = true;
@@ -1636,7 +1636,7 @@ const UserInterface = {
             }
         })
 
-        btn_lockEndzoneColors = new Button(window.outerWidth - 114, window.outerHeight - 130, 56, "lock_button", "lock_button_pressed", 0, "", function () {
+        btn_lockEndzoneColors = new Button(screenWidthUI - 114, screenHeightUI - 130, 56, "lock_button", "lock_button_pressed", 0, "", function () {
             if (this.toggle) {
                 this.toggle = 0;
                 ColorPicker.lockEndzoneColors = true;
@@ -2090,7 +2090,7 @@ const UserInterface = {
             ctx.fillText("Null Hop", midX_UI - ctx.measureText("Null Hop").width / 2, 110)
 
             const menu_background = document.getElementById("menu_background")
-            ctx.drawImage(menu_background, -30, 15, window.outerWidth + 60, (menu_background.height / menu_background.width) * window.outerWidth + 60)
+            ctx.drawImage(menu_background, -30, 15, screenWidthUI + 60, (menu_background.height / menu_background.width) * screenWidthUI + 60)
         }
 
         if (this.gamestate == 3) { // In Settings
@@ -2107,14 +2107,14 @@ const UserInterface = {
 
             // Draw Timer Box
             if (this.levelState !== 3 && Tutorial.isActive == false) {
-                UserInterfaceCanvas.roundedRect(window.outerWidth - 220, 32, 170, 75, 15)
+                UserInterfaceCanvas.roundedRect(screenWidthUI - 220, 32, 170, 75, 15)
                 ctx.fill()
 
                 ctx.font = "20px BAHNSCHRIFT";
                 ctx.fillStyle = !UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
 
-                ctx.fillText("Time: " + UserInterface.secondsToMinutes(this.timer), window.outerWidth - 210, 62)
-                ctx.fillText("Record: " + UserInterface.secondsToMinutes((this.records[Map.name] == null ? 0 : this.records[Map.name])), window.outerWidth - 210, 90);
+                ctx.fillText("Time: " + UserInterface.secondsToMinutes(this.timer), screenWidthUI - 210, 62)
+                ctx.fillText("Record: " + UserInterface.secondsToMinutes((this.records[Map.name] == null ? 0 : this.records[Map.name])), screenWidthUI - 210, 90);
             }
 
 
@@ -2230,7 +2230,7 @@ const UserInterface = {
 
                         const radius = 8
                         const x = midX_UI - 150
-                        const y = window.outerHeight - 100
+                        const y = screenHeightUI - 100
                         const w = 300
                         const h = 16
 
@@ -2269,24 +2269,24 @@ const UserInterface = {
                         // DRAW VERTICAL WARNING
                         if (this.showVerticalWarning) {
 
-                            UserInterfaceCanvas.roundedRect(midX_UI - 150, window.outerHeight - 130, ctx.measureText("DON'T SWIPE VERTICAL").width + 24, 24, 8)
+                            UserInterfaceCanvas.roundedRect(midX_UI - 150, screenHeightUI - 130, ctx.measureText("DON'T SWIPE VERTICAL").width + 24, 24, 8)
                             ctx.fillStyle = UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1
                             ctx.fill()
 
                             ctx.fillStyle = !UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1
-                            ctx.fillText("DON'T SWIPE VERTICAL", midX_UI - 138, window.outerHeight - 112)
+                            ctx.fillText("DON'T SWIPE VERTICAL", midX_UI - 138, screenHeightUI - 112)
 
                         }
 
                         if (this.showOverstrafeWarning) {
 
                             heightOffset = this.showVerticalWarning ? 36 : 0;
-                            UserInterfaceCanvas.roundedRect(midX_UI - 150, window.outerHeight - 130 - heightOffset, ctx.measureText("TURNING TOO FAST!").width + 24, 24, 8)
+                            UserInterfaceCanvas.roundedRect(midX_UI - 150, screenHeightUI - 130 - heightOffset, ctx.measureText("TURNING TOO FAST!").width + 24, 24, 8)
                             ctx.fillStyle = UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1
                             ctx.fill()
 
                             ctx.fillStyle = !UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1
-                            ctx.fillText("TURNING TOO FAST!", midX_UI - 138, window.outerHeight - 120 - heightOffset)
+                            ctx.fillText("TURNING TOO FAST!", midX_UI - 138, screenHeightUI - 120 - heightOffset)
                         }
                     }
                 }
@@ -2445,7 +2445,7 @@ const UserInterface = {
                 if (MapEditor.editorState == 2 && !MapEditor.dragSelect) { // DRAWING SIDE PANEL
 
                     const sidePanel = {// If these change also change the values in MapEditor.touchReleased()
-                        x: window.outerWidth - 262,
+                        x: screenWidthUI - 262,
                         y: 22,
                         width: 218,
                         height: 292

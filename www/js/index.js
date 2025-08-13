@@ -7,10 +7,16 @@ let gravity = 500;
 let prevDateNow;
 let dt = 1 / 60; // delta time always has a 1 frame delay
 
-let midX = null; // Middle of Device DPI Scaled canvas
+// set by CanvasArea
+let screenWidth = null; // actual pixel resolution of screen
+let screenHeight = null;
+let screenWidthUI = null; // logical CSS pixel resolution of screen
+let screenHeightUI = null;
+let midX = null; // middle of device DPI scaled canvas
 let midY = null;
-let midX_UI = null; // Middle of standard CSS canvas since UI is position on unscaled canvas
+let midX_UI = null; // middle of standard CSS canvas since UI is position on unscaled canvas
 let midY_UI = null;
+
 
 function onDeviceReady() {
     // Called on page load in HMTL

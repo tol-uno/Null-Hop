@@ -21,8 +21,8 @@ const MapEditor = {
         x: 0, // x and y are the center of the view (the crosshair)
         y: 0, // if 0,0 the view is centered on the map origin. Origin is in the center of the screen
 
-        width: 0, //CanvasArea.canvas.width / MapEditor.zoom,
-        height: 0, //CanvasArea.canvas.height / MapEditor.zoom,
+        width: 0, //screenWidth / MapEditor.zoom,
+        height: 0, //screenHeight / MapEditor.zoom,
 
         cornerX: this.x - this.width / 2, // these coords are the top left corner of the view screen
         cornerY: this.y - this.height / 2 // if they are 0,0 the origin of the map is in the top left corner
@@ -70,8 +70,8 @@ const MapEditor = {
 
                 this.screen.x = this.loadedMap.playerStart.x;
                 this.screen.y = this.loadedMap.playerStart.y;
-                this.screen.width = CanvasArea.canvas.width / this.zoom
-                this.screen.height = CanvasArea.canvas.height / this.zoom
+                this.screen.width = screenWidth / this.zoom
+                this.screen.height = screenHeight / this.zoom
                 this.screen.cornerX = this.screen.x - this.screen.width / 2
                 this.screen.cornerY = this.screen.y - this.screen.height / 2
 
@@ -164,8 +164,8 @@ const MapEditor = {
 
 
             // UPDATING THE other 2 SCREEN Perameters every frame incase zoom changes
-            this.screen.width = CanvasArea.canvas.width / this.zoom
-            this.screen.height = CanvasArea.canvas.height / this.zoom
+            this.screen.width = screenWidth / this.zoom
+            this.screen.height = screenHeight / this.zoom
             this.screen.cornerX = this.screen.x - this.screen.width / 2
             this.screen.cornerY = this.screen.y - this.screen.height / 2
 
@@ -630,8 +630,8 @@ const MapEditor = {
         if (
             this.editorState == 2 &&
             !this.dragSelect && // dragSelect hides side panel
-            x >= window.outerWidth - 262 &&
-            x <= window.outerWidth - 262 + 218 &&
+            x >= screenWidthUI - 262 &&
+            x <= screenWidthUI - 262 + 218 &&
             y >= 22 &&
             y <= 22 + 292
         ) {
@@ -899,8 +899,8 @@ const MapEditor = {
             MapEditor.loadedMap = null;
             MapEditor.screen.x = 0;
             MapEditor.screen.y = 0;
-            MapEditor.screen.width = CanvasArea.canvas.width;
-            MapEditor.screen.height = CanvasArea.canvas.height;
+            MapEditor.screen.width = screenWidth;
+            MapEditor.screen.height = screenHeight;
             MapEditor.scrollVelX = 0;
             MapEditor.scrollVelY = 0;
             MapEditor.snapAmount = 0;
@@ -1066,8 +1066,8 @@ const MapEditor = {
     },
 
     convertToMapCord: function (screenX, screenY) {
-        const mapX = UserInterfaceCanvas.mapToRange(screenX, 0, window.outerWidth, this.screen.cornerX, this.screen.cornerX + this.screen.width)
-        const mapY = UserInterfaceCanvas.mapToRange(screenY, 0, window.outerHeight, this.screen.cornerY, this.screen.cornerY + this.screen.height)
+        const mapX = UserInterfaceCanvas.mapToRange(screenX, 0, screenWidthUI, this.screen.cornerX, this.screen.cornerX + this.screen.width)
+        const mapY = UserInterfaceCanvas.mapToRange(screenY, 0, screenHeightUI, this.screen.cornerY, this.screen.cornerY + this.screen.height)
 
         return {
             x: mapX,

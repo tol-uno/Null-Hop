@@ -602,11 +602,11 @@ const Player = {
             ctx.scale(this.speedCameraOffset.zoom, this.speedCameraOffset.zoom);
 
             ctx.translate(
-                (CanvasArea.canvas.width / this.speedCameraOffset.zoom - CanvasArea.canvas.width) /
+                (screenWidth / this.speedCameraOffset.zoom - screenWidth) /
                     2 +
                     this.speedCameraOffset.direction.x,
-                (CanvasArea.canvas.height / this.speedCameraOffset.zoom -
-                    CanvasArea.canvas.height) /
+                (screenHeight / this.speedCameraOffset.zoom -
+                    screenHeight) /
                     2 +
                     this.speedCameraOffset.direction.y
             );
@@ -813,11 +813,11 @@ const Player = {
             // This zooming was only done on PlayerCanvas. CanvasArea needs zoom too
             CanvasArea.ctx.scale(this.speedCameraOffset.zoom, this.speedCameraOffset.zoom);
             CanvasArea.ctx.translate(
-                (CanvasArea.canvas.width / this.speedCameraOffset.zoom - CanvasArea.canvas.width) /
+                (screenWidth / this.speedCameraOffset.zoom - screenWidth) /
                     2 +
                     this.speedCameraOffset.direction.x,
-                (CanvasArea.canvas.height / this.speedCameraOffset.zoom -
-                    CanvasArea.canvas.height) /
+                (screenHeight / this.speedCameraOffset.zoom -
+                    screenHeight) /
                     2 +
                     this.speedCameraOffset.direction.y
             );
@@ -864,11 +864,11 @@ const Player = {
             ctx.scale(this.speedCameraOffset.zoom, this.speedCameraOffset.zoom);
 
             ctx.translate(
-                (CanvasArea.canvas.width / this.speedCameraOffset.zoom - CanvasArea.canvas.width) /
+                (screenWidth / this.speedCameraOffset.zoom - screenWidth) /
                     2 +
                     this.speedCameraOffset.direction.x,
-                (CanvasArea.canvas.height / this.speedCameraOffset.zoom -
-                    CanvasArea.canvas.height) /
+                (screenHeight / this.speedCameraOffset.zoom -
+                    screenHeight) /
                     2 +
                     this.speedCameraOffset.direction.y
             );
@@ -1078,11 +1078,11 @@ const Player = {
             // This zooming was only done on PlayerCanvas. CanvasArea needs too
             CanvasArea.ctx.scale(this.speedCameraOffset.zoom, this.speedCameraOffset.zoom);
             CanvasArea.ctx.translate(
-                (CanvasArea.canvas.width / this.speedCameraOffset.zoom - CanvasArea.canvas.width) /
+                (screenWidth / this.speedCameraOffset.zoom - screenWidth) /
                     2 +
                     this.speedCameraOffset.direction.x,
-                (CanvasArea.canvas.height / this.speedCameraOffset.zoom -
-                    CanvasArea.canvas.height) /
+                (screenHeight / this.speedCameraOffset.zoom -
+                    screenHeight) /
                     2 +
                     this.speedCameraOffset.direction.y
             );

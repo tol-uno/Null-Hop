@@ -313,7 +313,7 @@ const MapBrowser = { // should set back to 0 at some points
 
                 ctx.font = "24px BAHNSCHRIFT";
                 ctx.fillStyle = (!UserInterface.darkMode) ? UserInterface.lightColor_1 : UserInterface.darkColor_1;
-                ctx.fillText("Play Tutorial", window.outerWidth - 404, window.outerHeight - 62)
+                ctx.fillText("Play Tutorial", screenWidthUI - 404, screenHeightUI - 62)
             }
 
         } else { // no map is selected

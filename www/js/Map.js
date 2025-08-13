@@ -206,8 +206,8 @@ const Map = {
 
         this.platforms.forEach(platform => { // Loop through ALL platforms to get renderedPlatforms
 
-            let zoomOffsetX = (CanvasArea.canvas.width / Player.speedCameraOffset.zoom - CanvasArea.canvas.width) / 2
-            let zoomOffsetY = (CanvasArea.canvas.height / Player.speedCameraOffset.zoom - CanvasArea.canvas.height) / 2
+            let zoomOffsetX = (screenWidth / Player.speedCameraOffset.zoom - screenWidth) / 2
+            let zoomOffsetY = (screenHeight / Player.speedCameraOffset.zoom - screenHeight) / 2
 
             if (
                 (platform.minX < Player.x + midX + zoomOffsetX - Player.speedCameraOffset.direction.x) && // coming into frame on right side

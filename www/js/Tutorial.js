@@ -241,7 +241,7 @@ const Tutorial = {
 
             if (TouchHandler.dragging == false && Tutorial.timerCompleted) {
                 const image = Tutorial.decalList[0]
-                ctx.drawImage(image, midX_UI - image.width/2 + (animValue * 116), window.outerHeight - image.height - 36)
+                ctx.drawImage(image, midX_UI - image.width/2 + (animValue * 116), screenHeightUI - image.height - 36)
             }
         }
 

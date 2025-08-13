@@ -3,13 +3,13 @@ const PlayerCanvas = {
     start : function() { // called in deviceReady
         this.canvas = document.createElement("canvas")
 
-        this.scale = window.devicePixelRatio || 1
+        this.scale = CanvasArea.scale
 
-        this.canvas.width = window.outerWidth * this.scale;
-        this.canvas.height = window.outerHeight * this.scale;
+        this.canvas.width = screenWidth;
+        this.canvas.height = screenHeight;
 
-        this.canvas.style.width = window.outerWidth + "px";
-        this.canvas.style.height = window.outerHeight + "px";
+        this.canvas.style.width = screenWidthUI + "px";
+        this.canvas.style.height = screenHeightUI + "px";
 
         this.canvas.style.display = "none"
 
@@ -19,6 +19,6 @@ const PlayerCanvas = {
 
 
     clear : function() { // CLEARS WHOLE CANVAS
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
+        this.ctx.clearRect(0, 0, screenWidth, screenHeight)
     },
 }
