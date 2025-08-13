@@ -93,12 +93,6 @@ const ColorPicker = {
         this.lightnessGradient.addColorStop(1, "hsla(" + this.h + ", 100%, 100%, 1)");
     },
 
-    toggleAllButtons : function() { // shouldnt need Kill
-        UserInterface.renderedButtons.forEach(button => {
-            button.toggle = 0
-        })
-    },
-
     update : function() {
         if (this.hueGradient == null) { // only create gradients once
             this.syncGradients();

@@ -51,7 +51,7 @@ const PreviewWindow = {
             platform.hull = CanvasArea.convexHull(allHullPoints);
         });
 
-        Map.setMapLighting();
+        Map.setMapLighting(this);
     },
 
     // called in MapEditor.render()

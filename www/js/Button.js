@@ -54,7 +54,7 @@ class Button {
             );
 
             // creating images from the svg text
-            // FIX FIX FIX could use one this.icon and generate the correct image on the fly
+            // FIX could use one this.icon and generate the correct image on the fly
             // (depending on how fast createImageFromSvgText is)
             this.lightIcon = await createImageFromSvgText(lightSvgText);
             this.lightIcon_p = await createImageFromSvgText(lightPressedSvgText);

@@ -4,9 +4,9 @@ const Map = {
     wallsToCheck: [],
     endZonesToCheck: [],
     name: null,
-    upperShadowClip: new Path2D(),
-    endZoneShadowClip: new Path2D(),
-    playerClip: new Path2D(), // calculated every frame
+    upperShadowClip: null, // set up in initMap > parseMapData
+    endZoneShadowClip: null, // set up in initMap > parseMapData
+    playerClip: null, // calculated every frame
 
     initMap: async function (name, isCustom = false) { // initializing a normal map (not custom)
         this.platforms = [];
@@ -39,9 +39,9 @@ const Map = {
             if (platform.wall) { this.walls.push(platform) }
         });
 
-
+        
         // SET ALL LIGHTING
-        this.setMapLighting()
+        this.setMapLighting(this)
 
 
         // SETTING BOUNDING POINTS AND CLIPS
@@ -221,7 +221,7 @@ const Map = {
         }); // end of looping through ALL platforms
 
 
-        // BAD FIX FIX FIX
+        // FIX BAD
         this.playerClip = new Path2D() // resets the clip every frame. when it is used there must be an counter clockwise rectangle drawn first to invert clip
 
 
@@ -322,41 +322,37 @@ const Map = {
     },
 
 
-    setMapLighting: function () { // Calculates all lighting and shadows 
-
-        // determine where to pull platforms and styles from. PreviewWindow copies styles from MapEditor.loadedMap
-        const MapData = UserInterface.gamestate == 7 ? PreviewWindow : Map
-
+    setMapLighting: function (mapData) { // Calculates all lighting and shadows 
 
         // Turning lightDirection and lightPitch into a 3D vector
-        const lightDirection_Rads = MapData.style.lightDirection * (Math.PI / 180)
-        const lightPitch_Rads = MapData.style.lightPitch * (Math.PI / 180) // light pitch = light angle. 0 == flat at the horizon. 90 == directly above
+        const lightDirection_Rads = mapData.style.lightDirection * (Math.PI / 180)
+        const lightPitch_Rads = mapData.style.lightPitch * (Math.PI / 180) // light pitch = light angle. 0 == flat at the horizon. 90 == directly above
 
         const x = Math.cos(lightDirection_Rads) * Math.cos(lightPitch_Rads)
         const y = Math.sin(lightDirection_Rads) * Math.cos(lightPitch_Rads)
         const z = Math.sin(lightPitch_Rads)
 
-        const directLightVector = new Vector2D3D(x, y, z)
+        mapData.directLightVector = new Vector2D3D(x, y, z)
 
-        const shadowX = directLightVector.x / Math.tan(lightPitch_Rads) * MapData.style.platformHeight
-        const shadowY = directLightVector.y / Math.tan(lightPitch_Rads) * MapData.style.platformHeight
+        const shadowX = mapData.directLightVector.x / Math.tan(lightPitch_Rads) * mapData.style.platformHeight
+        const shadowY = mapData.directLightVector.y / Math.tan(lightPitch_Rads) * mapData.style.platformHeight
 
         let litPercentTop // init here so that background and others can use
 
         // LOOPING THROUGH EACH PLATFORM
         // SETTING : Shaded colors and shadow poligon
-        MapData.platforms.forEach(platform => {
+        mapData.platforms.forEach(platform => {
 
-            let colorToUse1 = MapData.style.platformTopColor;
-            let colorToUse2 = MapData.style.platformSideColor;
+            let colorToUse1 = mapData.style.platformTopColor;
+            let colorToUse2 = mapData.style.platformSideColor;
 
             if (platform.endzone) {
-                colorToUse1 = MapData.style.endZoneTopColor;
-                colorToUse2 = MapData.style.endZoneSideColor;
+                colorToUse1 = mapData.style.endZoneTopColor;
+                colorToUse2 = mapData.style.endZoneSideColor;
             }
             if (platform.wall) {
-                colorToUse1 = MapData.style.wallTopColor;
-                colorToUse2 = MapData.style.wallSideColor;
+                colorToUse1 = mapData.style.wallTopColor;
+                colorToUse2 = mapData.style.wallSideColor;
             }
 
 
@@ -373,16 +369,16 @@ const Map = {
             // if angleDifference is > PI/2 (90 deg) then side is in light. Otherwise no direct light is hitting it
             // if angleDifference is < PI/2 (90 deg) then side is in shadow & litPercent = 0
 
-            litPercentTop = Math.cos(Math.PI - topNormal.angleDifference(directLightVector)) // known as geometry term
+            litPercentTop = Math.cos(Math.PI - topNormal.angleDifference(mapData.directLightVector)) // known as geometry term
             if (litPercentTop < 0) { litPercentTop = 0 } // clamp to 0 to 1
 
-            let litPercent1 = Math.cos(Math.PI - side1Normal.angleDifference(directLightVector)) // known as geometry term
+            let litPercent1 = Math.cos(Math.PI - side1Normal.angleDifference(mapData.directLightVector)) // known as geometry term
             if (litPercent1 < 0) { litPercent1 = 0 } // clamp to 0 to 1
 
-            let litPercent2 = Math.cos(Math.PI - side2Normal.angleDifference(directLightVector)) // known as geometry term
+            let litPercent2 = Math.cos(Math.PI - side2Normal.angleDifference(mapData.directLightVector)) // known as geometry term
             if (litPercent2 < 0) { litPercent2 = 0 } // clamp to 0 to 1
 
-            let litPercent3 = Math.cos(Math.PI - side3Normal.angleDifference(directLightVector)) // known as geometry term
+            let litPercent3 = Math.cos(Math.PI - side3Normal.angleDifference(mapData.directLightVector)) // known as geometry term
             if (litPercent3 < 0) { litPercent3 = 0 } // clamp to 0 to 1
 
 
@@ -397,8 +393,8 @@ const Map = {
 
             // set the additional length that's added to wall shadows
             let wallShadowMultiplier
-            if (platform.wall && MapData.style.platformHeight > 0) {
-                wallShadowMultiplier = 1 + (MapData.style.wallHeight / MapData.style.platformHeight)
+            if (platform.wall && mapData.style.platformHeight > 0) {
+                wallShadowMultiplier = 1 + (mapData.style.wallHeight / mapData.style.platformHeight)
             } else {
                 wallShadowMultiplier = 1
             }
@@ -408,49 +404,49 @@ const Map = {
                 // bot left corner
                 [
                     platform.corners[0][0],
-                    platform.corners[0][1] + MapData.style.platformHeight,
+                    platform.corners[0][1] + mapData.style.platformHeight,
                 ],
 
                 // bot right corner
                 [
                     platform.corners[1][0],
-                    platform.corners[1][1] + MapData.style.platformHeight,
+                    platform.corners[1][1] + mapData.style.platformHeight,
                 ],
 
                 // top right corner
                 [
                     platform.corners[2][0],
-                    platform.corners[2][1] + MapData.style.platformHeight,
+                    platform.corners[2][1] + mapData.style.platformHeight,
                 ],
 
                 // top left corner
                 [
                     platform.corners[3][0],
-                    platform.corners[3][1] + MapData.style.platformHeight,
+                    platform.corners[3][1] + mapData.style.platformHeight,
                 ],
 
                 // bot left SHADOW
                 [
                     platform.corners[0][0] + shadowX * wallShadowMultiplier,
-                    platform.corners[0][1] + MapData.style.platformHeight + shadowY * wallShadowMultiplier,
+                    platform.corners[0][1] + mapData.style.platformHeight + shadowY * wallShadowMultiplier,
                 ],
 
                 // bot right SHADOW
                 [
                     platform.corners[1][0] + shadowX * wallShadowMultiplier,
-                    platform.corners[1][1] + MapData.style.platformHeight + shadowY * wallShadowMultiplier,
+                    platform.corners[1][1] + mapData.style.platformHeight + shadowY * wallShadowMultiplier,
                 ],
 
                 // top right SHADOW
                 [
                     platform.corners[2][0] + shadowX * wallShadowMultiplier,
-                    platform.corners[2][1] + MapData.style.platformHeight + shadowY * wallShadowMultiplier,
+                    platform.corners[2][1] + mapData.style.platformHeight + shadowY * wallShadowMultiplier,
                 ],
 
                 // top left SHADOW
                 [
                     platform.corners[3][0] + shadowX * wallShadowMultiplier,
-                    platform.corners[3][1] + MapData.style.platformHeight + shadowY * wallShadowMultiplier,
+                    platform.corners[3][1] + mapData.style.platformHeight + shadowY * wallShadowMultiplier,
                 ],
 
             ]; // end of shadowPoints array
@@ -462,18 +458,18 @@ const Map = {
 
         // calculate all other map colors
         // THESE ALL NEED TO USE 3D Normal Vectors for calculations
-        MapData.style.shaded_backgroundColor = CanvasArea.getShadedColor(MapData.style.backgroundColor, litPercentTop)
+        mapData.style.shaded_backgroundColor = CanvasArea.getShadedColor(mapData.style.backgroundColor, litPercentTop)
 
 
-        MapData.style.shadow_platformColor = CanvasArea.getShadedColor(MapData.style.platformTopColor, Math.max(0, litPercentTop - 0.7)) // shadow brightness can be between 0 and 0.3
-        MapData.style.shadow_endzoneColor = CanvasArea.getShadedColor(MapData.style.endZoneTopColor, Math.max(0, litPercentTop - 0.7))
-        MapData.style.shadow_backgroundColor = CanvasArea.getShadedColor(MapData.style.backgroundColor, Math.max(0, litPercentTop - 0.7))
+        mapData.style.shadow_platformColor = CanvasArea.getShadedColor(mapData.style.platformTopColor, Math.max(0, litPercentTop - 0.7)) // shadow brightness can be between 0 and 0.3
+        mapData.style.shadow_endzoneColor = CanvasArea.getShadedColor(mapData.style.endZoneTopColor, Math.max(0, litPercentTop - 0.7))
+        mapData.style.shadow_backgroundColor = CanvasArea.getShadedColor(mapData.style.backgroundColor, Math.max(0, litPercentTop - 0.7))
 
     },
 
 
-    renderPlatform: function (ctx, MapData, platform) {
-        const adjustedHeight = platform.wall ? MapData.style.wallHeight : 0; // for adding height to walls
+    renderPlatform: function (ctx, mapData, platform) {
+        const adjustedHeight = platform.wall ? mapData.style.wallHeight : 0; // for adding height to walls
 
         // DRAW BACKGROUND HULL
         ctx.fillStyle = platform.shaded_topColor;
@@ -504,11 +500,11 @@ const Map = {
         ); // BL
         ctx.lineTo(
             platform.x + platform.corners[0][0],
-            platform.y + platform.corners[0][1] + MapData.style.platformHeight
+            platform.y + platform.corners[0][1] + mapData.style.platformHeight
         ); // BL + height
         ctx.lineTo(
             platform.x + platform.corners[1][0],
-            platform.y + platform.corners[1][1] + MapData.style.platformHeight
+            platform.y + platform.corners[1][1] + mapData.style.platformHeight
         ); // BR + height
         ctx.closePath();
         ctx.fill();
@@ -527,11 +523,11 @@ const Map = {
             ); // TL
             ctx.lineTo(
                 platform.x + platform.corners[3][0],
-                platform.y + platform.corners[3][1] + MapData.style.platformHeight
+                platform.y + platform.corners[3][1] + mapData.style.platformHeight
             ); // TL + height
             ctx.lineTo(
                 platform.x + platform.corners[0][0],
-                platform.y + platform.corners[0][1] + MapData.style.platformHeight
+                platform.y + platform.corners[0][1] + mapData.style.platformHeight
             ); // BL + height
             ctx.closePath();
             ctx.fill();
@@ -549,11 +545,11 @@ const Map = {
             ); // TR
             ctx.lineTo(
                 platform.x + platform.corners[2][0],
-                platform.y + platform.corners[2][1] + MapData.style.platformHeight
+                platform.y + platform.corners[2][1] + mapData.style.platformHeight
             ); // TR + height
             ctx.lineTo(
                 platform.x + platform.corners[1][0],
-                platform.y + platform.corners[1][1] + MapData.style.platformHeight
+                platform.y + platform.corners[1][1] + mapData.style.platformHeight
             ); // BR + height
             ctx.closePath();
             ctx.fill();
@@ -594,8 +590,8 @@ const Map = {
 
         const ctx = CanvasArea.ctx;
 
-        // Where to pull syles from: Map or PreviewWindow
-        const MapData = UserInterface.gamestate == 7 ? MapEditor.loadedMap : Map;
+        // Where to pull syles from: Map or PreviewWindow DONT NEED THIS CHECK _ ALWAYS Map KILL FIX
+        const mapData = UserInterface.gamestate == 7 ? MapEditor.loadedMap : Map;
 
         const camera = Player.speedCameraOffset;
 
@@ -612,7 +608,7 @@ const Map = {
         ctx.setTransform(camera.zoom, 0, 0, camera.zoom, translateX, translateY);
 
         // Set color for all shadows
-        ctx.fillStyle = MapData.style.shadow_backgroundColor;
+        ctx.fillStyle = mapData.style.shadow_backgroundColor;
 
         ctx.beginPath();
 
@@ -620,7 +616,7 @@ const Map = {
         // RENDER PLAYER LOWER SHADOW. FIX!! NOT ROTATED -- ADD ROTATIION ONCE PLAYER VERTECES ARE ACCESABLE.
         // ALSO JUST PLOT POLYGON AND THEN FILL ALONG WITH ALL THE PLATFORM SHADOWS BELOW
         // ctx.rotate((this.lookAngle.getAngleInDegrees() * Math.PI) / 180); // rotating canvas OLD CODE
-        ctx.fillRect(Player.x - 15, Player.y - 15 + MapData.style.platformHeight, 30, 30)
+        ctx.fillRect(Player.x - 15, Player.y - 15 + mapData.style.platformHeight, 30, 30)
 
         // DRAW ALL PLATFORM SHADOWS IN renderedPlatforms
         for (const platform of this.renderedPlatforms) {
@@ -635,7 +631,7 @@ const Map = {
 
         // DRAW ALL PLATFORMS IN renderedPlatforms
         for (const platform of this.renderedPlatforms) {
-            Map.renderPlatform(ctx, MapData, platform);
+            Map.renderPlatform(ctx, mapData, platform);
         }
 
 

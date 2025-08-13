@@ -75,7 +75,7 @@ const TouchHandler = {
         });
 
 
-        window.addEventListener("touchcancel", e => { // Fixes tripple tap bugs by reseting everything
+        window.addEventListener("touchcancel", e => { // Prevents tripple tap bugs by reseting everything
             this.dragging = false;
             this.touches = [] // this could cause issues i think
             this.zoom.isZooming = false
