@@ -12,11 +12,15 @@ const Player = {
         dirAveragerY: new Averager(180),
     },
 
-    topColor: "rgb(0,255,0)",
-    botSideColor: "rgb(0,255,0)",
-    rightSideColor: "rgb(0,200,0)",
-    topSideColor: "rgb(0,150,0)",
-    leftSideColor: "rgb(0,100,0)",
+    topColor: null,
+    botSideColor: null,
+    rightSideColor: null,
+    topSideColor: null,
+    leftSideColor: null,
+
+    upperCorners: null,
+    lowerCorners: null,
+    shadowCorners: null,
 
     debugTurn: 2, // intialized here so it can be accesed in console
 
@@ -34,6 +38,8 @@ const Player = {
         this.rightSideNormal = new Vector2D3D(1, 0, 0).rotate(angle);
         this.topSideNormal = new Vector2D3D(0, -1, 0).rotate(angle);
         this.leftSideNormal = new Vector2D3D(-1, 0, 0).rotate(angle);
+
+        this.topColor = null; // top shaded color wont be calculated if topColor already exists
 
         this.speedCameraOffset.zoomAverager.frames.fill(1.5, 0);
         this.speedCameraOffset.zoom = 1.5;
@@ -505,7 +511,10 @@ const Player = {
             litPercentLeftSide = 0;
         }
 
-        this.topColor = CanvasArea.getShadedColor(this.mapData.style.playerColor, litPercentTop); // SHOULDNT BE CALCULATED EVERY FRAME
+        if (!this.topColor) {
+            // Only calculate once
+            this.topColor = CanvasArea.getShadedColor(this.mapData.style.playerColor, litPercentTop);
+        }
         this.botSideColor = CanvasArea.getShadedColor(this.mapData.style.playerColor, litPercentBotSide);
         this.rightSideColor = CanvasArea.getShadedColor(this.mapData.style.playerColor, litPercentRightSide);
         this.topSideColor = CanvasArea.getShadedColor(this.mapData.style.playerColor, litPercentTopSide);
@@ -514,64 +523,71 @@ const Player = {
 
     render: function () {
         // Player is drawn on a seperate PlayerCanvas.
-        // On PlayerCanvas, parts of the player that
-        // are behind walls are erased using Map.playerClip
+        // On PlayerCanvas, parts of the player that are behind walls are erased using Map.playerClip
         // PlayerCanvas is then pasted onto the main CanvasArea
 
-        this.setPlayerLighting(); // OPTIMIZE
+        this.setPlayerLighting();
+
+        const loopedAngle = this.lookAngle.getAngleInDegrees();
+        const angleRad = (loopedAngle * Math.PI) / 180;
+
+        // Generate all player vertices
+        // creates array of point objects: [ {x:1,y:1}, {x:2,y:2} ]
+        // topLeft, topRight, bottomRight, bottomLeft -- when Player.angle == 0 (looking right)
+        const shadowCorners = CanvasArea.createPoligon(this.x, this.y, 32, 32, angleRad);
+        const lowerCorners = shadowCorners.map((point) => ({ x: point.x, y: point.y - this.jumpValue }));
+        const upperCorners = shadowCorners.map((point) => ({ x: point.x, y: point.y - this.jumpValue - 32 }));
 
         const ctx = PlayerCanvas.ctx;
         PlayerCanvas.clear();
 
-        ctx.save(); // #2 For scaling the canvas for zoom
-
         if (this.mapData == Map) {
             // in actual level
-            ctx.scale(this.speedCameraOffset.zoom, this.speedCameraOffset.zoom);
+            const camera = this.speedCameraOffset;
+            const cameraTargetX = this.x - camera.direction.x;
+            const cameraTargetY = this.y - camera.direction.y;
 
-            ctx.translate(
-                (screenWidth / this.speedCameraOffset.zoom - screenWidth) / 2 + this.speedCameraOffset.direction.x,
-                (screenHeight / this.speedCameraOffset.zoom - screenHeight) / 2 + this.speedCameraOffset.direction.y
-            );
+            const translateX = midX - cameraTargetX * camera.zoom;
+            const translateY = midY - cameraTargetY * camera.zoom;
 
-            ctx.translate(midX, midY); // translate to center of the screen
-        } else {
-            // in preview window
-            ctx.translate(this.x, this.y); // translate to wherever player is at on screen
+            ctx.setTransform(camera.zoom, 0, 0, camera.zoom, translateX, translateY);
         }
 
-        // LOWER SHADOW IS DRAWN BY MAP
-        // DRAWING UPPER SHADOW HERE (drawn twice, once while over platform and once while over endzone)
+        // LOWER Player SHADOW IS DRAWN BY MAP
+        // DRAWING UPPER SHADOW HERE
+        // drawn twice, first using platform's shadedColor with platform clip applied
+        // and second using endzone's shadedColor with endzone clip applied
 
         // SHADOW OVER PLATFORM
-        ctx.save(); // #5 upperShadowClip canvas
+        ctx.save(); // #1 Necessary for clearing upperShadowClip
 
         if (this.mapData == Map) {
             // only set upper shadow clip if in Map not PreviewWindow
-            ctx.translate(-this.x, -this.y); // ctx goes to map origin to set clip
 
             // Draw standard shadowClip DEBUG
-            // ctx.lineWidth = 5
+            // ctx.lineWidth = 4
             // ctx.strokeStyle = "#00ff00"
             // ctx.stroke(Map.upperShadowClip)
 
             ctx.clip(Map.upperShadowClip);
-            ctx.translate(this.x, this.y); // reset ctx to middle of player at middle of screen
         }
 
-        ctx.rotate((this.lookAngle.getAngleInDegrees() * Math.PI) / 180);
-
         ctx.fillStyle = this.mapData.style.shadow_platformColor;
-        ctx.fillRect(-15, -15, 30, 30);
 
-        ctx.restore(); // #5 clears upperShadowClip
+        ctx.beginPath();
+        ctx.moveTo(shadowCorners[0].x, shadowCorners[0].y);
+        ctx.lineTo(shadowCorners[1].x, shadowCorners[1].y);
+        ctx.lineTo(shadowCorners[2].x, shadowCorners[2].y);
+        ctx.lineTo(shadowCorners[3].x, shadowCorners[3].y);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.restore(); // #1 Necessary for clearing upperShadowClip
 
         // SHADOW OVER ENDZONE
         if (this.mapData == Map && Map.endZonesToCheck.length > 0) {
-            // onlt applicable in Map not PreviewWindow
-            ctx.save(); // #6 endZoneShadowClip canvas
-
-            ctx.translate(-this.x, -this.y);
+            // only applicable in Map not PreviewWindow
+            ctx.save(); // #2 Necessary for clearing endZoneShadowClip
 
             // Draw endZoneShadowClip DEBUG
             // ctx.lineWidth = 3
@@ -579,179 +595,159 @@ const Player = {
             // ctx.stroke(Map.endZoneShadowClip)
 
             ctx.clip(Map.endZoneShadowClip);
-            ctx.translate(this.x, this.y);
-
-            ctx.rotate((this.lookAngle.getAngleInDegrees() * Math.PI) / 180);
 
             ctx.fillStyle = Map.style.shadow_endzoneColor;
-            ctx.fillRect(-15, -15, 30, 30);
 
-            ctx.restore(); // #6 clears endZoneShadowClip
+            ctx.beginPath();
+            ctx.moveTo(shadowCorners[0].x, shadowCorners[0].y);
+            ctx.lineTo(shadowCorners[1].x, shadowCorners[1].y);
+            ctx.lineTo(shadowCorners[2].x, shadowCorners[2].y);
+            ctx.lineTo(shadowCorners[3].x, shadowCorners[3].y);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.restore(); // #2 Necessary for clearing endZoneShadowClip
         }
 
-        // GENERATE player.hull
-        // (0, -this.jumpValue) used here because createPoligon returns global coords and we want local to player
-        const cornersPolygon = CanvasArea.createPoligon(0, -this.jumpValue, 32, 32, (this.lookAngle.getAngleInDegrees() * Math.PI) / 180);
-
-        const lowerCorners = [
-            // topLeft, topRight, bottomRight, bottomLeft
-            [cornersPolygon[0].x, cornersPolygon[0].y],
-            [cornersPolygon[1].x, cornersPolygon[1].y],
-            [cornersPolygon[2].x, cornersPolygon[2].y],
-            [cornersPolygon[3].x, cornersPolygon[3].y],
-        ];
-
-        const upperCorners = [
-            [cornersPolygon[0].x, cornersPolygon[0].y - 32],
-            [cornersPolygon[1].x, cornersPolygon[1].y - 32],
-            [cornersPolygon[2].x, cornersPolygon[2].y - 32],
-            [cornersPolygon[3].x, cornersPolygon[3].y - 32],
-        ];
-
         const allHullPoints = lowerCorners.concat(upperCorners);
-
         this.hull = CanvasArea.convexHull(allHullPoints);
 
         // DRAW BACKGROUND HULL
-        ctx.save(); // #6.5 for reverting Player.rotation and Player.jumpValue translations
-
         ctx.fillStyle = this.topColor;
 
         ctx.beginPath();
-        ctx.moveTo(this.hull[0][0], this.hull[0][1]);
+        ctx.moveTo(this.hull[0].x, this.hull[0].y);
         for (let i = this.hull.length - 1; i > 0; i--) {
-            ctx.lineTo(this.hull[i][0], this.hull[i][1]);
+            ctx.lineTo(this.hull[i].x, this.hull[i].y);
         }
         ctx.closePath();
         ctx.fill();
 
-        // Draw Player top arrow
-        ctx.translate(0, -this.jumpValue - 32);
-        ctx.rotate((this.lookAngle.getAngleInDegrees() * Math.PI) / 180); // rotating canvas
+        // Draw Player TOP ARROW (FIX rotation)
         ctx.strokeStyle = "#00000030";
         ctx.lineWidth = 2;
 
+        const trianglePoints = [
+            { x: 8, y: 0 },
+            { x: -5, y: -7 },
+            { x: -5, y: 7 },
+        ];
+
+        const cos = Math.cos(angleRad);
+        const sin = Math.sin(angleRad);
+
+        const rotatedPoints = trianglePoints.map(({ x, y }) => {
+            return {
+                x: x * cos - y * sin,
+                y: x * sin + y * cos,
+            };
+        });
+
         ctx.beginPath();
-        ctx.moveTo(8, 0);
-        ctx.lineTo(-5, -7);
-        ctx.lineTo(-5, 7);
-        ctx.lineTo(8, 0);
+        ctx.moveTo(this.x + rotatedPoints[0].x, this.y + rotatedPoints[0].y - this.jumpValue - 32);
+        ctx.lineTo(this.x + rotatedPoints[1].x, this.y + rotatedPoints[1].y - this.jumpValue - 32);
+        ctx.lineTo(this.x + rotatedPoints[2].x, this.y + rotatedPoints[2].y - this.jumpValue - 32);
+        ctx.closePath();
         ctx.stroke();
 
-        ctx.restore(); // #6.5 leaves player rotation and jump value translation
-        // ctx is now back at player coords with no jumpvalue
-
         // SIDES OF PLAYER
-        const loopedAngle = this.lookAngle.getAngleInDegrees();
 
-        // at lookAngle == 0 the player is facing to the right. BOT WALL refers to the bottom wall when lookAnlge == 0
+        // at lookAngle == 0 the player is facing to the right. BOT WALL refers to the bottom wall when lookAngle == 0
         // lowerCorners & upperCorners order: topLeft, topRight, bottomRight, bottomLeft
 
         if (loopedAngle > 270 || loopedAngle < 90) {
             // BOT WALL
-
+            // looking to the right + or - 90 deg
             ctx.fillStyle = this.botSideColor;
 
             ctx.beginPath();
-            ctx.moveTo(upperCorners[2][0], upperCorners[2][1]);
-            ctx.lineTo(upperCorners[3][0], upperCorners[3][1]);
-            ctx.lineTo(lowerCorners[3][0], lowerCorners[3][1]);
-            ctx.lineTo(lowerCorners[2][0], lowerCorners[2][1]);
+            ctx.moveTo(upperCorners[2].x, upperCorners[2].y);
+            ctx.lineTo(upperCorners[3].x, upperCorners[3].y);
+            ctx.lineTo(lowerCorners[3].x, lowerCorners[3].y);
+            ctx.lineTo(lowerCorners[2].x, lowerCorners[2].y);
             ctx.closePath();
             ctx.fill();
         }
 
-        if (0 < loopedAngle && loopedAngle < 180) {
+        if (loopedAngle > 0 && loopedAngle < 180) {
             // RIGHT WALL
-
+            // looking downwards + or - 90 deg
             ctx.fillStyle = this.rightSideColor;
+
             ctx.beginPath();
-            ctx.moveTo(upperCorners[1][0], upperCorners[1][1]);
-            ctx.lineTo(upperCorners[2][0], upperCorners[2][1]);
-            ctx.lineTo(lowerCorners[2][0], lowerCorners[2][1]);
-            ctx.lineTo(lowerCorners[1][0], lowerCorners[1][1]);
+            ctx.moveTo(upperCorners[1].x, upperCorners[1].y);
+            ctx.lineTo(upperCorners[2].x, upperCorners[2].y);
+            ctx.lineTo(lowerCorners[2].x, lowerCorners[2].y);
+            ctx.lineTo(lowerCorners[1].x, lowerCorners[1].y);
             ctx.closePath();
             ctx.fill();
         }
 
-        if (90 < loopedAngle && loopedAngle < 270) {
+        if (loopedAngle > 90 && loopedAngle < 270) {
             // TOP WALL
-
+            // looking to the left + or - 90 deg
             ctx.fillStyle = this.topSideColor;
 
             ctx.beginPath();
-            ctx.moveTo(upperCorners[0][0], upperCorners[0][1]);
-            ctx.lineTo(upperCorners[1][0], upperCorners[1][1]);
-            ctx.lineTo(lowerCorners[1][0], lowerCorners[1][1]);
-            ctx.lineTo(lowerCorners[0][0], lowerCorners[0][1]);
+            ctx.moveTo(upperCorners[0].x, upperCorners[0].y);
+            ctx.lineTo(upperCorners[1].x, upperCorners[1].y);
+            ctx.lineTo(lowerCorners[1].x, lowerCorners[1].y);
+            ctx.lineTo(lowerCorners[0].x, lowerCorners[0].y);
             ctx.closePath();
             ctx.fill();
         }
 
-        if (180 < loopedAngle && loopedAngle < 360) {
+        if (loopedAngle > 180 && loopedAngle < 360) {
             // LEFT WALL
-
+            // looking upwards + or - 90 deg
             ctx.fillStyle = this.leftSideColor;
 
             ctx.beginPath();
-            ctx.moveTo(upperCorners[3][0], upperCorners[3][1]);
-            ctx.lineTo(upperCorners[0][0], upperCorners[0][1]);
-            ctx.lineTo(lowerCorners[0][0], lowerCorners[0][1]);
-            ctx.lineTo(lowerCorners[3][0], lowerCorners[3][1]);
+            ctx.moveTo(upperCorners[3].x, upperCorners[3].y);
+            ctx.lineTo(upperCorners[0].x, upperCorners[0].y);
+            ctx.lineTo(lowerCorners[0].x, lowerCorners[0].y);
+            ctx.lineTo(lowerCorners[3].x, lowerCorners[3].y);
             ctx.closePath();
             ctx.fill();
         }
 
         // ERASE PARTS OF PLAYER THAT ARE BEHIND WALL AND DRAW PLAYER XRAY (if in Map not PreviewWindow)
         if (this.mapData == Map && Map.wallsToCheck.length != 0) {
-            // FIX use more precice check here ex: looking to see if theres data in Map.playerClip OPTIMIZE
+            //  OPTIMIZE: Could use more precice check here like checking if there's data in Map.playerClip
+            // if theres no data in playerClip path then this doesnt have to be run
 
-            // ERASE PARTS OF PLAYER THAT ARE BEHIND WALLS
+            // Draw playerClip DEBUG on PlayerCanvas
+            // ctx.lineWidth = 4;
+            // ctx.strokeStyle = "#ff0000";
+            // ctx.stroke(Map.playerClip);
 
-            // ctx is still at player middle
-            ctx.translate(-this.x, -this.y); // ctx is at map origin
-
-            // Draw playerClip DEBUG (This is being drawn on PlayerCanvas)
-            // ctx.lineWidth = 5
-            // ctx.strokeStyle = "#00ff00"
-            // ctx.stroke(Map.playerClip)
-
+            ctx.save(); // #3 Necessary for clearing playerClip
             // ADD CLIP of area behind walls
             ctx.clip(Map.playerClip);
 
-            // ERASE PLAYER THATS BEHIND CLIP
-            ctx.translate(this.x - midX, this.y - midY); // translate to the top left of the screen / canvas
-            PlayerCanvas.clear();
+            // ERASE PARTS OF PLAYER THAT ARE BEHIND WALLS
+            PlayerCanvas.clear(this.x - midX, this.y - midY); // clear canvas at the players position - half screen width
 
-            // DRAW PLAYER XRAY IF BEHIND WALL (draw on normal CanvasArea)
-            CanvasArea.ctx.save(); // # 7 used to reset the CanvasArea (which hasnt really been used in Player.render)
+            // DRAW PLAYER XRAY
+            ctx.strokeStyle = this.topColor;
+            ctx.lineWidth = 2;
 
-            // This zooming was only done on PlayerCanvas. CanvasArea needs zoom too
-            CanvasArea.ctx.scale(this.speedCameraOffset.zoom, this.speedCameraOffset.zoom);
-            CanvasArea.ctx.translate(
-                (screenWidth / this.speedCameraOffset.zoom - screenWidth) / 2 + this.speedCameraOffset.direction.x,
-                (screenHeight / this.speedCameraOffset.zoom - screenHeight) / 2 + this.speedCameraOffset.direction.y
-            );
+            ctx.beginPath();
+            ctx.moveTo(shadowCorners[0].x, shadowCorners[0].y);
+            ctx.lineTo(shadowCorners[1].x, shadowCorners[1].y);
+            ctx.lineTo(shadowCorners[2].x, shadowCorners[2].y);
+            ctx.lineTo(shadowCorners[3].x, shadowCorners[3].y);
+            ctx.closePath();
+            ctx.stroke();
 
-            CanvasArea.ctx.translate(-this.x + midX, -this.y + midY); // Map origin
-
-            CanvasArea.ctx.clip(Map.playerClip);
-
-            CanvasArea.ctx.translate(this.x, this.y); // middle of player
-            CanvasArea.ctx.rotate((this.lookAngle.getAngleInDegrees() * Math.PI) / 180);
-
-            CanvasArea.ctx.strokeStyle = this.topColor;
-            CanvasArea.ctx.lineWidth = 2;
-            CanvasArea.ctx.beginPath();
-            CanvasArea.ctx.strokeRect(-16, -16, 32, 32);
-            CanvasArea.ctx.stroke();
-
-            CanvasArea.ctx.restore(); // # 7 resets the CanvasArea to whatever weird state it was in previously
+            ctx.restore(); // #3 Necessary for clearing playerClip
         }
 
         // COPY PLAYER TO MAIN CANVAS AFTER ERASE
         CanvasArea.ctx.drawImage(PlayerCanvas.canvas, 0, 0);
 
-        ctx.restore(); // #2 clears ctx.scale for zoom. Also restores Player.x / .y translation or midX midY
+        if (this.mapData == Map) {
+            ctx.setTransform();
+        }
     },
 };

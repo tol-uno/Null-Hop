@@ -18,7 +18,7 @@ const PlayerCanvas = {
         },
 
 
-    clear : function() { // CLEARS WHOLE CANVAS
-        this.ctx.clearRect(0, 0, screenWidth, screenHeight)
+    clear : function(x = 0, y = 0) { // CLEARS WHOLE CANVAS
+        this.ctx.clearRect(x, y, screenWidth, screenHeight)
     },
 }

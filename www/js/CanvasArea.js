@@ -33,40 +33,58 @@ const CanvasArea = {
     },
 
     convexHull: function (points) {
-        // points formated as: [[1,1],[2,2]]
+        // points can be formated either two ways:
+        // [ {x:1, y:1}, {x:2, y:2} ]
+        // [ [1, 1], [2, 2] ]
+        // returns points out in whatever format they where input as
+        
+        const isArrayFormat = Array.isArray(points[0]);
+    
+        // Normalize to {x, y} format
+        const normalizedPoints = points.map(p =>
+            isArrayFormat ? { x: p[0], y: p[1] } : p
+        );
+    
         function cross(a, b, o) {
-            return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
+            return (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x);
         }
-
-        points.sort(function (a, b) {
-            return a[0] == b[0] ? a[1] - b[1] : a[0] - b[0];
-        });
-
+    
+        normalizedPoints.sort((a, b) =>
+            a.x === b.x ? a.y - b.y : a.x - b.x
+        );
+    
         const lower = [];
-        for (let i = 0; i < points.length; i++) {
+        for (let i = 0; i < normalizedPoints.length; i++) {
             while (
                 lower.length >= 2 &&
-                cross(lower[lower.length - 2], lower[lower.length - 1], points[i]) <= 0
+                cross(lower[lower.length - 2], lower[lower.length - 1], normalizedPoints[i]) <= 0
             ) {
                 lower.pop();
             }
-            lower.push(points[i]);
+            lower.push(normalizedPoints[i]);
         }
-
+    
         const upper = [];
-        for (let i = points.length - 1; i >= 0; i--) {
+        for (let i = normalizedPoints.length - 1; i >= 0; i--) {
             while (
                 upper.length >= 2 &&
-                cross(upper[upper.length - 2], upper[upper.length - 1], points[i]) <= 0
+                cross(upper[upper.length - 2], upper[upper.length - 1], normalizedPoints[i]) <= 0
             ) {
                 upper.pop();
             }
-            upper.push(points[i]);
+            upper.push(normalizedPoints[i]);
         }
-
+    
         upper.pop();
         lower.pop();
-        return lower.concat(upper);
+        const result = lower.concat(upper);
+    
+        // Convert back to original format if needed
+        if (isArrayFormat) {
+            return result.map(p => [p.x, p.y]);
+        } else {
+            return result;
+        }
     },
 
     HSLToRGB: function (h, s, l) {
