@@ -579,19 +579,7 @@ const Map = {
     render: function () {
         // Renders Player lower shadow, platforms shadows, platforms, and checkpoints
 
-        /*
-        Map rendering pipeline:
-
-        Scale And Translate canvas.ctx origin (which == map origin) so that player is drawn in middle of canvas
-        Draw lower Player shadow
-        Draw all platform shadows (one draw call)
-
-        */
-
         const ctx = CanvasArea.ctx;
-
-        // Where to pull syles from: Map or PreviewWindow DONT NEED THIS CHECK _ ALWAYS Map KILL FIX
-        const mapData = UserInterface.gamestate == 7 ? MapEditor.loadedMap : Map;
 
         const camera = Player.speedCameraOffset;
 
@@ -608,15 +596,15 @@ const Map = {
         ctx.setTransform(camera.zoom, 0, 0, camera.zoom, translateX, translateY);
 
         // Set color for all shadows
-        ctx.fillStyle = mapData.style.shadow_backgroundColor;
+        ctx.fillStyle = this.style.shadow_backgroundColor;
 
         ctx.beginPath();
 
-
-        // RENDER PLAYER LOWER SHADOW. FIX!! NOT ROTATED -- ADD ROTATIION ONCE PLAYER VERTECES ARE ACCESABLE.
-        // ALSO JUST PLOT POLYGON AND THEN FILL ALONG WITH ALL THE PLATFORM SHADOWS BELOW
-        // ctx.rotate((this.lookAngle.getAngleInDegrees() * Math.PI) / 180); // rotating canvas OLD CODE
-        ctx.fillRect(Player.x - 15, Player.y - 15 + mapData.style.platformHeight, 30, 30)
+        // DRAW PLAYER LOWER SHADOW (gets filled alongside platform shadows)
+        // need to set up Player.shadowPoints here because this code is run before Player.render()
+        const angleRad = Player.lookAngle.getAngleInDegrees() * Math.PI / 180;
+        Player.shadowCorners = CanvasArea.createPoligon(Player.x, Player.y, 30, 30, angleRad); // 30x30 instead of 32x32
+        Player.drawPlayerShadow(ctx, this.style.platformHeight)
 
         // DRAW ALL PLATFORM SHADOWS IN renderedPlatforms
         for (const platform of this.renderedPlatforms) {
@@ -631,7 +619,7 @@ const Map = {
 
         // DRAW ALL PLATFORMS IN renderedPlatforms
         for (const platform of this.renderedPlatforms) {
-            Map.renderPlatform(ctx, mapData, platform);
+            Map.renderPlatform(ctx, Map, platform);
         }
 
 

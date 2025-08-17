@@ -18,9 +18,9 @@ const Player = {
     topSideColor: null,
     leftSideColor: null,
 
-    upperCorners: null,
-    lowerCorners: null,
-    shadowCorners: null,
+
+    shadowCorners: null, // need to expose here so that this.drawPlayerShadow() can use. 
+    // Weirdly set by Map because Map needs it first in the rendering pipeline.
 
     debugTurn: 2, // intialized here so it can be accesed in console
 
@@ -521,6 +521,16 @@ const Player = {
         this.leftSideColor = CanvasArea.getShadedColor(this.mapData.style.playerColor, litPercentLeftSide);
     },
 
+    drawPlayerShadow: function (ctx = PlayerCanvas.ctx, yOffset = 0) {
+        // winding order is reversed so that player's lower shadow combines with platform shadows
+        ctx.beginPath(); 
+        ctx.moveTo(this.shadowCorners[3].x, this.shadowCorners[3].y + yOffset);
+        ctx.lineTo(this.shadowCorners[2].x, this.shadowCorners[2].y + yOffset);
+        ctx.lineTo(this.shadowCorners[1].x, this.shadowCorners[1].y + yOffset);
+        ctx.lineTo(this.shadowCorners[0].x, this.shadowCorners[0].y + yOffset);
+        ctx.closePath();
+    },
+
     render: function () {
         // Player is drawn on a seperate PlayerCanvas.
         // On PlayerCanvas, parts of the player that are behind walls are erased using Map.playerClip
@@ -528,21 +538,23 @@ const Player = {
 
         this.setPlayerLighting();
 
+        const ctx = PlayerCanvas.ctx;
+        PlayerCanvas.clear();
+
         const loopedAngle = this.lookAngle.getAngleInDegrees();
         const angleRad = (loopedAngle * Math.PI) / 180;
 
         // Generate all player vertices
         // creates array of point objects: [ {x:1,y:1}, {x:2,y:2} ]
         // topLeft, topRight, bottomRight, bottomLeft -- when Player.angle == 0 (looking right)
-        const shadowCorners = CanvasArea.createPoligon(this.x, this.y, 32, 32, angleRad);
-        const lowerCorners = shadowCorners.map((point) => ({ x: point.x, y: point.y - this.jumpValue }));
-        const upperCorners = shadowCorners.map((point) => ({ x: point.x, y: point.y - this.jumpValue - 32 }));
+        // When in Map, shadowCorners is set within Map.render because it runs first. If not in map, shadowCorners calculated below.
+        const lowerCorners = CanvasArea.createPoligon(this.x, this.y - this.jumpValue, 32, 32, angleRad);
+        const upperCorners = lowerCorners.map((point) => ({ x: point.x, y: point.y - 32 }));
 
-        const ctx = PlayerCanvas.ctx;
-        PlayerCanvas.clear();
-
-        if (this.mapData == Map) {
-            // in actual level
+        if (this.mapData == PreviewWindow) { // Map sets these otherwise
+            this.shadowCorners = CanvasArea.createPoligon(this.x, this.y, 30, 30, angleRad); // 30x30 instead of 32x32
+        } else {
+            // in actual level with Map
             const camera = this.speedCameraOffset;
             const cameraTargetX = this.x - camera.direction.x;
             const cameraTargetY = this.y - camera.direction.y;
@@ -573,13 +585,7 @@ const Player = {
         }
 
         ctx.fillStyle = this.mapData.style.shadow_platformColor;
-
-        ctx.beginPath();
-        ctx.moveTo(shadowCorners[0].x, shadowCorners[0].y);
-        ctx.lineTo(shadowCorners[1].x, shadowCorners[1].y);
-        ctx.lineTo(shadowCorners[2].x, shadowCorners[2].y);
-        ctx.lineTo(shadowCorners[3].x, shadowCorners[3].y);
-        ctx.closePath();
+        this.drawPlayerShadow()
         ctx.fill();
 
         ctx.restore(); // #1 Necessary for clearing upperShadowClip
@@ -597,13 +603,7 @@ const Player = {
             ctx.clip(Map.endZoneShadowClip);
 
             ctx.fillStyle = Map.style.shadow_endzoneColor;
-
-            ctx.beginPath();
-            ctx.moveTo(shadowCorners[0].x, shadowCorners[0].y);
-            ctx.lineTo(shadowCorners[1].x, shadowCorners[1].y);
-            ctx.lineTo(shadowCorners[2].x, shadowCorners[2].y);
-            ctx.lineTo(shadowCorners[3].x, shadowCorners[3].y);
-            ctx.closePath();
+            this.drawPlayerShadow()
             ctx.fill();
 
             ctx.restore(); // #2 Necessary for clearing endZoneShadowClip
@@ -623,7 +623,7 @@ const Player = {
         ctx.closePath();
         ctx.fill();
 
-        // Draw Player TOP ARROW (FIX rotation)
+        // Draw Player TOP ARROW
         ctx.strokeStyle = "#00000030";
         ctx.lineWidth = 2;
 
@@ -731,13 +731,7 @@ const Player = {
             // DRAW PLAYER XRAY
             ctx.strokeStyle = this.topColor;
             ctx.lineWidth = 2;
-
-            ctx.beginPath();
-            ctx.moveTo(shadowCorners[0].x, shadowCorners[0].y);
-            ctx.lineTo(shadowCorners[1].x, shadowCorners[1].y);
-            ctx.lineTo(shadowCorners[2].x, shadowCorners[2].y);
-            ctx.lineTo(shadowCorners[3].x, shadowCorners[3].y);
-            ctx.closePath();
+            this.drawPlayerShadow()
             ctx.stroke();
 
             ctx.restore(); // #3 Necessary for clearing playerClip
