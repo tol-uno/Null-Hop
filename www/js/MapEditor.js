@@ -929,7 +929,7 @@ const MapEditor = {
                     return 0;
                 }
 
-                // toSorted() isnt supported by old safari i guess?
+                // toSorted() isnt supported by old safari
                 platform.cornersSorted = [...platform.corners]
                 platform.cornersSorted.sort(sortCornersX)
 

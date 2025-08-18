@@ -34,38 +34,37 @@ const Map = {
         this.style = jsonData.style;
         this.checkpoints = jsonData.checkpoints; // returns an object
 
-        jsonData.platforms.forEach(platform => { // LOOP THROUGH PLATFORMS TO POPULATE platforms AND walls ARRAYS
+        for (const platform of jsonData.platforms) {
+            // LOOP THROUGH PLATFORMS TO POPULATE platforms AND walls ARRAYS
             this.platforms.push(platform);
-            if (platform.wall) { this.walls.push(platform) }
-        });
-
+            if (platform.wall) {
+                this.walls.push(platform);
+            }
+        }
         
         // SET ALL LIGHTING
         this.setMapLighting(this)
 
-
         // SETTING BOUNDING POINTS AND CLIPS
         // bounding points are used for determining if platform is in view
         // clips for area behind each wall AND for drawing the player shadow ontop of platforms or endzones
-        this.platforms.forEach(platform => {
+        for (const platform of this.platforms) {
 
             // Set the bounding points for each platform for determining if they're in view
             let minX = minY = Infinity
             let maxX = maxY = -Infinity
 
-            platform.shadowPoints.forEach((point) => { // shadowPoints are local to platform
+            for (const point of platform.shadowPoints) { // shadowPoints are local to platform
                 if (point[0] < minX) { minX = point[0] }
                 if (point[1] < minY) { minY = point[1] }
                 if (point[0] > maxX) { maxX = point[0] }
                 if (point[1] > maxY) { maxY = point[1] }
-            })
+            }
 
             platform.minX = platform.x + minX // shadowpoints will always coorespond with max and min X 
             platform.maxX = platform.x + maxX
             platform.minY = Math.min(platform.y - platform.hypotenuse - (platform.wall ? this.style.wallHeight : 0), platform.y + minY)
             platform.maxY = Math.max(platform.y + platform.hypotenuse + this.style.platformHeight, platform.y + maxY)
-
-
 
             // GENERATE platform.hull
             // getting all corners needed for hull. need to consider walls that need upper corners
@@ -183,7 +182,7 @@ const Map = {
                 clipToUse.closePath()
             }
 
-        }) // end of looping through platforms to set clips
+        } // end of looping through platforms to set clips
 
 
 
@@ -204,8 +203,7 @@ const Map = {
         this.wallsToCheck = [];
         this.endZonesToCheck = [];
 
-        this.platforms.forEach(platform => { // Loop through ALL platforms to get renderedPlatforms
-
+        for (const platform of this.platforms) { // Loop through ALL platforms to get renderedPlatforms
             let zoomOffsetX = (screenWidth / Player.speedCameraOffset.zoom - screenWidth) / 2
             let zoomOffsetY = (screenHeight / Player.speedCameraOffset.zoom - screenHeight) / 2
 
@@ -218,15 +216,14 @@ const Map = {
                 this.renderedPlatforms.push(platform); // ADD platform to renderedPlatforms
             }
 
-        }); // end of looping through ALL platforms
+        }; // end of looping through ALL platforms
 
 
         // FIX BAD
-        this.playerClip = new Path2D() // resets the clip every frame. when it is used there must be an counter clockwise rectangle drawn first to invert clip
+        this.playerClip = new Path2D() // resets the clip every frame
 
 
-        this.renderedPlatforms.forEach(platform => { // Loop through renderedPlatforms. Update wallsToCheck, playerClip, endZonesToCheck
-
+        for (const platform of this.renderedPlatforms) { // Loop through renderedPlatforms. Update wallsToCheck, playerClip, endZonesToCheck 
             if (platform.wall) {
 
                 if ( // if wall is close enough to Player that it needs to be checked with Player rotation
@@ -234,55 +231,31 @@ const Map = {
                     (platform.x - platform.hypotenuse < Player.x + 25) && // right side
                     (platform.y + platform.hypotenuse > Player.y - 73) && // top side
                     (platform.y - platform.hypotenuse - this.style.wallHeight < Player.y + 25) // bottom side
-                ) { // test for Player overlap and rendering z-order tests
-
+                ) { 
+                    // test for Player overlap and rendering z-order
                     this.wallsToCheck.push(platform) // for checking if Player is colliding with walls in Player.update()
 
-                    // convert Player angle and get radian version
-                    const angle = Player.lookAngle.getAngleInDegrees();
-                    const angleRad = angle * (Math.PI / 180);
-
                     // GET PLAYERS LEFTMOST AND RIGHT MOST CORNERS
-                    Player.leftMostPlayerCornerX = null
-                    Player.leftMostPlayerCornerY = null
-                    Player.rightMostPlayerCornerX = null
-                    Player.rightMostPlayerCornerY = null
-                    if (0 <= angle && angle < 90) { // leftMost=bot left        rightMost=top right 
-                        Player.leftMostPlayerCornerX = Player.x - (16 * Math.cos(angleRad) + (16 * Math.sin(angleRad)))
-                        Player.leftMostPlayerCornerY = Player.y - (16 * Math.sin(angleRad) - (16 * Math.cos(angleRad)))
-                        Player.rightMostPlayerCornerX = Player.x + (16 * Math.cos(angleRad) + (16 * Math.sin(angleRad)))
-                        Player.rightMostPlayerCornerY = Player.y + (16 * Math.sin(angleRad) - (16 * Math.cos(angleRad)))
+                    function sortCornersX(a, b) {
+                        // if return is negative ... a comes first 
+                        // if return is positive ... b comes first
+                        // return is 0... nothing is changed
+                        if (a.x < b.x) { return -1; }
+                        if (a.x > b.x) { return 1; }
+                        return 0;
                     }
-                    if (90 <= angle && angle < 180) { // leftMost=bot right     rightMost=top left
-                        Player.leftMostPlayerCornerX = Player.x + (16 * Math.cos(angleRad) - (16 * Math.sin(angleRad)))
-                        Player.leftMostPlayerCornerY = Player.y + (16 * Math.sin(angleRad) + (16 * Math.cos(angleRad)))
-                        Player.rightMostPlayerCornerX = Player.x - (16 * Math.cos(angleRad) - (16 * Math.sin(angleRad)))
-                        Player.rightMostPlayerCornerY = Player.y - (16 * Math.sin(angleRad) + (16 * Math.cos(angleRad)))
-                    }
-                    if (180 <= angle && angle < 270) { // leftMost=top right    rightMost=bot left 
-                        Player.leftMostPlayerCornerX = Player.x + (16 * Math.cos(angleRad) + (16 * Math.sin(angleRad)))
-                        Player.leftMostPlayerCornerY = Player.y + (16 * Math.sin(angleRad) - (16 * Math.cos(angleRad)))
-                        Player.rightMostPlayerCornerX = Player.x - (16 * Math.cos(angleRad) + (16 * Math.sin(angleRad)))
-                        Player.rightMostPlayerCornerY = Player.y - (16 * Math.sin(angleRad) - (16 * Math.cos(angleRad)))
-                    }
-                    if (270 <= angle && angle < 360) { // leftMost=top left     rightMost=bot right
-                        Player.leftMostPlayerCornerX = Player.x - (16 * Math.cos(angleRad) - (16 * Math.sin(angleRad)))
-                        Player.leftMostPlayerCornerY = Player.y - (16 * Math.sin(angleRad) + (16 * Math.cos(angleRad)))
-                        Player.rightMostPlayerCornerX = Player.x + (16 * Math.cos(angleRad) - (16 * Math.sin(angleRad)))
-                        Player.rightMostPlayerCornerY = Player.y + (16 * Math.sin(angleRad) + (16 * Math.cos(angleRad)))
-                    }
-
-
+    
+                    // toSorted() isnt supported by old safari
+                    let playerCornersSorted = [...Player.playerPoligon]
+                    playerCornersSorted.sort(sortCornersX)
 
                     // NEW TEST FOR WHETHER OR NOT TO ADD WALL PLATFORM TO CLIP
                     if (
-                        (Player.x <= platform.x && Player.rightMostPlayerCornerY < platform.getSplitLineY(Player.rightMostPlayerCornerX)) ||
-                        (Player.x > platform.x && Player.leftMostPlayerCornerY < platform.getSplitLineY(Player.leftMostPlayerCornerX))
+                        (Player.x <= platform.x && playerCornersSorted[3].y < platform.getSplitLineY(playerCornersSorted[3].x)) ||
+                        (Player.x > platform.x && playerCornersSorted[0].y < platform.getSplitLineY(playerCornersSorted[0].x))
                     ) {
                         addToPlayerClip()
                     }
-
-
 
                     // ADD TO CLIP SHAPE FOR AREAS BEHIND WALLS
                     function addToPlayerClip() {
@@ -306,18 +279,16 @@ const Map = {
                                 )
                             }
                         }
-
                         clipPolygon.closePath()
                         Map.playerClip.addPath(clipPolygon)
                     }
-
                 }
             }
 
             if (platform.endzone) {
                 this.endZonesToCheck.push(platform);
             }
-        }); // end of looping through each rendered platform
+        }; // end of looping through each rendered platform
 
     },
 
@@ -341,8 +312,8 @@ const Map = {
 
         // LOOPING THROUGH EACH PLATFORM
         // SETTING : Shaded colors and shadow poligon
-        mapData.platforms.forEach(platform => {
-
+        for (const platform of mapData.platforms) {
+        
             let colorToUse1 = mapData.style.platformTopColor;
             let colorToUse2 = mapData.style.platformSideColor;
 
@@ -453,7 +424,7 @@ const Map = {
 
             platform.shadowPoints = CanvasArea.convexHull(platform.shadowPoints)
 
-        }); // end of looping thrugh each platform
+        } // end of looping thrugh each platform
 
 
         // calculate all other map colors
@@ -585,13 +556,9 @@ const Map = {
 
         const cameraTargetX = Player.x - camera.direction.x;
         const cameraTargetY = Player.y - camera.direction.y;
-        
+
         const translateX = midX - cameraTargetX * camera.zoom;
         const translateY = midY - cameraTargetY * camera.zoom;
-
-        // old code that does the same but isnt as logically understandle
-        // const translateX = midX - (Player.x - camera.direction.x) * camera.zoom;
-        // const translateY = midY - (Player.y - camera.direction.y) * camera.zoom;
 
         ctx.setTransform(camera.zoom, 0, 0, camera.zoom, translateX, translateY);
 
@@ -601,10 +568,8 @@ const Map = {
         ctx.beginPath();
 
         // DRAW PLAYER LOWER SHADOW (gets filled alongside platform shadows)
-        // need to set up Player.shadowPoints here because this code is run before Player.render()
-        const angleRad = Player.lookAngle.getAngleInDegrees() * Math.PI / 180;
-        Player.shadowCorners = CanvasArea.createPoligon(Player.x, Player.y, 30, 30, angleRad); // 30x30 instead of 32x32
-        Player.drawPlayerShadow(ctx, this.style.platformHeight)
+        // Player.shadowPoints is updated in Player.update() not Player.render so that it is ready for this opperation
+        Player.drawPlayerShadow(ctx, this.style.platformHeight);
 
         // DRAW ALL PLATFORM SHADOWS IN renderedPlatforms
         for (const platform of this.renderedPlatforms) {
@@ -614,27 +579,23 @@ const Map = {
             }
             ctx.closePath();
         }
-        ctx.fill() // Fill all lower shadows (players and platforms)
-
+        ctx.fill(); // Fill all lower shadows (players and platforms)
 
         // DRAW ALL PLATFORMS IN renderedPlatforms
         for (const platform of this.renderedPlatforms) {
             Map.renderPlatform(ctx, Map, platform);
         }
 
-
         // Draw checkpoints if Debugging
         if (UserInterface.settings.debugText == 1) {
-            this.checkpoints.forEach((checkpoint) => {
-                ctx.strokeStyle = UserInterface.darkMode
-                    ? UserInterface.darkColor_1
-                    : UserInterface.lightColor_1;
+            for (const checkpoint of this.checkpoints) {
+                ctx.strokeStyle = UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
                 ctx.lineWidth = 4;
                 ctx.beginPath();
                 ctx.moveTo(checkpoint.triggerX1, checkpoint.triggerY1);
                 ctx.lineTo(checkpoint.triggerX2, checkpoint.triggerY2);
                 ctx.stroke();
-            });
+            }
         }
 
         ctx.setTransform(1, 0, 0, 1, 0, 0); // resets ctx to identity matrix

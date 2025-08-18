@@ -18,9 +18,13 @@ const Player = {
     topSideColor: null,
     leftSideColor: null,
 
+    loopedAngle: null,
+    angleRad: null,
 
-    shadowCorners: null, // need to expose here so that this.drawPlayerShadow() can use. 
-    // Weirdly set by Map because Map needs it first in the rendering pipeline.
+    playerPoligon: null, // similar to shadow corners but used for collision checks with platforms and walls (32x32)
+
+    shadowCorners: null, // need to expose here so that this.drawPlayerShadow() can use. (30x30)
+    // set in Player.update because Map needs it before Player in the rendering pipeline.
 
     debugTurn: 2, // intialized here so it can be accesed in console
 
@@ -33,17 +37,16 @@ const Player = {
         this.restartAngle = angle;
         this.velocity.set(0, 0);
 
-        this.topNormal = new Vector2D3D(0, 0, -1);
+        this.topNormal = new Vector2D3D(0, 0, -1); // FIX should be able to not have these declared here right?
         this.botSideNormal = new Vector2D3D(0, 1, 0).rotate(angle);
         this.rightSideNormal = new Vector2D3D(1, 0, 0).rotate(angle);
         this.topSideNormal = new Vector2D3D(0, -1, 0).rotate(angle);
         this.leftSideNormal = new Vector2D3D(-1, 0, 0).rotate(angle);
 
-        this.topColor = null; // top shaded color wont be calculated if topColor already exists
+        this.topColor = null; // top shaded color wont be calculated if topColor already exists so need to reset
 
-        this.speedCameraOffset.zoomAverager.frames.fill(1.5, 0);
         this.speedCameraOffset.zoom = 1.5;
-
+        this.speedCameraOffset.zoomAverager.frames.fill(1.5, 0);
         this.speedCameraOffset.dirAveragerX.frames.fill(0, 0);
         this.speedCameraOffset.dirAveragerY.frames.fill(0, 0);
 
@@ -59,10 +62,12 @@ const Player = {
     update: function () {
         //TouchHandler.dragAmountX = dt // debugTurn
 
-        if (UserInterface.levelState == 1 || UserInterface.levelState == 2) {
-            // if NOT at end screen
+        const updatePlayerRotationFromTouch = () => {
+            // arrow function so that "this" can be used to refer to Player
 
             this.lookAngle.rotate(TouchHandler.dragAmountX * UserInterface.settings.sensitivity);
+            this.loopedAngle = this.lookAngle.getAngleInDegrees();
+            this.angleRad = (this.loopedAngle * Math.PI) / 180;
 
             // Setting wish_velocity
             // normalized unit vector that is perpendicular to lookAngle
@@ -79,25 +84,29 @@ const Player = {
             if (TouchHandler.dragAmountX == 0) {
                 this.wish_velocity.set(0, 0);
             }
-        }
+        };
 
-        if (UserInterface.levelState == 2) {
-            // 1 = pre-start, 2 = playing level, 3 = in endzone
+        const updatePlayerPoligon = () => {
+            // arrow function so that "this" can be used to refer to Player
+            // needs to be called at different times depending on levelState
+            this.playerPoligon = CanvasArea.createPoligon(this.x, this.y, 32, 32, this.angleRad);
+        };
 
-            // ALL MOVEMENT CALCULATIONS BASED OFF QUAKE 1 CODE
-            // BUILT MOSTLY FROM zweek's video on how airstrafing works
-            // https://www.youtube.com/watch?v=gRqoXy-0d84
-
-            // Other references for quake / source movement info
-            // https://adrianb.io/2015/02/14/bunnyhop.html
-            // https://www.youtube.com/watch?v=v3zT3Z5apaM
-            // https://www.youtube.com/watch?v=rTsXO6Zicls
-            // https://www.youtube.com/watch?v=rTsXO6Zicls
-            // https://steamcommunity.com/sharedfiles/filedetails/?id=184184420
-            // https://github.com/myria666/qMovementDoc/blob/main/Quake_s_Player_Movement.pdf
-
-            // SUEDO QUAKE 1 CODE
+        const updatePlayerVelocity = () => {
             /*
+            ALL MOVEMENT CALCULATIONS BASED OFF QUAKE 1 CODE
+            BUILT MOSTLY FROM zweek's video on how airstrafing works
+            https://www.youtube.com/watch?v=gRqoXy-0d84
+
+            Other references for quake / source movement info
+            https://adrianb.io/2015/02/14/bunnyhop.html
+            https://www.youtube.com/watch?v=v3zT3Z5apaM
+            https://www.youtube.com/watch?v=rTsXO6Zicls
+            https://www.youtube.com/watch?v=rTsXO6Zicls
+            https://steamcommunity.com/sharedfiles/filedetails/?id=184184420
+            https://github.com/myria666/qMovementDoc/blob/main/Quake_s_Player_Movement.pdf
+
+            SUEDO QUAKE 1 CODE    
             function SV_AirAccelerate(wish_velocity) {
                 let wish_speed
                 let current_speed
@@ -142,10 +151,10 @@ const Player = {
             // currentSpeedProjected is a measurment of how closely the wish_velocity aligns with the actual velocity vector
             this.currentSpeedProjected = this.velocity.dotProduct(this.wish_velocity); // Vector projection of Current_velocity onto wish_velocity
 
-            // maxVelocity replaces the action of clipping wish_speed to 30 --- maxVelocity == 30
+            // maxVelocity replaces the action of clipping wish_speed to 32 --- maxVelocity == 32 set in index.js
             this.addSpeed = maxVelocity - this.currentSpeedProjected;
 
-            // show overstrafe warning BROKEN
+            // show overstrafe warning BROKEN FIX
             if (this.addSpeed > 320 * airAcceleration * dt) {
                 // 11:04 in zweeks video shows why u lose speed
                 if (UserInterface.showOverstrafeWarning == false) {
@@ -193,10 +202,41 @@ const Player = {
                 this.velocity.y += (accel_speed * this.wish_velocity.y)
             }
             */
+        };
 
-            // velocity applied to player coords after checking wall collisions
+        const updatePlayerPosition = () => {
+            // APPLYING VELOCITY
+            this.x += this.velocity.x * dt;
+            this.y += this.velocity.y * dt;
+        };
 
-            // CHECK IF COLLIDING WITH WALLS
+        const teleportPlayer = () => {
+            // Called when player hits the water
+            if (this.checkpointIndex !== -1) {
+                this.x = Map.checkpoints[this.checkpointIndex].x;
+                this.y = Map.checkpoints[this.checkpointIndex].y;
+                this.lookAngle.set(1, 0).rotate(Map.checkpoints[this.checkpointIndex].angle);
+                this.loopedAngle = this.lookAngle.getAngleInDegrees();
+                this.angleRad = (this.loopedAngle * Math.PI) / 180;
+                this.velocity.set(100, 0).rotate(this.lookAngle.getAngleInDegrees());
+                this.jumpValue = 0;
+                this.jumpVelocity = 200;
+            } else {
+                btn_restart.released(true);
+            }
+            updatePlayerPoligon();
+        };
+
+        // 1 = pre-start, 2 = playing level, 3 = in endzone
+
+        if (UserInterface.levelState == 1) {
+            updatePlayerRotationFromTouch();
+            updatePlayerPoligon();
+        } else if (UserInterface.levelState == 2) {
+            updatePlayerRotationFromTouch();
+            updatePlayerVelocity(); // doesnt apply velocity to position yet
+
+            // CHECK IF COLLIDING WITH WALLS could move to abstracted function
             function getPlayerWallCollision(player, wall) {
                 // Calculate relative position of player to the center of the wall
                 const relativeX = player.x - wall.x;
@@ -311,24 +351,28 @@ const Player = {
                 }
             }
 
-            // APPLYING VELOCITY
-            this.x += this.velocity.x * dt;
-            this.y += this.velocity.y * dt;
+            updatePlayerPosition();
+            updatePlayerPoligon(); // update here so that checkCollisions can use it for platforms and endzone.
+            // for use in wall z-depth testing by Map and this.checkCollisions
+            // updated again if player is hitting water and teleports
 
-            // JUMPING
+            // JUMPING check platform collision
             if (this.jumpValue < 0) {
                 this.jumpValue = 0;
-                this.jumpVelocity = 200;
-
-                // play random jump sound
-                // AudioHandler.playSound(AudioHandler[`jump${Math.floor(Math.random() * 3) + 1}Audio`], true);
-                AudioHandler.playAudio(AudioHandler.JumpSFXBuffer, { volume: 0.8 });
 
                 if (!this.checkCollision(Map.renderedPlatforms.filter((platform) => platform.wall == 0))) {
-                    // checkCollision on an array of just renderedPlatforms (no walls)
+                    // checkCollision on platforms in renderedPlatforms array with walls removed
+                    // Hit water
                     AudioHandler.playAudio(AudioHandler.splashBuffer, { volume: 0.4 });
                     this.speedCameraOffset.zoomAverager.clear();
-                    this.teleport();
+                    teleportPlayer(); // takes care of changing player angle and updating playerPoligon
+                } else {
+                    // Landed on platform
+                    this.jumpVelocity = 200;
+
+                    // play random jump sound
+                    // AudioHandler.playSound(AudioHandler[`jump${Math.floor(Math.random() * 3) + 1}Audio`], true);
+                    AudioHandler.playAudio(AudioHandler.JumpSFXBuffer, { volume: 0.8 });
                 }
             } else {
                 this.jumpValue += this.jumpVelocity * dt;
@@ -336,7 +380,39 @@ const Player = {
             }
 
             // CHECK if colliding with checkpoint triggers
-            Map.checkpoints.forEach((checkpoint) => {
+            // Used in checkpoint loop to get minumum distance to line segment from point
+            function pDistance(x, y, x1, y1, x2, y2) {
+                const A = x - x1;
+                const B = y - y1;
+                const C = x2 - x1;
+                const D = y2 - y1;
+
+                const dot = A * C + B * D;
+                const len_sq = C * C + D * D;
+                let param = -1;
+                if (len_sq != 0)
+                    //in case of 0 length line
+                    param = dot / len_sq;
+
+                let xx, yy;
+
+                if (param < 0) {
+                    xx = x1;
+                    yy = y1;
+                } else if (param > 1) {
+                    xx = x2;
+                    yy = y2;
+                } else {
+                    xx = x1 + param * C;
+                    yy = y1 + param * D;
+                }
+
+                const dx = x - xx;
+                const dy = y - yy;
+                return Math.sqrt(dx * dx + dy * dy);
+            }
+
+            for (const checkpoint of Map.checkpoints) {
                 const distance = pDistance(this.x, this.y, checkpoint.triggerX1, checkpoint.triggerY1, checkpoint.triggerX2, checkpoint.triggerY2);
                 // console.log("distance to " + checkpoint + ": " + distance)
 
@@ -345,39 +421,7 @@ const Player = {
                     this.checkpointIndex = Map.checkpoints.indexOf(checkpoint); // could do this with a callback index function?
                     // console.log(this.checkpointIndex);
                 }
-
-                // gets minumum distance to line segment from point: https://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment
-                function pDistance(x, y, x1, y1, x2, y2) {
-                    const A = x - x1;
-                    const B = y - y1;
-                    const C = x2 - x1;
-                    const D = y2 - y1;
-
-                    const dot = A * C + B * D;
-                    const len_sq = C * C + D * D;
-                    let param = -1;
-                    if (len_sq != 0)
-                        //in case of 0 length line
-                        param = dot / len_sq;
-
-                    let xx, yy;
-
-                    if (param < 0) {
-                        xx = x1;
-                        yy = y1;
-                    } else if (param > 1) {
-                        xx = x2;
-                        yy = y2;
-                    } else {
-                        xx = x1 + param * C;
-                        yy = y1 + param * D;
-                    }
-
-                    const dx = x - xx;
-                    const dy = y - yy;
-                    return Math.sqrt(dx * dx + dy * dy);
-                }
-            });
+            }
 
             // CHECK IF COLLIDING WITH ANY ENDZONES
             if (Map.endZonesToCheck.length > 0) {
@@ -386,6 +430,27 @@ const Player = {
                     UserInterface.handleRecord();
                     UserInterface.levelState = 3;
                 }
+            }
+        } else if (UserInterface.levelState == 3) {
+            // SLOW DOWN MOVEMENT AFTER HITTING END ZONE
+            if (this.endSlow > 0) {
+                this.endSlow -= 2 * dt;
+            } else {
+                this.endSlow = 0;
+            }
+
+            this.x += this.velocity.x * dt * this.endSlow; // MOVE FORWARD AT ANGLE BASED ON VELOCITY
+            this.y += this.velocity.y * dt * this.endSlow;
+
+            updatePlayerPoligon();
+
+            if (this.jumpValue < 0) {
+                // JUMPING without checking collision
+                this.jumpValue = 0;
+                this.jumpVelocity = 200;
+            } else {
+                this.jumpValue += this.jumpVelocity * dt * this.endSlow;
+                this.jumpVelocity -= gravity * dt * this.endSlow;
             }
         }
 
@@ -404,27 +469,8 @@ const Player = {
         this.speedCameraOffset.direction.x = this.speedCameraOffset.dirAveragerX.getAverage();
         this.speedCameraOffset.direction.y = this.speedCameraOffset.dirAveragerY.getAverage();
 
-        if (UserInterface.levelState == 3) {
-            // SLOW DOWN MOVEMENT AFTER HITTING END ZONE
-            // if (this.endSlow > 0.02) {this.endSlow = (this.endSlow * 0.95);} else {this.endSlow = 0} // THIS NEEDS TO BE FPS INDEPENDENT
-            if (this.endSlow > 0) {
-                this.endSlow -= 2 * dt;
-            } else {
-                this.endSlow = 0;
-            }
-
-            this.x += this.velocity.x * dt * this.endSlow; // MOVE FORWARD AT ANGLE BASED ON VELOCITY
-            this.y += this.velocity.y * dt * this.endSlow;
-
-            if (this.jumpValue < 0) {
-                // JUMPING
-                this.jumpValue = 0;
-                this.jumpVelocity = 200;
-            } else {
-                this.jumpValue += this.jumpVelocity * dt * this.endSlow;
-                this.jumpVelocity -= gravity * dt * this.endSlow;
-            }
-        }
+        // Update shadowCorners here for use by Map to render Player lower shadow
+        this.shadowCorners = CanvasArea.createPoligon(this.x, this.y, 30, 30, this.angleRad); // 30x30 instead of 32x32
     },
 
     startLevel: function () {
@@ -432,12 +478,15 @@ const Player = {
     },
 
     checkCollision: function (arrayOfPlatformsToCheck) {
-        const playerPoligon = CanvasArea.createPoligon(this.x, this.y, 32, 32, (this.lookAngle.getAngleInDegrees() * Math.PI) / 180); // player angle converted to rads
-
         for (const platform of arrayOfPlatformsToCheck) {
-            const platformPoligon = CanvasArea.createPoligon(platform.x, platform.y, platform.width, platform.height, platform.angleRad);
 
-            if (CanvasArea.doPolygonsIntersect(playerPoligon, platformPoligon)) {
+            // once parsemap gives these corners in global coordinates this will no longer be needed
+            const platformPoligon = platform.corners.map(([x, y]) => ({
+                x: platform.x + x,
+                y: platform.y + y
+              }));
+
+            if (CanvasArea.doPolygonsIntersect(this.playerPoligon, platformPoligon)) {
                 return true; // breaks out of loop once at least one collision is detected
             }
         }
@@ -445,28 +494,17 @@ const Player = {
         return false;
     },
 
-    teleport: function () {
-        // Called when player hits the water
-        if (this.checkpointIndex !== -1) {
-            this.x = Map.checkpoints[this.checkpointIndex].x;
-            this.y = Map.checkpoints[this.checkpointIndex].y;
-            this.lookAngle.set(1, 0).rotate(Map.checkpoints[this.checkpointIndex].angle);
-            this.velocity.set(100, 0).rotate(this.lookAngle.getAngleInDegrees());
-            this.jumpValue = 0;
-            this.jumpVelocity = 200;
-        } else {
-            btn_restart.released(true);
-        }
-    },
-
     restart: function () {
-        // Called when user hits restart button (not when teleported from water)
+        // Called when user hits restart button or when player fails without a checkpoint
         this.x = this.restartX;
         this.y = this.restartY;
         this.lookAngle.set(1, 0).rotate(this.restartAngle);
+        this.loopedAngle = this.lookAngle.getAngleInDegrees();
+        this.angleRad = (this.loopedAngle * Math.PI) / 180;
         this.velocity.set(0, 0);
         this.jumpValue = 0;
-        this.jumpVelocity = 2;
+        this.jumpVelocity = 200;
+
         this.endSlow = 1;
         this.speedCameraOffset.zoomAverager.frames.fill(1.5, 0);
         this.speedCameraOffset.zoom = 1.5;
@@ -476,11 +514,10 @@ const Player = {
 
     setPlayerLighting: function () {
         // Update Normals
-        const angle = this.lookAngle.getAngleInDegrees();
-        this.botSideNormal.set(0, 1, 0).rotate(angle);
-        this.rightSideNormal.set(1, 0, 0).rotate(angle);
-        this.topSideNormal.set(0, -1, 0).rotate(angle);
-        this.leftSideNormal.set(-1, 0, 0).rotate(angle);
+        this.botSideNormal.set(0, 1, 0).rotate(this.loopedAngle);
+        this.rightSideNormal.set(1, 0, 0).rotate(this.loopedAngle);
+        this.topSideNormal.set(0, -1, 0).rotate(this.loopedAngle);
+        this.leftSideNormal.set(-1, 0, 0).rotate(this.loopedAngle);
 
         // angleDifference result will be between 0 and PI radians
         // if angleDifference is > PI/2 (90 deg) then side is at least partially in direct light.
@@ -523,7 +560,7 @@ const Player = {
 
     drawPlayerShadow: function (ctx = PlayerCanvas.ctx, yOffset = 0) {
         // winding order is reversed so that player's lower shadow combines with platform shadows
-        ctx.beginPath(); 
+        ctx.beginPath();
         ctx.moveTo(this.shadowCorners[3].x, this.shadowCorners[3].y + yOffset);
         ctx.lineTo(this.shadowCorners[2].x, this.shadowCorners[2].y + yOffset);
         ctx.lineTo(this.shadowCorners[1].x, this.shadowCorners[1].y + yOffset);
@@ -541,18 +578,15 @@ const Player = {
         const ctx = PlayerCanvas.ctx;
         PlayerCanvas.clear();
 
-        const loopedAngle = this.lookAngle.getAngleInDegrees();
-        const angleRad = (loopedAngle * Math.PI) / 180;
-
         // Generate all player vertices
         // creates array of point objects: [ {x:1,y:1}, {x:2,y:2} ]
         // topLeft, topRight, bottomRight, bottomLeft -- when Player.angle == 0 (looking right)
-        // When in Map, shadowCorners is set within Map.render because it runs first. If not in map, shadowCorners calculated below.
-        const lowerCorners = CanvasArea.createPoligon(this.x, this.y - this.jumpValue, 32, 32, angleRad);
+        // shadowCorners is set in Player.update because Map needs it to render player lower shadow before Player is rendered
+        const lowerCorners = this.playerPoligon.map((point) => ({ x: point.x, y: point.y - this.jumpValue }));
         const upperCorners = lowerCorners.map((point) => ({ x: point.x, y: point.y - 32 }));
 
-        if (this.mapData == PreviewWindow) { // Map sets these otherwise
-            this.shadowCorners = CanvasArea.createPoligon(this.x, this.y, 30, 30, angleRad); // 30x30 instead of 32x32
+        if (this.mapData == PreviewWindow) {
+            // Map sets these otherwise
         } else {
             // in actual level with Map
             const camera = this.speedCameraOffset;
@@ -585,7 +619,7 @@ const Player = {
         }
 
         ctx.fillStyle = this.mapData.style.shadow_platformColor;
-        this.drawPlayerShadow()
+        this.drawPlayerShadow();
         ctx.fill();
 
         ctx.restore(); // #1 Necessary for clearing upperShadowClip
@@ -603,7 +637,7 @@ const Player = {
             ctx.clip(Map.endZoneShadowClip);
 
             ctx.fillStyle = Map.style.shadow_endzoneColor;
-            this.drawPlayerShadow()
+            this.drawPlayerShadow();
             ctx.fill();
 
             ctx.restore(); // #2 Necessary for clearing endZoneShadowClip
@@ -633,8 +667,8 @@ const Player = {
             { x: -5, y: 7 },
         ];
 
-        const cos = Math.cos(angleRad);
-        const sin = Math.sin(angleRad);
+        const cos = Math.cos(this.angleRad);
+        const sin = Math.sin(this.angleRad);
 
         const rotatedPoints = trianglePoints.map(({ x, y }) => {
             return {
@@ -655,7 +689,7 @@ const Player = {
         // at lookAngle == 0 the player is facing to the right. BOT WALL refers to the bottom wall when lookAngle == 0
         // lowerCorners & upperCorners order: topLeft, topRight, bottomRight, bottomLeft
 
-        if (loopedAngle > 270 || loopedAngle < 90) {
+        if (this.loopedAngle > 270 || this.loopedAngle < 90) {
             // BOT WALL
             // looking to the right + or - 90 deg
             ctx.fillStyle = this.botSideColor;
@@ -669,7 +703,7 @@ const Player = {
             ctx.fill();
         }
 
-        if (loopedAngle > 0 && loopedAngle < 180) {
+        if (this.loopedAngle > 0 && this.loopedAngle < 180) {
             // RIGHT WALL
             // looking downwards + or - 90 deg
             ctx.fillStyle = this.rightSideColor;
@@ -683,7 +717,7 @@ const Player = {
             ctx.fill();
         }
 
-        if (loopedAngle > 90 && loopedAngle < 270) {
+        if (this.loopedAngle > 90 && this.loopedAngle < 270) {
             // TOP WALL
             // looking to the left + or - 90 deg
             ctx.fillStyle = this.topSideColor;
@@ -697,7 +731,7 @@ const Player = {
             ctx.fill();
         }
 
-        if (loopedAngle > 180 && loopedAngle < 360) {
+        if (this.loopedAngle > 180 && this.loopedAngle < 360) {
             // LEFT WALL
             // looking upwards + or - 90 deg
             ctx.fillStyle = this.leftSideColor;
@@ -731,7 +765,7 @@ const Player = {
             // DRAW PLAYER XRAY
             ctx.strokeStyle = this.topColor;
             ctx.lineWidth = 2;
-            this.drawPlayerShadow()
+            this.drawPlayerShadow();
             ctx.stroke();
 
             ctx.restore(); // #3 Necessary for clearing playerClip

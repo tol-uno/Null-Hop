@@ -49,10 +49,10 @@ function updateGameArea() {
     }
 
     if (UserInterface.gamestate == 6) {
-        Map.update();
         if (!Tutorial.pausePlayer) {
             Player.update();
         }
+        Map.update();
         if (Tutorial.isActive) {
             Tutorial.update();
         }
