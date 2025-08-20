@@ -149,7 +149,7 @@ const TouchHandler = {
             };
         }
 
-        document.body.addEventListener("touchstart", createDoubleTapPreventer(575), { passive: false });
+        document.body.addEventListener("touchstart", createDoubleTapPreventer(585), { passive: false });
 
     },
 

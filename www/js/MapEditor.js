@@ -978,8 +978,8 @@ const MapEditor = {
 
             function test_A_below_B(a, b) {
                 if (
-                    (a.x + a.width / 2 <= b.x + b.width / 2 && a.rightMostCornerY > b.getSplitLineY(a.rightMostCornerX)) ||  // a is to the left && a's rightCorner is below/infront of b
-                    (a.x + a.width / 2 > b.x + b.width / 2 && a.leftMostCornerY > b.getSplitLineY(a.leftMostCornerX)) // a is to the right && a's leftCorner is below/infront of b
+                    (a.x <= b.x && a.rightMostCornerY > b.getSplitLineY(a.rightMostCornerX)) ||  // a is to the left && a's rightCorner is below/infront of b split line
+                    (a.x > b.x && a.leftMostCornerY > b.getSplitLineY(a.leftMostCornerX)) // a is to the right && a's leftCorner is below/infront of b split line
                 ) {
                     return true // a is below/infront of b
                 } else {

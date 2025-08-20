@@ -193,7 +193,6 @@ const Map = {
 
         UserInterface.determineButtonColor();
         UserInterface.mapLoaded(); // moves onto gamestate 6
-
     },
 
 
@@ -219,7 +218,7 @@ const Map = {
         }; // end of looping through ALL platforms
 
 
-        // FIX BAD
+        // FIX but not sure how
         this.playerClip = new Path2D() // resets the clip every frame
 
 

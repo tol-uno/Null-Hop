@@ -33,11 +33,16 @@ const Player = {
         this.y = y;
         this.restartX = x;
         this.restartY = y;
-        this.lookAngle = new Vector2D3D(1, 0).rotate(angle);
         this.restartAngle = angle;
-        this.velocity.set(0, 0);
+        this.lookAngle = new Vector2D3D(1, 0).rotate(angle);
+        this.loopedAngle = angle;
+        this.angleRad = (angle * Math.PI) / 180;
 
-        this.topNormal = new Vector2D3D(0, 0, -1); // FIX should be able to not have these declared here right?
+        // set here so that PreviewWindow can render player without calling Player.update()
+        this.playerPoligon = CanvasArea.createPoligon(this.x, this.y, 32, 32, this.angleRad);
+        this.shadowCorners = CanvasArea.createPoligon(this.x, this.y, 30, 30, this.angleRad); // 30x30 instead of 32x32
+
+        this.topNormal = new Vector2D3D(0, 0, -1);
         this.botSideNormal = new Vector2D3D(0, 1, 0).rotate(angle);
         this.rightSideNormal = new Vector2D3D(1, 0, 0).rotate(angle);
         this.topSideNormal = new Vector2D3D(0, -1, 0).rotate(angle);
@@ -49,6 +54,8 @@ const Player = {
         this.speedCameraOffset.zoomAverager.frames.fill(1.5, 0);
         this.speedCameraOffset.dirAveragerX.frames.fill(0, 0);
         this.speedCameraOffset.dirAveragerY.frames.fill(0, 0);
+
+        this.velocity.set(0, 0);
 
         this.jumpValue = 0;
         this.jumpVelocity = 200;
@@ -479,12 +486,11 @@ const Player = {
 
     checkCollision: function (arrayOfPlatformsToCheck) {
         for (const platform of arrayOfPlatformsToCheck) {
-
             // once parsemap gives these corners in global coordinates this will no longer be needed
             const platformPoligon = platform.corners.map(([x, y]) => ({
                 x: platform.x + x,
-                y: platform.y + y
-              }));
+                y: platform.y + y,
+            }));
 
             if (CanvasArea.doPolygonsIntersect(this.playerPoligon, platformPoligon)) {
                 return true; // breaks out of loop once at least one collision is detected

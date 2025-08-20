@@ -589,7 +589,7 @@ const UserInterface = {
             }
         })
 
-        btn_level_crystals = new Button(144, 472, 256, "crystals_button", "", 0, "", function () {
+        btn_level_crystals = new Button(144, 472, 256, "crystals_button", "crystals_button_pressed", 0, "", function () {
             if (this.toggle) {
                 this.toggle = 0;
                 MapBrowser.selectedMapIndex = -1
@@ -2104,7 +2104,6 @@ const UserInterface = {
         if (this.gamestate == 6) { // In Level
             ctx.fillStyle = UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
 
-
             // Draw Timer Box
             if (this.levelState !== 3 && Tutorial.isActive == false) {
                 UserInterfaceCanvas.roundedRect(screenWidthUI - 220, 32, 170, 75, 15)
@@ -2117,7 +2116,6 @@ const UserInterface = {
                 ctx.fillText("Record: " + UserInterface.secondsToMinutes((this.records[Map.name] == null ? 0 : this.records[Map.name])), screenWidthUI - 210, 90);
             }
 
-
             // Draw Speed. ADD COLOR AND SIZE CHANGES TO THIS BASED OFF OF GAIN
             if (this.showVelocity && this.levelState == 2) {
                 ctx.font = "20px BAHNSCHRIFT";
@@ -2125,7 +2123,6 @@ const UserInterface = {
                 const offsetY = Tutorial.pausePlayer ? 26 : 45
                 ctx.fillText("Speed: " + Math.round(Player.velocity.magnitude()), midX_UI - ctx.measureText("Speed: 000").width / 2, offsetY)
             }
-
 
             if (this.settings.debugText == 1) { // DRAWING DEBUG TEXT
                 const textX = 150;
@@ -2179,7 +2176,6 @@ const UserInterface = {
                 ctx.lineWidth = 1
                 */
             }
-
 
             if (this.settings.strafeHUD == 1) { // STRAFE OPTIMIZER HUD
 
