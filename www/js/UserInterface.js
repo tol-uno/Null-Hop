@@ -2523,6 +2523,8 @@ const UserInterface = {
                         }
                     }
 
+                    ctx.fillText("zoom ratio: " + TouchHandler.zoom.ratio, textX, 180)
+
 
                     if (TouchHandler.zoom.isZooming) { // draw center point between two fingers of zoom
                         ctx.save()

@@ -54,8 +54,6 @@ const MapEditor = {
     editQueue: [], // gets filled with QueueItems
     recordingEdit: false,
 
-    debugText: false,
-
     update: function () {
 
         // when map is loaded for editing
@@ -96,41 +94,45 @@ const MapEditor = {
             ) {
                 // SCROLLING AROUND SCREEN
 
-                if (this.scrollAmountX == null && this.scrollAmountY == null) { // starting scroll
+                if (this.scrollAmountX == null && this.scrollAmountY == null) {
+                    // starting scroll
                     this.scrollAmountX = this.screen.x;
                     this.scrollAmountY = this.screen.y;
                 }
 
-                // ZOOMING 
+                // ZOOMING
                 if (TouchHandler.zoom.isZooming) {
-
-                    this.zoom = TouchHandler.zoom.ratio * this.startingZoom
-                    if (this.zoom > 10) { this.zoom = 10 }
-                    if (this.zoom < 0.05) { this.zoom = 0.05 }
-                    if (Math.abs(this.zoom - 1) < 0.1) { // snapping to zoom = 1 if close
-                        this.zoom = 1
+                    this.zoom = TouchHandler.zoom.ratio * this.startingZoom;
+                    if (this.zoom > 10) {
+                        this.zoom = 10;
                     }
-
-
+                    if (this.zoom < 0.05) {
+                        this.zoom = 0.05;
+                    }
+                    if (Math.abs(this.zoom - 1) < 0.1) {
+                        // snapping to zoom = 1 if close
+                        this.zoom = 1;
+                    }
                 } else {
-                    this.startingZoom = this.zoom
+                    this.startingZoom = this.zoom;
+                    // also set outside of if(dragging) loop so that if both touches
+                    // are released on the same frame (and this zooming code isnt run)
+                    // startZoom is still set to be the current zoom
                 }
 
                 // ACTUALLY SCROLLING THE SCREEN
-                this.scrollAmountX -= TouchHandler.dragAmountX / this.zoom * CanvasArea.scale
-                this.scrollAmountY -= TouchHandler.dragAmountY / this.zoom * CanvasArea.scale
+                this.scrollAmountX -= (TouchHandler.dragAmountX / this.zoom) * CanvasArea.scale;
+                this.scrollAmountY -= (TouchHandler.dragAmountY / this.zoom) * CanvasArea.scale;
 
                 // sets scrollVel to average drag amount of past 10 frames
-                this.scrollVelAveragerX.pushValue(-TouchHandler.dragAmountX / this.zoom * CanvasArea.scale)
-                this.scrollVelAveragerY.pushValue(-TouchHandler.dragAmountY / this.zoom * CanvasArea.scale)
+                this.scrollVelAveragerX.pushValue((-TouchHandler.dragAmountX / this.zoom) * CanvasArea.scale);
+                this.scrollVelAveragerY.pushValue((-TouchHandler.dragAmountY / this.zoom) * CanvasArea.scale);
 
-                this.scrollVelX = this.scrollVelAveragerX.getAverage()
-                this.scrollVelY = this.scrollVelAveragerY.getAverage()
+                this.scrollVelX = this.scrollVelAveragerX.getAverage();
+                this.scrollVelY = this.scrollVelAveragerY.getAverage();
 
                 this.screen.x = this.scrollAmountX;
                 this.screen.y = this.scrollAmountY;
-
-
             } else { // not dragging around screen
 
                 if (this.scrollAmountX != null && this.scrollAmountY != null) { // just stopped dragging
@@ -139,6 +141,8 @@ const MapEditor = {
 
                     this.scrollVelAveragerX.clear()
                     this.scrollVelAveragerY.clear()
+
+                    this.startingZoom = this.zoom // needs to be set here to avoid double touch zoom reset bug
                 }
 
                 this.screen.x += this.scrollVelX
