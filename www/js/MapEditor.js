@@ -1062,7 +1062,7 @@ const MapEditor = {
             exportName = prompt("Enter Map Name");
 
             const mapBlob = new Blob([JSON.stringify(exportObj, null, 2)], { type: "application/json" });
-            await UserInterface.writeFile(exportName + ".json", mapBlob, "maps")
+            await writeFile(exportName + ".json", mapBlob, "maps")
             console.log("Successful Map Save");
             exitEdit()
 

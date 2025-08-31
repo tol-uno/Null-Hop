@@ -13,14 +13,30 @@
     <platform name="android">
         <preference name="DisallowOverscroll" value="true"/>
         <preference name="Fullscreen" value="true" />
-        <preference name="BackgroundColor" value="0x37906Dff"/>
+        <preference name="BackgroundColor" value="#37906Dff"/>
         <preference name="Orientation" value="landscape" />
+
+        <!--
+            ldpi    : 36x36 px
+            mdpi    : 48x48 px
+            hdpi    : 72x72 px
+            xhdpi   : 96x96 px
+            xxhdpi  : 144x144 px
+            xxxhdpi : 192x192 px
+        -->
+        <icon src="res/android/ldpi.png" density="ldpi" />
+        <icon src="res/android/mdpi.png" density="mdpi" />
+        <icon src="res/android/hdpi.png" density="hdpi" />
+        <icon src="res/android/xhdpi.png" density="xhdpi" />
+        <icon src="res/android/xxhdpi.png" density="xxhdpi" />
+        <icon src="res/android/xxxhdpi.png" density="xxxhdpi" />
+
     </platform>
 
     <platform name="ios">
         <preference name="DisallowOverscroll" value="true"/>
         <preference name="Fullscreen" value="true" />
-        <preference name="BackgroundColor" value="0x37906Dff"/>
+        <preference name="BackgroundColor" value="#37906Dff"/>
         <preference name="Orientation" value="landscape" />
 
         <preference name="SuppressesLongPressGesture" value="true" />

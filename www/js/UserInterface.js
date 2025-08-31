@@ -1788,7 +1788,7 @@ const UserInterface = {
         UserInterface.renderedButtons = this.btnGroup_inLevel;
     },
     
-    writeFile: function (fileName, blobData, subDirectory = "") { // returns a promise
+    writeFileKILL: function (fileName, blobData, subDirectory = "") { // returns a promise
         // fileName is a string with file extension EX: settings.json
         // blobData = new Blob([JSON.stringify(exportObj, null, 2)], { type: "application/json" });
         // subDirectory is a string. no need for first \ EX: maps\bad_maps OR just customMaps
@@ -1841,7 +1841,6 @@ const UserInterface = {
         this.leaderboards = JSON.parse(leaderboardData)
     },
 
-
     getSettings: async function () {
         try {
             const settingsData = await readFile("device", "", "settings.json", "text");
@@ -1875,7 +1874,7 @@ const UserInterface = {
 
     writeSettings: function () {
         const settingsBlob = new Blob([JSON.stringify(this.settings, null, 2)], { type: "application/json" });
-        this.writeFile("settings.json", settingsBlob)
+        writeFile("settings.json", settingsBlob)
     },
 
     getRecords: async function () {
@@ -1901,7 +1900,7 @@ const UserInterface = {
 
     writeRecords: function () {
         const recordsBlob = new Blob([JSON.stringify(this.records, null, 2)], { type: "application/json" });
-        this.writeFile("records.json", recordsBlob)
+        writeFile("records.json", recordsBlob)
     },
 
     handleRecord: function () {
