@@ -147,7 +147,7 @@ const TouchHandler = {
             };
         }
 
-        document.body.addEventListener("touchstart", createDoubleTapPreventer(590), { passive: false });
+        document.body.addEventListener("touchstart", createDoubleTapPreventer(700), { passive: false });
     },
 
     // processTouchEvent : function () {

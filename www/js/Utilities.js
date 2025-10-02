@@ -127,3 +127,22 @@ function writeFile(fileName, blobData, subDirectory = "") {
     });
 }
 
+function isBlack(color) {
+    if (!color) return false;
+    const normalized = color.trim().toLowerCase();
+    return (
+        normalized === "black" || normalized === "#000" || normalized === "#000000" || normalized === "rgb(0,0,0)" || normalized === "rgb(0, 0, 0)"
+    );
+}
+
+function isWhite(color) {
+    if (!color) return false;
+    const normalized = color.trim().toLowerCase();
+    return (
+        normalized === "white" ||
+        normalized === "#fff" ||
+        normalized === "#ffffff" ||
+        normalized === "rgb(255,255,255)" ||
+        normalized === "rgb(255, 255, 255)"
+    );
+}

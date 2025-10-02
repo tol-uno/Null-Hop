@@ -1,34 +1,152 @@
-* { /* from cordova default css file */
-    -webkit-tap-highlight-color: rgba(0,0,0,0); /* make transparent link selection, adjust last value opacity 0 to 1.0 */
+* {
+    /* from cordova default css file */
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0); /* make transparent link selection, adjust last value opacity 0 to 1.0 */
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     touch-action: none;
     touch-action-delay: none;
     user-select: none;
 }
-  
+
 @font-face {
     font-family: "BAHNSCHRIFT";
     src: url("../assets/BAHNSCHRIFT.TTF");
 }
 
-html, body {
+html,
+body {
     margin: 0;
     overflow: hidden;
     /* background: red; */
     /* padding: env(safe-area-inset); */
 }
 
-body { /* all these are from cordova's default css file*/
-    -webkit-touch-callout: none;                /* prevent callout to copy image, etc when tap to hold */
-    -webkit-text-size-adjust: none;             /* prevent webkit from resizing text to fit */
-    -webkit-user-select: none;                  /* prevent copy paste, to allow, change 'none' to 'text' */
+body {
+    /* all these are from cordova's default css file*/
+    -webkit-touch-callout: none; /* prevent callout to copy image, etc when tap to hold */
+    -webkit-text-size-adjust: none; /* prevent webkit from resizing text to fit */
+    -webkit-user-select: none; /* prevent copy paste, to allow, change 'none' to 'text' */
 
-     /* Padding to avoid the "unsafe" areas behind notches in the screen */
-     /* padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px); */
+    /* Padding to avoid the "unsafe" areas behind notches in the screen */
+    /* padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px); */
 }
 
 canvas {
     position: absolute;
     /* background: purple; */
+}
+
+#ui-container {
+    font-family: "BAHNSCHRIFT";
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 2; /* change to 1 once other ui canvas is removed */
+}
+
+button {
+    position: absolute;
+
+    color: #444;
+    background-color: white;
+    border: 4px solid;
+    border-radius: 8px;
+    padding: 0px;
+    /* box-shadow:
+    1px 1px 0px 0px,
+    2px 2px 0px 0px,
+    3px 3px 0px 0px,
+    4px 4px 0px 0px,
+    5px 5px 0px 0px; */
+
+    box-shadow: 0px 5px 0px 0px;
+
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+
+    transform: translate(0px, 0px);
+    transition: transform 100ms cubic-bezier(0.31, 0.52, 0.48, 1.81), box-shadow 100ms cubic-bezier(0.31, 0.52, 0.48, 1.81);
+}
+
+/* button {
+    position: absolute;
+    border-radius: 9999px;
+    border: none;
+    transition: transform 0.01s ease, box-shadow 0.01s ease;
+    box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.25);
+    color: black;
+    background-color: white;
+    padding: 0;
+    line-height: 0;
+} */
+
+button.pressed {
+    box-shadow: 0px 0px 0px 0px;
+
+    /* transform: translate(5px, 5px); */
+    transform: translate(0px, 5px);
+    transition: transform 0ms, box-shadow 0ms;
+}
+
+/* button.pressed {
+    transform: scale(0.95);
+    box-shadow: 0px 0px 0px rgba(0, 0, 0, 0.25);
+    background-color: lightgray;
+} */
+
+button.hidden {
+    display: none;
+}
+
+#main-menu-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+}
+
+h1 {
+    font-size: 108px;
+    margin: 0;
+    font-weight: 400;
+    line-height: 0.75;
+}
+
+#btn_play_new {
+    position: relative;
+    width: 110px;
+    height: 64px;
+    font-size: 32px;
+}
+
+#btn_settings_new {
+    position: relative;
+    width: 166px;
+    height: 64px;
+    font-size: 32px;
+}
+
+#btn_mapEditor_new {
+    position: relative;
+    width: 222px;
+    height: 64px;
+    font-size: 32px;
+}
+
+#btn_jump_new {
+    left: calc(44px + 100px); /* remove 100 */
+    bottom: 40px;
+    width: 96px;
+    height: 96px;
+}
+
+#btn_toggleUI {
+    right: 0;
+    bottom: 0;
 }
