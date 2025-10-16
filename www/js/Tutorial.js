@@ -112,7 +112,7 @@ const Tutorial = {
 
             } else { // All targets completed
                 this.state = 5; // skip state 4
-                UserInterface.renderedButtons = UserInterface.btnGroup_inLevel
+                UserInterface.switchToUiGroup(UserInterface.uiGroup_inLevel)
             }
         }
 
@@ -129,7 +129,8 @@ const Tutorial = {
                 this.timerStarted = false;
                 this.state ++;
                 this.pausePlayer = true
-                UserInterface.renderedButtons = UserInterface.btnGroup_inLevel.concat(btn_next)
+                UserInterface.switchToUiGroup(UserInterface.uiGroup_inLevel.concat(btn_next)) // THIS THROWS ERROR BC btn_next is old style btn
+
             }, 1800);
             this.timerStarted = true;
         }
@@ -179,7 +180,7 @@ const Tutorial = {
         if (this.state == 17) { // check if ended level
             if (UserInterface.levelState == 3 && Player.endSlow == 0) {
                 this.state ++; 
-                UserInterface.renderedButtons = UserInterface.btnGroup_inLevel.concat(btn_next)
+                UserInterface.switchToUiGroup(UserInterface.uiGroup_inLevel.concat(btn_next)) // THIS THROWS ERROR BC btn_next is old style btn
             }
         }
 

@@ -127,7 +127,7 @@ const TouchHandler = {
             }
         });
 
-        // CODE TO REMOVE THE MAGNIFIER LOUPE
+        // Remove The Magnifier Loupe By Disabling Defualt Browser Touch Behavior On Second Tap
         // https://discourse.threejs.org/t/iphone-how-to-remove-text-selection-magnifier/47812/12
         function createDoubleTapPreventer(timeout_ms) {
             let dblTapTimer = 0;
@@ -148,6 +148,8 @@ const TouchHandler = {
         }
 
         document.body.addEventListener("touchstart", createDoubleTapPreventer(700), { passive: false });
+        // below \/ just disables the default DOM touch behavior all the time. Could use except for shareDiv which I think will need it
+        // document.body.addEventListener("touchstart", (e) => { e.preventDefault() }, { passive: false });
     },
 
     // processTouchEvent : function () {

@@ -40,6 +40,7 @@ const UserInterface = {
     // darkColor_1 : "#503c4b",
     // darkColor_2 : "#412b3a",
 
+    // should kill these eventually and only use ones defined in CSS
     lightColor_1: "#F5F5F5", // lighter
     lightColor_2: "#E0E0E0", // darker
     darkColor_1: "#454545",
@@ -53,29 +54,35 @@ const UserInterface = {
         this.getLeaderboards();
         this.checkCustomMapsDirectoryExists();
 
-        // MAIN MENU
-        const btn_play_new = document.getElementById("btn_play_new");
-        btn_play_new.func = () => {
+        function getByID(id) {
+            return document.getElementById(id);
+        }
+
+        // ===========
+        //  MAIN MENU
+        // ===========
+
+        const btn_play = getByID("btn_play");
+        btn_play.func = () => {
             UserInterface.gamestate = 2;
-            UserInterface.renderedButtons = UserInterface.btnGroup_standardMapBrowser; // replace once new group exists
-            // UserInterface.switchToBtnGroup(UserInterface.btnGroup_standardMapBrowser_new);
+            UserInterface.switchToUiGroup(UserInterface.uiGroup_standardMapBrowser);
             MapBrowser.state = 1;
             MapBrowser.init();
         };
 
-        const btn_settings_new = document.getElementById("btn_settings_new");
-        btn_settings_new.func = () => {
+        const btn_settings = getByID("btn_settings");
+        btn_settings.func = () => {
             UserInterface.gamestate = 3;
-            UserInterface.renderedButtons = UserInterface.btnGroup_settings;
-            // UserInterface.switchToBtnGroup(UserInterface.btnGroup_settings_new);
+            UserInterface.renderedButtons = UserInterface.btnGroup_settings; // replace once new group is done
+            UserInterface.switchToUiGroup(UserInterface.uiGroup_settings);
         };
 
-        const btn_mapEditor_new = document.getElementById("btn_mapEditor_new");
-        btn_mapEditor_new.func = () => {
+        const btn_mapEditor = getByID("btn_mapEditor");
+        btn_mapEditor.func = () => {
             MapEditor.editorState = 5;
             UserInterface.gamestate = 2;
             UserInterface.renderedButtons = UserInterface.btnGroup_mapEditorBrowser;
-            // UserInterface.switchToBtnGroup(UserInterface.btnGroup_mapEditorBrowser_new);
+            // UserInterface.switchToUiGroup(UserInterface.uiGroup_mapEditorBrowser);
 
             // ADDING DIV OVERLAY FOR SHARE BUTTON - FIX (UNEEDED WITH NEW BUTTON SYSTEM)
             btn_shareMap.func(true); // runs the createDiv function of the button
@@ -84,65 +91,89 @@ const UserInterface = {
             MapBrowser.init();
         };
 
-        const btn_jump_new = document.getElementById("btn_jump_new");
-        btn_jump_new.func = () => {
-            if (UserInterface.levelState == 1) {
-                UserInterface.timerStart = Date.now();
-                UserInterface.levelState = 2;
-                Player.startLevel();
+        // ==========
+        //  SETTINGS
+        // ==========
+        const btn_sensitivitySlider = document.getElementById("btn_sensitivitySlider");
+        btn_sensitivitySlider.slider = btn_sensitivitySlider.querySelector("input");
+        btn_sensitivitySlider.label = btn_sensitivitySlider.querySelector("span");
+        btn_sensitivitySlider.func = function () {
+            UserInterface.settings.sensitivity = this.value;
+            UserInterface.writeSettings();
+        };
+        // btn_sensitivitySlider.addEventListener("input", () => {
+        //     UserInterface.updateSliderLabel(btn_sensitivitySlider);
+        // });
+        // UserInterface.updateSliderLabel(btn_sensitivitySlider); // update once to start
+
+        const btn_volumeSlider = document.getElementById("btn_volumeSlider");
+        btn_volumeSlider.slider = btn_volumeSlider.querySelector("input");
+        btn_volumeSlider.label = btn_volumeSlider.querySelector("span");
+        btn_volumeSlider.func = function () {
+            UserInterface.settings.volume = this.value;
+            AudioHandler.setVolume(UserInterface.settings.volume);
+            UserInterface.writeSettings();
+        };
+        // btn_volumeSlider.addEventListener("input", () => {
+        //     UserInterface.updateSliderLabel(btn_volumeSlider);
+        // });
+        // UserInterface.updateSliderLabel(btn_volumeSlider); // update once to start
+
+        const btn_debugText = getByID("btn_debugText");
+        btn_debugText.func = function () {
+            // sync with UserInterface.settings.debugText
+            this.classList.toggle("toggled"); // .toggle adds or removes class depending on if it's already added
+            UserInterface.settings.debugText = UserInterface.getToggleState(this); // adjust settings to match toggle state
+            UserInterface.writeSettings();
+        };
+
+        const btn_strafeHUD = getByID("btn_strafeHUD");
+        btn_strafeHUD.func = function () {
+            // sync with UserInterface.settings.strafeHUD
+            this.classList.toggle("toggled");
+            UserInterface.settings.strafeHUD = UserInterface.getToggleState(this);
+            UserInterface.writeSettings();
+        };
+
+        const btn_resetSettings = getByID("btn_resetSettings");
+        btn_resetSettings.func = () => {
+            const reset = confirm("Reset All Settings and Records?");
+            if (reset) {
+                UserInterface.records = {
+                    unlocked: UserInterface.records.unlocked,
+                };
+                UserInterface.writeRecords();
+
+                UserInterface.settings = {
+                    sensitivity: 0.5,
+                    volume: 0.5,
+                    debugText: 0,
+                    strafeHUD: 1,
+                    playTutorial: 1,
+                };
+                UserInterface.writeSettings();
+
+                // sync all settings button
+                UserInterface.setSliderValue(btn_sensitivitySlider, UserInterface.settings.sensitivity);
+                UserInterface.setSliderValue(btn_volumeSlider, UserInterface.settings.volume);
+                UserInterface.setToggleState(btn_debugText, UserInterface.settings.debugText);
+                UserInterface.setToggleState(btn_strafeHUD, UserInterface.settings.strafeHUD);
+                UserInterface.setToggleState(btn_playTutorial, UserInterface.settings.playTutorial);
+                AudioHandler.setVolume(UserInterface.settings.volume);
+
+                console.log("Records And Settings Cleared");
             }
         };
 
-        const btn_toggleUI = document.getElementById("btn_toggleUI");
-        btn_toggleUI.func = () => {
-            UserInterface.switchToBtnGroup(UserInterface.btnGroup_play);
+        // ==========
+        //  IN LEVEL
+        // ==========
 
-            if (UserInterface.darkMode) {
-                UserInterface.activateLightUI(btn_play_new);
-                UserInterface.darkMode = false;
-                console.log("toggled to light");
-            } else {
-                UserInterface.activateDarkUI(btn_play_new);
-                UserInterface.darkMode = true;
-                console.log("toggled to dark");
-            }
-        };
+        const ui_speedometer = getByID("ui_speedometer");
+        const ui_timerBox = getByID("ui_timerBox");
 
-        this.btnGroup_mainMenu_new = [btn_play_new, btn_settings_new, btn_mapEditor_new];
-        this.btnGroup_toggleUI = [btn_toggleUI];
-        this.btnGroup_inLevel_new = [btn_jump_new];
-
-        // CREATING THE OLD BUTTONS
-
-        // Main Menu BUTTONS
-        btn_play = new Button(midX_UI - 55, 148, 110, "play_button", "", 0, "", function () {
-            UserInterface.gamestate = 2;
-            UserInterface.renderedButtons = UserInterface.btnGroup_standardMapBrowser;
-            MapBrowser.state = 1;
-            MapBrowser.init();
-        });
-
-        btn_settings = new Button(midX_UI - 83, 228, 166, "settings_button", "", 0, "", function () {
-            UserInterface.gamestate = 3;
-            UserInterface.renderedButtons = UserInterface.btnGroup_settings;
-        });
-
-        btn_mapEditor = new Button(midX_UI - 99.5, 308, 199, "map_editor_button", "", 0, "", function () {
-            MapEditor.editorState = 5;
-
-            UserInterface.gamestate = 2;
-
-            UserInterface.renderedButtons = UserInterface.btnGroup_mapEditorBrowser;
-
-            // ADDING DIV OVERLAY FOR SHARE BUTTON
-            btn_shareMap.func(true); // runs the createDiv function of the button
-
-            MapBrowser.state = 2;
-            MapBrowser.init();
-        });
-
-        // IN LEVEL Buttons
-        btn_mainMenu = new Button(44, 40, 68, "x_button", "", 0, "", function () {
+        const btn_mainMenu = getByID("btn_mainMenu");
+        btn_mainMenu.func = () => {
             // UserInterface.gamestate
             // 1: main menu
             // 2: level select (MapBrowser)
@@ -178,14 +209,10 @@ const UserInterface = {
                     MapBrowser.scrollY = 0;
                     MapBrowser.selectedMapIndex = -1;
                     UserInterface.gamestate = 1;
-                    // loop through each button (including non-maps eww) and untoggle it. DO I NEED THIS?
-                    UserInterface.renderedButtons.forEach((button) => {
-                        if (button.toggle == 1 && button != btn_playTutorial) {
-                            button.toggle = 0;
-                        }
-                    });
+
                     // UserInterface.renderedButtons = UserInterface.btnGroup_mainMenu; //kill
-                    UserInterface.switchToBtnGroup(UserInterface.btnGroup_mainMenu_new);
+                    UserInterface.renderedButtons = []; // kill
+                    UserInterface.switchToUiGroup(UserInterface.uiGroup_mainMenu);
 
                     return;
                 }
@@ -205,7 +232,8 @@ const UserInterface = {
                         MapEditor.editorState = 0;
 
                         // UserInterface.renderedButtons = UserInterface.btnGroup_mainMenu; // kill
-                        UserInterface.switchToBtnGroup(UserInterface.btnGroup_mainMenu_new);
+                        UserInterface.renderedButtons = []; // kill
+                        UserInterface.switchToUiGroup(UserInterface.uiGroup_mainMenu);
 
                         document.getElementById("shareDiv").remove();
                         return;
@@ -213,7 +241,7 @@ const UserInterface = {
 
                     // goto play standard map browser
                     MapBrowser.state = 1;
-                    UserInterface.renderedButtons = UserInterface.btnGroup_standardMapBrowser;
+                    UserInterface.switchToUiGroup(UserInterface.uiGroup_standardMapBrowser);
                     MapBrowser.init();
                     return;
                 }
@@ -224,16 +252,17 @@ const UserInterface = {
                 // goto main menu
                 UserInterface.gamestate = 1;
                 // UserInterface.renderedButtons = UserInterface.btnGroup_mainMenu; // kill
-                UserInterface.switchToBtnGroup(UserInterface.btnGroup_mainMenu_new);
+                UserInterface.renderedButtons = []; // kill
+                UserInterface.switchToUiGroup(UserInterface.uiGroup_mainMenu);
                 return;
             }
 
             if (UserInterface.gamestate == 5) {
                 // in Loading Map page
-                // goto standard map browser
+                // goto standard map browser (OR CUSTOM BROWSER - FIX / ADD THIS)
                 UserInterface.gamestate = 2;
                 MapBrowser.state = 1;
-                UserInterface.renderedButtons = UserInterface.btnGroup_standardMapBrowser;
+                UserInterface.switchToUiGroup(UserInterface.uiGroup_standardMapBrowser);
                 MapBrowser.init();
                 return;
             }
@@ -248,9 +277,9 @@ const UserInterface = {
                 UserInterface.levelState = 1;
 
                 if (MapBrowser.state == 1) {
-                    UserInterface.renderedButtons = UserInterface.btnGroup_standardMapBrowser;
+                    UserInterface.switchToUiGroup(UserInterface.uiGroup_standardMapBrowser);
                 } else {
-                    UserInterface.renderedButtons = UserInterface.btnGroup_customMapBrowser;
+                    UserInterface.switchToUiGroup(UserInterface.uiGroup_customMapBrowser);
                 }
 
                 MapBrowser.init();
@@ -258,7 +287,7 @@ const UserInterface = {
                 if (Tutorial.isActive) {
                     // leaving tutorial level
                     if (Tutorial.state >= 18) {
-                        btn_playTutorial.released(true); // toggle tutorial button to be false after completing it
+                        btn_playTutorial.func(); // press toggle tutorial button to turn it off after completing tutorial
                     }
 
                     Tutorial.reset();
@@ -276,135 +305,162 @@ const UserInterface = {
                 MapEditor.editorState = 1;
                 return;
             }
-        });
+        };
 
-        btn_restart = new Button(44, 128, 68, "restart_button", "", 0, "", function () {
+        const btn_restart = getByID("btn_restart");
+        btn_restart.func = () => {
             if (Tutorial.isActive) {
-                // restart pressed in tutorial level
-                // DRAW ALERT "Restart Disabled"
+                // UNHIDE POPUP ALERT "Restart Disabled During Tutorial"
             } else {
                 UserInterface.timer = 0;
                 UserInterface.levelState = 1;
                 Player.checkpointIndex = -1;
                 Player.restart();
             }
-        });
+        };
 
-        btn_jump = new Button(44, screenHeightUI - 136, 96, "jump_button", "", 0, "", function () {
+        const btn_jump = getByID("btn_jump");
+        btn_jump.func = () => {
             if (UserInterface.levelState == 1) {
                 UserInterface.timerStart = Date.now();
                 UserInterface.levelState = 2;
                 Player.startLevel();
             }
-        });
+        };
 
-        // SETTINGS Buttons
-        btn_reset_settings = new Button(screenWidthUI - 230, screenHeightUI - 90, 160, "", "", 0, "Erase Data", function () {
-            const reset = confirm("Reset All Settings and Records?");
-            if (reset) {
-                UserInterface.records = {
-                    unlocked: UserInterface.records.unlocked,
-                };
-                UserInterface.writeRecords();
+        // ======================
+        //  STANDARD MAP BROWSER
+        // ======================
 
-                UserInterface.settings = {
-                    sensitivity: 0.5,
-                    volume: 0.5,
-                    debugText: 0,
-                    strafeHUD: 1,
-                    playTutorial: 1,
-                };
-                UserInterface.writeSettings();
-
-                // sync all settings button
-                btn_sensitivitySlider.updateState(UserInterface.settings.sensitivity);
-                btn_volumeSlider.updateState(UserInterface.settings.volume);
-                btn_debugText.func(true);
-                btn_strafeHUD.func(true);
-                btn_playTutorial.func(true);
-                AudioHandler.setVolume(UserInterface.settings.volume);
-
-                console.log("records and settings cleared");
-            }
-        });
-
-        btn_sensitivitySlider = new SliderUI(160, 80, 230, 0.1, 3, 10, "Sensitivity", UserInterface.settings.sensitivity, function () {
-            UserInterface.settings.sensitivity = this.value;
-            UserInterface.writeSettings();
-        });
-
-        btn_volumeSlider = new SliderUI(160, 160, 230, 0, 1, 10, "Volume", UserInterface.settings.volume, function () {
-            UserInterface.settings.volume = this.value;
-            AudioHandler.setVolume(UserInterface.settings.volume);
-            UserInterface.writeSettings();
-        });
-
-        btn_debugText = new Button(270, 210, 60, "toggle_button", "toggle_button_pressed", 1, "", function (sync) {
-            if (sync) {
-                this.toggle = UserInterface.settings.debugText;
-            } else {
-                if (this.toggle == 1) {
-                    this.toggle = 0;
-                    UserInterface.settings.debugText = 0;
-                    UserInterface.writeSettings();
-                } else {
-                    this.toggle = 1;
-                    UserInterface.settings.debugText = 1;
-                    UserInterface.writeSettings();
-                }
-            }
-        });
-
-        btn_strafeHUD = new Button(270, 280, 60, "toggle_button", "toggle_button_pressed", 1, "", function (sync) {
-            if (sync) {
-                this.toggle = UserInterface.settings.strafeHUD;
-            } else {
-                if (this.toggle == 1) {
-                    this.toggle = 0;
-                    UserInterface.settings.strafeHUD = 0;
-                    UserInterface.writeSettings();
-                } else {
-                    this.toggle = 1;
-                    UserInterface.settings.strafeHUD = 1;
-                    UserInterface.writeSettings();
-                }
-            }
-        });
-
-        // MAP BROWSER BUTTONS
-        btn_custom_maps = new Button(screenWidthUI - 283, 40, 239, "custom_maps_button", "", 0, "", function () {
+        const btn_customMaps = getByID("btn_customMaps");
+        btn_customMaps.func = () => {
             UserInterface.gamestate = 2;
 
-            // loop through each button (including non-maps eww) and untoggle it. Could be an issue once I add a "play tutorial" toggle / button idk
-            UserInterface.renderedButtons.forEach((button) => {
-                if (button.toggle == 1 && button != btn_playTutorial) {
-                    button.toggle = 0;
-                }
-            });
+            UserInterface.switchToUiGroup(UserInterface.uiGroup_customMapBrowser);
 
-            UserInterface.renderedButtons = UserInterface.btnGroup_customMapBrowser;
             MapBrowser.state = 2;
             MapBrowser.init();
-        });
+        };
 
-        btn_playMap = new Button(screenWidthUI - 154, screenHeightUI - 104, 110, "play_button", "", 0, "", function () {
-            MapBrowser.toggleAllButtons();
+        const btn_playMap = getByID("btn_playMap");
+        btn_playMap.func = () => {
             MapBrowser.scrollY = 0;
             MapBrowser.scrollVel = 0;
 
             UserInterface.gamestate = 5;
-            UserInterface.renderedButtons = [btn_mainMenu];
+            UserInterface.renderedButtons = []; // kill once ALL map browsers buttons are on NEW systems
+            UserInterface.switchToUiGroup([btn_mainMenu]);
 
             if (MapBrowser.state == 1) {
                 // in normal maps browser
-
                 Map.initMap(MapBrowser.selectedMapIndex, false);
             } else {
                 // in custom maps browser
-
                 Map.initMap(MapBrowser.selectedMapIndex, true);
             }
-        });
+        };
+
+        const btn_playTutorial = getByID("btn_playTutorial");
+        btn_playTutorial.func = function () {
+            // sync with UserInterface.settings.playTutorial
+            this.classList.toggle("toggled");
+            const toggleState = UserInterface.getToggleState(this);
+            Tutorial.isActive = toggleState;
+            UserInterface.settings.playTutorial = toggleState;
+            UserInterface.writeSettings();
+            console.log("Play Tutorial Toggled: " + toggleState);
+        };
+
+        const ui_mapInfoBox = getByID("ui_mapInfoBox");
+
+        const btn_level_awakening = getByID("btn_level_awakening");
+        btn_level_awakening.func = () => {
+            MapBrowser.selectedMapIndex = "Awakening";
+            MapBrowser.updateMapInfoBox();
+            if (UserInterface.settings.playTutorial) {
+                Tutorial.isActive = true; // Doesn't this need to be toggled off at some point too? FIX What is this doing? toggle also turns this on and off
+            }
+        };
+
+        const btn_level_pitfall = getByID("btn_level_pitfall");
+        btn_level_pitfall.func = () => {
+            MapBrowser.selectedMapIndex = "Pitfall";
+            MapBrowser.updateMapInfoBox();
+        };
+
+        const btn_level_cavernAbyss = getByID("btn_level_cavernAbyss");
+        btn_level_cavernAbyss.func = () => {
+            MapBrowser.selectedMapIndex = "Cavern Abyss";
+            MapBrowser.updateMapInfoBox();
+        };
+
+        const btn_level_crystals = getByID("btn_level_crystals");
+        btn_level_crystals.func = () => {
+            MapBrowser.selectedMapIndex = "Crystals";
+            MapBrowser.updateMapInfoBox();
+        };
+
+        const btn_level_trespass = getByID("btn_level_trespass");
+        btn_level_trespass.func = () => {
+            MapBrowser.selectedMapIndex = "Trespass";
+            MapBrowser.updateMapInfoBox();
+        };
+
+        const btn_level_turmoil = getByID("btn_level_turmoil");
+        btn_level_turmoil.func = () => {
+            MapBrowser.selectedMapIndex = "Turmoil";
+            MapBrowser.updateMapInfoBox();
+        };
+
+        const btn_level_tangledForest = getByID("btn_level_tangledForest");
+        btn_level_tangledForest.func = () => {
+            MapBrowser.selectedMapIndex = "Tangled Forest";
+            MapBrowser.updateMapInfoBox();
+        };
+
+        const btn_level_pinnacle = getByID("btn_level_pinnacle");
+        btn_level_pinnacle.func = () => {
+            MapBrowser.selectedMapIndex = "Pinnacle";
+            MapBrowser.updateMapInfoBox();
+        };
+
+        const btn_level_forever = getByID("btn_level_forever");
+        btn_level_forever.func = () => {
+            MapBrowser.selectedMapIndex = "Forever";
+            MapBrowser.updateMapInfoBox();
+        };
+
+        // ===========
+        //  UI GROUPS
+        // ===========
+        this.uiGroup_mainMenu = [getByID("main-title"), btn_play, btn_settings, btn_mapEditor, getByID("menu-background")];
+        this.uiGroup_settings = [btn_mainMenu, btn_sensitivitySlider, btn_volumeSlider, btn_debugText, btn_strafeHUD, btn_resetSettings];
+        this.uiGroup_standardMapBrowser = [
+            btn_mainMenu,
+            btn_customMaps,
+            ui_mapInfoBox,
+            // btn_playMap, // added dynamically
+            // btn_playTutorial, // added dynamically
+            getByID("map-list-container"),
+            btn_level_awakening,
+            btn_level_pitfall,
+            btn_level_cavernAbyss,
+            btn_level_crystals,
+            btn_level_trespass,
+            btn_level_turmoil,
+            btn_level_tangledForest,
+            btn_level_pinnacle,
+            btn_level_forever,
+        ];
+        this.uiGroup_customMapBrowser = [btn_mainMenu, getByID("custom-map-browser-info"), ui_mapInfoBox, getByID("custom-map-list-container")];
+        this.uiGroup_inLevel = [ui_speedometer, ui_timerBox, btn_mainMenu, btn_restart, btn_jump];
+
+        this.activeUiGroup = [];
+        this.switchToUiGroup(UserInterface.uiGroup_mainMenu);
+
+        // [][][][][][][][][][][][][][]
+        //   CREATING THE OLD BUTTONS
+        // [][][][][][][][][][][][][][]
 
         // MapEditor browser buttons
         btn_new_map = new Button(screenWidthUI - 438, 40, 169, "new_map_button", "", 0, "", function () {
@@ -513,7 +569,6 @@ const UserInterface = {
             // delete shareDiv when leaving browser page
             document.getElementById("shareDiv").remove();
 
-            MapBrowser.toggleAllButtons();
             MapBrowser.scrollVel = 0;
             MapBrowser.scrollY = 0;
 
@@ -578,7 +633,8 @@ const UserInterface = {
                                     document.getElementById("shareDiv").remove();
 
                                     // reload map editor map browser by pressing btn_mapEditor again
-                                    btn_mapEditor.released(true);
+                                    // btn_mapEditor.released(true);
+                                    btn_mapEditor.func();
                                 },
                                 function (error) {
                                     alert("error occurred: " + error.code);
@@ -590,109 +646,6 @@ const UserInterface = {
                         });
                     });
                 });
-            }
-        });
-
-        // ALL LEVEL BUTTONS
-        btn_level_awakening = new Button(144, 40, 256, "awakening_button", "awakening_button_pressed", 0, "", function () {
-            if (this.toggle) {
-                this.toggle = 0;
-                MapBrowser.selectedMapIndex = -1;
-            } else {
-                MapBrowser.toggleAllButtons();
-                this.toggle = 1;
-                MapBrowser.selectedMapIndex = "Awakening";
-                if (UserInterface.settings.playTutorial) {
-                    Tutorial.isActive = true;
-                }
-            }
-        });
-
-        btn_level_pitfall = new Button(144, 184, 256, "pitfall_button", "pitfall_button_pressed", 0, "", function () {
-            if (this.toggle) {
-                this.toggle = 0;
-                MapBrowser.selectedMapIndex = -1;
-            } else {
-                MapBrowser.toggleAllButtons();
-                this.toggle = 1;
-                MapBrowser.selectedMapIndex = "Pitfall";
-            }
-        });
-
-        btn_level_cavernAbyss = new Button(144, 328, 256, "cavern_abyss_button", "cavern_abyss_button_pressed", 0, "", function () {
-            if (this.toggle) {
-                this.toggle = 0;
-                MapBrowser.selectedMapIndex = -1;
-            } else {
-                MapBrowser.toggleAllButtons();
-                this.toggle = 1;
-                MapBrowser.selectedMapIndex = "Cavern Abyss";
-            }
-        });
-
-        btn_level_crystals = new Button(144, 472, 256, "crystals_button", "crystals_button_pressed", 0, "", function () {
-            if (this.toggle) {
-                this.toggle = 0;
-                MapBrowser.selectedMapIndex = -1;
-            } else {
-                MapBrowser.toggleAllButtons();
-                this.toggle = 1;
-                MapBrowser.selectedMapIndex = "Crystals";
-            }
-        });
-
-        btn_level_trespass = new Button(144, 616, 256, "trespass_button", "", 0, "", function () {
-            if (this.toggle) {
-                this.toggle = 0;
-                MapBrowser.selectedMapIndex = -1;
-            } else {
-                MapBrowser.toggleAllButtons();
-                this.toggle = 1;
-                MapBrowser.selectedMapIndex = "Trespass";
-            }
-        });
-
-        btn_level_turmoil = new Button(144, 760, 256, "turmoil_button", "", 0, "", function () {
-            if (this.toggle) {
-                this.toggle = 0;
-                MapBrowser.selectedMapIndex = -1;
-            } else {
-                MapBrowser.toggleAllButtons();
-                this.toggle = 1;
-                MapBrowser.selectedMapIndex = "Turmoil";
-            }
-        });
-
-        btn_level_tangledForest = new Button(144, 904, 256, "tangled_forest_button", "", 0, "", function () {
-            if (this.toggle) {
-                this.toggle = 0;
-                MapBrowser.selectedMapIndex = -1;
-            } else {
-                MapBrowser.toggleAllButtons();
-                this.toggle = 1;
-                MapBrowser.selectedMapIndex = "Tangled Forest";
-            }
-        });
-
-        btn_level_pinnacle = new Button(144, 1048, 256, "pinnacle_button", "", 0, "", function () {
-            if (this.toggle) {
-                this.toggle = 0;
-                MapBrowser.selectedMapIndex = -1;
-            } else {
-                MapBrowser.toggleAllButtons();
-                this.toggle = 1;
-                MapBrowser.selectedMapIndex = "Pinnacle";
-            }
-        });
-
-        btn_level_forever = new Button(144, 1192, 256, "forever_button", "", 0, "", function () {
-            if (this.toggle) {
-                this.toggle = 0;
-                MapBrowser.selectedMapIndex = -1;
-            } else {
-                MapBrowser.toggleAllButtons();
-                this.toggle = 1;
-                MapBrowser.selectedMapIndex = "Forever";
             }
         });
 
@@ -723,60 +676,30 @@ const UserInterface = {
             }
 
             // state 3 progresses to 5 when all targets are completed
-
             // state 5 uses jump button to progress
-
             // state 6 progresses to 7 automatically after 2 secs
 
             if (Tutorial.state == 7) {
                 Tutorial.state++; // going into STATE 8
-                UserInterface.renderedButtons = UserInterface.btnGroup_inLevel;
+                UserInterface.switchToUiGroup(UserInterface.uiGroup_inLevel);
                 return;
             }
 
             // 8 to 9 on user swipe
-
             // 9 to 10 on checkpoint
-
             // 10 to 11 on user swipe
-
             // 11 to 12 on checkpoint
-
             // 12 to 13 on user swipe
-
             // 13 to 14 on checkpoint
-
             // 14 to 15 on user swipe
-
             // 15 to 16 on checkpoint
-
             // 16 to 17 on user swipe
-
             // 17 to 18 on level end
 
             if (Tutorial.state == 18) {
                 Tutorial.state++; // going into STATE 19
-                UserInterface.renderedButtons = UserInterface.btnGroup_inLevel;
+                UserInterface.switchToUiGroup(UserInterface.uiGroup_inLevel);
                 return;
-            }
-        });
-
-        btn_playTutorial = new Button(screenWidthUI - 256, screenHeightUI - 86, 64, "toggle_button", "toggle_button_pressed", 1, "", function (sync) {
-            if (sync) {
-                this.toggle = UserInterface.settings.playTutorial;
-            } else {
-                console.log("PLAY TUT TOGGLED");
-                if (this.toggle == 1) {
-                    this.toggle = 0;
-                    Tutorial.isActive = false;
-                    UserInterface.settings.playTutorial = 0;
-                    UserInterface.writeSettings();
-                } else {
-                    this.toggle = 1;
-                    Tutorial.isActive = true;
-                    UserInterface.settings.playTutorial = 1;
-                    UserInterface.writeSettings();
-                }
             }
         });
 
@@ -1959,23 +1882,9 @@ const UserInterface = {
         });
 
         // GROUPS OF BUTTONS TO RENDER ON DIFFERENT PAGES
-        this.btnGroup_mainMenu = [btn_play, btn_settings, btn_mapEditor];
-        this.btnGroup_settings = [btn_mainMenu, btn_sensitivitySlider, btn_volumeSlider, btn_debugText, btn_strafeHUD, btn_reset_settings];
-        this.btnGroup_standardMapBrowser = [
-            btn_mainMenu,
-            btn_custom_maps,
-            btn_level_awakening,
-            btn_level_pitfall,
-            btn_level_cavernAbyss,
-            btn_level_crystals,
-            btn_level_trespass,
-            btn_level_turmoil,
-            btn_level_tangledForest,
-            btn_level_pinnacle,
-            btn_level_forever,
-        ];
-        this.btnGroup_customMapBrowser = [btn_mainMenu];
-        this.btnGroup_mapEditorBrowser = [btn_mainMenu, btn_new_map, btn_import_map];
+        this.btnGroup_settings = [];
+
+        this.btnGroup_mapEditorBrowser = [btn_new_map, btn_import_map];
         this.btnGroup_mapEditorInterface = [
             btn_exit_edit,
             btn_add_platform,
@@ -1986,9 +1895,7 @@ const UserInterface = {
             btn_multiSelect,
             btn_snappingSlider,
         ];
-        this.btnGroup_inLevel = [btn_mainMenu, btn_restart, btn_jump];
         this.btnGroup_colorPickerState1 = [
-            btn_mainMenu,
             btn_backgroundColor,
             btn_playerColor,
             btn_wallTopColor,
@@ -2004,7 +1911,6 @@ const UserInterface = {
             btn_lockEndzoneColors,
         ];
         this.btnGroup_colorPickerState2 = [
-            btn_mainMenu,
             btn_unselectColor,
             btn_copyColor,
             btn_pasteColor,
@@ -2012,7 +1918,7 @@ const UserInterface = {
             btn_saturationSlider,
             btn_lightnessSlider,
         ];
-        this.btnGroup_mapSettings = [btn_mainMenu, btn_platformHeightSlider, btn_wallHeightSlider, btn_lightDirectionSlider, btn_lightPitchSlider];
+        this.btnGroup_mapSettings = [btn_platformHeightSlider, btn_wallHeightSlider, btn_lightDirectionSlider, btn_lightPitchSlider];
         this.btnGroup_editPlatform = [
             btn_exit_edit,
             btn_unselect,
@@ -2098,9 +2004,7 @@ const UserInterface = {
     mapLoaded: function () {
         // called at the end of Map.parseMapData()
         UserInterface.gamestate = 6;
-        UserInterface.renderedButtons = this.btnGroup_inLevel;
-        // New DOM buttons
-        UserInterface.switchToBtnGroup(this.btnGroup_inLevel_new);
+        UserInterface.switchToUiGroup(this.uiGroup_inLevel);
     },
 
     getLeaderboards: async function () {
@@ -2132,11 +2036,11 @@ const UserInterface = {
         }
 
         // Sync UI after settings are ready
-        btn_sensitivitySlider.updateState(UserInterface.settings.sensitivity);
-        btn_volumeSlider.updateState(UserInterface.settings.volume);
-        btn_debugText.func(true);
-        btn_strafeHUD.func(true);
-        btn_playTutorial.func(true);
+        UserInterface.setSliderValue(btn_sensitivitySlider, UserInterface.settings.sensitivity);
+        UserInterface.setSliderValue(btn_volumeSlider, UserInterface.settings.volume);
+        UserInterface.setToggleState(btn_debugText, UserInterface.settings.debugText);
+        UserInterface.setToggleState(btn_strafeHUD, UserInterface.settings.strafeHUD);
+        UserInterface.setToggleState(btn_playTutorial, UserInterface.settings.playTutorial);
         AudioHandler.setVolume(UserInterface.settings.volume);
     },
 
@@ -2213,6 +2117,31 @@ const UserInterface = {
         );
     },
 
+    updateSliderLabel: function (sliderWrapper) {
+        sliderWrapper.label.textContent = this.getSliderValue(sliderWrapper);
+    },
+
+    setSliderValue: function (sliderWrapper, value) {
+        sliderWrapper.slider.value = value;
+        this.updateSliderLabel(sliderWrapper);
+    },
+
+    getSliderValue: function (sliderWrapper) {
+        return parseInt(sliderWrapper.slider.value, 10);
+    },
+
+    getToggleState: function (toggleButton) {
+        return toggleButton.classList.contains("toggled");
+    },
+
+    setToggleState: function (toggleButton, state) {
+        if (state) {
+            toggleButton.classList.add("toggled");
+        } else {
+            toggleButton.classList.remove("toggled");
+        }
+    },
+
     determineButtonColor: function () {
         let bgColor = CanvasArea.canvas.style.backgroundColor; // returns rgba string
 
@@ -2225,84 +2154,24 @@ const UserInterface = {
         this.darkMode = luminance > 0.77 ? true : false;
     },
 
-    activateLightUI: function (button) {
-        if (this.darkMode == false) {
-            return;
+    updateUiColorMode: function (mode) {
+        // mode = "light" or "dark'
+
+        if (mode == "dark") {
+            const root = document.documentElement.style;
+            root.setProperty("--uiForegroundColor", "var(--lightColor_1)");
+            root.setProperty("--uiForegroundColor_pressed", "var(--lightColor_2)");
+            root.setProperty("--uiBackgroundColor", "var(--darkColor_1)");
+            root.setProperty("--uiBackgroundColor_pressed", "var(--darkColor_2)");
+        } else if (mode == "light") {
+            const root = document.documentElement.style;
+            root.setProperty("--uiForegroundColor", "var(--darkColor_1)");
+            root.setProperty("--uiForegroundColor_pressed", "var(--darkColor_2)");
+            root.setProperty("--uiBackgroundColor", "var(--lightColor_1)");
+            root.setProperty("--uiBackgroundColor_pressed", "var(--lightColor_2)");
+        } else {
+            console.log("Invalid updateUiColorMode parameter. Should be 'light' or 'dark'.");
         }
-
-        // update button bg and text color
-        button.style.backgroundColor = "#ffffff";
-        button.style.color = "#000000";
-
-        // Loop through all SVG elements inside the root
-        button.querySelectorAll("*").forEach((el) => {
-            // --- Check 'fill' and 'stroke' attributes ---
-            const fillAttr = el.getAttribute("fill");
-            const strokeAttr = el.getAttribute("stroke");
-
-            if (isWhite(fillAttr)) {
-                el.setAttribute("fill", "#000000"); // New color
-            }
-            if (isWhite(strokeAttr)) {
-                el.setAttribute("stroke", "#000000");
-            }
-
-            // --- Check inline 'style' attributes ---
-            const style = el.getAttribute("style");
-            if (style) {
-                let updatedStyle = style;
-
-                // Replace white fill in inline style
-                updatedStyle = updatedStyle.replace(/fill\s*:\s*(white|#ffffff|#fff|rgb\(255,\s*255,\s*255\))/gi, "fill: #000000");
-
-                // Replace black stroke in inline style
-                updatedStyle = updatedStyle.replace(/stroke\s*:\s*(white|#ffffff|#fff|rgb\(255,\s*255,\s*255\))/gi, "stroke: #000000");
-
-                el.setAttribute("style", updatedStyle);
-            }
-        });
-
-        this.darkMode = false;
-    },
-
-    activateDarkUI: function (button) {
-        if (this.darkMode == true) {
-            return;
-        }
-
-        // update button bg and text color
-        button.style.backgroundColor = "#000000";
-        button.style.color = "#ffffff";
-
-        // Loop through all SVG elements inside the root
-        button.querySelectorAll("*").forEach((el) => {
-            // --- Check 'fill' and 'stroke' attributes ---
-            const fillAttr = el.getAttribute("fill");
-            const strokeAttr = el.getAttribute("stroke");
-
-            if (isBlack(fillAttr)) {
-                el.setAttribute("fill", "#ffffff"); // New color
-            }
-            if (isBlack(strokeAttr)) {
-                el.setAttribute("stroke", "#ffffff");
-            }
-
-            // --- Check inline 'style' attributes ---
-            const style = el.getAttribute("style");
-            if (style) {
-                let updatedStyle = style;
-
-                // Replace black fill in inline style
-                updatedStyle = updatedStyle.replace(/fill\s*:\s*(black|#000000|#000|rgb\(0,\s*0,\s*0\))/gi, "fill: #ffffff");
-
-                // Replace black stroke in inline style
-                updatedStyle = updatedStyle.replace(/stroke\s*:\s*(black|#000000|#000|rgb\(0,\s*0,\s*0\))/gi, "stroke: #ffffff");
-
-                el.setAttribute("style", updatedStyle);
-            }
-        });
-
-        this.darkMode = true;
     },
 
     secondsToMinutes: function (milliseconds) {
@@ -2372,22 +2241,28 @@ const UserInterface = {
         }
     },
 
-    switchToBtnGroup: function (btnGroup) {
-        // Hide all buttons that are currently showing
-        const visibleButtons = document.querySelectorAll("button:not(.hidden)"); // FIX with a future better way to get this list
+    switchToUiGroup: function (uiGroup) {
+        // alternative way that removes the need to track current active uiGroup
+        // const visibleElements = document.querySelectorAll('#ui-container :not(.hidden)');
 
-        for (button of visibleButtons) {
-            button.classList.add("hidden");
+        // there is also this .toggle function if it is applicable / safe to use here
+        // element.classList.toggle("hidden");
+
+        // Hide all ui elements currently showing
+        for (element of this.activeUiGroup) {
+            element.classList.add("hidden");
         }
 
-        for (button of btnGroup) {
-            // unhide all buttons in btnGroup
-            button.classList.remove("hidden");
+        // Unhide all ui elements in uiGroup
+        for (element of uiGroup) {
+            element.classList.remove("hidden");
         }
+
+        this.activeUiGroup = uiGroup;
     },
 
-    isPointInsideButton: function (x, y, button) {
-        const rect = button.getBoundingClientRect();
+    isPointInsideElement: function (x, y, element) {
+        const rect = element.getBoundingClientRect();
         return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
     },
 
@@ -2421,13 +2296,24 @@ const UserInterface = {
             }
         });
 
-        // NEW BUTTONS
-        // will have another way of getting this list -- FIX
-        const visibleButtons = document.querySelectorAll("button:not(.hidden)");
+        // NEW DOM BASED UI
 
-        for (button of visibleButtons) {
-            if (this.isPointInsideButton(x, y, button) && !button.classList.contains("pressed")) {
-                button.classList.add("pressed");
+        for (uiElement of this.activeUiGroup) {
+            // butons and toggles
+            if (uiElement.nodeName.toLowerCase() === "button" || uiElement.classList.contains("toggle-container")) {
+                // only run buttons and toggles (and sliders eventually)
+
+                if (this.isPointInsideElement(x, y, uiElement)) {
+                    uiElement.classList.add("pressed");
+                }
+            }
+            // sliders
+            if (uiElement.classList.contains("slider")) {
+                const sliderHandle = uiElement.slider.querySelector("::-webkit-slider-thumb");
+                
+                if (this.isPointInsideElement(x, y, sliderHandle)) {
+                    sliderHandle.classList.add("pressed");
+                }
             }
         }
     },
@@ -2460,21 +2346,19 @@ const UserInterface = {
         });
 
         // NEW BUTTONS
-        // should have another way of getting this list -- FIX
-        const visibleButtons = document.querySelectorAll("button:not(.hidden)");
-
-        for (button of visibleButtons) {
-            if (
-                this.isPointInsideButton(x, y, button) &&
-                button.classList.contains("pressed") &&
-                (MapBrowser.scrollVel == 0 || MapBrowser.scrollAmount == null) && // dont release if scrolling through Map Browser
-                MapEditor.dragSelect == false // dont release if dragSelecting in Map Editor
-            ) {
-                // add map browser / editing scrolling check logic from above
-                button.func();
-                editorIgnoreRelease = true;
+        for (uiElement of this.activeUiGroup) {
+            if (uiElement.nodeName.toLowerCase() === "button" || uiElement.classList.contains("toggle-container")) {
+                if (
+                    this.isPointInsideElement(x, y, uiElement) &&
+                    uiElement.classList.contains("pressed") &&
+                    (MapBrowser.scrollVel == 0 || MapBrowser.scrollAmount == null) && // dont release if scrolling through Map Browser
+                    MapEditor.dragSelect == false // dont release if dragSelecting in Map Editor
+                ) {
+                    uiElement.func();
+                    editorIgnoreRelease = true;
+                }
+                uiElement.classList.remove("pressed");
             }
-            button.classList.remove("pressed");
         }
 
         if (
@@ -2494,52 +2378,40 @@ const UserInterface = {
 
         if (this.gamestate == 1) {
             // In Main Menu
+            // dont set this here every frame
             CanvasArea.canvas.style.backgroundColor = "#a3d5e1";
-
-            // Draw Title Text KILL 
-            // ctx.fillStyle = UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
-
-            // ctx.font = "108px BAHNSCHRIFT";
-            // ctx.fillText("Null Hop", midX_UI - ctx.measureText("Null Hop").width / 2, 110);
-
-            const menu_background = document.getElementById("menu_background");
-            ctx.drawImage(menu_background, -30, 15, screenWidthUI + 60, (menu_background.height / menu_background.width) * screenWidthUI + 60);
-        }
-
-        if (this.gamestate == 3) {
-            // In Settings
-            ctx.font = "16px BAHNSCHRIFT";
-            ctx.fillStyle = UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
-            ctx.fillText("Debug Info", btn_debugText.x - 110, btn_debugText.y + 20);
-            ctx.fillText("Strafe Helper", btn_strafeHUD.x - 110, btn_strafeHUD.y + 20);
         }
 
         if (this.gamestate == 6) {
             // In Level
             ctx.fillStyle = UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
 
-            // Draw Timer Box
+            // Update Timer Box's Text
             if (this.levelState !== 3 && Tutorial.isActive == false) {
-                UserInterfaceCanvas.roundedRect(screenWidthUI - 220, 32, 170, 75, 15);
-                ctx.fill();
-
-                ctx.font = "20px BAHNSCHRIFT";
-                ctx.fillStyle = !UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
-
-                ctx.fillText("Time: " + UserInterface.secondsToMinutes(this.timer), screenWidthUI - 210, 62);
-                ctx.fillText(
-                    "Record: " + UserInterface.secondsToMinutes(this.records[Map.name] == null ? 0 : this.records[Map.name]),
-                    screenWidthUI - 210,
-                    90
-                );
+                ui_timerBox.children[0].textContent = `Time: ${UserInterface.secondsToMinutes(this.timer)}`;
+                // FIX DONT CALCULATE THE RECORD EVERY TIME -- CACHE IT
+                ui_timerBox.children[1].textContent = `Record: ${UserInterface.secondsToMinutes(
+                    this.records[Map.name] == null ? 0 : this.records[Map.name]
+                )}`;
             }
 
-            // Draw Speed. ADD COLOR AND SIZE CHANGES TO THIS BASED OFF OF GAIN
+            // Update Speed Text. ADD COLOR AND SIZE CHANGES TO THIS BASED OFF OF GAIN
             if (this.showVelocity && this.levelState == 2) {
-                ctx.font = "20px BAHNSCHRIFT";
-                ctx.fillStyle = UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
-                const offsetY = Tutorial.pausePlayer ? 26 : 45;
-                ctx.fillText("Speed: " + Math.round(Player.velocity.magnitude()), midX_UI - ctx.measureText("Speed: 000").width / 2, offsetY);
+                // FIX do this CSS change only when player is first paused or unpaused not by checking every frame
+                const speedometerTopValue = parseFloat(window.getComputedStyle(ui_speedometer).top);
+
+                if (Tutorial.pausePlayer) {
+                    if (speedometerTopValue === 32) {
+                        ui_speedometer.style.top = "8px";
+                    }
+                } else {
+                    // not paused
+                    if (speedometerTopValue === 8) {
+                        ui_speedometer.style.top = "32px";
+                    }
+                }
+
+                ui_speedometer.textContent = `Speed: ${Math.round(Player.velocity.magnitude())}`;
             }
 
             if (this.settings.debugText == 1) {

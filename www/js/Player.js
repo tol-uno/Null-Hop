@@ -229,7 +229,7 @@ const Player = {
                 this.jumpValue = 0;
                 this.jumpVelocity = 200;
             } else {
-                btn_restart.released(true);
+                btn_restart.func()
             }
             updatePlayerPoligon();
         };
