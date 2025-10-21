@@ -63,10 +63,10 @@ const MapBrowser = {
                     button.innerHTML = buttonHTML.trim();
                     button.func = () => {
                         MapBrowser.selectedMapIndex = mapName;
-                        MapBrowser.updateMapInfoBox();
+                        MapBrowser.updateMapBrowserState();
                     };
                     container.appendChild(button);
-                    UserInterface.activeUiGroup = UserInterface.activeUiGroup.concat(button);
+                    UserInterface.addUiElement(button, true);
                 }
             } catch (error) {
                 console.error("Failed to load custom maps:", error);
@@ -80,7 +80,7 @@ const MapBrowser = {
             this.maxScroll *= -1;
         }
 
-        this.updateMapInfoBox();
+        this.updateMapBrowserState();
     },
 
     update: function () {
@@ -129,67 +129,75 @@ const MapBrowser = {
         }
 
         document.querySelector(".map-list-container:not(.hidden)").scrollTop = -this.scrollY;
+    },
 
-        // ENABLING and DISABLING btn_playMap and btn_playTutorial in browsers BESIDES map editor's
-        // This should only be done when one of the map buttons is pressed -- not every frame FIX by moving into other function called by buttons
+    updateMapBrowserState: function () {
+        // updates the MapInfoBox and adds/ removes the nessesary buttons when map buttons are clicked
+        this.updateMapInfoBox();
+
+        // ENABLING and DISABLING btn_playMap, btn_playTutorial, btn_editMap, btn_shareMap, btn_deleteMap
+
         if (MapEditor.editorState !== 5) {
-            // not in map editors browser
+            // NOT in map editors browser
 
             // ADDING btn_playMap
             if (this.selectedMapIndex != -1 && !UserInterface.activeUiGroup.includes(btn_playMap)) {
-                UserInterface.switchToUiGroup(UserInterface.activeUiGroup.concat(btn_playMap));
+                UserInterface.addUiElement(btn_playMap);
             }
             // REMOVING btn_playMap
             if (this.selectedMapIndex == -1 && UserInterface.activeUiGroup.includes(btn_playMap)) {
-                UserInterface.switchToUiGroup(UserInterface.activeUiGroup.filter((item) => item !== btn_playMap));
+                UserInterface.removeUiElement(btn_playMap);
             }
 
             // ADDING AND REMOVING btn_playTutorial toggle
             if (this.state == 1 && this.selectedMapIndex == "Awakening" && !UserInterface.activeUiGroup.includes(btn_playTutorial)) {
-                UserInterface.switchToUiGroup(UserInterface.activeUiGroup.concat(btn_playTutorial));
+                UserInterface.addUiElement(btn_playTutorial);
             }
 
             if (this.state == 1 && this.selectedMapIndex != "Awakening" && UserInterface.activeUiGroup.includes(btn_playTutorial)) {
-                UserInterface.switchToUiGroup(UserInterface.activeUiGroup.filter((item) => item !== btn_playTutorial));
+                UserInterface.removeUiElement(btn_playTutorial);
             }
         } else {
             // in MapEditors browser
-            // ADD AND REMOVE: btn_editMap, btn_shareMap, btn_deleteMap
+            // ADD & REMOVE: btn_editMap, btn_shareMap, btn_deleteMap
 
-            if (this.selectedMapIndex != -1 && !UserInterface.renderedButtons.includes(btn_editMap)) {
-                UserInterface.renderedButtons = UserInterface.renderedButtons.concat(btn_editMap);
-                UserInterface.renderedButtons = UserInterface.renderedButtons.concat(btn_deleteMap);
-                UserInterface.renderedButtons = UserInterface.renderedButtons.concat(btn_shareMap);
+            if (this.selectedMapIndex != -1 && !UserInterface.activeUiGroup.includes(btn_editMap)) {
+                UserInterface.addUiElement(btn_editMap)
+                UserInterface.addUiElement(btn_shareMap)
+                UserInterface.addUiElement(btn_deleteMap)
             }
 
-            if (this.selectedMapIndex == -1 && UserInterface.renderedButtons.includes(btn_editMap)) {
-                UserInterface.renderedButtons = UserInterface.renderedButtons.slice(0, -3);
+            if (this.selectedMapIndex == -1 && UserInterface.activeUiGroup.includes(btn_editMap)) {
+                UserInterface.removeUiElement(btn_editMap)
+                UserInterface.removeUiElement(btn_shareMap)
+                UserInterface.removeUiElement(btn_deleteMap)
             }
         }
     },
 
+    // this could be inside of updateMapBrowserState
     updateMapInfoBox: function () {
         if (this.selectedMapIndex == -1) {
-            ui_mapInfoBox.querySelector("#mapName").textContent = "Select A Map";
-            ui_mapInfoBox.querySelector("#yourTime").textContent = ``;
-            ui_mapInfoBox.querySelector("#medalList").classList.add("hidden");
+            ui_mapInfoBox.querySelector(".mapName").textContent = "Select A Map";
+            ui_mapInfoBox.querySelector(".yourTime").textContent = ``;
+            ui_mapInfoBox.querySelector(".medalList").classList.add("hidden");
             return;
         }
 
-        ui_mapInfoBox.querySelector("#mapName").textContent = this.selectedMapIndex;
+        ui_mapInfoBox.querySelector(".mapName").textContent = this.selectedMapIndex;
 
         const personalBest = UserInterface.records[this.selectedMapIndex];
         const yourTimeInSeconds = UserInterface.secondsToMinutes(personalBest == undefined ? 0 : personalBest);
-        ui_mapInfoBox.querySelector("#yourTime").textContent = `Your Time: ${yourTimeInSeconds}`;
+        ui_mapInfoBox.querySelector(".yourTime").textContent = `Your Time: ${yourTimeInSeconds}`;
 
         // update medal times and active medal OR hide medal list
         const mapLeaderboard = UserInterface.leaderboards[this.selectedMapIndex];
         if (mapLeaderboard !== undefined) {
-            ui_mapInfoBox.querySelector("#medalList").classList.remove("hidden");
+            ui_mapInfoBox.querySelector(".medalList").classList.remove("hidden");
 
-            const goldMedal = ui_mapInfoBox.querySelector("#gold");
-            const silverMedal = ui_mapInfoBox.querySelector("#silver");
-            const bronzeMedal = ui_mapInfoBox.querySelector("#bronze");
+            const goldMedal = ui_mapInfoBox.querySelector(".gold");
+            const silverMedal = ui_mapInfoBox.querySelector(".silver");
+            const bronzeMedal = ui_mapInfoBox.querySelector(".bronze");
 
             // update times
             goldMedal.textContent = UserInterface.secondsToMinutes(mapLeaderboard.gold);
@@ -211,7 +219,7 @@ const MapBrowser = {
             }
         } else {
             // No leaderboards -> hide medal list
-            ui_mapInfoBox.querySelector("#medalList").classList.add("hidden");
+            ui_mapInfoBox.querySelector(".medalList").classList.add("hidden");
         }
     },
 

@@ -444,6 +444,9 @@ const Player = {
                 this.endSlow -= 2 * dt;
             } else {
                 this.endSlow = 0;
+                if (ui_endScreen.classList.contains("hidden")) { // not a great way of doing this. Maybe add a levelState = 4?
+                    UserInterface.activateEndScreen();
+                }
             }
 
             this.x += this.velocity.x * dt * this.endSlow; // MOVE FORWARD AT ANGLE BASED ON VELOCITY

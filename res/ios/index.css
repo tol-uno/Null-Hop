@@ -43,7 +43,6 @@ body {
 
     /* Padding to avoid the "unsafe" areas behind notches in the screen */
     /* padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px); */
-    background-color: #a3d5e1;
 }
 
 canvas {
@@ -264,7 +263,7 @@ INDIVIDUAL BUTTON STYLES
     margin: 0;
     font-weight: 400;
     line-height: 0.75;
-    text-shadow: 0px 4px 0 var(--lightColor_2);
+    text-shadow: 0px 4px 0 var(--darkColor_1);
 }
 
 #btn_play {
@@ -354,53 +353,27 @@ INDIVIDUAL BUTTON STYLES
 }
 
 #ui_strafeHelper {
-    overflow: hidden;
-    position: fixed;
-    left: 50%;
-    transform: translateX(-50%);
-    bottom: 72px;
-    width: 300px;
-    height: 14px;
-    border-radius: 99px;
-    outline: 4px solid var(--uiBackgroundColor);
+	position: fixed;
+	bottom: 72px;
+	height: 14px;
+	background-color: var(--uiBackgroundColor);
+	width: 300px;
+	left: 50%;
+	transform: translateX(-50%);
+	border-radius: 99px;
+	outline: 4px solid var(--uiForegroundColor);
+	box-sizing: border-box;
+
 }
 
 #strafeHandle {
-    position: absolute;
-    width: 14px;
-    height: 14px;
-    background-color: var(--uiBackgroundColor);
-    border-radius: 50%;
-    transform: translateX(-50%);
-}
+	position: absolute;
+	width: 14px;
+	height: 14px;
+	background-color: var(--uiForegroundColor);
+	border-radius: 50%;
+	transform: translateX(-50%);
 
-#ui_verticalWarning {
-    position: fixed;
-    left: calc(50% - (190px / 2));
-    transform: translateX(-50%);
-    bottom: 108px;
-    width: 190px;
-    height: 28px;
-    background-color: var(--uiBackgroundColor);
-    color: var(--uiForegroundColor);
-    font-size: 16px;
-    border-radius: 8px;
-    box-shadow: 0 4px 0 var(--uiBackgroundColor_pressed);
-    animation: pulse 800ms infinite;
-    text-align: center;
-    align-content: center;
-}
-
-@keyframes pulse {
-    0% {
-        transform: scale(1);
-    }
-    50% {
-        transform: scale(1.07);
-    }
-    100% {
-        transform: scale(1);
-    }
 }
 
 #btn_mainMenu {
@@ -427,7 +400,7 @@ INDIVIDUAL BUTTON STYLES
     height: 96px;
 }
 
-/* STANDARD MAP BROWSER (and ENDSCREEN) */
+/* STANDARD MAP BROWSER */
 
 #btn_customMaps {
     position: fixed;
@@ -458,8 +431,9 @@ INDIVIDUAL BUTTON STYLES
     position: fixed;
     top: 0;
     left: 120px;
-    width: 320px;
-    height: 100%;
+    width: 300px;
+    height: 360px;
+    border: 1px solid red;
     padding: 40px 0px;
     overflow-y: scroll;
     display: flex;
@@ -500,11 +474,12 @@ INDIVIDUAL BUTTON STYLES
     font-size: 26px;
 }
 
-#ui_mapInfoBox,
-#ui_endScreen {
-    position: fixed;
+#ui_mapInfoBox {
     background-color: var(--uiBackgroundColor);
     color: var(--uiForegroundColor);
+    position: fixed;
+    top: 128px;
+    right: 44px;
     width: 400px;
     height: 162px;
     border-radius: 24px;
@@ -514,24 +489,10 @@ INDIVIDUAL BUTTON STYLES
     box-shadow: 0 8px 0 var(--uiBackgroundColor_pressed);
 }
 
-#ui_mapInfoBox {
-    top: 128px;
-    right: 44px;
-}
-
-#ui_endScreen {
-    width: 448px;
-    height: 204px;
-    top: 100px;
-    left: 50%;
-    transform: translateX(-50%);
-}
-
-#ui_mapInfoBox > :first-child,
-#ui_endScreen > :first-child {
+#ui_mapInfoBox > :first-child {
     display: flex;
     width: 100%;
-    /* overflow-x: hidden; */
+    overflow-x: hidden;
     overflow-wrap: break-word;
     flex-direction: column;
     justify-content: center;
@@ -544,26 +505,11 @@ INDIVIDUAL BUTTON STYLES
     overflow: hidden;
 }
 
-#ui_endScreen .mapName {
-    font-size: 32px;
-    line-height: 1;
-}
-
 #ui_mapInfoBox .yourTime {
     font-size: 20px;
 }
 
-#ui_endScreen .yourTime {
-    font-size: 58px;
-    line-height: 0.9;
-}
-
-#ui_endScreen .yourRecord {
-    font-size: 22px;
-}
-
-/* #ui_mapInfoBox .medalList { */
-.medalList {
+#ui_mapInfoBox .medalList {
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -572,12 +518,7 @@ INDIVIDUAL BUTTON STYLES
     gap: 10px;
 }
 
-#ui_endScreen .medalList {
-    gap: 18px;
-}
-
-/* #ui_mapInfoBox .medalList > div { */
-.medalList > div {
+#ui_mapInfoBox .medalList > div {
     display: flex;
     gap: 8px;
     justify-content: end;
@@ -632,58 +573,4 @@ INDIVIDUAL BUTTON STYLES
     width: 24px !important;
     height: 24px !important;
     box-shadow: 0 4px !important;
-}
-
-/* MAP EDITOR MAP BROWSER */
-#btn_newMap {
-    position: fixed;
-    top: 40px;
-    right: 268px;
-    width: 168px;
-    height: 64px;
-    font-size: 32px;
-}
-
-#btn_importMap {
-    position: fixed;
-    top: 40px;
-    right: 44px;
-    width: 200px;
-    height: 64px;
-    font-size: 32px;
-}
-
-#btn_editMap {
-    position: fixed;
-    bottom: 40px;
-    right: 220px;
-    width: 168px;
-    height: 64px;
-    font-size: 32px;
-}
-
-#btn_shareMap {
-    position: fixed;
-    right: 132px;
-    bottom: 40px;
-    width: 64px;
-    height: 64px;
-    touch-action: manipulation; /* allow native touch events for share button */
-}
-
-#btn_deleteMap {
-    position: fixed;
-    right: 44px;
-    bottom: 40px;
-    width: 64px;
-    height: 64px;
-}
-
-/* Map Editor Main Interface */
-#btn_exitMapEditor {
-    position: fixed;
-    left: 44px;
-    top: 40px;
-    width: 68px;
-    height: 68px;
 }

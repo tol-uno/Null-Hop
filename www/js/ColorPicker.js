@@ -217,7 +217,7 @@ const ColorPicker = {
             ctx.fill()
             ctx.stroke()
     
-            // rbg text
+            // rgb text
             ctx.font = "16px BAHNSCHRIFT";
             ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
             ctx.fillText(CanvasArea.HSLToRGB(this.h, this.s, this.l), this.x + 164, this.y + 122)
@@ -253,7 +253,7 @@ const ColorPicker = {
     },
 
     getColor : function() {
-        return CanvasArea.HSLToRGB(this.h, this.s, this.l) // returns rbg string
+        return CanvasArea.HSLToRGB(this.h, this.s, this.l) // returns rgb string
     },
 
     copyColor : function() {

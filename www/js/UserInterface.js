@@ -20,8 +20,6 @@ const UserInterface = {
         playTutorial: null,
     },
 
-    showVelocity: true,
-
     timer: 0,
     timerStart: null, // set by jump button
     levelState: 1, // 1 = pre-start, 2 = playing level, 3 = in endzone
@@ -73,7 +71,6 @@ const UserInterface = {
         const btn_settings = getByID("btn_settings");
         btn_settings.func = () => {
             UserInterface.gamestate = 3;
-            UserInterface.renderedButtons = UserInterface.btnGroup_settings; // replace once new group is done
             UserInterface.switchToUiGroup(UserInterface.uiGroup_settings);
         };
 
@@ -81,11 +78,8 @@ const UserInterface = {
         btn_mapEditor.func = () => {
             MapEditor.editorState = 5;
             UserInterface.gamestate = 2;
-            UserInterface.renderedButtons = UserInterface.btnGroup_mapEditorBrowser;
-            // UserInterface.switchToUiGroup(UserInterface.uiGroup_mapEditorBrowser);
-
-            // ADDING DIV OVERLAY FOR SHARE BUTTON - FIX (UNEEDED WITH NEW BUTTON SYSTEM)
-            btn_shareMap.func(true); // runs the createDiv function of the button
+            UserInterface.renderedButtons = []; // kill once all map editor button are on new system
+            UserInterface.switchToUiGroup(UserInterface.uiGroup_mapEditorMapBrowser);
 
             MapBrowser.state = 2;
             MapBrowser.init();
@@ -94,30 +88,22 @@ const UserInterface = {
         // ==========
         //  SETTINGS
         // ==========
-        const btn_sensitivitySlider = document.getElementById("btn_sensitivitySlider");
-        btn_sensitivitySlider.slider = btn_sensitivitySlider.querySelector("input");
-        btn_sensitivitySlider.label = btn_sensitivitySlider.querySelector("span");
+        const btn_sensitivitySlider = getByID("btn_sensitivitySlider");
+        btn_sensitivitySlider.labelValue = btn_sensitivitySlider.querySelector(".label > span");
+        btn_sensitivitySlider.handle = btn_sensitivitySlider.querySelector(".handle");
         btn_sensitivitySlider.func = function () {
-            UserInterface.settings.sensitivity = this.value;
+            UserInterface.settings.sensitivity = UserInterface.getSliderValue(this);
             UserInterface.writeSettings();
         };
-        // btn_sensitivitySlider.addEventListener("input", () => {
-        //     UserInterface.updateSliderLabel(btn_sensitivitySlider);
-        // });
-        // UserInterface.updateSliderLabel(btn_sensitivitySlider); // update once to start
 
-        const btn_volumeSlider = document.getElementById("btn_volumeSlider");
-        btn_volumeSlider.slider = btn_volumeSlider.querySelector("input");
-        btn_volumeSlider.label = btn_volumeSlider.querySelector("span");
+        const btn_volumeSlider = getByID("btn_volumeSlider");
+        btn_volumeSlider.labelValue = btn_volumeSlider.querySelector(".label > span");
+        btn_volumeSlider.handle = btn_volumeSlider.querySelector(".handle");
         btn_volumeSlider.func = function () {
-            UserInterface.settings.volume = this.value;
+            UserInterface.settings.volume = UserInterface.getSliderValue(this);
             AudioHandler.setVolume(UserInterface.settings.volume);
             UserInterface.writeSettings();
         };
-        // btn_volumeSlider.addEventListener("input", () => {
-        //     UserInterface.updateSliderLabel(btn_volumeSlider);
-        // });
-        // UserInterface.updateSliderLabel(btn_volumeSlider); // update once to start
 
         const btn_debugText = getByID("btn_debugText");
         btn_debugText.func = function () {
@@ -170,7 +156,28 @@ const UserInterface = {
         // ==========
 
         const ui_speedometer = getByID("ui_speedometer");
+
         const ui_timerBox = getByID("ui_timerBox");
+
+        const ui_strafeHelper = getByID("ui_strafeHelper");
+        ui_strafeHelper.handle = getByID("strafeHandle");
+        ui_strafeHelper.func = function () {
+            const touchX = TouchHandler.touches[0].x;
+
+            const parentRect = ui_strafeHelper.getBoundingClientRect();
+            const parentLeft = parentRect.left;
+            const parentWidth = parentRect.width;
+
+            // relative position of touch inside the parent
+            let rel = touchX - parentLeft;
+
+            // wrap-around using modulo so it loops when going past edges
+            rel = ((rel % parentWidth) + parentWidth) % parentWidth;
+
+            ui_strafeHelper.handle.style.left = rel + "px";
+        };
+
+        const ui_verticalWarning = getByID("ui_verticalWarning");
 
         const btn_mainMenu = getByID("btn_mainMenu");
         btn_mainMenu.func = () => {
@@ -231,11 +238,9 @@ const UserInterface = {
                         UserInterface.gamestate = 1;
                         MapEditor.editorState = 0;
 
-                        // UserInterface.renderedButtons = UserInterface.btnGroup_mainMenu; // kill
                         UserInterface.renderedButtons = []; // kill
                         UserInterface.switchToUiGroup(UserInterface.uiGroup_mainMenu);
 
-                        document.getElementById("shareDiv").remove();
                         return;
                     }
 
@@ -302,6 +307,7 @@ const UserInterface = {
                 // btn_mainMenu only appears in map settings or map color pages while in MapEditor
                 // goto MapEditor main map editing screen
                 UserInterface.renderedButtons = UserInterface.btnGroup_mapEditorInterface;
+                UserInterface.switchToUiGroup(UserInterface.uiGroup_mapEditorInterface)
                 MapEditor.editorState = 1;
                 return;
             }
@@ -312,6 +318,9 @@ const UserInterface = {
             if (Tutorial.isActive) {
                 // UNHIDE POPUP ALERT "Restart Disabled During Tutorial"
             } else {
+                if (UserInterface.levelState == 3) {
+                    UserInterface.switchToUiGroup(UserInterface.uiGroup_inLevel);
+                }
                 UserInterface.timer = 0;
                 UserInterface.levelState = 1;
                 Player.checkpointIndex = -1;
@@ -327,6 +336,8 @@ const UserInterface = {
                 Player.startLevel();
             }
         };
+
+        const ui_endScreen = getByID("ui_endScreen");
 
         // ======================
         //  STANDARD MAP BROWSER
@@ -376,7 +387,7 @@ const UserInterface = {
         const btn_level_awakening = getByID("btn_level_awakening");
         btn_level_awakening.func = () => {
             MapBrowser.selectedMapIndex = "Awakening";
-            MapBrowser.updateMapInfoBox();
+            MapBrowser.updateMapBrowserState();
             if (UserInterface.settings.playTutorial) {
                 Tutorial.isActive = true; // Doesn't this need to be toggled off at some point too? FIX What is this doing? toggle also turns this on and off
             }
@@ -385,85 +396,56 @@ const UserInterface = {
         const btn_level_pitfall = getByID("btn_level_pitfall");
         btn_level_pitfall.func = () => {
             MapBrowser.selectedMapIndex = "Pitfall";
-            MapBrowser.updateMapInfoBox();
+            MapBrowser.updateMapBrowserState();
         };
 
         const btn_level_cavernAbyss = getByID("btn_level_cavernAbyss");
         btn_level_cavernAbyss.func = () => {
             MapBrowser.selectedMapIndex = "Cavern Abyss";
-            MapBrowser.updateMapInfoBox();
+            MapBrowser.updateMapBrowserState();
         };
 
         const btn_level_crystals = getByID("btn_level_crystals");
         btn_level_crystals.func = () => {
             MapBrowser.selectedMapIndex = "Crystals";
-            MapBrowser.updateMapInfoBox();
+            MapBrowser.updateMapBrowserState();
         };
 
         const btn_level_trespass = getByID("btn_level_trespass");
         btn_level_trespass.func = () => {
             MapBrowser.selectedMapIndex = "Trespass";
-            MapBrowser.updateMapInfoBox();
+            MapBrowser.updateMapBrowserState();
         };
 
         const btn_level_turmoil = getByID("btn_level_turmoil");
         btn_level_turmoil.func = () => {
             MapBrowser.selectedMapIndex = "Turmoil";
-            MapBrowser.updateMapInfoBox();
+            MapBrowser.updateMapBrowserState();
         };
 
         const btn_level_tangledForest = getByID("btn_level_tangledForest");
         btn_level_tangledForest.func = () => {
             MapBrowser.selectedMapIndex = "Tangled Forest";
-            MapBrowser.updateMapInfoBox();
+            MapBrowser.updateMapBrowserState();
         };
 
         const btn_level_pinnacle = getByID("btn_level_pinnacle");
         btn_level_pinnacle.func = () => {
             MapBrowser.selectedMapIndex = "Pinnacle";
-            MapBrowser.updateMapInfoBox();
+            MapBrowser.updateMapBrowserState();
         };
 
         const btn_level_forever = getByID("btn_level_forever");
         btn_level_forever.func = () => {
             MapBrowser.selectedMapIndex = "Forever";
-            MapBrowser.updateMapInfoBox();
+            MapBrowser.updateMapBrowserState();
         };
 
-        // ===========
-        //  UI GROUPS
-        // ===========
-        this.uiGroup_mainMenu = [getByID("main-title"), btn_play, btn_settings, btn_mapEditor, getByID("menu-background")];
-        this.uiGroup_settings = [btn_mainMenu, btn_sensitivitySlider, btn_volumeSlider, btn_debugText, btn_strafeHUD, btn_resetSettings];
-        this.uiGroup_standardMapBrowser = [
-            btn_mainMenu,
-            btn_customMaps,
-            ui_mapInfoBox,
-            // btn_playMap, // added dynamically
-            // btn_playTutorial, // added dynamically
-            getByID("map-list-container"),
-            btn_level_awakening,
-            btn_level_pitfall,
-            btn_level_cavernAbyss,
-            btn_level_crystals,
-            btn_level_trespass,
-            btn_level_turmoil,
-            btn_level_tangledForest,
-            btn_level_pinnacle,
-            btn_level_forever,
-        ];
-        this.uiGroup_customMapBrowser = [btn_mainMenu, getByID("custom-map-browser-info"), ui_mapInfoBox, getByID("custom-map-list-container")];
-        this.uiGroup_inLevel = [ui_speedometer, ui_timerBox, btn_mainMenu, btn_restart, btn_jump];
-
-        this.activeUiGroup = [];
-        this.switchToUiGroup(UserInterface.uiGroup_mainMenu);
-
-        // [][][][][][][][][][][][][][]
-        //   CREATING THE OLD BUTTONS
-        // [][][][][][][][][][][][][][]
-
-        // MapEditor browser buttons
-        btn_new_map = new Button(screenWidthUI - 438, 40, 169, "new_map_button", "", 0, "", function () {
+        // ====================
+        //  MAP EDITOR BROWSER
+        // ====================
+        const btn_newMap = getByID("btn_newMap");
+        btn_newMap.func = function () {
             MapEditor.loadedMap = {
                 playerStart: {
                     x: 350,
@@ -472,16 +454,16 @@ const UserInterface = {
                 },
                 checkpoints: [],
                 style: {
-                    backgroundColor: "rgba(139,202,218)",
-                    playerColor: "rgba(240,240,240)",
-                    platformTopColor: "rgba(209,70,63)",
-                    platformSideColor: "rgba(209,70,63)",
-                    wallTopColor: "rgba(125,94,49)",
-                    wallSideColor: "rgba(125,94,49)",
-                    endZoneTopColor: "rgba(255,218,98)",
-                    endZoneSideColor: "rgba(255,218,98)",
-                    directLight: "rgba(89,89,89)",
-                    ambientLight: "rgba(191,191,191)",
+                    backgroundColor: "rgb(139,202,218)",
+                    playerColor: "rgb(240,240,240)",
+                    platformTopColor: "rgb(209,70,63)",
+                    platformSideColor: "rgb(209,70,63)",
+                    wallTopColor: "rgb(125,94,49)",
+                    wallSideColor: "rgb(125,94,49)",
+                    endZoneTopColor: "rgb(255,218,98)",
+                    endZoneSideColor: "rgb(255,218,98)",
+                    directLight: "rgb(89,89,89)",
+                    ambientLight: "rgb(191,191,191)",
                     platformHeight: 25,
                     wallHeight: 50,
                     lightDirection: 180,
@@ -512,14 +494,12 @@ const UserInterface = {
             // calculates the initial hypotenuse angleRad and corners for each platform
             MapEditor.loadedMap.platforms.forEach((platform) => MapEditor.updatePlatformCorners(platform));
 
-            // delete shareDiv when leaving browser page
-            document.getElementById("shareDiv").remove();
-
             UserInterface.gamestate = 7;
-        });
+        };
 
-        // UPDATE THIS BUTTON TO INCLUDE FUNCTIONALITY OF btn_import_map_text BUTTON
-        btn_import_map = new Button(screenWidthUI - 244, 40, 200, "import_map_button", "", 0, "", function () {
+        const btn_importMap = getByID("btn_importMap");
+        btn_importMap.func = () => {
+            // UPDATE THIS BUTTON TO INCLUDE FUNCTIONALITY OF btn_importMap_text BUTTON
             // LOAD FROM LOCAL FILE SYSTEM
             const input = document.createElement("input");
             input.type = "file";
@@ -537,9 +517,6 @@ const UserInterface = {
                         // Attempt to parse the JSON from the file
                         MapEditor.loadedMap = JSON.parse(e.target.result);
                         UserInterface.gamestate = 7;
-
-                        // remove shareDiv when leaving browser page
-                        document.getElementById("shareDiv").remove();
                     } catch (error) {
                         alert("Failed to load map: " + error.message);
                     }
@@ -556,19 +533,10 @@ const UserInterface = {
             });
 
             input.click(); // Trigger the file dialog
-        });
+        };
 
-        btn_import_map_text = new Button(midX_UI - 150, 250, 300, "", "", 0, "Import Map With Copy & Paste", function () {
-            let mapPaste = prompt("Paste Map Data:");
-            if (mapPaste) {
-                MapEditor.loadedMap = JSON.parse(mapPaste);
-            }
-        });
-
-        btn_editMap = new Button(screenWidthUI - 388, screenHeightUI - 102, 168, "edit_map_button", "", 0, "", async function () {
-            // delete shareDiv when leaving browser page
-            document.getElementById("shareDiv").remove();
-
+        const btn_editMap = getByID("btn_editMap");
+        btn_editMap.func = async () => {
             MapBrowser.scrollVel = 0;
             MapBrowser.scrollY = 0;
 
@@ -576,49 +544,16 @@ const UserInterface = {
 
             MapEditor.loadedMap = JSON.parse(mapDataRaw);
             UserInterface.gamestate = 7;
-        });
+        };
 
-        btn_shareMap = new Button(screenWidthUI - 196, screenHeightUI - 102, 64, "share_button", "", 0, "", function (createDiv) {
-            // The shareDiv does all the work for this button.
-            // createDiv is called by btn_mapEditor
-            // shareDiv is removed by btn_mainMenu, btn_editMap and btn_deleteMap
+        const btn_shareMap = getByID("btn_shareMap");
+        btn_shareMap.addEventListener("click", UserInterface.shareMap);
+        btn_shareMap.func = () => {
+            console.log("btn_shareMap functionality handled by native touch click and UserInterface.shareMap()");
+        };
 
-            if (createDiv) {
-                // called with this tag by btn_mapEditor
-                const shareDiv = document.createElement("div");
-                shareDiv.setAttribute("id", "shareDiv");
-                shareDiv.style.cssText = `
-                    position: absolute; 
-                    left: ${btn_shareMap.x}px;
-                    top: ${btn_shareMap.y}px;
-                    width: ${btn_shareMap.width}px;
-                    height: ${btn_shareMap.height}px;
-                    /* border: solid 2px blue; */
-                    z-index: 2;
-                `;
-
-                shareDiv.addEventListener("click", async () => {
-                    if (MapBrowser.selectedMapIndex != -1) {
-                        const mapDataRaw = await readFile("device", "maps/", MapBrowser.selectedMapIndex + ".json", "text");
-
-                        const share_data = {
-                            title: MapBrowser.selectedMapIndex, // doesnt do anything on IOS
-                            text: mapDataRaw,
-                        };
-
-                        try {
-                            await navigator.share(share_data);
-                        } catch (err) {
-                            console.log(err);
-                        }
-                    }
-                });
-
-                document.body.appendChild(shareDiv);
-            }
-        });
-
-        btn_deleteMap = new Button(screenWidthUI - 108, screenHeightUI - 102, 64, "trash_button", "", 0, "", function () {
+        const btn_deleteMap = getByID("btn_deleteMap");
+        btn_deleteMap.func = () => {
             const deleteMap = confirm("Delete Map?");
             if (deleteMap) {
                 window.resolveLocalFileSystemURL(cordova.file.dataDirectory + "maps", (fileSystem) => {
@@ -629,11 +564,7 @@ const UserInterface = {
                                 (file) => {
                                     alert("Map Deleted");
 
-                                    // delete shareDiv (avoids it getting duplicated when clicking btn_mapEditor below)
-                                    document.getElementById("shareDiv").remove();
-
                                     // reload map editor map browser by pressing btn_mapEditor again
-                                    // btn_mapEditor.released(true);
                                     btn_mapEditor.func();
                                 },
                                 function (error) {
@@ -646,6 +577,80 @@ const UserInterface = {
                         });
                     });
                 });
+            }
+        };
+
+        // ============
+        //  MAP EDITOR
+        // ============
+
+        const btn_exitMapEditor = getByID("btn_exitMapEditor")
+        btn_exitMapEditor.func = () =>  {
+            MapEditor.saveCustomMap();
+        };
+
+        // ===========
+        //  UI GROUPS
+        // ===========
+        this.uiGroup_mainMenu = [getByID("main-title"), btn_play, btn_settings, btn_mapEditor, getByID("menu-background")];
+        this.uiGroup_settings = [btn_mainMenu, btn_sensitivitySlider, btn_volumeSlider, btn_debugText, btn_strafeHUD, btn_resetSettings];
+        this.uiGroup_standardMapBrowser = [
+            btn_mainMenu,
+            btn_customMaps,
+            ui_mapInfoBox,
+            // btn_playMap, // added dynamically
+            // btn_playTutorial, // added dynamically
+            getByID("map-list-container"),
+            btn_level_awakening,
+            btn_level_pitfall,
+            btn_level_cavernAbyss,
+            btn_level_crystals,
+            btn_level_trespass,
+            btn_level_turmoil,
+            btn_level_tangledForest,
+            btn_level_pinnacle,
+            btn_level_forever,
+        ];
+        this.uiGroup_customMapBrowser = [btn_mainMenu, getByID("custom-map-browser-info"), ui_mapInfoBox, getByID("custom-map-list-container")];
+        this.uiGroup_inLevel = [
+            ui_speedometer,
+            ui_timerBox,
+            // ui_strafeHelper,
+            // ui_verticalWarning,
+            // ui_restartWarning, // Not done
+            // ui_overstrafeWarning, // Not done
+            btn_mainMenu,
+            btn_restart,
+            btn_jump,
+        ];
+        this.uiGroup_endScreen = [ui_speedometer, btn_mainMenu, btn_restart, btn_jump, ui_endScreen];
+
+        this.uiGroup_mapEditorMapBrowser = [btn_mainMenu, getByID("custom-map-list-container"), ui_mapInfoBox, btn_newMap, btn_importMap];
+
+        this.uiGroup_mapEditorInterface = [btn_exitMapEditor];
+        this.uiGroup_editPlatform = [btn_exitMapEditor];
+        this.uiGroup_editPlayerStart = [btn_exitMapEditor];
+        this.uiGroup_editCheckPoint = [btn_exitMapEditor];
+        this.uiGroup_editMultiSelect = [btn_exitMapEditor];
+
+        this.uiGroup_colorPickerState1 = [btn_mainMenu]
+        this.uiGroup_colorPickerState2 = []
+        this.uiGroup_mapSettings = [btn_mainMenu]
+
+
+        this.activeUiGroup = [];
+        this.switchToUiGroup(UserInterface.uiGroup_mainMenu);
+
+        // [][][][][][][][][][][][][][]
+        //   CREATING THE OLD BUTTONS
+        // [][][][][][][][][][][][][][]
+
+        // MapEditor browser buttons
+
+        btn_importMap_text = new Button(midX_UI - 150, 250, 300, "", "", 0, "Import Map With Copy & Paste", function () {
+            let mapPaste = prompt("Paste Map Data:");
+            if (mapPaste) {
+                MapEditor.loadedMap = JSON.parse(mapPaste);
             }
         });
 
@@ -704,10 +709,6 @@ const UserInterface = {
         });
 
         // MAP EDITOR BUTTONS
-        btn_exit_edit = new Button(44, 40, 68, "back_button", "", 0, "", function () {
-            MapEditor.saveCustomMap();
-        });
-
         btn_add_platform = new Button(screenWidthUI - 196, 25, 156, "platform_button", "", 0, "", function () {
             const newPlatform = {
                 x: Math.round(MapEditor.screen.x),
@@ -727,6 +728,7 @@ const UserInterface = {
                 ? MapEditor.selectedElements.concat(MapEditor.loadedMap.platforms.length - 1)
                 : [MapEditor.loadedMap.platforms.length - 1];
             UserInterface.renderedButtons = UserInterface.btnGroup_editPlatform;
+            UserInterface.switchToUiGroup(UserInterface.uiGroup_editPlatform);
 
             // SYNC ALL BUTTONS AND SLIDERS
             btn_angleSlider.updateState(MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].angle);
@@ -755,6 +757,7 @@ const UserInterface = {
             ColorPicker.editingElement = 0;
             PreviewWindow.update();
             UserInterface.renderedButtons = UserInterface.btnGroup_colorPickerState1;
+            UserInterface.switchToUiGroup(UserInterface.uiGroup_colorPickerState1);
         });
 
         btn_map_settings = new Button(screenWidthUI - 440, 25, 108, "map_settings_button", "", 0, "", function () {
@@ -768,6 +771,7 @@ const UserInterface = {
             btn_lightPitchSlider.updateState(MapEditor.loadedMap.style.lightPitch);
 
             UserInterface.renderedButtons = UserInterface.btnGroup_mapSettings;
+            UserInterface.switchToUiGroup(UserInterface.uiGroup_mapSettings);
         });
 
         btn_dragSelect = new Button(45, screenHeightUI - 230, 60, "toggle_button", "toggle_button_pressed", 1, "", function (sync) {
@@ -812,15 +816,7 @@ const UserInterface = {
 
                         if (MapEditor.selectedElements.length > 1) {
                             MapEditor.selectedElements = [MapEditor.selectedElements[MapEditor.selectedElements.length - 1]]; // make it only select the last element in the array
-
-                            // set correct btnGroup
-                            if (MapEditor.selectedElements[0] == "playerStart") {
-                                UserInterface.renderedButtons = UserInterface.btnGroup_editPlayerStart;
-                            } else if (Array.isArray(MapEditor.selectedElements[0])) {
-                                UserInterface.renderedButtons = UserInterface.btnGroup_editCheckPoint;
-                            } else {
-                                UserInterface.renderedButtons = UserInterface.btnGroup_editPlatform;
-                            }
+                            MapEditor.setButtonGroup()
                         }
                     } else {
                         // turn on multiSelect
@@ -847,6 +843,7 @@ const UserInterface = {
 
         btn_unselect = new Button(screenWidthUI - 250, 34, 45, "x_button", "", 0, "", function () {
             UserInterface.renderedButtons = UserInterface.btnGroup_mapEditorInterface;
+            UserInterface.switchToUiGroup(UserInterface.uiGroup_mapEditorInterface)
             MapEditor.selectedElements = []; // No selected platforms
         });
 
@@ -1628,6 +1625,8 @@ const UserInterface = {
 
             MapEditor.selectedElements = []; // No selected elements after delete
             UserInterface.renderedButtons = UserInterface.btnGroup_mapEditorInterface;
+            UserInterface.switchToUiGroup(UserInterface.uiGroup_mapEditorInterface)
+            UserInterface.switchToUiGroup(U)
         });
 
         // MAP SETTINGS SLIDERS
@@ -1749,6 +1748,7 @@ const UserInterface = {
 
         btn_unselectColor = new Button(screenWidthUI - 480, 32, 44, "x_button", "", 0, "", function () {
             UserInterface.renderedButtons = UserInterface.btnGroup_colorPickerState1;
+            UserInterface.switchToUiGroup(UserInterface.uiGroup_colorPickerState1);
             ColorPicker.editingElement = 0;
         });
 
@@ -1767,7 +1767,8 @@ const UserInterface = {
 
         btn_backgroundColor = new Button(screenWidthUI - 498, 32, 208, "background_button", "", 0, "", function () {
             ColorPicker.editingElement = 1;
-            UserInterface.renderedButtons = UserInterface.btnGroup_colorPickerState2;
+            UserInterface.renderedButtons = UserInterface.btnGroup_colorPickerState2; // kill
+            UserInterface.switchToUiGroup(UserInterface.uiGroup_colorPickerState2);
             ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.backgroundColor);
             ColorPicker.updateSliders();
             ColorPicker.syncGradients();
@@ -1776,6 +1777,7 @@ const UserInterface = {
         btn_playerColor = new Button(screenWidthUI - 498, 116, 208, "player_button", "", 0, "", function () {
             ColorPicker.editingElement = 2;
             UserInterface.renderedButtons = UserInterface.btnGroup_colorPickerState2;
+            UserInterface.switchToUiGroup(UserInterface.uiGroup_colorPickerState2);
             ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.playerColor);
             ColorPicker.updateSliders();
             ColorPicker.syncGradients();
@@ -1784,6 +1786,7 @@ const UserInterface = {
         btn_directLightColor = new Button(screenWidthUI - 270, 32, 226, "direct_light_button", "", 0, "", function () {
             ColorPicker.editingElement = 9;
             UserInterface.renderedButtons = UserInterface.btnGroup_colorPickerState2;
+            UserInterface.switchToUiGroup(UserInterface.uiGroup_colorPickerState2);
             ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.directLight);
             ColorPicker.updateSliders();
             ColorPicker.syncGradients();
@@ -1792,6 +1795,7 @@ const UserInterface = {
         btn_ambientLightColor = new Button(screenWidthUI - 270, 116, 226, "ambient_light_button", "", 0, "", function () {
             ColorPicker.editingElement = 10;
             UserInterface.renderedButtons = UserInterface.btnGroup_colorPickerState2;
+            UserInterface.switchToUiGroup(UserInterface.uiGroup_colorPickerState2);
             ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.ambientLight);
             ColorPicker.updateSliders();
             ColorPicker.syncGradients();
@@ -1800,6 +1804,7 @@ const UserInterface = {
         btn_wallTopColor = new Button(screenWidthUI - 726, screenHeightUI - 172, 152, "top_button", "", 0, "", function () {
             ColorPicker.editingElement = 5;
             UserInterface.renderedButtons = UserInterface.btnGroup_colorPickerState2;
+            UserInterface.switchToUiGroup(UserInterface.uiGroup_colorPickerState2);
             ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.wallTopColor);
             ColorPicker.updateSliders();
             ColorPicker.syncGradients();
@@ -1808,6 +1813,7 @@ const UserInterface = {
         btn_wallSideColor = new Button(screenWidthUI - 726, screenHeightUI - 96, 152, "side_button", "", 0, "", function () {
             ColorPicker.editingElement = 6;
             UserInterface.renderedButtons = UserInterface.btnGroup_colorPickerState2;
+            UserInterface.switchToUiGroup(UserInterface.uiGroup_colorPickerState2);
             ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.wallSideColor);
             ColorPicker.updateSliders();
             ColorPicker.syncGradients();
@@ -1816,6 +1822,7 @@ const UserInterface = {
         btn_platformTopColor = new Button(screenWidthUI - 498, screenHeightUI - 172, 152, "top_button", "", 0, "", function () {
             ColorPicker.editingElement = 3;
             UserInterface.renderedButtons = UserInterface.btnGroup_colorPickerState2;
+            UserInterface.switchToUiGroup(UserInterface.uiGroup_colorPickerState2);
             ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.platformTopColor);
             ColorPicker.updateSliders();
             ColorPicker.syncGradients();
@@ -1824,6 +1831,7 @@ const UserInterface = {
         btn_platformSideColor = new Button(screenWidthUI - 498, screenHeightUI - 96, 152, "side_button", "", 0, "", function () {
             ColorPicker.editingElement = 4;
             UserInterface.renderedButtons = UserInterface.btnGroup_colorPickerState2;
+            UserInterface.switchToUiGroup(UserInterface.uiGroup_colorPickerState2);
             ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.platformSideColor);
             ColorPicker.updateSliders();
             ColorPicker.syncGradients();
@@ -1832,6 +1840,7 @@ const UserInterface = {
         btn_endZoneTopColor = new Button(screenWidthUI - 270, screenHeightUI - 172, 152, "top_button", "", 0, "", function () {
             ColorPicker.editingElement = 7;
             UserInterface.renderedButtons = UserInterface.btnGroup_colorPickerState2;
+            UserInterface.switchToUiGroup(UserInterface.uiGroup_colorPickerState2);
             ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.endZoneTopColor);
             ColorPicker.updateSliders();
             ColorPicker.syncGradients();
@@ -1840,6 +1849,7 @@ const UserInterface = {
         btn_endZoneSideColor = new Button(screenWidthUI - 270, screenHeightUI - 96, 152, "side_button", "", 0, "", function () {
             ColorPicker.editingElement = 8;
             UserInterface.renderedButtons = UserInterface.btnGroup_colorPickerState2;
+            UserInterface.switchToUiGroup(UserInterface.uiGroup_colorPickerState2);
             ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.endZoneSideColor);
             ColorPicker.updateSliders();
             ColorPicker.syncGradients();
@@ -1882,11 +1892,8 @@ const UserInterface = {
         });
 
         // GROUPS OF BUTTONS TO RENDER ON DIFFERENT PAGES
-        this.btnGroup_settings = [];
 
-        this.btnGroup_mapEditorBrowser = [btn_new_map, btn_import_map];
         this.btnGroup_mapEditorInterface = [
-            btn_exit_edit,
             btn_add_platform,
             btn_map_colors,
             btn_map_settings,
@@ -1920,7 +1927,6 @@ const UserInterface = {
         ];
         this.btnGroup_mapSettings = [btn_platformHeightSlider, btn_wallHeightSlider, btn_lightDirectionSlider, btn_lightPitchSlider];
         this.btnGroup_editPlatform = [
-            btn_exit_edit,
             btn_unselect,
 
             btn_translate,
@@ -1939,7 +1945,6 @@ const UserInterface = {
             btn_snappingSlider,
         ];
         this.btnGroup_editPlayerStart = [
-            btn_exit_edit,
             btn_unselect,
 
             btn_translate,
@@ -1949,7 +1954,6 @@ const UserInterface = {
             btn_snappingSlider,
         ];
         this.btnGroup_editCheckPoint = [
-            btn_exit_edit,
             btn_unselect,
 
             btn_translate,
@@ -1961,7 +1965,6 @@ const UserInterface = {
             btn_snappingSlider,
         ];
         this.btnGroup_editMultiSelect = [
-            btn_exit_edit,
             btn_unselect,
 
             btn_delete_element,
@@ -1971,34 +1974,11 @@ const UserInterface = {
             btn_multiSelect,
             btn_snappingSlider,
         ];
-        this.btnGroup_dragSelect = [btn_dragSelect];
+
+        this.btnGroup_dragSelect = [btn_dragSelect]; // dont even need
 
         // this.renderedButtons = this.btnGroup_mainMenu;
         this.renderedButtons = []; // kill eventually
-    },
-
-    update: function () {
-        if (this.gamestate == 3 || MapEditor.loadedMap) {
-            // in settings page or in map editor pages
-            this.renderedButtons.forEach((button) => {
-                // LOOP RENDERED BUTTONS
-                if (button.constructor.name == "SliderUI") {
-                    // run .update() for only Sliders
-                    button.update();
-                }
-            });
-        }
-
-        if (this.levelState == 2) {
-            if (Tutorial.pausePlayer == true) {
-                // Date.now() - this.timerStart) - this.timer = time to add to this.timerStart
-                // Date.now() - this.timer = this.timerStart
-
-                this.timerStart += Date.now() - this.timer - this.timerStart;
-            } else {
-                this.timer = Date.now() - this.timerStart;
-            }
-        }
     },
 
     mapLoaded: function () {
@@ -2117,18 +2097,53 @@ const UserInterface = {
         );
     },
 
-    updateSliderLabel: function (sliderWrapper) {
-        sliderWrapper.label.textContent = this.getSliderValue(sliderWrapper);
+    // Slider Get, Set, & updateDraggedSlider Functions
+
+    setSliderValue: function (slider, value) {
+        const min = parseFloat(slider.dataset.min);
+        const max = parseFloat(slider.dataset.max);
+
+        // Clamp the value to [min, max]
+        const clamped = Math.min(Math.max(value, min), max);
+
+        const step = parseFloat(slider.dataset.step) || 1;
+        const stepSnapped = Math.round((clamped - min) / step) * step + min;
+
+        const decimalPointsToUse = slider.dataset.step?.split(".")[1]?.length || 0;
+        const stepSnappedRounded = stepSnapped.toFixed(decimalPointsToUse);
+
+        // update data-value in HTML dataSet
+        slider.dataset.value = stepSnappedRounded;
+
+        // update the label to reflect new value
+        slider.labelValue.textContent = stepSnappedRounded;
+
+        // Convert value to percentage of the range for styling
+        const percent = ((stepSnappedRounded - min) / (max - min)) * 100;
+        slider.handle.style.setProperty("--pos", `${percent}%`);
     },
 
-    setSliderValue: function (sliderWrapper, value) {
-        sliderWrapper.slider.value = value;
-        this.updateSliderLabel(sliderWrapper);
+    getSliderValue: function (slider) {
+        return parseFloat(slider.dataset.value);
     },
 
-    getSliderValue: function (sliderWrapper) {
-        return parseInt(sliderWrapper.slider.value, 10);
+    updateDraggedSlider: function (slider) {
+        const sliderRect = slider.getBoundingClientRect();
+        const slidersTouchID = Number(slider.dataset.touchid);
+        const touch = TouchHandler.touches.find((touch) => touch.identifier === slidersTouchID);
+
+        const value = UserInterfaceCanvas.mapToRange(
+            touch.x,
+            sliderRect.left,
+            sliderRect.right,
+            Number(slider.dataset.min),
+            Number(slider.dataset.max)
+        );
+
+        this.setSliderValue(slider, value);
     },
+
+    // Toggle Button Get and Set Functions
 
     getToggleState: function (toggleButton) {
         return toggleButton.classList.contains("toggled");
@@ -2212,8 +2227,8 @@ const UserInterface = {
         UserInterfaceCanvas.ctx.fillStyle = oldFill;
     },
 
-    /*
-    getOrdinalSuffix: function (i) { // turns 1 into 1st, 2 into 2nd UNUSED
+    getOrdinalSuffix: function (i) {
+        // turns 1 into 1st, 2 into 2nd UNUSED KILL
         let j = i % 10,
             k = i % 100;
         if (j === 1 && k !== 11) {
@@ -2227,7 +2242,6 @@ const UserInterface = {
         }
         return i + "th";
     },
-    */
 
     truncateText: function (text, clampToWidth) {
         if (UserInterfaceCanvas.ctx.measureText(text).width > clampToWidth) {
@@ -2245,7 +2259,7 @@ const UserInterface = {
         // alternative way that removes the need to track current active uiGroup
         // const visibleElements = document.querySelectorAll('#ui-container :not(.hidden)');
 
-        // there is also this .toggle function if it is applicable / safe to use here
+        // there is also this .toggle function if it is applicable to use here
         // element.classList.toggle("hidden");
 
         // Hide all ui elements currently showing
@@ -2261,14 +2275,25 @@ const UserInterface = {
         this.activeUiGroup = uiGroup;
     },
 
+    removeUiElement: function (uiElement) {
+        this.switchToUiGroup(this.activeUiGroup.filter((item) => item !== uiElement));
+    },
+
+    addUiElement: function (uiElement, allowDuplicates = false) {
+        if (!this.activeUiGroup.includes(uiElement) || allowDuplicates) {
+            this.switchToUiGroup(this.activeUiGroup.concat(uiElement));
+        }
+    },
+
     isPointInsideElement: function (x, y, element) {
         const rect = element.getBoundingClientRect();
         return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
     },
 
-    touchStarted: function (x, y) {
-        // TRIGGERED BY TouchHandler
+    touchStarted: function (x, y, id) {
+        // Called By TouchHandler
         this.renderedButtons.forEach((button) => {
+            // kill eventually
             if (button.constructor.name == "Button") {
                 // only run on buttons not sliders
                 if (
@@ -2284,6 +2309,7 @@ const UserInterface = {
         });
 
         this.renderedButtons.forEach((slider) => {
+            // kill eventually
             if (slider.constructor.name == "SliderUI") {
                 // only run on sliders
                 if (
@@ -2309,17 +2335,21 @@ const UserInterface = {
             }
             // sliders
             if (uiElement.classList.contains("slider")) {
-                const sliderHandle = uiElement.slider.querySelector("::-webkit-slider-thumb");
-                
-                if (this.isPointInsideElement(x, y, sliderHandle)) {
-                    sliderHandle.classList.add("pressed");
+                if (this.isPointInsideElement(x, y, uiElement.handle)) {
+                    uiElement.handle.classList.add("pressed");
+                    uiElement.dataset.touchid = id;
                 }
             }
         }
+
+        if (this.gamestate == 6 && this.levelState !== 3) {
+            // In Level and not at endscreen
+            this.addUiElement(ui_strafeHelper);
+        }
     },
 
-    touchReleased: function (x, y) {
-        // TRIGGERED BY TouchHandler. x and y are already canvas scaled
+    touchReleased: function (x, y, id) {
+        // Called By TouchHandler
 
         // run button's function if clicked
         // run MapEditor.touchRelease if active and no buttons are pressed
@@ -2358,6 +2388,20 @@ const UserInterface = {
                     editorIgnoreRelease = true;
                 }
                 uiElement.classList.remove("pressed");
+
+                // SLIDERS
+            } else if (uiElement.classList.contains("slider") && Number(uiElement.dataset.touchid) == id) {
+                uiElement.func();
+                uiElement.handle.classList.remove("pressed");
+                editorIgnoreRelease = true;
+            }
+        }
+
+        if (this.gamestate == 6) {
+            // In Level
+            if (TouchHandler.touches.length == 0) {
+                // no more touches on screen
+                UserInterface.removeUiElement(ui_strafeHelper);
             }
         }
 
@@ -2371,6 +2415,181 @@ const UserInterface = {
         }
     },
 
+    activateEndScreen: function () {
+        // called when player.endslow reaches 0 at end of level
+
+        this.switchToUiGroup(this.uiGroup_endScreen); // removes strafeHelper and timerBox
+
+        // Update Endscreen with all necessary information
+        ui_endScreen.querySelector(".mapName").textContent = Map.name;
+
+        const yourTimeInSeconds = this.secondsToMinutes(this.timer);
+        ui_endScreen.querySelector(".yourTime").textContent = `${yourTimeInSeconds}`;
+
+        // map records is set immediately after completion so if timer == map.record it means it was a new record
+        if (this.timer == this.records[Map.name]) {
+            // new record text
+            ui_endScreen.querySelector(".yourRecord").textContent = `New Record!  -(${this.secondsToMinutes(
+                Math.abs(this.previousRecord - this.records[Map.name])
+            )})`;
+        } else {
+            // display normal record
+            ui_endScreen.querySelector(".yourRecord").textContent = `Best Time: ${this.secondsToMinutes(this.records[Map.name])}`;
+        }
+
+        // update medal times and activeMedal OR hide medal list
+        const mapLeaderboard = this.leaderboards[Map.name];
+        if (mapLeaderboard !== undefined) {
+            ui_endScreen.querySelector(".medalList").classList.remove("hidden");
+
+            const goldMedal = ui_endScreen.querySelector(".gold");
+            const silverMedal = ui_endScreen.querySelector(".silver");
+            const bronzeMedal = ui_endScreen.querySelector(".bronze");
+
+            // update times
+            goldMedal.textContent = this.secondsToMinutes(mapLeaderboard.gold);
+            silverMedal.textContent = this.secondsToMinutes(mapLeaderboard.silver);
+            bronzeMedal.textContent = this.secondsToMinutes(mapLeaderboard.bronze);
+
+            // remove activeMedal from all
+            goldMedal.classList.remove("activeMedal");
+            silverMedal.classList.remove("activeMedal");
+            bronzeMedal.classList.remove("activeMedal");
+
+            // set activeMedal
+            if (this.timer <= mapLeaderboard.gold) {
+                goldMedal.classList.add("activeMedal");
+            } else if (this.timer <= mapLeaderboard.silver) {
+                silverMedal.classList.add("activeMedal");
+            } else if (this.timer <= mapLeaderboard.bronze) {
+                bronzeMedal.classList.add("activeMedal");
+            }
+        } else {
+            // No leaderboards -> hide medal list
+            ui_endScreen.querySelector(".medalList").classList.add("hidden");
+        }
+    },
+
+    shareMap: async function () {
+        try {
+            const mapIndex = MapBrowser.selectedMapIndex;
+            const mapDataRaw = await readFile("device", "maps/", mapIndex + ".json", "text");
+
+            const shareData = {
+                title: `Map ${mapIndex}`,
+                text: mapDataRaw,
+            };
+
+            if (navigator.share) {
+                try {
+                    await navigator.share(shareData);
+                    console.log("Map shared successfully.");
+                    return;
+                } catch (shareErr) {
+                    if (shareErr.name === "AbortError" || shareErr.message.includes("cancel")) {
+                        console.log("Share canceled by user.");
+                        return; // Silently exit on cancel
+                    }
+                    console.warn("Share failed unexpectedly:", shareErr);
+                    // fall through to clipboard
+                }
+            }
+
+            if (navigator.clipboard) {
+                await navigator.clipboard.writeText(mapDataRaw);
+                alert("Map data copied to clipboard.");
+            }
+        } catch (err) {
+            console.error("Sharing failed entirely:", err);
+            alert("Something went wrong while trying to share your map.");
+        }
+    },
+    
+    update: function () {
+        // update dragged Sliders every frame
+        // sliders are only in Settings Page and MapEditor Pages
+        if (this.gamestate == 3 || MapEditor.loadedMap) {
+            this.renderedButtons.forEach((button) => {
+                // kill eventually
+                // LOOP RENDERED BUTTONS
+                if (button.constructor.name == "SliderUI") {
+                    // run .update() for only Sliders
+                    button.update();
+                }
+            });
+
+            // NEW DOM WAY
+            // Live update position of handle if slider is being dragged
+            for (const uiElement of this.activeUiGroup) {
+                if (uiElement.classList.contains("slider")) {
+                    if (uiElement.handle.classList.contains("pressed")) {
+                        this.updateDraggedSlider(uiElement);
+                    }
+                }
+            }
+        }
+
+        // In Level
+        if (this.gamestate == 6) {
+            if (this.levelState == 1 || this.levelState == 2) {
+                if (TouchHandler.dragging) {
+                    ui_strafeHelper.func();
+
+                    // Calculate whether to DRAW VERTICAL WARNING
+                    if (!Tutorial.pausePlayer) {
+                        const averageX = Math.abs(TouchHandler.averageDragX.getAverage());
+                        const averageY = Math.abs(TouchHandler.averageDragY.getAverage());
+                        if (averageY > (5 * 1) / 60 / dt && averageY > averageX * 1.25) {
+                            if (this.showVerticalWarning == false) {
+                                this.addUiElement(ui_verticalWarning);
+                                this.showVerticalWarning = true;
+                                setTimeout(() => {
+                                    this.removeUiElement(ui_verticalWarning);
+                                    this.showVerticalWarning = false;
+                                }, 1500); // waits 1.5 seconds to hide warning
+                            }
+                        }
+                    }
+                }
+
+                // Update Timer Box's Text
+                if (Tutorial.isActive == false) {
+                    ui_timerBox.children[0].textContent = `Time: ${UserInterface.secondsToMinutes(this.timer)}`;
+                    // FIX DONT CALCULATE THE RECORD EVERY TIME -- CACHE IT
+                    ui_timerBox.children[1].textContent = `Record: ${UserInterface.secondsToMinutes(
+                        this.records[Map.name] == null ? 0 : this.records[Map.name]
+                    )}`;
+                }
+            }
+
+            if (this.levelState == 2) {
+                // FIX do this below \/ CSS change only when player is first paused or unpaused not by checking every frame
+                const speedometerTopValue = parseFloat(window.getComputedStyle(ui_speedometer).top);
+
+                if (!Tutorial.pausePlayer) {
+                    // player is NOT paused
+                    this.timer = Date.now() - this.timerStart;
+
+                    // Update Speed Text. ADD COLOR AND SIZE CHANGES TO THIS BASED OFF OF GAIN
+                    ui_speedometer.textContent = `Speed: ${Math.round(Player.velocity.magnitude())}`;
+
+                    // move Speed Text down to normal spot (dont do this check every frame only when first unpausing FIX )
+                    if (speedometerTopValue === 8) {
+                        ui_speedometer.style.top = "32px";
+                    }
+                } else {
+                    // player IS paused
+                    this.timerStart += Date.now() - this.timer - this.timerStart; // dont progress timer when paused
+
+                    // move Speed Text up (dont do this check every frame only when first pausing FIX )
+                    if (speedometerTopValue === 32) {
+                        ui_speedometer.style.top = "8px";
+                    }
+                }
+            }
+        }
+    },
+
     render: function () {
         const ctx = UserInterfaceCanvas.ctx;
         ctx.save(); // UI SCALING SAVE
@@ -2378,41 +2597,14 @@ const UserInterface = {
 
         if (this.gamestate == 1) {
             // In Main Menu
-            // dont set this here every frame
-            CanvasArea.canvas.style.backgroundColor = "#a3d5e1";
+            // FIX dont set this here every frame
+            // also dont use canvas as BG
+            // CanvasArea.canvas.style.backgroundColor = "#a3d5e1";
         }
 
         if (this.gamestate == 6) {
             // In Level
             ctx.fillStyle = UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
-
-            // Update Timer Box's Text
-            if (this.levelState !== 3 && Tutorial.isActive == false) {
-                ui_timerBox.children[0].textContent = `Time: ${UserInterface.secondsToMinutes(this.timer)}`;
-                // FIX DONT CALCULATE THE RECORD EVERY TIME -- CACHE IT
-                ui_timerBox.children[1].textContent = `Record: ${UserInterface.secondsToMinutes(
-                    this.records[Map.name] == null ? 0 : this.records[Map.name]
-                )}`;
-            }
-
-            // Update Speed Text. ADD COLOR AND SIZE CHANGES TO THIS BASED OFF OF GAIN
-            if (this.showVelocity && this.levelState == 2) {
-                // FIX do this CSS change only when player is first paused or unpaused not by checking every frame
-                const speedometerTopValue = parseFloat(window.getComputedStyle(ui_speedometer).top);
-
-                if (Tutorial.pausePlayer) {
-                    if (speedometerTopValue === 32) {
-                        ui_speedometer.style.top = "8px";
-                    }
-                } else {
-                    // not paused
-                    if (speedometerTopValue === 8) {
-                        ui_speedometer.style.top = "32px";
-                    }
-                }
-
-                ui_speedometer.textContent = `Speed: ${Math.round(Player.velocity.magnitude())}`;
-            }
 
             if (this.settings.debugText == 1) {
                 // DRAWING DEBUG TEXT
@@ -2474,7 +2666,6 @@ const UserInterface = {
 
             if (this.settings.strafeHUD == 1) {
                 // STRAFE OPTIMIZER HUD
-
                 if (this.settings.debugText == 1) {
                     // disabled
                     /*
@@ -2496,85 +2687,8 @@ const UserInterface = {
                 }
 
                 if (TouchHandler.dragging && this.levelState != 3) {
-                    let lineUpOffset = 0;
-                    if (TouchHandler.touches[0].startX > midX_UI - 150 && TouchHandler.touches[0].startX < midX_UI + 150) {
-                        // if touched withing slider's X => offset the handle to lineup with finger
-                        lineUpOffset = TouchHandler.touches[0].startX - midX_UI;
-                    }
-
-                    let strafeDistanceX = TouchHandler.touches[0].x - TouchHandler.touches[0].startX + lineUpOffset;
-                    while (strafeDistanceX > 160) {
-                        // loop back to negative
-                        strafeDistanceX = strafeDistanceX - 320;
-                    }
-                    while (strafeDistanceX < -160) {
-                        // loop back to positive
-                        strafeDistanceX = strafeDistanceX + 320;
-                    }
-
-                    ctx.strokeStyle = UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
-                    ctx.fillStyle = UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
-
-                    // DRAW TOUCH HUD SLIDER
                     if (Tutorial.pausePlayer == false) {
-                        // as long as Player isnt paused
-
-                        ctx.lineWidth = 3;
-
-                        const radius = 8;
-                        const x = midX_UI - 150;
-                        const y = screenHeightUI - 100;
-                        const w = 300;
-                        const h = 16;
-
-                        // long slider shape
-                        ctx.beginPath();
-                        ctx.moveTo(x + radius, y); // top line
-                        ctx.lineTo(x + w - radius, y);
-                        ctx.arc(x + w - radius, y + radius, radius, 1.5 * Math.PI, 0.5 * Math.PI); // right arc
-                        ctx.lineTo(x + radius, y + h);
-                        ctx.arc(x + radius, y + radius, radius, 0.5 * Math.PI, 1.5 * Math.PI); // left arc
-
-                        ctx.stroke();
-                        ctx.save(); // #2.2
-                        ctx.clip();
-
-                        // Handle (dot)
-                        ctx.beginPath();
-                        ctx.arc(midX_UI + strafeDistanceX, y + h / 2, 6, 0, 2 * Math.PI);
-                        ctx.fill();
-
-                        ctx.restore(); // #2.2
-
-                        // Calculate wheather to DRAW VERTICAL WARNING
-                        const averageX = Math.abs(TouchHandler.averageDragX.getAverage());
-                        const averageY = Math.abs(TouchHandler.averageDragY.getAverage());
-                        if (averageY > (5 * 1) / 60 / dt && averageY > averageX * 1.25) {
-                            if (this.showVerticalWarning == false) {
-                                this.showVerticalWarning = true;
-                                setTimeout(() => {
-                                    UserInterface.showVerticalWarning = false;
-                                }, 1500); // waits 1 second to hide warning
-                            }
-                        }
-
                         ctx.font = "16px BAHNSCHRIFT";
-
-                        // DRAW VERTICAL WARNING
-                        if (this.showVerticalWarning) {
-                            UserInterfaceCanvas.roundedRect(
-                                midX_UI - 150,
-                                screenHeightUI - 130,
-                                ctx.measureText("DON'T SWIPE VERTICAL").width + 24,
-                                24,
-                                8
-                            );
-                            ctx.fillStyle = UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
-                            ctx.fill();
-
-                            ctx.fillStyle = !UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
-                            ctx.fillText("DON'T SWIPE VERTICAL", midX_UI - 138, screenHeightUI - 112);
-                        }
 
                         if (this.showOverstrafeWarning) {
                             heightOffset = this.showVerticalWarning ? 36 : 0;
@@ -2592,138 +2706,6 @@ const UserInterface = {
                             ctx.fillText("TURNING TOO FAST!", midX_UI - 138, screenHeightUI - 120 - heightOffset);
                         }
                     }
-                }
-            }
-
-            // ENDSCREEN
-            if (Player.endSlow == 0) {
-                // level name, your time, record, medals
-
-                // TIME BOX
-                const timeBox = {
-                    x: midX_UI - (this.leaderboards[Map.name] !== undefined ? 232 : 170),
-                    y: midY_UI - (Tutorial.isActive ? 90 : 108),
-                    width: this.leaderboards[Map.name] !== undefined ? 500 : 322,
-                    height: 222,
-                };
-
-                // HIGHLIGHT MEDAL BOX
-                const highlightBox = {
-                    x: timeBox.x + 308,
-                    y: null, // set later
-                    width: 172,
-                    height: 58,
-                };
-
-                let medal = null;
-
-                // DRAW BOXES
-                ctx.fillStyle = UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
-                ctx.strokeStyle = !UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
-
-                ctx.save(); // save 3
-
-                ctx.shadowColor = "rgba(0, 0, 0, 0.21)";
-                ctx.shadowOffsetX = 10;
-                ctx.shadowOffsetY = 10;
-
-                // time box
-                UserInterfaceCanvas.roundedRect(timeBox.x, timeBox.y, timeBox.width, timeBox.height, 15);
-                ctx.fill();
-
-                // highlight medal box
-                if (this.leaderboards[Map.name] !== undefined) {
-                    // set hightlight box y and draw it
-                    if (UserInterface.timer <= this.leaderboards[Map.name].gold) {
-                        medal = 1;
-                        highlightBox.y = timeBox.y + 50 - highlightBox.height / 2;
-                    } else if (UserInterface.timer <= this.leaderboards[Map.name].silver) {
-                        medal = 2;
-                        highlightBox.y = timeBox.y + timeBox.height / 2 - highlightBox.height / 2;
-                    } else if (UserInterface.timer <= this.leaderboards[Map.name].bronze) {
-                        medal = 3;
-                        highlightBox.y = timeBox.y + timeBox.height - 50 - highlightBox.height / 2;
-                    }
-
-                    if (medal !== null) {
-                        ctx.shadowOffsetX = 8;
-                        ctx.shadowOffsetY = 8;
-
-                        UserInterfaceCanvas.roundedRect(highlightBox.x, highlightBox.y, highlightBox.width, highlightBox.height, 12);
-                        ctx.fill();
-
-                        ctx.shadowColor = "transparent";
-                        ctx.lineWidth = 4;
-                        ctx.stroke();
-                    }
-                }
-
-                ctx.restore(); // restore 3
-
-                // DRAW END SCREEN TEXT
-                ctx.fillStyle = !UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
-
-                // map name
-                ctx.font = "30px BAHNSCHRIFT";
-                ctx.fillText(Map.name, timeBox.x + 30, timeBox.y + 54);
-
-                // time
-                ctx.font = "70px BAHNSCHRIFT";
-                ctx.fillText(UserInterface.secondsToMinutes(UserInterface.timer), timeBox.x + 27, timeBox.y + timeBox.height / 2 + 24);
-
-                // record OR new record
-                ctx.font = "24px BAHNSCHRIFT";
-
-                const recordText =
-                    this.timer == this.records[Map.name]
-                        ? "New Record!  -(" + UserInterface.secondsToMinutes(Math.abs(this.previousRecord - this.records[Map.name])) + ")"
-                        : "Best Time: " + UserInterface.secondsToMinutes(this.records[Map.name]);
-
-                ctx.fillText(recordText, timeBox.x + 30, timeBox.y + timeBox.height - 35);
-
-                // medals and times
-                if (this.leaderboards[Map.name] !== undefined) {
-                    let halfFontHeight = 8;
-                    let xOffset = 0;
-                    let medalRadius = 12;
-                    let medalShadow = false;
-
-                    function testMedal(number) {
-                        // sets specific parameters for each drawMedal
-                        ctx.font = medal == number ? "30px BAHNSCHRIFT" : "24px BAHNSCHRIFT";
-                        halfFontHeight = medal == number ? 10 : 8;
-                        xOffset = medal == number ? 10 : 0;
-                        medalRadius = medal == number ? 15 : 12;
-                        medalShadow = medal == number ? true : false;
-                        ctx.globalAlpha = medal == number || medal == null ? 1 : 0.5;
-                    }
-
-                    testMedal(1);
-                    ctx.fillText(
-                        UserInterface.secondsToMinutes(this.leaderboards[Map.name].gold),
-                        timeBox.x + 370 - xOffset,
-                        timeBox.y + 50 + halfFontHeight
-                    );
-                    ctx.globalAlpha = 1;
-                    this.drawMedal(timeBox.x + 348 - xOffset, timeBox.y + 50, medalRadius, "#f1b62c", "#fde320", 3, medalShadow);
-
-                    testMedal(2);
-                    ctx.fillText(
-                        UserInterface.secondsToMinutes(this.leaderboards[Map.name].silver),
-                        timeBox.x + 370 - xOffset,
-                        timeBox.y + timeBox.height / 2 + halfFontHeight
-                    );
-                    ctx.globalAlpha = 1;
-                    this.drawMedal(timeBox.x + 348 - xOffset, timeBox.y + timeBox.height / 2, medalRadius, "#8c9a9b", "#d4d4d6", 3, medalShadow);
-
-                    testMedal(3);
-                    ctx.fillText(
-                        UserInterface.secondsToMinutes(this.leaderboards[Map.name].bronze),
-                        timeBox.x + 370 - xOffset,
-                        timeBox.y + timeBox.height - 50 + halfFontHeight
-                    );
-                    ctx.globalAlpha = 1;
-                    this.drawMedal(timeBox.x + 348 - xOffset, timeBox.y + timeBox.height - 50, medalRadius, "#e78b4c", "#f4a46f", 3, medalShadow);
                 }
             }
         }

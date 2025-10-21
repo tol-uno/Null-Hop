@@ -34,7 +34,7 @@ const TouchHandler = {
                     this.dragging = true;
                 }
 
-                UserInterface.touchStarted(touch.x, touch.y); // sends touchStarted for every touchStart
+                UserInterface.touchStarted(touch.x, touch.y, touch.identifier); // sends touchStarted for every touchStart
 
                 this.touches.push(touch);
             }
@@ -114,7 +114,7 @@ const TouchHandler = {
                     this.touches.splice(touchIndex, 1); // 2nd parameter means remove one item only
                 }
 
-                UserInterface.touchReleased(touch.x, touch.y); // sends touchRealease for every release
+                UserInterface.touchReleased(touch.x, touch.y, touch.identifier); // sends touchRealease for every release
             }
 
             if (this.zoom.isZooming && this.touches.length < 2) {
@@ -147,9 +147,21 @@ const TouchHandler = {
             };
         }
 
-        document.body.addEventListener("touchstart", createDoubleTapPreventer(700), { passive: false });
-        // below \/ just disables the default DOM touch behavior all the time. Could use except for shareDiv which I think will need it
+        // this blocks the default behavior of the second touch in a double tap. 
+        // document.body.addEventListener("touchstart", createDoubleTapPreventer(700), { passive: false });
+
+        // this just disables the default DOM touch behavior all the time. Could use except btn_shareMap needs it
         // document.body.addEventListener("touchstart", (e) => { e.preventDefault() }, { passive: false });
+
+        // this prevents all default touch events on everything except elements with the class "allow-native-touch"
+        document.body.addEventListener(
+            "touchstart",
+            (e) => {
+                if (e.target.closest(".allow-native-touch")) return;
+                e.preventDefault();
+            },
+            { passive: false }
+        );
     },
 
     // processTouchEvent : function () {
