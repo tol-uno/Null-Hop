@@ -43,9 +43,6 @@ function updateGameArea() {
     if (UserInterface.gamestate == 2) {
         // In a MapBrowser
         MapBrowser.update();
-        if (Tutorial.isActive) {
-            Tutorial.update();
-        }
     }
 
     if (UserInterface.gamestate == 6) {

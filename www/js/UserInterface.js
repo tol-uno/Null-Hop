@@ -78,7 +78,7 @@ const UserInterface = {
         btn_mapEditor.func = () => {
             MapEditor.editorState = 5;
             UserInterface.gamestate = 2;
-            UserInterface.renderedButtons = []; // kill once all map editor button are on new system
+            UserInterface.renderedButtons = []; // kill once all map editor button are on new system. Exit edit calls this func()
             UserInterface.switchToUiGroup(UserInterface.uiGroup_mapEditorMapBrowser);
 
             MapBrowser.state = 2;
@@ -238,7 +238,6 @@ const UserInterface = {
                         UserInterface.gamestate = 1;
                         MapEditor.editorState = 0;
 
-                        UserInterface.renderedButtons = []; // kill
                         UserInterface.switchToUiGroup(UserInterface.uiGroup_mainMenu);
 
                         return;
@@ -256,18 +255,21 @@ const UserInterface = {
                 // in Settings page
                 // goto main menu
                 UserInterface.gamestate = 1;
-                // UserInterface.renderedButtons = UserInterface.btnGroup_mainMenu; // kill
-                UserInterface.renderedButtons = []; // kill
                 UserInterface.switchToUiGroup(UserInterface.uiGroup_mainMenu);
                 return;
             }
 
             if (UserInterface.gamestate == 5) {
                 // in Loading Map page
-                // goto standard map browser (OR CUSTOM BROWSER - FIX / ADD THIS)
+                // goto standard map browser OR custom browser
                 UserInterface.gamestate = 2;
-                MapBrowser.state = 1;
-                UserInterface.switchToUiGroup(UserInterface.uiGroup_standardMapBrowser);
+
+                if (MapBrowser.state == 1) {
+                    UserInterface.switchToUiGroup(UserInterface.uiGroup_standardMapBrowser);
+                } else {
+                    UserInterface.switchToUiGroup(UserInterface.uiGroup_customMapBrowser);
+                }
+
                 MapBrowser.init();
                 return;
             }
@@ -291,10 +293,7 @@ const UserInterface = {
 
                 if (Tutorial.isActive) {
                     // leaving tutorial level
-                    if (Tutorial.state >= 18) {
-                        btn_playTutorial.func(); // press toggle tutorial button to turn it off after completing tutorial
-                    }
-
+                    Tutorial.isActive = false;
                     Tutorial.reset();
                 }
 
@@ -307,7 +306,7 @@ const UserInterface = {
                 // btn_mainMenu only appears in map settings or map color pages while in MapEditor
                 // goto MapEditor main map editing screen
                 UserInterface.renderedButtons = UserInterface.btnGroup_mapEditorInterface;
-                UserInterface.switchToUiGroup(UserInterface.uiGroup_mapEditorInterface)
+                UserInterface.switchToUiGroup(UserInterface.uiGroup_mapEditorInterface);
                 MapEditor.editorState = 1;
                 return;
             }
@@ -315,16 +314,27 @@ const UserInterface = {
 
         const btn_restart = getByID("btn_restart");
         btn_restart.func = () => {
-            if (Tutorial.isActive) {
+            if (Tutorial.isActive && Tutorial.state < 18) {
+                // in Tutorial and HAVE NOT reached the end
                 // UNHIDE POPUP ALERT "Restart Disabled During Tutorial"
-            } else {
-                if (UserInterface.levelState == 3) {
-                    UserInterface.switchToUiGroup(UserInterface.uiGroup_inLevel);
-                }
-                UserInterface.timer = 0;
-                UserInterface.levelState = 1;
-                Player.checkpointIndex = -1;
-                Player.restart();
+                return;
+            }
+
+            if (UserInterface.levelState == 3) {
+                // if already finished level
+                UserInterface.switchToUiGroup(UserInterface.uiGroup_inLevel);
+            }
+
+            ui_speedometer.textContent = "Speed: 0";
+            UserInterface.timer = 0;
+            UserInterface.levelState = 1;
+            Player.checkpointIndex = -1;
+            Player.restart();
+
+            // only reaches this code if tutorial is on last two states (pretty much completed)
+            if (Tutorial.isActive) {
+                Tutorial.isActive = false;
+                Tutorial.reset();
             }
         };
 
@@ -365,6 +375,11 @@ const UserInterface = {
             if (MapBrowser.state == 1) {
                 // in normal maps browser
                 Map.initMap(MapBrowser.selectedMapIndex, false);
+
+                // check if Tutorial should be started
+                if (MapBrowser.selectedMapIndex == "Awakening" && UserInterface.settings.playTutorial == true) {
+                    Tutorial.isActive = true;
+                }
             } else {
                 // in custom maps browser
                 Map.initMap(MapBrowser.selectedMapIndex, true);
@@ -376,7 +391,6 @@ const UserInterface = {
             // sync with UserInterface.settings.playTutorial
             this.classList.toggle("toggled");
             const toggleState = UserInterface.getToggleState(this);
-            Tutorial.isActive = toggleState;
             UserInterface.settings.playTutorial = toggleState;
             UserInterface.writeSettings();
             console.log("Play Tutorial Toggled: " + toggleState);
@@ -388,9 +402,6 @@ const UserInterface = {
         btn_level_awakening.func = () => {
             MapBrowser.selectedMapIndex = "Awakening";
             MapBrowser.updateMapBrowserState();
-            if (UserInterface.settings.playTutorial) {
-                Tutorial.isActive = true; // Doesn't this need to be toggled off at some point too? FIX What is this doing? toggle also turns this on and off
-            }
         };
 
         const btn_level_pitfall = getByID("btn_level_pitfall");
@@ -440,6 +451,27 @@ const UserInterface = {
             MapBrowser.selectedMapIndex = "Forever";
             MapBrowser.updateMapBrowserState();
         };
+
+        // ==========
+        //  TUTORIAL
+        // ==========
+
+        const ui_tutorialTextWrapper = getByID("ui_tutorialTextWrapper");
+        const ui_tutorialText = getByID("ui_tutorialText");
+
+        const btn_next = getByID("btn_next");
+        btn_next.func = function () {
+            Tutorial.setState(Tutorial.state + 1);
+        };
+
+        const tutorial_swipe = getByID("tutorial_swipe");
+        const tutorial_swipeVertical = getByID("tutorial_swipeVertical");
+        const tutorial_arrow = getByID("tutorial_arrow");
+
+        this.tutorial_targetCenter = getByID("target-center");
+        this.tutorial_arc = getByID("arc");    
+        this.tutorial_dot = getByID("dot");
+        
 
         // ====================
         //  MAP EDITOR BROWSER
@@ -580,13 +612,629 @@ const UserInterface = {
             }
         };
 
-        // ============
-        //  MAP EDITOR
-        // ============
+        // ==========================
+        //  MAP EDITOR (MAIN SCREEN)
+        // ==========================
 
-        const btn_exitMapEditor = getByID("btn_exitMapEditor")
-        btn_exitMapEditor.func = () =>  {
+        const btn_exitMapEditor = getByID("btn_exitMapEditor");
+        btn_exitMapEditor.func = () => {
             MapEditor.saveCustomMap();
+        };
+
+        const btn_addPlatform = getByID("btn_addPlatform");
+        btn_addPlatform.func = () => {
+            const newPlatform = {
+                x: Math.round(MapEditor.screen.x),
+                y: Math.round(MapEditor.screen.y),
+                width: 100,
+                height: 100,
+                hypotenuse: Math.sqrt(this.width * this.width + this.height * this.height) / 2,
+                angle: 0,
+                endzone: 0,
+                wall: 0,
+            };
+
+            MapEditor.updatePlatformCorners(newPlatform); // update dynamic attributes of platform
+
+            MapEditor.loadedMap.platforms.push(newPlatform);
+            MapEditor.selectedElements = MapEditor.multiSelect
+                ? MapEditor.selectedElements.concat(MapEditor.loadedMap.platforms.length - 1)
+                : [MapEditor.loadedMap.platforms.length - 1];
+            UserInterface.renderedButtons = UserInterface.btnGroup_editPlatform;
+            UserInterface.switchToUiGroup(UserInterface.uiGroup_editPlatform);
+
+            // SYNC ALL BUTTONS AND SLIDERS
+            UserInterface.setSliderValue(btn_platformAngleSlider, MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].angle, true);
+
+            // should abstract this stuff to somewhere else -- it is duplicated in a few places
+            const isWall = MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].wall;
+            UserInterface.setToggleState(btn_wall, isWall);
+            btn_wall.label.textContent = isWall ? "Wall: Yes" : "Wall: No";
+
+            const isEndZone = MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].endzone;
+            UserInterface.setToggleState(btn_endzone, isEndZone);
+            btn_endzone.label.textContent = isEndZone ? "End Zone: Yes" : "End Zone: No";
+
+            this.updateMapEditorSidePanel();
+        };
+
+        const btn_addCheckpoint = getByID("btn_addCheckpoint");
+        btn_addCheckpoint.func = () => {
+            const middleX = Math.round(MapEditor.screen.x);
+            const middleY = Math.round(MapEditor.screen.y);
+            const newCheckpoint = {
+                triggerX1: middleX - 100,
+                triggerY1: middleY,
+                triggerX2: middleX + 100,
+                triggerY2: middleY,
+                x: middleX,
+                y: middleY + 50,
+                angle: 270,
+            };
+
+            MapEditor.loadedMap.checkpoints.push(newCheckpoint);
+        };
+
+        const btn_mapColors = getByID("btn_mapColors");
+        btn_mapColors.func = () => {
+            MapEditor.editorState = 3; // map colors
+            ColorPicker.editingElement = 0;
+            PreviewWindow.update();
+            UserInterface.renderedButtons = UserInterface.btnGroup_colorPickerState1;
+            UserInterface.switchToUiGroup(UserInterface.uiGroup_colorPickerState1);
+        };
+
+        const btn_mapSettings = getByID("btn_mapSettings");
+        btn_mapSettings.func = () => {
+            MapEditor.editorState = 4; // map settings
+
+            PreviewWindow.update();
+
+            UserInterface.setSliderValue(btn_platformHeightSlider, MapEditor.loadedMap.style.platformHeight);
+            UserInterface.setSliderValue(btn_wallHeightSlider, MapEditor.loadedMap.style.wallHeight);
+            UserInterface.setSliderValue(btn_lightDirectionSlider, MapEditor.loadedMap.style.lightDirection);
+            UserInterface.setSliderValue(btn_lightPitchSlider, MapEditor.loadedMap.style.lightPitch);
+
+            UserInterface.renderedButtons = UserInterface.btnGroup_mapSettings;
+            UserInterface.switchToUiGroup(UserInterface.uiGroup_mapSettings);
+        };
+
+        const btn_dragSelect = getByID("btn_dragSelect");
+        btn_dragSelect.func = function () {
+            if (this.classList.contains("toggled")) {
+                // turn off dragSelect
+                MapEditor.dragSelect = false;
+                MapEditor.setButtonGroup();
+            } else {
+                // turn on dragSelect and multiSelect
+                MapEditor.dragSelect = true;
+                MapEditor.multiSelect = true;
+                UserInterface.setToggleState(btn_multiSelect, true); // sync other button's toggle
+                UserInterface.renderedButtons = []; // kill once all main map editor interface buttons are done
+                UserInterface.switchToUiGroup([btn_dragSelect]);
+            }
+
+            this.classList.toggle("toggled");
+        };
+
+        const btn_multiSelect = getByID("btn_multiSelect");
+        btn_multiSelect.func = function () {
+            if (this.classList.contains("toggled")) {
+                // turn off multiSelect
+                MapEditor.multiSelect = false;
+                if (MapEditor.selectedElements.length > 1) {
+                    MapEditor.selectedElements = [MapEditor.selectedElements[MapEditor.selectedElements.length - 1]]; // make it only select the last element in the array
+                    MapEditor.setButtonGroup();
+                }
+            } else {
+                // turn on multiSelect
+                MapEditor.multiSelect = true;
+            }
+
+            this.classList.toggle("toggled");
+        };
+
+        const btn_snappingSlider = getByID("btn_snappingSlider");
+        btn_snappingSlider.labelValue = btn_snappingSlider.querySelector(".label > span");
+        btn_snappingSlider.handle = btn_snappingSlider.querySelector(".handle");
+        btn_snappingSlider.func = function () {
+            const value = UserInterface.getSliderValue(this);
+            MapEditor.snapAmount = value;
+
+            // Update step values for angle sliders
+            btn_platformAngleSlider.dataset.step = value;
+            btn_playerAngleSlider.dataset.step = value;
+            btn_checkpointAngleSlider.dataset.step = value;
+        };
+
+        const btn_translate = getByID("btn_translate");
+        btn_translate.func = function () {
+            // for multiselect:
+            // get center average of all selected elements
+            // create an array containing each element with its xKey / yKey
+            // do a selectedElements.forEach loop to run logic on each element
+
+            let avgMidX = 0;
+            let avgMidY = 0;
+            let conditioningArray = [];
+
+            // populate conditioningArray
+            for (let i = 0; i < MapEditor.selectedElements.length; i++) {
+                // PRE CONDITIONING FOR THE SELECTED ELEMENTS
+                let item = {
+                    element: null,
+                    xKey: "x", // these are used to distingish wheather to use triggerX1 or just x when dealing with checkpoints
+                    yKey: "y", // implemented this system so that the btn_translate logic can be done with one section of code
+                    offSet: 0, // amount to offset the bnt_translate from the center of the element
+                };
+
+                if (MapEditor.selectedElements[i] == "playerStart") {
+                    // if playerStart is selected
+                    item.element = MapEditor.loadedMap.playerStart;
+                    item.offSet = 32 / MapEditor.zoom;
+                } else if (Array.isArray(MapEditor.selectedElements[i])) {
+                    const checkpoint = MapEditor.selectedElements[i];
+
+                    item.element = MapEditor.loadedMap.checkpoints[checkpoint[0]];
+
+                    if (checkpoint[1] == 1) {
+                        item.xKey = "triggerX1";
+                        item.yKey = "triggerY1";
+                    }
+
+                    if (checkpoint[1] == 2) {
+                        item.xKey = "triggerX2";
+                        item.yKey = "triggerY2";
+                    }
+
+                    if (checkpoint[1] == 3) {
+                        item.offSet = 32;
+                    }
+                } else {
+                    // selected platform
+                    item.element = MapEditor.loadedMap.platforms[MapEditor.selectedElements[i]];
+                }
+
+                conditioningArray.push(item);
+                avgMidX += item.element[item.xKey];
+                avgMidY += item.element[item.yKey];
+            }
+
+            avgMidX = avgMidX / conditioningArray.length;
+            avgMidY = avgMidY / conditioningArray.length;
+
+            // ACTUAL BUTTON LOGIC
+
+            if (!this.classList.contains("pressed")) {
+                // not pressed
+
+                // element(s) map coords mapped to screen coords
+                // mapToRange(number, inMin, inMax, outMin, outMax)
+                const xMapped = UserInterfaceCanvas.mapToRange(
+                    avgMidX,
+                    MapEditor.screen.cornerX,
+                    MapEditor.screen.cornerX + MapEditor.screen.width,
+                    0,
+                    screenWidthUI
+                );
+                const yMapped = UserInterfaceCanvas.mapToRange(
+                    avgMidY,
+                    MapEditor.screen.cornerY,
+                    MapEditor.screen.cornerY + MapEditor.screen.height,
+                    0,
+                    screenHeightUI
+                );
+
+                // position button in the middle of element(s)
+                if (MapEditor.selectedElements.length > 1) {
+                    // Multiple element selected -- position button in average middle
+                    UserInterface.setGizmoBtnPos(this, xMapped, yMapped);
+                } else {
+                    // Just one element selected. Use its offSet (accounting for map zoom)
+                    UserInterface.setGizmoBtnPos(
+                        this,
+                        xMapped + conditioningArray[0].offSet * MapEditor.zoom,
+                        yMapped + conditioningArray[0].offSet * MapEditor.zoom
+                    );
+                }
+                return;
+            }
+            // MOVE BUTTON according to touch dragging
+            // adjust and pan screen if button is near the edge
+            // move element to rounded and mapped button coords
+            // snap element to snapping slider
+
+            let btnPos = UserInterface.getGizmoBtnPos(this);
+            btnPos.x += TouchHandler.dragAmountX;
+            btnPos.y += TouchHandler.dragAmountY;
+            UserInterface.setGizmoBtnPos(this, btnPos.x, btnPos.y);
+            // this could be done with transform: translate() which would be GPU accelerated.
+            // would have to track full touch drag from when press starts till press ends
+
+            // panning if at edges of screen
+            if (btnPos.x > screenWidthUI - 270) {
+                MapEditor.screen.x += (400 / MapEditor.zoom) * dt;
+            }
+            if (btnPos.x < 60) {
+                MapEditor.screen.x -= (400 / MapEditor.zoom) * dt;
+            }
+            if (btnPos.y > screenHeightUI - 60) {
+                MapEditor.screen.y += (400 / MapEditor.zoom) * dt;
+            }
+            if (btnPos.y < 30) {
+                MapEditor.screen.y -= (400 / MapEditor.zoom) * dt;
+            }
+
+            // MOVING EACH SELECTED ELEMENT TO FOLLOW BUTTON
+            for (let i = 0; i < MapEditor.selectedElements.length; i++) {
+                let xMapped; // where this button is in global map coords
+                let yMapped; // (and sometimes accounting for the offset when multiple platforms are selected)
+
+                if (MapEditor.selectedElements.length > 1) {
+                    // Multiple objects selected
+
+                    // offSetFromBtn (offeset from middle of selection) for each platform is in global coords here
+                    const offSetFromAvgMidGlobalX = avgMidX - conditioningArray[i].element[conditioningArray[i].xKey];
+                    const offSetFromAvgMidGlobalY = avgMidY - conditioningArray[i].element[conditioningArray[i].yKey];
+
+                    // Map btn pos from UI coords to global map coords
+                    // mapToRange(number, inMin, inMax, outMin, outMax)
+                    const btnGlobalX = UserInterfaceCanvas.mapToRange(
+                        btnPos.x,
+                        0,
+                        screenWidthUI,
+                        MapEditor.screen.cornerX,
+                        MapEditor.screen.cornerX + MapEditor.screen.width
+                    );
+                    const btnGlobalY = UserInterfaceCanvas.mapToRange(
+                        btnPos.y,
+                        0,
+                        screenHeightUI,
+                        MapEditor.screen.cornerY,
+                        MapEditor.screen.cornerY + MapEditor.screen.height
+                    );
+
+                    xMapped = btnGlobalX - offSetFromAvgMidGlobalX;
+                    yMapped = btnGlobalY - offSetFromAvgMidGlobalY;
+                } else {
+                    // use offset for single item
+
+                    xMapped = UserInterfaceCanvas.mapToRange(
+                        btnPos.x - conditioningArray[i].offSet * MapEditor.zoom,
+                        0,
+                        screenWidthUI,
+                        MapEditor.screen.cornerX,
+                        MapEditor.screen.cornerX + MapEditor.screen.width
+                    );
+                    yMapped = UserInterfaceCanvas.mapToRange(
+                        btnPos.y - conditioningArray[i].offSet * MapEditor.zoom,
+                        0,
+                        screenHeightUI,
+                        MapEditor.screen.cornerY,
+                        MapEditor.screen.cornerY + MapEditor.screen.height
+                    );
+                }
+
+                // set element position to (xMapped, yMapped)
+                conditioningArray[i].element[conditioningArray[i].xKey] = Math.round(xMapped);
+                conditioningArray[i].element[conditioningArray[i].yKey] = Math.round(yMapped);
+
+                if (MapEditor.snapAmount > 0) {
+                    conditioningArray[i].element[conditioningArray[i].xKey] =
+                        Math.round(conditioningArray[i].element[conditioningArray[i].xKey] / MapEditor.snapAmount) * MapEditor.snapAmount;
+                    conditioningArray[i].element[conditioningArray[i].yKey] =
+                        Math.round(conditioningArray[i].element[conditioningArray[i].yKey] / MapEditor.snapAmount) * MapEditor.snapAmount;
+                }
+
+                UserInterface.updateMapEditorSidePanel();
+            }
+        };
+
+        const btn_resize_TL = getByID("btn_resize_TL");
+        const btn_resize_TR = getByID("btn_resize_TR");
+        const btn_resize_BR = getByID("btn_resize_BR");
+        const btn_resize_BL = getByID("btn_resize_BL");
+
+        function resizeBtnFuncLogic(btn, cornerIndex, pinnedIndex, offsetX, offsetY, widthSign, heightSign) {
+            const platform = MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]];
+
+            if (!btn.classList.contains("pressed")) {
+                // position button at corner of element
+                const corner = platform.corners[cornerIndex];
+                const cornerMappedX = UserInterfaceCanvas.mapToRange(
+                    platform.x + corner[0],
+                    MapEditor.screen.cornerX,
+                    MapEditor.screen.cornerX + MapEditor.screen.width,
+                    0,
+                    screenWidthUI
+                );
+                const cornerMappedY = UserInterfaceCanvas.mapToRange(
+                    platform.y + corner[1],
+                    MapEditor.screen.cornerY,
+                    MapEditor.screen.cornerY + MapEditor.screen.height,
+                    0,
+                    screenHeightUI
+                );
+                UserInterface.setGizmoBtnPos(btn, cornerMappedX + offsetX, cornerMappedY + offsetY);
+                return;
+            }
+
+            // move button according to drag
+            let btnPos = UserInterface.getGizmoBtnPos(btn);
+            btnPos.x += TouchHandler.dragAmountX;
+            btnPos.y += TouchHandler.dragAmountY;
+            UserInterface.setGizmoBtnPos(btn, btnPos.x, btnPos.y);
+
+            // panning when drag near edges of screen
+            const panSpeed = (400 / MapEditor.zoom) * dt;
+            if (btnPos.x > screenWidthUI - 270) {
+                MapEditor.screen.x += panSpeed;
+            }
+            if (btnPos.x < 60) {
+                MapEditor.screen.x -= panSpeed;
+            }
+            if (btnPos.y > screenHeightUI - 60) {
+                MapEditor.screen.y += panSpeed;
+            }
+            if (btnPos.y < 30) {
+                MapEditor.screen.y -= panSpeed;
+            }
+
+            // pinned corner map + screen coords
+            const pinned = platform.corners[pinnedIndex];
+            const pinnedX_map = platform.x + pinned[0];
+            const pinnedY_map = platform.y + pinned[1];
+            const pinnedX_screen = UserInterfaceCanvas.mapToRange(
+                pinnedX_map,
+                MapEditor.screen.cornerX,
+                MapEditor.screen.cornerX + MapEditor.screen.width,
+                0,
+                screenWidthUI
+            );
+            const pinnedY_screen = UserInterfaceCanvas.mapToRange(
+                pinnedY_map,
+                MapEditor.screen.cornerY,
+                MapEditor.screen.cornerY + MapEditor.screen.height,
+                0,
+                screenHeightUI
+            );
+
+            // get drag vector (from pinnedCorner -> buttonPos) (unscaled by zoom)
+            // dividing by zoom brings it back to real map scale
+            const drag = new Vector2D3D(
+                (btnPos.x - offsetX - pinnedX_screen) / MapEditor.zoom,
+                (btnPos.y - offsetY - pinnedY_screen) / MapEditor.zoom
+            );
+            const rotated = drag.clone().rotate(-platform.angle);
+
+            // set width and height using rotatedDragFromPinned
+            platform.width = Math.round(widthSign * rotated.x * UserInterfaceCanvas.scale);
+            platform.height = Math.round(heightSign * rotated.y * UserInterfaceCanvas.scale);
+
+            // snapping and restricting size
+            if (MapEditor.snapAmount > 0) {
+                platform.width = Math.round(platform.width / MapEditor.snapAmount) * MapEditor.snapAmount;
+                platform.height = Math.round(platform.height / MapEditor.snapAmount) * MapEditor.snapAmount;
+            }
+
+            platform.width = Math.max(platform.width, 6);
+            platform.height = Math.max(platform.height, 6);
+
+            // recompute new dragged corner offset
+            const angleRad = platform.angleRad;
+            const c = Math.cos(angleRad);
+            const s = Math.sin(angleRad);
+
+            // Offsets of all 4 corners relative to center (only one used per button)
+            const cornerOffsets = [
+                [(-platform.width / 2) * c - (platform.height / 2) * s, (-platform.width / 2) * s + (platform.height / 2) * c], // BL
+                [(platform.width / 2) * c - (platform.height / 2) * s, (platform.width / 2) * s + (platform.height / 2) * c], // BR
+                [(platform.width / 2) * c + (platform.height / 2) * s, (platform.width / 2) * s - (platform.height / 2) * c], // TR
+                [(-platform.width / 2) * c + (platform.height / 2) * s, (-platform.width / 2) * s - (platform.height / 2) * c], // TL
+            ];
+
+            // The dragged corner (in map-space offset)
+            const draggedCorner = cornerOffsets[cornerIndex];
+
+            // Find the dragged corner’s new map position
+            const draggedX_map = pinnedX_map + draggedCorner[0] * 2;
+            const draggedY_map = pinnedY_map + draggedCorner[1] * 2;
+
+            // Recenter platform between pinned and dragged corners
+            platform.x = (pinnedX_map + draggedX_map) / 2;
+            platform.y = (pinnedY_map + draggedY_map) / 2;
+
+            // update platform center
+            MapEditor.updatePlatformCorners(platform);
+
+            // update size and position text
+            UserInterface.updateMapEditorSidePanel();
+        }
+
+        btn_resize_TL.func = () => resizeBtnFuncLogic(btn_resize_TL, 3, 1, -19, -19, -1, -1);
+        btn_resize_TR.func = () => resizeBtnFuncLogic(btn_resize_TR, 2, 0, +19, -19, +1, -1);
+        btn_resize_BR.func = () => resizeBtnFuncLogic(btn_resize_BR, 1, 3, +19, +19, +1, +1);
+        btn_resize_BL.func = () => resizeBtnFuncLogic(btn_resize_BL, 0, 2, -19, +19, -1, +1);
+
+        const ui_editorSidePanel = getByID("ui_editorSidePanel");
+        const ui_elementTitle = getByID("ui_elementTitle");
+        const ui_elementInfo = getByID("ui_elementInfo");
+
+        const btn_unselect = getByID("btn_unselect");
+        btn_unselect.func = () => {
+            UserInterface.renderedButtons = UserInterface.btnGroup_mapEditorInterface; // kill eventually
+            UserInterface.switchToUiGroup(UserInterface.uiGroup_mapEditorInterface);
+            MapEditor.selectedElements = []; // remove all selected elements
+        };
+
+        const btn_platformAngleSlider = getByID("btn_platformAngleSlider");
+        btn_platformAngleSlider.labelValue = btn_platformAngleSlider.querySelector(".label > span");
+        btn_platformAngleSlider.handle = btn_platformAngleSlider.querySelector(".handle");
+        btn_platformAngleSlider.func = function () {
+            MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].angle = UserInterface.getSliderValue(this);
+            MapEditor.updatePlatformCorners(MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]]);
+        };
+
+        const btn_playerAngleSlider = getByID("btn_playerAngleSlider");
+        btn_playerAngleSlider.labelValue = btn_playerAngleSlider.querySelector(".label > span");
+        btn_playerAngleSlider.handle = btn_playerAngleSlider.querySelector(".handle");
+        btn_playerAngleSlider.func = function () {
+            MapEditor.loadedMap.playerStart.angle = UserInterface.getSliderValue(this);
+        };
+
+        const btn_checkpointAngleSlider = getByID("btn_checkpointAngleSlider");
+        btn_checkpointAngleSlider.labelValue = btn_checkpointAngleSlider.querySelector(".label > span");
+        btn_checkpointAngleSlider.handle = btn_checkpointAngleSlider.querySelector(".handle");
+        btn_checkpointAngleSlider.func = function () {
+            MapEditor.loadedMap.checkpoints[MapEditor.selectedElements[0][0]].angle = UserInterface.getSliderValue(this);
+        };
+
+        const btn_wall = getByID("btn_wall");
+        btn_wall.label = btn_wall.querySelector(".label");
+        btn_wall.func = function () {
+            if (this.classList.contains("toggled")) {
+                // make platform NOT wall
+                MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].wall = 0;
+                this.label.textContent = "Wall: No";
+            } else {
+                // make platform wall
+                MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].wall = 1;
+                this.label.textContent = "Wall: Yes";
+                MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].endzone = 0;
+                UserInterface.setToggleState(btn_endzone, false);
+                btn_endzone.label.textContent = "End Zone: No";
+            }
+
+            this.classList.toggle("toggled");
+        };
+
+        const btn_endzone = getByID("btn_endzone");
+        btn_endzone.label = btn_endzone.querySelector(".label");
+        btn_endzone.func = function () {
+            if (this.classList.contains("toggled")) {
+                // make platform NOT endzone
+                MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].endzone = 0;
+                this.label.textContent = "End Zone: No";
+            } else {
+                // make platform endzone
+                MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].endzone = 1;
+                this.label.textContent = "End Zone: Yes";
+                MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].wall = 0;
+                UserInterface.setToggleState(btn_wall, false);
+                btn_wall.label.textContent = "Wall: No";
+            }
+
+            this.classList.toggle("toggled");
+        };
+
+        const btn_duplicateElements = getByID("btn_duplicateElements");
+        btn_duplicateElements.func = () => {
+            let originPlatform = {
+                x: null,
+                y: null,
+            };
+
+            for (const element of MapEditor.selectedElements) {
+                // only run for platforms
+                if (element != "playerStart" && !Array.isArray(element)) {
+                    const newPlatform = { ...MapEditor.loadedMap.platforms[element] }; // get selected platform. spread syntax creates a shallow copy that doesn not link/reference
+
+                    if (originPlatform.x == null) {
+                        // set origin platform if none set yet
+                        originPlatform.x = MapEditor.loadedMap.platforms[element].x;
+                        originPlatform.y = MapEditor.loadedMap.platforms[element].y;
+                    }
+
+                    const offsetFromOriginPlatformX = MapEditor.loadedMap.platforms[element].x - originPlatform.x;
+                    const offsetFromOriginPlatformY = MapEditor.loadedMap.platforms[element].y - originPlatform.y;
+
+                    newPlatform.x = Math.round(MapEditor.screen.x) + offsetFromOriginPlatformX; // center it
+                    newPlatform.y = Math.round(MapEditor.screen.y) + offsetFromOriginPlatformY;
+                    MapEditor.loadedMap.platforms.push(newPlatform); // add platform
+
+                    // deal with selections
+                    if (MapEditor.multiSelect) {
+                        MapEditor.selectedElements[MapEditor.selectedElements.indexOf(element)] = MapEditor.loadedMap.platforms.length - 1;
+                    } else {
+                        MapEditor.selectedElements = [MapEditor.loadedMap.platforms.length - 1];
+                    }
+                }
+            }
+
+            if (MapEditor.selectedElements.length == 1) {
+                // only need to sync buttons and sliders in single select
+                UserInterface.setSliderValue(btn_platformAngleSlider, MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].angle, true);
+
+                // should abstract this stuff to somewhere else -- it is duplicated in a few places
+                const isWall = MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].wall;
+                UserInterface.setToggleState(btn_wall, isWall);
+                btn_wall.label.textContent = isWall ? "Wall: Yes" : "Wall: No";
+
+                const isEndZone = MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].endzone;
+                UserInterface.setToggleState(btn_endzone, isEndZone);
+                btn_endzone.label.textContent = isEndZone ? "End Zone: Yes" : "End Zone: No";
+            }
+
+            this.updateMapEditorSidePanel();
+        };
+
+        const btn_deleteElements = getByID("btn_deleteElements");
+        btn_deleteElements.func = () => {
+            for (const element of MapEditor.selectedElements) {
+                // loop through and delete
+                if (Array.isArray(element)) {
+                    // delete checkpoint
+
+                    MapEditor.loadedMap.checkpoints[element[0]] = "remove"; // set a placeholder which will be removed by .filter
+                } else if (element != "playerStart") {
+                    // delete platform but DONT delete playerStart
+
+                    MapEditor.loadedMap.platforms[element] = "remove"; // set a placeholder which will be removed by .filter
+                }
+            }
+
+            MapEditor.loadedMap.checkpoints = MapEditor.loadedMap.checkpoints.filter((checkpoint) => checkpoint != "remove");
+            MapEditor.loadedMap.platforms = MapEditor.loadedMap.platforms.filter((platform) => platform != "remove");
+
+            MapEditor.selectedElements = []; // No selected elements after delete
+            UserInterface.renderedButtons = UserInterface.btnGroup_mapEditorInterface;
+            UserInterface.switchToUiGroup(UserInterface.uiGroup_mapEditorInterface);
+        };
+
+        // ======================
+        //  MAP SETTINGS SLIDERS
+        // ======================
+
+        const btn_platformHeightSlider = getByID("btn_platformHeightSlider");
+        btn_platformHeightSlider.labelValue = btn_platformHeightSlider.querySelector(".label > span");
+        btn_platformHeightSlider.handle = btn_platformHeightSlider.querySelector(".handle");
+        btn_platformHeightSlider.func = function () {
+            MapEditor.loadedMap.style.platformHeight = UserInterface.getSliderValue(this);
+            PreviewWindow.update();
+        };
+
+        const btn_wallHeightSlider = getByID("btn_wallHeightSlider");
+        btn_wallHeightSlider.labelValue = btn_wallHeightSlider.querySelector(".label > span");
+        btn_wallHeightSlider.handle = btn_wallHeightSlider.querySelector(".handle");
+        btn_wallHeightSlider.func = function () {
+            MapEditor.loadedMap.style.wallHeight = UserInterface.getSliderValue(this);
+            PreviewWindow.update();
+        };
+
+        const btn_lightDirectionSlider = getByID("btn_lightDirectionSlider");
+        btn_lightDirectionSlider.labelValue = btn_lightDirectionSlider.querySelector(".label > span");
+        btn_lightDirectionSlider.handle = btn_lightDirectionSlider.querySelector(".handle");
+        btn_lightDirectionSlider.func = function () {
+            MapEditor.loadedMap.style.lightDirection = UserInterface.getSliderValue(this);
+            PreviewWindow.update();
+        };
+
+        const btn_lightPitchSlider = getByID("btn_lightPitchSlider");
+        btn_lightPitchSlider.labelValue = btn_lightPitchSlider.querySelector(".label > span");
+        btn_lightPitchSlider.handle = btn_lightPitchSlider.querySelector(".handle");
+        btn_lightPitchSlider.func = function () {
+            MapEditor.loadedMap.style.lightPitch = UserInterface.getSliderValue(this);
+            PreviewWindow.update();
         };
 
         // ===========
@@ -627,16 +1275,70 @@ const UserInterface = {
 
         this.uiGroup_mapEditorMapBrowser = [btn_mainMenu, getByID("custom-map-list-container"), ui_mapInfoBox, btn_newMap, btn_importMap];
 
-        this.uiGroup_mapEditorInterface = [btn_exitMapEditor];
-        this.uiGroup_editPlatform = [btn_exitMapEditor];
-        this.uiGroup_editPlayerStart = [btn_exitMapEditor];
-        this.uiGroup_editCheckPoint = [btn_exitMapEditor];
-        this.uiGroup_editMultiSelect = [btn_exitMapEditor];
+        this.uiGroup_mapEditorInterface = [
+            btn_exitMapEditor,
+            btn_addPlatform,
+            btn_addCheckpoint,
+            btn_mapSettings,
+            btn_mapColors,
+            btn_dragSelect,
+            btn_multiSelect,
+            btn_snappingSlider,
+        ];
+        this.uiGroup_editPlatform = [
+            btn_exitMapEditor,
+            btn_dragSelect,
+            btn_multiSelect,
+            btn_snappingSlider,
+            btn_translate,
+            btn_resize_BL,
+            btn_resize_BR,
+            btn_resize_TR,
+            btn_resize_TL,
+            ui_editorSidePanel,
+            btn_unselect,
+            btn_platformAngleSlider,
+            btn_wall,
+            btn_endzone,
+            btn_deleteElements,
+            btn_duplicateElements,
+        ];
+        this.uiGroup_editPlayerStart = [
+            btn_exitMapEditor,
+            btn_dragSelect,
+            btn_multiSelect,
+            btn_translate,
+            btn_snappingSlider,
+            ui_editorSidePanel,
+            btn_unselect,
+            btn_playerAngleSlider,
+        ];
+        this.uiGroup_editCheckpoint = [
+            btn_exitMapEditor,
+            btn_dragSelect,
+            btn_multiSelect,
+            btn_translate,
+            btn_snappingSlider,
+            ui_editorSidePanel,
+            btn_unselect,
+            btn_checkpointAngleSlider,
+            btn_deleteElements,
+        ];
+        this.uiGroup_editMultiSelect = [
+            btn_exitMapEditor,
+            btn_dragSelect,
+            btn_multiSelect,
+            btn_translate,
+            btn_snappingSlider,
+            ui_editorSidePanel,
+            btn_unselect,
+            btn_deleteElements,
+            btn_duplicateElements,
+        ];
 
-        this.uiGroup_colorPickerState1 = [btn_mainMenu]
-        this.uiGroup_colorPickerState2 = []
-        this.uiGroup_mapSettings = [btn_mainMenu]
-
+        this.uiGroup_colorPickerState1 = [btn_mainMenu];
+        this.uiGroup_colorPickerState2 = [];
+        this.uiGroup_mapSettings = [btn_mainMenu, btn_platformHeightSlider, btn_wallHeightSlider, btn_lightDirectionSlider, btn_lightPitchSlider];
 
         this.activeUiGroup = [];
         this.switchToUiGroup(UserInterface.uiGroup_mainMenu);
@@ -646,1049 +1348,12 @@ const UserInterface = {
         // [][][][][][][][][][][][][][]
 
         // MapEditor browser buttons
-
         btn_importMap_text = new Button(midX_UI - 150, 250, 300, "", "", 0, "Import Map With Copy & Paste", function () {
             let mapPaste = prompt("Paste Map Data:");
             if (mapPaste) {
                 MapEditor.loadedMap = JSON.parse(mapPaste);
             }
         });
-
-        // TUTORIAL BUTTONS
-        btn_next = new Button(screenWidthUI - 100, 38, 60, "next_button", "", 0, "", function () {
-            Tutorial.timerStarted = false; // easier to always set these here even if they arent always needed
-            Tutorial.animatePos = 0;
-            Tutorial.animateVel = 0;
-
-            // reset the position and scale because the button is being pulse animated
-            this.x = screenWidthUI - 100;
-            this.y = 38;
-            this.width = 60;
-            this.height = 60;
-
-            if (Tutorial.state == 1) {
-                Tutorial.state++;
-                UserInterface.renderedButtons = [btn_mainMenu, btn_next];
-                return;
-            }
-
-            if (Tutorial.state == 2) {
-                Tutorial.state++; // going into STATE 3
-                UserInterface.renderedButtons = [btn_mainMenu];
-
-                Player.lookAngle.set(0, -1); // so that ur NOT already looking at a target
-                return;
-            }
-
-            // state 3 progresses to 5 when all targets are completed
-            // state 5 uses jump button to progress
-            // state 6 progresses to 7 automatically after 2 secs
-
-            if (Tutorial.state == 7) {
-                Tutorial.state++; // going into STATE 8
-                UserInterface.switchToUiGroup(UserInterface.uiGroup_inLevel);
-                return;
-            }
-
-            // 8 to 9 on user swipe
-            // 9 to 10 on checkpoint
-            // 10 to 11 on user swipe
-            // 11 to 12 on checkpoint
-            // 12 to 13 on user swipe
-            // 13 to 14 on checkpoint
-            // 14 to 15 on user swipe
-            // 15 to 16 on checkpoint
-            // 16 to 17 on user swipe
-            // 17 to 18 on level end
-
-            if (Tutorial.state == 18) {
-                Tutorial.state++; // going into STATE 19
-                UserInterface.switchToUiGroup(UserInterface.uiGroup_inLevel);
-                return;
-            }
-        });
-
-        // MAP EDITOR BUTTONS
-        btn_add_platform = new Button(screenWidthUI - 196, 25, 156, "platform_button", "", 0, "", function () {
-            const newPlatform = {
-                x: Math.round(MapEditor.screen.x),
-                y: Math.round(MapEditor.screen.y),
-                width: 100,
-                height: 100,
-                hypotenuse: Math.sqrt(this.width * this.width + this.height * this.height) / 2,
-                angle: 0,
-                endzone: 0,
-                wall: 0,
-            };
-
-            MapEditor.updatePlatformCorners(newPlatform); // update dynamic attributes of platform
-
-            MapEditor.loadedMap.platforms.push(newPlatform);
-            MapEditor.selectedElements = MapEditor.multiSelect
-                ? MapEditor.selectedElements.concat(MapEditor.loadedMap.platforms.length - 1)
-                : [MapEditor.loadedMap.platforms.length - 1];
-            UserInterface.renderedButtons = UserInterface.btnGroup_editPlatform;
-            UserInterface.switchToUiGroup(UserInterface.uiGroup_editPlatform);
-
-            // SYNC ALL BUTTONS AND SLIDERS
-            btn_angleSlider.updateState(MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].angle);
-            btn_wall.func(true); // syncs the wall button's toggle state
-            btn_endzone.func(true); // syncs the endzone button's toggle state
-        });
-
-        btn_add_checkpoint = new Button(screenWidthUI - 232, 92, 192, "cp_button", "", 0, "", function () {
-            const middleX = Math.round(MapEditor.screen.x);
-            const middleY = Math.round(MapEditor.screen.y);
-            const newCheckPoint = {
-                triggerX1: middleX - 100,
-                triggerY1: middleY,
-                triggerX2: middleX + 100,
-                triggerY2: middleY,
-                x: middleX,
-                y: middleY + 50,
-                angle: 270,
-            };
-
-            MapEditor.loadedMap.checkpoints.push(newCheckPoint);
-        });
-
-        btn_map_colors = new Button(screenWidthUI - 310, 25, 96, "map_colors_button", "", 0, "", function () {
-            MapEditor.editorState = 3; // map colors
-            ColorPicker.editingElement = 0;
-            PreviewWindow.update();
-            UserInterface.renderedButtons = UserInterface.btnGroup_colorPickerState1;
-            UserInterface.switchToUiGroup(UserInterface.uiGroup_colorPickerState1);
-        });
-
-        btn_map_settings = new Button(screenWidthUI - 440, 25, 108, "map_settings_button", "", 0, "", function () {
-            MapEditor.editorState = 4; // map settings
-
-            PreviewWindow.update();
-
-            btn_platformHeightSlider.updateState(MapEditor.loadedMap.style.platformHeight); // value is set to 0 before we're in MapEditor
-            btn_wallHeightSlider.updateState(MapEditor.loadedMap.style.wallHeight);
-            btn_lightDirectionSlider.updateState(MapEditor.loadedMap.style.lightDirection);
-            btn_lightPitchSlider.updateState(MapEditor.loadedMap.style.lightPitch);
-
-            UserInterface.renderedButtons = UserInterface.btnGroup_mapSettings;
-            UserInterface.switchToUiGroup(UserInterface.uiGroup_mapSettings);
-        });
-
-        btn_dragSelect = new Button(45, screenHeightUI - 230, 60, "toggle_button", "toggle_button_pressed", 1, "", function (sync) {
-            if (MapEditor.loadedMap) {
-                // throws an error otherwise
-                if (sync) {
-                    this.toggle = MapEditor.dragSelect;
-                } else {
-                    if (this.toggle) {
-                        // turn off dragSelect
-                        this.toggle = 0;
-                        MapEditor.dragSelect = false;
-                        MapEditor.setButtonGroup();
-                    } else {
-                        // turn on dragSelect and multiSelect (required)
-                        this.toggle = 1;
-                        MapEditor.dragSelect = true;
-                        MapEditor.multiSelect = true;
-                        btn_multiSelect.func(true); // sync button's toggle
-                        UserInterface.renderedButtons = UserInterface.btnGroup_dragSelect; // hides all other buttons
-                    }
-                }
-            }
-        });
-
-        btn_multiSelect = new Button(45, screenHeightUI - 150, 60, "toggle_button", "toggle_button_pressed", 1, "", function (sync) {
-            if (MapEditor.loadedMap) {
-                // throws an error otherwise
-                if (sync) {
-                    this.toggle = MapEditor.multiSelect;
-                } else {
-                    if (this.toggle) {
-                        // turn off multiSelect
-                        this.toggle = 0;
-                        MapEditor.multiSelect = false;
-
-                        // turn off dragSelect bc it needs multiSelect
-                        if (MapEditor.dragSelect) {
-                            MapEditor.dragSelect = false;
-                            btn_dragSelect.func(true); // sync button
-                        }
-
-                        if (MapEditor.selectedElements.length > 1) {
-                            MapEditor.selectedElements = [MapEditor.selectedElements[MapEditor.selectedElements.length - 1]]; // make it only select the last element in the array
-                            MapEditor.setButtonGroup()
-                        }
-                    } else {
-                        // turn on multiSelect
-                        this.toggle = 1;
-                        MapEditor.multiSelect = true;
-                    }
-                }
-            }
-        });
-
-        btn_snappingSlider = new SliderUI(
-            50,
-            screenHeightUI - 50,
-            192,
-            0,
-            64,
-            0.5,
-            "Snapping",
-            MapEditor.loadedMap ? MapEditor.snapAmount : 0,
-            function () {
-                MapEditor.snapAmount = this.value;
-            }
-        );
-
-        btn_unselect = new Button(screenWidthUI - 250, 34, 45, "x_button", "", 0, "", function () {
-            UserInterface.renderedButtons = UserInterface.btnGroup_mapEditorInterface;
-            UserInterface.switchToUiGroup(UserInterface.uiGroup_mapEditorInterface)
-            MapEditor.selectedElements = []; // No selected platforms
-        });
-
-        btn_translate = new Button(0, 0, 38, "translate_button", "", 0, "", function () {
-            // for multiselect:
-            // get center average of all selected elements
-            // create an array containing each element with its xKey / yKey
-            // do a selectedElements.forEach loop to run logic on each element
-
-            let avgMidX = 0;
-            let avgMidY = 0;
-            let conditioningArray = [];
-
-            // populate conditioningArray
-            for (let i = 0; i < MapEditor.selectedElements.length; i++) {
-                // PRE CONDITIONING FOR THE SELECTED ELEMENTS
-                let item = {
-                    element: null,
-                    xKey: "x", // these are used to distingish wheather to use triggerX1 or just x when dealing with checkpoints
-                    yKey: "y", // implemented this system so that the btn_translate logic can be done with one section of code
-                    offSet: 0, // amount to offset the bnt_translate from the center of the element
-                };
-
-                if (MapEditor.selectedElements[i] == "playerStart") {
-                    // if playerStart is selected
-                    item.element = MapEditor.loadedMap.playerStart;
-                    item.offSet = 32 / MapEditor.zoom;
-                } else if (Array.isArray(MapEditor.selectedElements[i])) {
-                    checkpoint = MapEditor.selectedElements[i];
-
-                    item.element = MapEditor.loadedMap.checkpoints[checkpoint[0]];
-
-                    if (checkpoint[1] == 1) {
-                        item.xKey = "triggerX1";
-                        item.yKey = "triggerY1";
-                    }
-
-                    if (checkpoint[1] == 2) {
-                        item.xKey = "triggerX2";
-                        item.yKey = "triggerY2";
-                    }
-
-                    if (checkpoint[1] == 3) {
-                        item.offSet = 32;
-                    }
-                } else {
-                    // selected platform
-                    item.element = MapEditor.loadedMap.platforms[MapEditor.selectedElements[i]];
-                }
-
-                conditioningArray.push(item);
-                avgMidX += item.element[item.xKey];
-                avgMidY += item.element[item.yKey];
-            }
-
-            avgMidX = avgMidX / conditioningArray.length;
-            avgMidY = avgMidY / conditioningArray.length;
-
-            // ACTUAL BUTTON LOGIC
-
-            if (!this.isPressed) {
-                // not pressed
-
-                // element coords mapped to screen coords
-                // mapToRange(number, inMin, inMax, outMin, outMax)
-                const xMapped = UserInterfaceCanvas.mapToRange(
-                    avgMidX,
-                    MapEditor.screen.cornerX,
-                    MapEditor.screen.cornerX + MapEditor.screen.width,
-                    0,
-                    screenWidthUI
-                );
-                const yMapped = UserInterfaceCanvas.mapToRange(
-                    avgMidY,
-                    MapEditor.screen.cornerY,
-                    MapEditor.screen.cornerY + MapEditor.screen.height,
-                    0,
-                    screenHeightUI
-                );
-
-                // position button in the middle of element(s)
-                if (MapEditor.selectedElements.length > 1) {
-                    this.x = xMapped - this.width / 2;
-                    this.y = yMapped - this.height / 2;
-                } else {
-                    this.x = xMapped + conditioningArray[0].offSet * MapEditor.zoom - this.width / 2;
-                    this.y = yMapped + conditioningArray[0].offSet * MapEditor.zoom - this.height / 2;
-                }
-            } else if (TouchHandler.dragging) {
-                // MOVE BUTTON according to touch dragging
-                // adjust and pan screen if button is near the edge
-                // move element to rounded and mapped button coords
-                // snap element to snapping slider
-
-                this.x += TouchHandler.dragAmountX;
-                this.y += TouchHandler.dragAmountY;
-
-                // panning if at edges of screen
-                if (this.x > screenWidthUI - 270) {
-                    MapEditor.screen.x += (400 / MapEditor.zoom) * dt;
-                }
-                if (this.x < 60) {
-                    MapEditor.screen.x -= (400 / MapEditor.zoom) * dt;
-                }
-                if (this.y > screenHeightUI - 60) {
-                    MapEditor.screen.y += (400 / MapEditor.zoom) * dt;
-                }
-                if (this.y < 12) {
-                    MapEditor.screen.y -= (400 / MapEditor.zoom) * dt;
-                }
-
-                // MOVING EACH SELECTED ELEMENT TO FOLLOW BUTTON
-                for (let i = 0; i < MapEditor.selectedElements.length; i++) {
-                    let xMapped; // where this button is in global map coords
-                    let yMapped; // (and sometimes accounting for the offset when multiple platforms are selected)
-
-                    if (MapEditor.selectedElements.length > 1) {
-                        // Multiple objects selected
-
-                        // offSetFromBtn (offeset from middle of selection) for each platform is in global coords here
-                        const offSetFromAvgMidGlobalX = avgMidX - conditioningArray[i].element[conditioningArray[i].xKey];
-                        const offSetFromAvgMidGlobalY = avgMidY - conditioningArray[i].element[conditioningArray[i].yKey];
-
-                        // Map btn pos from UI coords to global map coords
-                        // mapToRange(number, inMin, inMax, outMin, outMax)
-                        const btnGlobalX = UserInterfaceCanvas.mapToRange(
-                            this.x + this.width / 2,
-                            0,
-                            screenWidthUI,
-                            MapEditor.screen.cornerX,
-                            MapEditor.screen.cornerX + MapEditor.screen.width
-                        );
-                        const btnGlobalY = UserInterfaceCanvas.mapToRange(
-                            this.y + this.height / 2,
-                            0,
-                            screenHeightUI,
-                            MapEditor.screen.cornerY,
-                            MapEditor.screen.cornerY + MapEditor.screen.height
-                        );
-
-                        xMapped = btnGlobalX - offSetFromAvgMidGlobalX;
-                        yMapped = btnGlobalY - offSetFromAvgMidGlobalY;
-                    } else {
-                        // use offset for single item
-
-                        xMapped = UserInterfaceCanvas.mapToRange(
-                            this.x - conditioningArray[i].offSet * MapEditor.zoom + this.width / 2,
-                            0,
-                            screenWidthUI,
-                            MapEditor.screen.cornerX,
-                            MapEditor.screen.cornerX + MapEditor.screen.width
-                        );
-                        yMapped = UserInterfaceCanvas.mapToRange(
-                            this.y - conditioningArray[i].offSet * MapEditor.zoom + this.height / 2,
-                            0,
-                            screenHeightUI,
-                            MapEditor.screen.cornerY,
-                            MapEditor.screen.cornerY + MapEditor.screen.height
-                        );
-                    }
-
-                    // set platform position to (xMapped, yMapped)
-                    conditioningArray[i].element[conditioningArray[i].xKey] = Math.round(xMapped);
-                    conditioningArray[i].element[conditioningArray[i].yKey] = Math.round(yMapped);
-
-                    if (MapEditor.snapAmount > 0) {
-                        conditioningArray[i].element[conditioningArray[i].xKey] =
-                            Math.round(conditioningArray[i].element[conditioningArray[i].xKey] / MapEditor.snapAmount) * MapEditor.snapAmount;
-                        conditioningArray[i].element[conditioningArray[i].yKey] =
-                            Math.round(conditioningArray[i].element[conditioningArray[i].yKey] / MapEditor.snapAmount) * MapEditor.snapAmount;
-                    }
-                }
-            }
-        });
-
-        btn_resize_BL = new Button(0, 0, 38, "scale_button_2", "", 0, "", function () {
-            let platform = MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]];
-
-            if (!this.isPressed) {
-                // position button at corner/edge of element
-
-                // BL corner (relative to platform center)
-                const cornerX = platform.corners[0][0];
-                const cornerY = platform.corners[0][1];
-
-                // corner coords mapped to screen coords
-                // mapToRange(number, inMin, inMax, outMin, outMax)
-                const cornerMappedX = UserInterfaceCanvas.mapToRange(
-                    platform.x + cornerX,
-                    MapEditor.screen.cornerX,
-                    MapEditor.screen.cornerX + MapEditor.screen.width,
-                    0,
-                    screenWidthUI
-                );
-                const cornerMappedY = UserInterfaceCanvas.mapToRange(
-                    platform.y + cornerY,
-                    MapEditor.screen.cornerY,
-                    MapEditor.screen.cornerY + MapEditor.screen.height,
-                    0,
-                    screenHeightUI
-                );
-
-                this.x = cornerMappedX - this.width;
-                this.y = cornerMappedY;
-            } else if (TouchHandler.dragging) {
-                // move button according to touch dragging
-                this.x += TouchHandler.dragAmountX;
-                this.y += TouchHandler.dragAmountY;
-
-                // panning if at edges of screen
-                if (this.x > screenWidthUI - 270) {
-                    MapEditor.screen.x += (400 / MapEditor.zoom) * dt;
-                }
-                if (this.x < 60) {
-                    MapEditor.screen.x -= (400 / MapEditor.zoom) * dt;
-                }
-                if (this.y > screenHeightUI - 60) {
-                    MapEditor.screen.y += (400 / MapEditor.zoom) * dt;
-                }
-                if (this.y < 12) {
-                    MapEditor.screen.y -= (400 / MapEditor.zoom) * dt;
-                }
-
-                // TR pinned corner MAP COORDS
-                const pinnedX_mapCoords = platform.x + platform.corners[2][0];
-                const pinnedY_mapCoords = platform.y + platform.corners[2][1];
-
-                // convert pinned coords to SCREEN COORDS
-                // mapToRange(number, inMin, inMax, outMin, outMax)
-                const pinnedX_screenCoords = UserInterfaceCanvas.mapToRange(
-                    pinnedX_mapCoords,
-                    MapEditor.screen.cornerX,
-                    MapEditor.screen.cornerX + MapEditor.screen.width,
-                    0,
-                    screenWidthUI
-                );
-                const pinnedY_screenCoords = UserInterfaceCanvas.mapToRange(
-                    pinnedY_mapCoords,
-                    MapEditor.screen.cornerY,
-                    MapEditor.screen.cornerY + MapEditor.screen.height,
-                    0,
-                    screenHeightUI
-                );
-
-                // get vector dragFromPinned (unscaled by zoom) (origin is at pin) x value will be neg at 0deg, y val will be pos(down) at 0 deg
-                // dividing by zoom brings it back to real map scale
-                const dragFromPinned = new Vector2D3D(
-                    (this.x + this.width - pinnedX_screenCoords) / MapEditor.zoom,
-                    (this.y - pinnedY_screenCoords) / MapEditor.zoom
-                );
-
-                // get rotatedDragFromPinned. (x will always be -, y will always be +)
-                const rotatedDragFromPinned = dragFromPinned.clone().rotate(-platform.angle);
-
-                // set width and height using rotatedDragFromPinned
-                platform.width = Math.round(-rotatedDragFromPinned.x * UserInterfaceCanvas.scale);
-                platform.height = Math.round(rotatedDragFromPinned.y * UserInterfaceCanvas.scale);
-
-                // snapping and restricting size
-                if (MapEditor.snapAmount > 0) {
-                    platform.width = Math.round(platform.width / MapEditor.snapAmount) * MapEditor.snapAmount;
-                    platform.height = Math.round(platform.height / MapEditor.snapAmount) * MapEditor.snapAmount;
-                }
-
-                if (platform.width < 6) {
-                    platform.width = 6;
-                }
-                if (platform.height < 6) {
-                    platform.height = 6;
-                }
-
-                // get NEW BL dragged corner map coords
-                const updatedDragCorner = [
-                    -((platform.width / 2) * Math.cos(platform.angleRad)) - (platform.height / 2) * Math.sin(platform.angleRad),
-                    -((platform.width / 2) * Math.sin(platform.angleRad)) + (platform.height / 2) * Math.cos(platform.angleRad),
-                ];
-
-                const draggedX_mapCoords = pinnedX_mapCoords + updatedDragCorner[0] * 2;
-                const draggedY_mapCoords = pinnedY_mapCoords + updatedDragCorner[1] * 2;
-
-                // set platform x and y to inbetween pinnedCorner in MAP COORDS and dragged corner in MAP COORDS
-                platform.x = (pinnedX_mapCoords + draggedX_mapCoords) / 2;
-                platform.y = (pinnedY_mapCoords + draggedY_mapCoords) / 2;
-
-                MapEditor.updatePlatformCorners(platform);
-            }
-        });
-
-        btn_resize_BR = new Button(0, 0, 38, "scale_button_1", "", 0, "", function () {
-            let platform = MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]];
-
-            if (!this.isPressed) {
-                // position button at corner/edge of element
-
-                // BR corner (relative to platform center)
-                const cornerX = platform.corners[1][0];
-                const cornerY = platform.corners[1][1];
-
-                // corner coords mapped to screen coords
-                // mapToRange(number, inMin, inMax, outMin, outMax)
-                const cornerMappedX = UserInterfaceCanvas.mapToRange(
-                    platform.x + cornerX,
-                    MapEditor.screen.cornerX,
-                    MapEditor.screen.cornerX + MapEditor.screen.width,
-                    0,
-                    screenWidthUI
-                );
-                const cornerMappedY = UserInterfaceCanvas.mapToRange(
-                    platform.y + cornerY,
-                    MapEditor.screen.cornerY,
-                    MapEditor.screen.cornerY + MapEditor.screen.height,
-                    0,
-                    screenHeightUI
-                );
-
-                this.x = cornerMappedX;
-                this.y = cornerMappedY;
-            } else if (TouchHandler.dragging) {
-                // move button according to touch dragging
-                this.x += TouchHandler.dragAmountX;
-                this.y += TouchHandler.dragAmountY;
-
-                // panning if at edges of screen
-                if (this.x > screenWidthUI - 270) {
-                    MapEditor.screen.x += (400 / MapEditor.zoom) * dt;
-                }
-                if (this.x < 60) {
-                    MapEditor.screen.x -= (400 / MapEditor.zoom) * dt;
-                }
-                if (this.y > screenHeightUI - 60) {
-                    MapEditor.screen.y += (400 / MapEditor.zoom) * dt;
-                }
-                if (this.y < 12) {
-                    MapEditor.screen.y -= (400 / MapEditor.zoom) * dt;
-                }
-
-                // TL pinned corner MAP COORDS
-                const pinnedX_mapCoords = platform.x + platform.corners[3][0];
-                const pinnedY_mapCoords = platform.y + platform.corners[3][1];
-
-                // convert pinned coords to SCREEN COORDS
-                // mapToRange(number, inMin, inMax, outMin, outMax)
-                const pinnedX_screenCoords = UserInterfaceCanvas.mapToRange(
-                    pinnedX_mapCoords,
-                    MapEditor.screen.cornerX,
-                    MapEditor.screen.cornerX + MapEditor.screen.width,
-                    0,
-                    screenWidthUI
-                );
-                const pinnedY_screenCoords = UserInterfaceCanvas.mapToRange(
-                    pinnedY_mapCoords,
-                    MapEditor.screen.cornerY,
-                    MapEditor.screen.cornerY + MapEditor.screen.height,
-                    0,
-                    screenHeightUI
-                );
-
-                // get vector dragFromPinned (unscaled by zoom) (origin is at pin) x value will be pos at 0deg, y val will be pos(down) at 0 deg
-                // dividing by zoom brings it back to real map scale
-                const dragFromPinned = new Vector2D3D(
-                    (this.x - pinnedX_screenCoords) / MapEditor.zoom,
-                    (this.y - pinnedY_screenCoords) / MapEditor.zoom
-                );
-
-                // get rotatedDragFromPinned. (x will always be -, y will always be +)
-                const rotatedDragFromPinned = dragFromPinned.clone().rotate(-platform.angle);
-
-                // set width and height using rotatedDragFromPinned
-                platform.width = Math.round(rotatedDragFromPinned.x * UserInterfaceCanvas.scale);
-                platform.height = Math.round(rotatedDragFromPinned.y * UserInterfaceCanvas.scale);
-
-                // snapping and restricting size
-                if (MapEditor.snapAmount > 0) {
-                    platform.width = Math.round(platform.width / MapEditor.snapAmount) * MapEditor.snapAmount;
-                    platform.height = Math.round(platform.height / MapEditor.snapAmount) * MapEditor.snapAmount;
-                }
-
-                if (platform.width < 6) {
-                    platform.width = 6;
-                }
-                if (platform.height < 6) {
-                    platform.height = 6;
-                }
-
-                // get NEW BR dragged corner map coords
-                const updatedDragCorner = [
-                    (platform.width / 2) * Math.cos(platform.angleRad) - (platform.height / 2) * Math.sin(platform.angleRad),
-                    (platform.width / 2) * Math.sin(platform.angleRad) + (platform.height / 2) * Math.cos(platform.angleRad),
-                ];
-
-                const draggedX_mapCoords = pinnedX_mapCoords + updatedDragCorner[0] * 2;
-                const draggedY_mapCoords = pinnedY_mapCoords + updatedDragCorner[1] * 2;
-
-                // set platform x and y to inbetween pinnedCorner in MAP COORDS and dragged corner in MAP COORDS
-                platform.x = (pinnedX_mapCoords + draggedX_mapCoords) / 2;
-                platform.y = (pinnedY_mapCoords + draggedY_mapCoords) / 2;
-
-                MapEditor.updatePlatformCorners(platform);
-            }
-        });
-
-        btn_resize_TR = new Button(0, 0, 38, "scale_button_2", "", 0, "", function () {
-            let platform = MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]];
-
-            if (!this.isPressed) {
-                // position button at corner/edge of element
-
-                // TR corner (relative to platform center)
-                const cornerX = platform.corners[2][0];
-                const cornerY = platform.corners[2][1];
-
-                // corner coords mapped to screen coords
-                // mapToRange(number, inMin, inMax, outMin, outMax)
-                const cornerMappedX = UserInterfaceCanvas.mapToRange(
-                    platform.x + cornerX,
-                    MapEditor.screen.cornerX,
-                    MapEditor.screen.cornerX + MapEditor.screen.width,
-                    0,
-                    screenWidthUI
-                );
-                const cornerMappedY = UserInterfaceCanvas.mapToRange(
-                    platform.y + cornerY,
-                    MapEditor.screen.cornerY,
-                    MapEditor.screen.cornerY + MapEditor.screen.height,
-                    0,
-                    screenHeightUI
-                );
-
-                this.x = cornerMappedX;
-                this.y = cornerMappedY - this.height;
-            } else if (TouchHandler.dragging) {
-                // move button according to touch dragging
-                this.x += TouchHandler.dragAmountX;
-                this.y += TouchHandler.dragAmountY;
-
-                // panning if at edges of screen
-                if (this.x > screenWidthUI - 270) {
-                    MapEditor.screen.x += (400 / MapEditor.zoom) * dt;
-                }
-                if (this.x < 60) {
-                    MapEditor.screen.x -= (400 / MapEditor.zoom) * dt;
-                }
-                if (this.y > screenHeightUI - 60) {
-                    MapEditor.screen.y += (400 / MapEditor.zoom) * dt;
-                }
-                if (this.y < 12) {
-                    MapEditor.screen.y -= (400 / MapEditor.zoom) * dt;
-                }
-
-                // BL pinned corner MAP COORDS
-                const pinnedX_mapCoords = platform.x + platform.corners[0][0];
-                const pinnedY_mapCoords = platform.y + platform.corners[0][1];
-
-                // convert pinned coords to SCREEN COORDS
-                // mapToRange(number, inMin, inMax, outMin, outMax)
-                const pinnedX_screenCoords = UserInterfaceCanvas.mapToRange(
-                    pinnedX_mapCoords,
-                    MapEditor.screen.cornerX,
-                    MapEditor.screen.cornerX + MapEditor.screen.width,
-                    0,
-                    screenWidthUI
-                );
-                const pinnedY_screenCoords = UserInterfaceCanvas.mapToRange(
-                    pinnedY_mapCoords,
-                    MapEditor.screen.cornerY,
-                    MapEditor.screen.cornerY + MapEditor.screen.height,
-                    0,
-                    screenHeightUI
-                );
-
-                // get vector dragFromPinned (unscaled by zoom) (origin is at pin) x value will be pos at 0deg, y val will be neg(up) at 0 deg
-                // dividing by zoom brings it back to real map scale
-                const dragFromPinned = new Vector2D3D(
-                    (this.x - pinnedX_screenCoords) / MapEditor.zoom,
-                    (this.y + this.height - pinnedY_screenCoords) / MapEditor.zoom
-                );
-
-                // get rotatedDragFromPinned. (x will always be -, y will always be +)
-                const rotatedDragFromPinned = dragFromPinned.clone().rotate(-platform.angle);
-
-                // set width and height using rotatedDragFromPinned
-                platform.width = Math.round(rotatedDragFromPinned.x * UserInterfaceCanvas.scale);
-                platform.height = Math.round(-rotatedDragFromPinned.y * UserInterfaceCanvas.scale);
-
-                // snapping and restricting size
-                if (MapEditor.snapAmount > 0) {
-                    platform.width = Math.round(platform.width / MapEditor.snapAmount) * MapEditor.snapAmount;
-                    platform.height = Math.round(platform.height / MapEditor.snapAmount) * MapEditor.snapAmount;
-                }
-
-                if (platform.width < 6) {
-                    platform.width = 6;
-                }
-                if (platform.height < 6) {
-                    platform.height = 6;
-                }
-
-                // get NEW TR dragged corner map coords
-                const updatedDragCorner = [
-                    (platform.width / 2) * Math.cos(platform.angleRad) + (platform.height / 2) * Math.sin(platform.angleRad),
-                    (platform.width / 2) * Math.sin(platform.angleRad) - (platform.height / 2) * Math.cos(platform.angleRad),
-                ];
-
-                const draggedX_mapCoords = pinnedX_mapCoords + updatedDragCorner[0] * 2;
-                const draggedY_mapCoords = pinnedY_mapCoords + updatedDragCorner[1] * 2;
-
-                // set platform x and y to inbetween pinnedCorner in MAP COORDS and dragged corner in MAP COORDS
-                platform.x = (pinnedX_mapCoords + draggedX_mapCoords) / 2;
-                platform.y = (pinnedY_mapCoords + draggedY_mapCoords) / 2;
-
-                MapEditor.updatePlatformCorners(platform);
-            }
-        });
-
-        btn_resize_TL = new Button(0, 0, 38, "scale_button_1", "", 0, "", function () {
-            let platform = MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]];
-
-            if (!this.isPressed) {
-                // position button at corner/edge of element
-
-                // TL corner (relative to platform center)
-                const cornerX = platform.corners[3][0];
-                const cornerY = platform.corners[3][1];
-
-                // corner coords mapped to screen coords
-                // mapToRange(number, inMin, inMax, outMin, outMax)
-                const cornerMappedX = UserInterfaceCanvas.mapToRange(
-                    platform.x + cornerX,
-                    MapEditor.screen.cornerX,
-                    MapEditor.screen.cornerX + MapEditor.screen.width,
-                    0,
-                    screenWidthUI
-                );
-                const cornerMappedY = UserInterfaceCanvas.mapToRange(
-                    platform.y + cornerY,
-                    MapEditor.screen.cornerY,
-                    MapEditor.screen.cornerY + MapEditor.screen.height,
-                    0,
-                    screenHeightUI
-                );
-
-                this.x = cornerMappedX - this.width;
-                this.y = cornerMappedY - this.height;
-            } else if (TouchHandler.dragging) {
-                // move button according to touch dragging
-                this.x += TouchHandler.dragAmountX;
-                this.y += TouchHandler.dragAmountY;
-
-                // panning if at edges of screen
-                if (this.x > screenWidthUI - 270) {
-                    MapEditor.screen.x += (400 / MapEditor.zoom) * dt;
-                }
-                if (this.x < 60) {
-                    MapEditor.screen.x -= (400 / MapEditor.zoom) * dt;
-                }
-                if (this.y > screenHeightUI - 60) {
-                    MapEditor.screen.y += (400 / MapEditor.zoom) * dt;
-                }
-                if (this.y < 12) {
-                    MapEditor.screen.y -= (400 / MapEditor.zoom) * dt;
-                }
-
-                // BR pinned corner MAP COORDS
-                const pinnedX_mapCoords = platform.x + platform.corners[1][0];
-                const pinnedY_mapCoords = platform.y + platform.corners[1][1];
-
-                // convert pinned coords to SCREEN COORDS
-                // mapToRange(number, inMin, inMax, outMin, outMax)
-                const pinnedX_screenCoords = UserInterfaceCanvas.mapToRange(
-                    pinnedX_mapCoords,
-                    MapEditor.screen.cornerX,
-                    MapEditor.screen.cornerX + MapEditor.screen.width,
-                    0,
-                    screenWidthUI
-                );
-                const pinnedY_screenCoords = UserInterfaceCanvas.mapToRange(
-                    pinnedY_mapCoords,
-                    MapEditor.screen.cornerY,
-                    MapEditor.screen.cornerY + MapEditor.screen.height,
-                    0,
-                    screenHeightUI
-                );
-
-                // get vector dragFromPinned (unscaled by zoom) (origin is at pin) x value will be neg at 0deg, y val will be neg(up) at 0 deg
-                // dividing by zoom brings it back to real map scale
-                const dragFromPinned = new Vector2D3D(
-                    (this.x + this.width - pinnedX_screenCoords) / MapEditor.zoom,
-                    (this.y + this.height - pinnedY_screenCoords) / MapEditor.zoom
-                );
-
-                // get rotatedDragFromPinned. (x will always be +, y will always be +)
-                const rotatedDragFromPinned = dragFromPinned.clone().rotate(-platform.angle);
-
-                // set width and height using rotatedDragFromPinned
-                platform.width = Math.round(-rotatedDragFromPinned.x * UserInterfaceCanvas.scale);
-                platform.height = Math.round(-rotatedDragFromPinned.y * UserInterfaceCanvas.scale);
-
-                // snapping and restricting size
-                if (MapEditor.snapAmount > 0) {
-                    platform.width = Math.round(platform.width / MapEditor.snapAmount) * MapEditor.snapAmount;
-                    platform.height = Math.round(platform.height / MapEditor.snapAmount) * MapEditor.snapAmount;
-                }
-
-                if (platform.width < 6) {
-                    platform.width = 6;
-                }
-                if (platform.height < 6) {
-                    platform.height = 6;
-                }
-
-                // get NEW TL dragged corner map coords
-                const updatedDragCorner = [
-                    -((platform.width / 2) * Math.cos(platform.angleRad)) + (platform.height / 2) * Math.sin(platform.angleRad),
-                    -((platform.width / 2) * Math.sin(platform.angleRad)) - (platform.height / 2) * Math.cos(platform.angleRad),
-                ];
-
-                const draggedX_mapCoords = pinnedX_mapCoords + updatedDragCorner[0] * 2;
-                const draggedY_mapCoords = pinnedY_mapCoords + updatedDragCorner[1] * 2;
-
-                // set platform x and y to inbetween pinnedCorner in MAP COORDS and dragged corner in MAP COORDS
-                platform.x = (pinnedX_mapCoords + draggedX_mapCoords) / 2;
-                platform.y = (pinnedY_mapCoords + draggedY_mapCoords) / 2;
-
-                MapEditor.updatePlatformCorners(platform);
-            }
-        });
-
-        btn_angleSlider = new SliderUI(
-            screenWidthUI - 246,
-            204,
-            186,
-            -45,
-            45,
-            1,
-            "Angle",
-            MapEditor.loadedMap ? MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]] : 0,
-            function () {
-                if (MapEditor.snapAmount > 0) {
-                    this.updateState(Math.round(this.value / MapEditor.snapAmount) * MapEditor.snapAmount);
-                }
-                if (this.value < this.min) {
-                    this.updateState(this.min);
-                } // these are incase snapping pushes the value over or under the limits
-                if (this.value > this.max) {
-                    this.updateState(this.max);
-                }
-                MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].angle = this.value;
-                MapEditor.updatePlatformCorners(MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]]);
-            }
-        );
-
-        btn_playerAngleSlider = new SliderUI(
-            screenWidthUI - 246,
-            204,
-            186,
-            0,
-            360,
-            1,
-            "Angle",
-            MapEditor.loadedMap ? MapEditor.loadedMap.playerStart : 0,
-            function () {
-                if (MapEditor.snapAmount > 0) {
-                    this.updateState(Math.round(this.value / MapEditor.snapAmount) * MapEditor.snapAmount);
-                }
-                MapEditor.loadedMap.playerStart.angle = this.value;
-            }
-        );
-
-        btn_checkpointAngleSlider = new SliderUI(
-            screenWidthUI - 246,
-            204,
-            186,
-            0,
-            360,
-            1,
-            "Angle",
-            MapEditor.loadedMap ? MapEditor.loadedMap.checkpoints[MapEditor.selectedElements[0][0]] : 0,
-            function () {
-                if (MapEditor.snapAmount > 0) {
-                    this.updateState(Math.round(this.value / MapEditor.snapAmount) * MapEditor.snapAmount);
-                }
-                MapEditor.loadedMap.checkpoints[MapEditor.selectedElements[0][0]].angle = this.value;
-            }
-        );
-
-        btn_wall = new Button(screenWidthUI - 120, 224, 60, "toggle_button", "toggle_button_pressed", 1, "", function (sync) {
-            if (MapEditor.loadedMap) {
-                // throws an error otherwise
-                if (sync) {
-                    this.toggle = MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].wall ? 1 : 0; // gets initial value of toggle
-                } else {
-                    if (this.toggle) {
-                        this.toggle = 0;
-                        MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].wall = 0;
-                    } else {
-                        this.toggle = 1;
-                        MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].wall = 1;
-                    }
-                }
-            }
-        });
-
-        btn_endzone = new Button(screenWidthUI - 120, 264, 60, "toggle_button", "toggle_button_pressed", 1, "", function (sync) {
-            if (MapEditor.loadedMap) {
-                // throws an error otherwise
-                if (sync) {
-                    this.toggle = MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].endzone ? 1 : 0; // gets initial value of toggle
-                } else {
-                    if (this.toggle) {
-                        this.toggle = 0;
-                        MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].endzone = 0;
-                    } else {
-                        this.toggle = 1;
-                        MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].endzone = 1;
-                    }
-                }
-            }
-        });
-
-        btn_duplicate_platform = new Button(screenWidthUI - 262, screenHeightUI - 90, 150, "", "", 0, "Duplicate", function () {
-            let originPlatform = {
-                x: null,
-                y: null,
-            };
-
-            MapEditor.selectedElements.forEach((element) => {
-                if (element != "playerStart" && !Array.isArray(element)) {
-                    // only run for platforms
-
-                    const newPlatform = { ...MapEditor.loadedMap.platforms[element] }; // get selected platform. spread syntax creates a shallow copy that doesn not link/reference
-
-                    if (originPlatform.x == null) {
-                        // set origin platform
-                        originPlatform.x = MapEditor.loadedMap.platforms[element].x;
-                        originPlatform.y = MapEditor.loadedMap.platforms[element].y;
-                    }
-
-                    const offsetFromOriginPlatformX = MapEditor.loadedMap.platforms[element].x - originPlatform.x;
-                    const offsetFromOriginPlatformY = MapEditor.loadedMap.platforms[element].y - originPlatform.y;
-
-                    (newPlatform.x = Math.round(MapEditor.screen.x) + offsetFromOriginPlatformX), // center it
-                        (newPlatform.y = Math.round(MapEditor.screen.y) + offsetFromOriginPlatformY),
-                        MapEditor.loadedMap.platforms.push(newPlatform); // add it
-
-                    // deal with selections
-                    if (MapEditor.multiSelect) {
-                        MapEditor.selectedElements[MapEditor.selectedElements.indexOf(element)] = MapEditor.loadedMap.platforms.length - 1;
-                    } else {
-                        MapEditor.selectedElements = [MapEditor.loadedMap.platforms.length - 1];
-                    }
-                }
-            });
-
-            if (MapEditor.selectedElements.length == 1) {
-                // only sync in single select
-                // SYNC ALL BUTTONS AND SLIDERS
-                btn_angleSlider.updateState(MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].angle);
-                btn_wall.func(true); // syncs the wall button's toggle state
-                btn_endzone.func(true); // syncs the enzone button's toggle state
-            }
-        });
-
-        btn_delete_element = new Button(screenWidthUI - 99, screenHeightUI - 90, 56, "trash_button", "", 0, "", function () {
-            MapEditor.selectedElements.forEach((element) => {
-                // loop through and delete
-                if (Array.isArray(element)) {
-                    // delete checkpoint
-
-                    MapEditor.loadedMap.checkpoints[element[0]] = "remove";
-                } else if (element != "playerStart") {
-                    // delete platform but DONT delete playerStart
-
-                    MapEditor.loadedMap.platforms[element] = "remove"; // set a placeholder which will be removed by .filter
-                }
-            });
-
-            MapEditor.loadedMap.checkpoints = MapEditor.loadedMap.checkpoints.filter((checkpoint) => checkpoint != "remove");
-            MapEditor.loadedMap.platforms = MapEditor.loadedMap.platforms.filter((platform) => platform != "remove");
-
-            MapEditor.selectedElements = []; // No selected elements after delete
-            UserInterface.renderedButtons = UserInterface.btnGroup_mapEditorInterface;
-            UserInterface.switchToUiGroup(UserInterface.uiGroup_mapEditorInterface)
-            UserInterface.switchToUiGroup(U)
-        });
-
-        // MAP SETTINGS SLIDERS
-        btn_platformHeightSlider = new SliderUI(
-            midX_UI,
-            80,
-            360,
-            0,
-            360,
-            1,
-            "Platform Height",
-            MapEditor.loadedMap ? MapEditor.loadedMap.style.platformHeight : 0,
-            function () {
-                MapEditor.loadedMap.style.platformHeight = this.value;
-                PreviewWindow.update();
-            }
-        );
-
-        btn_wallHeightSlider = new SliderUI(
-            midX_UI,
-            140,
-            360,
-            0,
-            360,
-            1,
-            "Wall Height",
-            MapEditor.loadedMap ? MapEditor.loadedMap.style.wallHeight : 0,
-            function () {
-                MapEditor.loadedMap.style.wallHeight = this.value;
-                PreviewWindow.update();
-            }
-        );
-
-        btn_lightDirectionSlider = new SliderUI(
-            midX_UI,
-            200,
-            360,
-            0,
-            360,
-            1,
-            "Light Direction",
-            MapEditor.loadedMap ? MapEditor.loadedMap.style.lightDirection : 0,
-            function () {
-                MapEditor.loadedMap.style.lightDirection = this.value;
-                PreviewWindow.update();
-            }
-        );
-
-        btn_lightPitchSlider = new SliderUI(
-            midX_UI,
-            260,
-            360,
-            5,
-            90,
-            1,
-            "Light Angle",
-            MapEditor.loadedMap ? MapEditor.loadedMap.style.lightPitch : 0,
-            function () {
-                MapEditor.loadedMap.style.lightPitch = this.value;
-                PreviewWindow.update();
-            }
-        );
 
         // COLOR PICKER BUTTONS AND SLIDERS
         btn_copyColor = new Button(ColorPicker.x + 154, ColorPicker.y + 46, 90, "", "", 0, "Copy", function () {
@@ -1893,15 +1558,7 @@ const UserInterface = {
 
         // GROUPS OF BUTTONS TO RENDER ON DIFFERENT PAGES
 
-        this.btnGroup_mapEditorInterface = [
-            btn_add_platform,
-            btn_map_colors,
-            btn_map_settings,
-            btn_add_checkpoint,
-            btn_dragSelect,
-            btn_multiSelect,
-            btn_snappingSlider,
-        ];
+        this.btnGroup_mapEditorInterface = [];
         this.btnGroup_colorPickerState1 = [
             btn_backgroundColor,
             btn_playerColor,
@@ -1925,59 +1582,12 @@ const UserInterface = {
             btn_saturationSlider,
             btn_lightnessSlider,
         ];
-        this.btnGroup_mapSettings = [btn_platformHeightSlider, btn_wallHeightSlider, btn_lightDirectionSlider, btn_lightPitchSlider];
-        this.btnGroup_editPlatform = [
-            btn_unselect,
+        this.btnGroup_mapSettings = [];
+        this.btnGroup_editPlatform = [];
+        this.btnGroup_editPlayerStart = [];
+        this.btnGroup_editCheckpoint = [];
+        this.btnGroup_editMultiSelect = [];
 
-            btn_translate,
-            btn_resize_BL,
-            btn_resize_BR,
-            btn_resize_TR,
-            btn_resize_TL,
-            btn_angleSlider,
-            btn_wall,
-            btn_endzone,
-
-            btn_delete_element,
-            btn_duplicate_platform,
-            btn_dragSelect,
-            btn_multiSelect,
-            btn_snappingSlider,
-        ];
-        this.btnGroup_editPlayerStart = [
-            btn_unselect,
-
-            btn_translate,
-            btn_playerAngleSlider,
-            btn_dragSelect,
-            btn_multiSelect,
-            btn_snappingSlider,
-        ];
-        this.btnGroup_editCheckPoint = [
-            btn_unselect,
-
-            btn_translate,
-            btn_checkpointAngleSlider,
-
-            btn_delete_element,
-            btn_dragSelect,
-            btn_multiSelect,
-            btn_snappingSlider,
-        ];
-        this.btnGroup_editMultiSelect = [
-            btn_unselect,
-
-            btn_delete_element,
-            btn_duplicate_platform,
-            btn_translate,
-            btn_dragSelect,
-            btn_multiSelect,
-            btn_snappingSlider,
-        ];
-
-        this.btnGroup_dragSelect = [btn_dragSelect]; // dont even need
-
-        // this.renderedButtons = this.btnGroup_mainMenu;
         this.renderedButtons = []; // kill eventually
     },
 
@@ -2099,27 +1709,43 @@ const UserInterface = {
 
     // Slider Get, Set, & updateDraggedSlider Functions
 
-    setSliderValue: function (slider, value) {
+    setSliderValue: function (slider, value, unsnapped = false) {
         const min = parseFloat(slider.dataset.min);
         const max = parseFloat(slider.dataset.max);
+        const step = parseFloat(slider.dataset.step) || 1;
 
-        // Clamp the value to [min, max]
+        // Clamp input value to [min, max]
         const clamped = Math.min(Math.max(value, min), max);
 
-        const step = parseFloat(slider.dataset.step) || 1;
-        const stepSnapped = Math.round((clamped - min) / step) * step + min;
+        // Snap to nearest step unless unsnapped is true or value was clamped by min or max
+        let stepSnapped;
+        if (unsnapped || clamped != value) {
+            // if override-snapping || if value was clamped
+            stepSnapped = clamped;
+        } else {
+            stepSnapped = Math.round(clamped / step) * step;
+            // Snap is relative to zero NOT min value
+            // This snaps relative to min value: Math.round((clamped - min) / step) * step + min;
+        }
 
+        // Determine what decimal precision should be used based on step's precision
         const decimalPointsToUse = slider.dataset.step?.split(".")[1]?.length || 0;
-        const stepSnappedRounded = stepSnapped.toFixed(decimalPointsToUse);
 
-        // update data-value in HTML dataSet
-        slider.dataset.value = stepSnappedRounded;
+        // Round to correct decimal precision (numeric form)
+        let stepSnappedRoundedNum = parseFloat(stepSnapped.toFixed(decimalPointsToUse));
 
-        // update the label to reflect new value
-        slider.labelValue.textContent = stepSnappedRounded;
+        // 5. Re-clamp after rounding to avoid edge overflow
+        stepSnappedRoundedNum = Math.min(Math.max(stepSnappedRoundedNum, min), max);
 
-        // Convert value to percentage of the range for styling
-        const percent = ((stepSnappedRounded - min) / (max - min)) * 100;
+        // Create string version for display (preserving decimal precision)
+        const stepSnappedRoundedStr = stepSnappedRoundedNum.toFixed(decimalPointsToUse);
+
+        // Update dataset and label
+        slider.dataset.value = stepSnappedRoundedNum; // numeric for internal logic
+        slider.labelValue.textContent = stepSnappedRoundedStr; // formatted for display
+
+        // Convert to % of range for styling
+        const percent = ((stepSnappedRoundedNum - min) / (max - min)) * 100;
         slider.handle.style.setProperty("--pos", `${percent}%`);
     },
 
@@ -2127,6 +1753,7 @@ const UserInterface = {
         return parseFloat(slider.dataset.value);
     },
 
+    // called every frame when sliders are on screen
     updateDraggedSlider: function (slider) {
         const sliderRect = slider.getBoundingClientRect();
         const slidersTouchID = Number(slider.dataset.touchid);
@@ -2155,6 +1782,25 @@ const UserInterface = {
         } else {
             toggleButton.classList.remove("toggled");
         }
+    },
+
+    // 2 Map Editor Platform Manipulation Button Position Functions (38px buttons only!)
+    setGizmoBtnPos: function (button, xPosForMiddleOfBtn, yPosForMiddleOfBtn) {
+        // 19 is half of button's 38px size
+        if (xPosForMiddleOfBtn !== undefined) {
+            button.style.left = `${xPosForMiddleOfBtn - 19}px`;
+        }
+        if (yPosForMiddleOfBtn !== undefined) {
+            button.style.top = `${yPosForMiddleOfBtn - 19}px`;
+        }
+    },
+
+    getGizmoBtnPos: function (button) {
+        // 19 is half of button's 38px size
+        return {
+            x: parseFloat(getComputedStyle(button).left) + 19,
+            y: parseFloat(getComputedStyle(button).top) + 19,
+        };
     },
 
     determineButtonColor: function () {
@@ -2203,47 +1849,8 @@ const UserInterface = {
         return minutes + ":" + extraSeconds;
     },
 
-    drawMedal: function (x, y, radius, fillColor, strokeColor, strokeWidth, shadow) {
-        // radius is accounts for stroke -- stroke is drawn inside of shape
-        const oldFill = UserInterfaceCanvas.ctx.fillStyle;
-
-        if (shadow) {
-            UserInterfaceCanvas.ctx.fillStyle = "rgba(0, 0, 0, 0.25)";
-            UserInterfaceCanvas.ctx.beginPath();
-            UserInterfaceCanvas.ctx.arc(x + 3, y + 3, radius, 0, 2 * Math.PI); // (x, y, radius, startAngle, endAngle)
-            UserInterfaceCanvas.ctx.fill();
-        }
-
-        UserInterfaceCanvas.ctx.fillStyle = fillColor;
-        UserInterfaceCanvas.ctx.strokeStyle = strokeColor;
-        UserInterfaceCanvas.ctx.lineWidth = strokeWidth;
-
-        UserInterfaceCanvas.ctx.beginPath();
-        UserInterfaceCanvas.ctx.arc(x, y, radius - strokeWidth / 2, 0, 2 * Math.PI); // (x, y, radius, startAngle, endAngle)
-
-        UserInterfaceCanvas.ctx.fill();
-        UserInterfaceCanvas.ctx.stroke();
-
-        UserInterfaceCanvas.ctx.fillStyle = oldFill;
-    },
-
-    getOrdinalSuffix: function (i) {
-        // turns 1 into 1st, 2 into 2nd UNUSED KILL
-        let j = i % 10,
-            k = i % 100;
-        if (j === 1 && k !== 11) {
-            return i + "st";
-        }
-        if (j === 2 && k !== 12) {
-            return i + "nd";
-        }
-        if (j === 3 && k !== 13) {
-            return i + "rd";
-        }
-        return i + "th";
-    },
-
     truncateText: function (text, clampToWidth) {
+        // kill maybe unless i think ill need it for map naming or something
         if (UserInterfaceCanvas.ctx.measureText(text).width > clampToWidth) {
             while (UserInterfaceCanvas.ctx.measureText(text + "...").width > clampToWidth || text.endsWith(" ")) {
                 // also removes end char if its a space
@@ -2470,6 +2077,83 @@ const UserInterface = {
         }
     },
 
+    updateMapEditorSidePanel: function () {
+        // called when:
+        // translate and resize buttons are dragged
+        // platform or checkpoint or playerStart get selected or drag select ends (MapEditor.touchReleased)
+        // items are duplicated, or added platform or added checkpoint
+
+        if (MapEditor.multiSelect && MapEditor.selectedElements.length > 1) {
+            // Multiple elements selected
+
+            ui_elementTitle.textContent = `Group Selection`;
+
+            const countData = MapEditor.indexSelectedElements();
+            let lines = [];
+            if (countData.platforms > 0) {
+                lines.push(`Platforms: ${countData.platforms}`);
+            }
+            if (countData.walls > 0) {
+                lines.push(`Walls: ${countData.walls}`);
+            }
+            if (countData.endZones > 0) {
+                lines.push(`End Zones: ${countData.endZones}`);
+            }
+            if (countData.checkpoints > 0) {
+                lines.push(`Checkpoints: ${countData.checkpoints}`);
+            }
+            if (countData.playerStart > 0) {
+                lines.push(`Player Start: ${countData.playerStart}`);
+            }
+            ui_elementInfo.innerHTML = lines.join("<br>");
+
+            return;
+        }
+
+        if (MapEditor.selectedElements[0] == "playerStart") {
+            // playerStart is selected
+            ui_elementTitle.textContent = `Player Start`;
+            ui_elementInfo.textContent = `Position: ${MapEditor.loadedMap.playerStart.x}, ${MapEditor.loadedMap.playerStart.y}`;
+
+            return;
+        }
+
+        if (Array.isArray(MapEditor.selectedElements[0])) {
+            // checkpoint is selected
+            ui_elementTitle.textContent = `Checkpoint`;
+
+            ui_elementInfo.innerHTML = `
+                Trigger 1: 
+                ${MapEditor.loadedMap.checkpoints[MapEditor.selectedElements[0][0]].triggerX1}, 
+                ${MapEditor.loadedMap.checkpoints[MapEditor.selectedElements[0][0]].triggerY1}
+                <br>
+                Trigger 2: ${MapEditor.loadedMap.checkpoints[MapEditor.selectedElements[0][0]].triggerX2}, 
+                ${MapEditor.loadedMap.checkpoints[MapEditor.selectedElements[0][0]].triggerY2}
+                <br>
+                Respawn: ${MapEditor.loadedMap.checkpoints[MapEditor.selectedElements[0][0]].x}, 
+                ${MapEditor.loadedMap.checkpoints[MapEditor.selectedElements[0][0]].y}
+            `.trim();
+
+            return;
+        }
+
+        // platform is selected
+        ui_elementTitle.textContent = `Platform`;
+
+        const approxSignX = MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].x % 1 == 0 ? "" : "~";
+        const approxSignY = MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].y % 1 == 0 ? "" : "~";
+
+        ui_elementInfo.innerHTML = `
+            Position: 
+            ${approxSignX}${Math.round(MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].x)}, 
+            ${approxSignY}${Math.round(MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].y)}
+            <br>
+            Size: 
+            ${MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].width}, 
+            ${MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].height}
+        `.trim();
+    },
+
     shareMap: async function () {
         try {
             const mapIndex = MapBrowser.selectedMapIndex;
@@ -2504,7 +2188,7 @@ const UserInterface = {
             alert("Something went wrong while trying to share your map.");
         }
     },
-    
+
     update: function () {
         // update dragged Sliders every frame
         // sliders are only in Settings Page and MapEditor Pages
@@ -2563,28 +2247,15 @@ const UserInterface = {
             }
 
             if (this.levelState == 2) {
-                // FIX do this below \/ CSS change only when player is first paused or unpaused not by checking every frame
-                const speedometerTopValue = parseFloat(window.getComputedStyle(ui_speedometer).top);
-
                 if (!Tutorial.pausePlayer) {
                     // player is NOT paused
                     this.timer = Date.now() - this.timerStart;
 
                     // Update Speed Text. ADD COLOR AND SIZE CHANGES TO THIS BASED OFF OF GAIN
                     ui_speedometer.textContent = `Speed: ${Math.round(Player.velocity.magnitude())}`;
-
-                    // move Speed Text down to normal spot (dont do this check every frame only when first unpausing FIX )
-                    if (speedometerTopValue === 8) {
-                        ui_speedometer.style.top = "32px";
-                    }
                 } else {
                     // player IS paused
                     this.timerStart += Date.now() - this.timer - this.timerStart; // dont progress timer when paused
-
-                    // move Speed Text up (dont do this check every frame only when first pausing FIX )
-                    if (speedometerTopValue === 32) {
-                        ui_speedometer.style.top = "8px";
-                    }
                 }
             }
         }
@@ -2594,13 +2265,6 @@ const UserInterface = {
         const ctx = UserInterfaceCanvas.ctx;
         ctx.save(); // UI SCALING SAVE
         ctx.scale(UserInterfaceCanvas.scale, UserInterfaceCanvas.scale); // All UI elements are positioned on original CSS cords. this brings them up to device DPI resolution
-
-        if (this.gamestate == 1) {
-            // In Main Menu
-            // FIX dont set this here every frame
-            // also dont use canvas as BG
-            // CanvasArea.canvas.style.backgroundColor = "#a3d5e1";
-        }
 
         if (this.gamestate == 6) {
             // In Level
@@ -2722,15 +2386,9 @@ const UserInterface = {
                 // MAP EDITOR UI
                 ctx.save(); // to revert map editor canvas state changes
 
-                ctx.font = "15px BAHNSCHRIFT";
-
                 if (MapEditor.editorState == 1 || MapEditor.editorState == 2) {
                     // Draw UI (not Side Panel yet) for Main edit screen or platform edit screen
                     ctx.fillStyle = UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
-                    ctx.fillText("Drag Select", btn_dragSelect.x, btn_dragSelect.y - 14);
-                    if (!MapEditor.dragSelect) {
-                        ctx.fillText("Group Select", btn_multiSelect.x, btn_multiSelect.y - 14);
-                    }
 
                     // Draw dragSelect rectangle marquee
                     if (MapEditor.dragSelect && TouchHandler.dragging) {
@@ -2744,102 +2402,6 @@ const UserInterface = {
                             MapEditor.dragSelectMarquee.height
                         );
                         ctx.setLineDash([]);
-                    }
-                }
-
-                if (MapEditor.editorState == 2 && !MapEditor.dragSelect) {
-                    // DRAWING SIDE PANEL
-
-                    const sidePanel = {
-                        // If these change also change the values in MapEditor.touchReleased()
-                        x: screenWidthUI - 262,
-                        y: 22,
-                        width: 218,
-                        height: 292,
-                    };
-
-                    // SIDE PANEL BG BOX
-                    ctx.fillStyle = UserInterface.darkMode ? UserInterface.lightColor_1 : UserInterface.darkColor_1;
-                    UserInterfaceCanvas.roundedRect(sidePanel.x, sidePanel.y, sidePanel.width, sidePanel.height, 27.5);
-                    ctx.fill();
-
-                    ctx.fillStyle = UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1; // for text
-
-                    if (MapEditor.multiSelect && MapEditor.selectedElements.length > 1) {
-                        // MULTISELECTED
-
-                        ctx.fillText("Group Selection", sidePanel.x + 16, sidePanel.y + 84);
-                        ctx.fillText(MapEditor.selectedElements.length + " Items", sidePanel.x + 16, sidePanel.y + 108);
-                    } else {
-                        if (MapEditor.selectedElements[0] == "playerStart") {
-                            // playerStart is selected
-                            ctx.fillText("Player Start", sidePanel.x + 84, sidePanel.y + 38);
-                            ctx.fillText(
-                                "Position: " + MapEditor.loadedMap.playerStart.x + ", " + MapEditor.loadedMap.playerStart.y,
-                                sidePanel.x + 16,
-                                sidePanel.y + 84
-                            );
-                        } else if (Array.isArray(MapEditor.selectedElements[0])) {
-                            // checkpoint is selected
-                            ctx.fillText("Checkpoint", sidePanel.x + 84, sidePanel.y + 38);
-                            ctx.fillText(
-                                "Trigger 1: " +
-                                    MapEditor.loadedMap.checkpoints[MapEditor.selectedElements[0][0]].triggerX1 +
-                                    ", " +
-                                    MapEditor.loadedMap.checkpoints[MapEditor.selectedElements[0][0]].triggerY1,
-                                sidePanel.x + 16,
-                                sidePanel.y + 84
-                            );
-                            ctx.fillText(
-                                "Trigger 2: " +
-                                    MapEditor.loadedMap.checkpoints[MapEditor.selectedElements[0][0]].triggerX2 +
-                                    ", " +
-                                    MapEditor.loadedMap.checkpoints[MapEditor.selectedElements[0][0]].triggerY2,
-                                sidePanel.x + 16,
-                                sidePanel.y + 108
-                            );
-                            ctx.fillText(
-                                "Respawn: " +
-                                    MapEditor.loadedMap.checkpoints[MapEditor.selectedElements[0][0]].x +
-                                    ", " +
-                                    MapEditor.loadedMap.checkpoints[MapEditor.selectedElements[0][0]].y,
-                                sidePanel.x + 16,
-                                sidePanel.y + 132
-                            );
-                        } else {
-                            // platform is selected
-                            ctx.fillText("Platform", sidePanel.x + 84, sidePanel.y + 38);
-                            const approxSignX = MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].x % 1 == 0 ? "" : "~";
-                            const approxSignY = MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].y % 1 == 0 ? "" : "~";
-                            ctx.fillText(
-                                "Position: " +
-                                    approxSignX +
-                                    Math.round(MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].x) +
-                                    ", " +
-                                    approxSignY +
-                                    Math.round(MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].y),
-                                sidePanel.x + 16,
-                                sidePanel.y + 84
-                            );
-                            ctx.fillText(
-                                "Size: " +
-                                    MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].width +
-                                    ", " +
-                                    MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].height,
-                                sidePanel.x + 16,
-                                sidePanel.y + 108
-                            );
-                            ctx.fillText(
-                                "Wall: " + (MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].wall ? "Yes" : "No"),
-                                sidePanel.x + 16,
-                                sidePanel.y + 224
-                            );
-                            ctx.fillText(
-                                "End Zone: " + (MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].endzone ? "Yes" : "No"),
-                                sidePanel.x + 16,
-                                sidePanel.y + 264
-                            );
-                        }
                     }
                 }
 

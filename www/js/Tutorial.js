@@ -1,406 +1,371 @@
 const Tutorial = {
-    isActive : false,
-    state : 0, //  20 stages in google doc
-    // STATES SKIPPED / REMOVED: 4, 
-    targets : [[240,50],[120,50],[180,50],[0,50],[60,50],[300,50]], // 1st number is target angle, 2nd is targets health
-    timerStarted : false, // used to prevent multiple timers from being set every frame
-    timerCompleted : false,
-    liftedFinger : false,
-    pausePlayer : false,
-    animatePos : 0,
-    animateVel : 0,
-    decalLoadState : -1, // -1 no, 0 started load, 4 finished load (number of decals loaded)
-    decalList : ["horizontal_finger", "vertical_finger", "finger", "arrow"],
-    timeoutToCancel : null,
+    isActive: false,
+    state: 0, //  20 stages in google doc
+    // STATES SKIPPED / REMOVED: 4,
+    targets: [
+        [240, 50],
+        [120, 50],
+        [180, 50],
+        [0, 50],
+        [60, 50],
+        [300, 50],
+    ], // 1st number is target angle, 2nd is targets health
+    pausePlayer: false,
 
-    reset : function() { // called on restart and when leaving level
+    reset: function () {
+        // called on restart and when leaving level
         this.state = 0;
-        this.targets = [[240,50],[120,50],[180,50],[0,50],[60,50],[300,50]];
-        this.timerStarted = false;
-        this.timerCompleted = false;
-        this.liftedFinger = false;
+        this.targets = [
+            [240, 50],
+            [120, 50],
+            [180, 50],
+            [0, 50],
+            [60, 50],
+            [300, 50],
+        ];
         this.pausePlayer = false;
-        this.animatePos = 0;
-        this.animateVel = 0;
-        clearTimeout(this.timeoutToCancel)
+
+        ui_tutorialTextWrapper.style.removeProperty("top");
+        tutorial_arrow.style.removeProperty("top");
+        tutorial_arrow.style.removeProperty("left");
     },
 
+    setState: function (newState) {
+        this.state = newState;
 
-
-    update : function() {
-        if (UserInterface.gamestate == 2) { // in map browser
-            if (MapBrowser.selectedMapIndex !== "Awakening") { // tutorial level not selected
-                this.isActive = false;
+        switch (newState) {
+            case 1: {
+                UserInterface.switchToUiGroup([btn_mainMenu, ui_tutorialTextWrapper, ui_tutorialText, tutorial_swipe]);
+                ui_tutorialText.textContent = "Slide horizontally to turn the player";
+                break;
             }
-        } 
 
-        // ONLY DO THESE CHECKS IF this.isActive
-
-        if (this.state == 0) {
-            if ((UserInterface.gamestate == 5 || UserInterface.gamestate == 6) && this.decalLoadState == -1) { // decals havn't started loading yet
-                // INITIATE DECALS
-                this.decalLoadState = 0
-
-                window.resolveLocalFileSystemURL(cordova.file.applicationDirectory + "www/assets/images/decals/", (dirEntry) => {
-                    // LOOP TO GET EACH DECAL IMAGE
-                    for(let i = 0; i < this.decalList.length; i++) {
-
-                        dirEntry.getFile(this.decalList[i] + ".svg", {create: false, exclusive: false}, (fileEntry) => {
-                            fileEntry.file( (file) => {
-                                const reader = new FileReader();
-                                reader.onload = (e) => {
-    
-                                    const SVG = new DOMParser().parseFromString(e.target.result, "image/svg+xml").documentElement;                                
-                                    SVG.getElementById("bg").style.fill = UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1
-                                    const SVG_string = new XMLSerializer().serializeToString(SVG);
-                                    const SVG_blob = new Blob([SVG_string], {type: 'image/svg+xml'});
-                                    const SVG_url = URL.createObjectURL(SVG_blob);
-                                    this.decalList[i] = new Image()
-                                    this.decalList[i].addEventListener("load", () => {
-                                        //once image is loaded
-                                        this.decalLoadState ++;
-                                        URL.revokeObjectURL(SVG_url)
-                                    }, {once: true});
-
-                                    this.decalList[i].src = SVG_url
-                                };
-                                reader.onerror = (e) => alert(e.target.error.name);
-                    
-                                reader.readAsText(file)
-                            })
-                        }, () => {console.log(this.decalList[i] + ": no svg found");});
-                    
-
-                    } // end of for loop
-                })
+            case 2: {
+                UserInterface.removeUiElement(tutorial_swipe);
+                UserInterface.addUiElement(tutorial_swipeVertical);
+                ui_tutorialText.textContent = "Sliding vertically does NOT turn the player";
+                break;
             }
-            
-            if (UserInterface.gamestate == 6) { // map is loaded
-                // called early incase decals arent loaded yet. Dont want all buttons visible
-                UserInterface.renderedButtons = [btn_mainMenu]
 
-                if (this.decalLoadState == 4) {
-                    this.state = 1;
-                }
+            case 3: {
+                UserInterface.removeUiElement(btn_next);
+                UserInterface.removeUiElement(tutorial_swipeVertical);
+                UserInterface.addUiElement(tutorial_swipe);
+                tutorial_swipe.classList.add("zero-opacity");
+
+                UserInterface.addUiElement(UserInterface.tutorial_targetCenter);
+
+                Player.lookAngle.set(0, -1); // so that ur not already looking at a target
+                ui_tutorialText.textContent = "Rotate the player to look at the rings: 0/6";
+
+                // set up initial target stuff
+                const circumference = Math.PI * 2 * 12; // 12 is radius of ring
+                UserInterface.tutorial_arc.setAttribute("stroke-dasharray", circumference); // defines the length of the visible stroke
+                const angle = this.targets[0][0];
+                UserInterface.tutorial_targetCenter.style.setProperty("--angle", `${angle}deg`);
+
+                break;
+            }
+
+            case 5: {
+                ui_tutorialText.textContent = "Start jumping by pressing the jump button";
+                UserInterface.addUiElement(btn_restart);
+                UserInterface.addUiElement(btn_jump);
+                UserInterface.addUiElement(tutorial_arrow);
+                UserInterface.removeUiElement(tutorial_swipe);
+                UserInterface.removeUiElement(UserInterface.tutorial_targetCenter);
+
+                break;
+            }
+
+            case 6: {
+                UserInterface.removeUiElement(tutorial_arrow);
+                UserInterface.removeUiElement(ui_tutorialText);
+                UserInterface.addUiElement(ui_speedometer);
+                // start 1.8 second timer for jumping before moving to next state
+                setTimeout(() => {
+                    this.setState(7);
+                }, 1800);
+                break;
+            }
+
+            case 7: {
+                // pause player after jumping for 1.8 seconds
+                this.pausePlayer = true;
+
+                // move speedometer up when pausing and showing tutorial text
+                ui_speedometer.style.top = "8px";
+
+                UserInterface.addUiElement(ui_tutorialText);
+                ui_tutorialText.textContent = "Stay on the red platforms";
+                UserInterface.addUiElement(btn_next);
+                break;
+            }
+
+            case 8: {
+                // wait for user to start swiping again (with arrow swipe graphic)
+                UserInterface.removeUiElement(btn_next);
+                ui_tutorialText.textContent = "Slide horizontally to change the direction of the player";
+                UserInterface.addUiElement(tutorial_swipe);
+                tutorial_swipe.classList.add("zero-opacity");
+
+                document.addEventListener(
+                    "touchstart",
+                    () => {
+                        this.setState(9);
+                    },
+                    { once: true }
+                );
+                break;
+            }
+
+            case 9:
+            case 11:
+            case 13:
+            case 15:
+            case 17: {
+                // Unpause. Move speedometer back down.
+                this.pausePlayer = false;
+                UserInterface.removeUiElement(ui_tutorialText);
+                UserInterface.removeUiElement(tutorial_swipe);
+                ui_speedometer.style.top = "32px";
+                break;
+            }
+
+            case 10: {
+                // Hit checkpoint. Show good stafe info and draw finger swipe to progess
+                this.pausePlayer = true;
+                UserInterface.addUiElement(tutorial_swipe);
+                tutorial_swipe.classList.add("zero-opacity");
+
+                UserInterface.addUiElement(ui_tutorialText);
+                ui_tutorialText.textContent = "Slow and steady swipes increase speed";
+
+                // move speedometer up when pausing and showing tutorial text
+                ui_speedometer.style.top = "8px";
+
+                document.addEventListener(
+                    "touchstart",
+                    () => {
+                        this.setState(11);
+                    },
+                    { once: true }
+                );
+
+                break;
+            }
+
+            // 11 unpause
+
+            case 12: {
+                // Hit checkpoint. Turn smoothly text
+                this.pausePlayer = true;
+                UserInterface.addUiElement(tutorial_swipe);
+                tutorial_swipe.classList.add("zero-opacity");
+
+                UserInterface.addUiElement(ui_tutorialText);
+                ui_tutorialText.textContent = "Turn smoothly to gain speed and clear the gap";
+                // move speedometer up when pausing and showing tutorial text
+                ui_speedometer.style.top = "8px";
+                document.addEventListener(
+                    "touchstart",
+                    () => {
+                        this.setState(13);
+                    },
+                    { once: true }
+                );
+                break;
+            }
+
+            // 13 unpause
+
+            case 14: {
+                // Hit checkpoint. Wall warning text
+                this.pausePlayer = true;
+                UserInterface.addUiElement(tutorial_swipe);
+                tutorial_swipe.classList.add("zero-opacity");
+
+                UserInterface.addUiElement(ui_tutorialText);
+                ui_tutorialText.textContent = "Don't touch the walls!";
+                // move speedometer up when pausing and showing tutorial text
+                ui_speedometer.style.top = "8px";
+
+                document.addEventListener(
+                    "touchstart",
+                    () => {
+                        this.setState(15);
+                    },
+                    { once: true }
+                );
+                break;
+            }
+
+            // 15 unpause
+
+            case 16: {
+                // Hit checkpoint. Ednzone text
+                this.pausePlayer = true;
+                UserInterface.addUiElement(tutorial_swipe);
+                tutorial_swipe.classList.add("zero-opacity");
+
+                UserInterface.addUiElement(ui_tutorialText);
+                ui_tutorialText.textContent = "Reach the gold endzone to finish the level";
+                // move speedometer up when pausing and showing tutorial text
+                ui_speedometer.style.top = "8px";
+
+                document.addEventListener(
+                    "touchstart",
+                    () => {
+                        this.setState(17);
+                    },
+                    { once: true }
+                );
+                break;
+            }
+
+            // 17 unpause
+
+            case 18: {
+                // Ending the level sets a new uiGroup so have to unhide stuff again
+
+                UserInterface.addUiElement(btn_next);
+                UserInterface.addUiElement(ui_tutorialTextWrapper);
+                UserInterface.addUiElement(ui_tutorialText);
+                ui_tutorialText.textContent = "Finish levels faster to earn medals";
+                ui_tutorialTextWrapper.style.top = "24px";
+                UserInterface.removeUiElement(ui_speedometer);
+
+                UserInterface.setToggleState(btn_playTutorial, false);
+                UserInterface.settings.playTutorial = false;
+                UserInterface.writeSettings();
+                // isActive needs to stay true so that btn_restart & btn_mainMenu KNOW they are in the tutorial and call Tutorial.reset() when pressed
+
+                break;
+            }
+
+            case 19: {
+                UserInterface.removeUiElement(btn_next);
+                UserInterface.addUiElement(tutorial_arrow);
+                tutorial_arrow.style.top = "48px";
+                tutorial_arrow.style.left = "142px";
+                ui_tutorialText.textContent = "Click here to select a new level";
+                break;
+            }
+
+            // default: {
+            // }
+        }
+    },
+
+    update: function () {
+        if (this.state == 0 && UserInterface.gamestate == 6) {
+            // map is loaded
+            this.setState(1);
+            return;
+        }
+
+        if (this.state == 1 || this.state == 3 || this.state == 8 || this.state == 10 || this.state == 12 || this.state == 14 || this.state == 16) {
+            if (TouchHandler.dragging || UserInterface.showVerticalWarning) {
+                tutorial_swipe.classList.add("zero-opacity");
+            } else {
+                tutorial_swipe.classList.remove("zero-opacity");
             }
         }
 
-        if (this.state == 1) {
-            this.timerCompleted = true;
-
-            if (
-                !UserInterface.renderedButtons.includes(btn_next) &&  
-                Math.abs(Player.lookAngle.getAngleInDegrees() - Map.playerStart.angle) > 45
-            ) {
-                UserInterface.renderedButtons = UserInterface.renderedButtons.concat(btn_next)
+        if (this.state == 1 && !UserInterface.activeUiGroup.includes(btn_next)) {
+            if (Math.abs(Player.lookAngle.getAngleInDegrees() - Map.playerStart.angle) > 45) {
+                UserInterface.addUiElement(btn_next);
             }
+            return;
         }
 
-        // state 2 has no wait timer on btn_next
+        if (this.state == 2) {
+            if (TouchHandler.dragging) {
+                tutorial_swipeVertical.classList.add("zero-opacity");
+            } else {
+                tutorial_swipeVertical.classList.remove("zero-opacity");
+            }
+            return;
+        }
 
         if (this.state == 3) {
+            if (this.targets[0][1] > 0) {
+                if (Math.abs(Player.lookAngle.getAngleInDegrees() - this.targets[0][0]) < 8) {
+                    this.targets[0][1] -= 60 * dt;
+                    UserInterface.tutorial_dot.classList.remove("hidden"); // shouldnt be adding and removing hidden class every frame. Low priority FIX
+                } else {
+                    this.targets[0][1] = 50;
+                    UserInterface.tutorial_dot.classList.add("hidden");
+                }
 
-            if (this.targets.length > 0) {
+                // Update the targets visually
+                const circumference = Math.PI * 2 * 12; // 12 is radius of ring. Shouldnt calculate this every frame
+                const completedPercent = 1 - this.targets[0][1] / 50; // between 0 -> 1
+                UserInterface.tutorial_arc.setAttribute("stroke-dashoffset", circumference * completedPercent); // offset the start of the stroke's dashes
+            } else {
+                // remove first element
+                this.targets.shift();
 
-                if (this.targets[0][1] > 0) {
+                if (this.targets.length == 0) {
+                    this.setState(5); // skips state 4 (it was removed)
+                    return;
+                }
 
-                    if (Math.abs(Player.lookAngle.getAngleInDegrees() - this.targets[0][0]) < 8) {
-                        this.targets[0][1] -= (60 * dt);
-                    } else { this.targets[0][1] = 50 }
-    
-                } else { this.targets.shift()} // remove first element
+                ui_tutorialText.textContent = `Rotate the player to look at the rings: ${6 - this.targets.length}/6`;
 
-            } else { // All targets completed
-                this.state = 5; // skip state 4
-                UserInterface.switchToUiGroup(UserInterface.uiGroup_inLevel)
-            }
-        }
-
-        if (this.state == 5) {
-            if (UserInterface.levelState == 2) { // if Player is jumping
-                this.state ++;
-                Tutorial.animatePos = 0;
-                Tutorial.animateVel = 0;
-            }
-        }
-
-        if (!this.timerStarted && this.state == 6) { // timer to jump for 2 seconds
-            this.timeoutToCancel = setTimeout(() => {
-                this.timerStarted = false;
-                this.state ++;
-                this.pausePlayer = true
-                UserInterface.switchToUiGroup(UserInterface.uiGroup_inLevel.concat(btn_next)) // THIS THROWS ERROR BC btn_next is old style btn
-
-            }, 1800);
-            this.timerStarted = true;
-        }
-
-        // state 7 has no wait timer on btn_next
-
-        if (this.state == 8 || this.state == 10 || this.state == 12 || this.state == 14 || this.state == 16) { // wait for a bit then allow Player to progess by swiping
-            if (!this.timerStarted && !this.timerCompleted) {
-                this.timeoutToCancel = setTimeout(() => {this.timerStarted = false; this.timerCompleted = true}, 800);
-                this.timerStarted = true;
-                this.liftedFinger = false;
+                // change targets position
+                const angle = this.targets[0][0];
+                UserInterface.tutorial_targetCenter.style.setProperty("--angle", `${angle}deg`);
             }
 
-            if (!TouchHandler.dragging) {this.liftedFinger = true}
-
-            if (this.timerCompleted && TouchHandler.dragging == true && this.liftedFinger) {
-                this.state ++; 
-                this.pausePlayer = false
-                this.timerCompleted = false
-            }
+            return;
         }
 
-        if (this.state == 9) {
-            if (Player.checkpointIndex == 4) {this.state ++; this.pausePlayer = true}
+        if (this.state == 5 && UserInterface.levelState == 2) {
+            // wait for user to press jump button
+            this.setState(6);
+            return;
         }
 
-        // 10 bundled w 8
-
-        if (this.state == 11) {
-            if (Player.checkpointIndex == 1) {this.state ++; this.pausePlayer = true}
+        if (this.state == 9 && Player.checkpointIndex == 4) {
+            this.setState(10);
+            return;
         }
 
-        // 12 bundled w 8
-
-        if (this.state == 13) {
-            if (Player.checkpointIndex == 2) {this.state ++; this.pausePlayer = true}
+        if (this.state == 11 && Player.checkpointIndex == 1) {
+            this.setState(12);
+            return;
         }
 
-        // 14 bundled w 8
-
-        if (this.state == 15) {
-            if (Player.checkpointIndex == 0) {this.state ++; this.pausePlayer = true}
+        if (this.state == 13 && Player.checkpointIndex == 2) {
+            this.setState(14);
+            return;
         }
 
-        // 16 bundled w 8
-
-        if (this.state == 17) { // check if ended level
-            if (UserInterface.levelState == 3 && Player.endSlow == 0) {
-                this.state ++; 
-                UserInterface.switchToUiGroup(UserInterface.uiGroup_inLevel.concat(btn_next)) // THIS THROWS ERROR BC btn_next is old style btn
-            }
+        if (this.state == 15 && Player.checkpointIndex == 0) {
+            this.setState(16);
+            return;
         }
 
-        // state 18 has no wait timer on btn_next
-
+        if (this.state == 17 && UserInterface.levelState == 3 && Player.endSlow == 0) {
+            this.setState(18);
+            return;
+        }
     },
 
-
-    render : function() {
+    render: function () {
         const ctx = UserInterfaceCanvas.ctx;
-        ctx.save() // for canvas scaling
-        ctx.scale(UserInterfaceCanvas.scale, UserInterfaceCanvas.scale)
+        ctx.save(); // for canvas scaling
+        ctx.scale(UserInterfaceCanvas.scale, UserInterfaceCanvas.scale);
 
-        ctx.font = "22px BAHNSCHRIFT";
-        const bg_color = UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
-        const icon_color = !UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
+        ctx.font = "16px BAHNSCHRIFT";
 
         // TUTORIAL DEBUG TEXT
         if (UserInterface.settings.debugText) {
-            // ctx.fillText("state: " + this.state, midX - 200, 34)
+            ctx.fillText("state: " + this.state, midX - 200, 34);
             // ctx.fillText(this.targets, 300, midY_UI)
         }
 
-
-        function drawTextPanel(text) {
-            const textWidth = ctx.measureText(text).width
-
-            ctx.fillStyle = bg_color
-            UserInterfaceCanvas.roundedRect(midX_UI - 20 - textWidth/2, 38, textWidth + 38, 60, 20)
-            ctx.fill()
-
-            ctx.fillStyle = icon_color
-            ctx.fillText(text, midX_UI - textWidth/2, 75)
-            
-            // resets position of btn_next so that it can pulse
-            btn_next.x = midX_UI + textWidth/2 + 34
-            btn_next.y = 40
-        }
-
-
-        function pulseNextButton() {
-
-            speed = 0.006 // 0.002 makes it oscillate ~every second. smaller = faster, larger = slower.
-            const animValue = Math.sin(performance.now() * speed);
-
-            // Pulse btn_next
-            btn_next.width = 60 + (-1 * animValue * 8)
-            btn_next.height = 60 + (-1 * animValue * 8)
-            // this relies on drawTextPanel reseting btn_next's position every frame
-            btn_next.x += (60 - btn_next.width) / 2
-            btn_next.y += (60 - btn_next.height) / 2
-        }
-
-
-        function drawFingerSwipe() {
-
-            const speed = 0.002 // 0.002 makes it oscillate ~every second. smaller = faster, larger = slower.
-            const animValue = Math.sin(performance.now() * speed); // Use a sin wave to occilate between -1 and 1
-
-            if (TouchHandler.dragging == false && Tutorial.timerCompleted) {
-                const image = Tutorial.decalList[0]
-                ctx.drawImage(image, midX_UI - image.width/2 + (animValue * 116), screenHeightUI - image.height - 36)
-            }
-        }
-
-
-        if (this.state == 1) {
-            drawTextPanel("Slide horizontally to turn the player");
-
-            drawFingerSwipe()
-            pulseNextButton()
-        }
-
-
-        if (this.state == 2) {
-            drawTextPanel("Sliding vertically does NOT turn the player")
-
-            // Draw NO VERTICAL swipe decal
-            const speed = 0.002 // 0.002 makes it oscillate ~every second. smaller = faster, larger = slower.           
-            const animValue = Math.sin(performance.now() * speed); // Use a sin wave to occilate between -1 and 1
-            //const animValueFast = Math.sin(performance.now() * speed * 3);
-
-            if (TouchHandler.dragging == false) {
-                const image = this.decalList[1]
-                ctx.drawImage(image, midX_UI - 250, midY_UI - 60 + (animValue * 50))
-            }
-
-            pulseNextButton()
-        }
-
-
-        if (this.state == 3 && this.targets.length > 0) { // Targets
-
-            const targetCounter = String(6 - this.targets.length + "/6")
-            drawTextPanel("Rotate the player to look at the rings: " + targetCounter)
-            
-            ctx.save() // #4
-            
-            ctx.translate(midX_UI, midY_UI)
-            ctx.rotate(this.targets[0][0] * Math.PI / 180)
-
-            ctx.strokeStyle = Map.style.shadow_platformColor
-            ctx.fillStyle = Map.style.shadow_platformColor
-            ctx.lineWidth = 6
-            ctx.lineCap = "round"
-
-    
-            // DRAW TARGET SHADOW
-            if (this.targets[0][1] > 0) { // these two blocks could be a function. theyre called twice. Translate the ctx between the two
-                ctx.beginPath()
-                ctx.arc(58 , 0, 10, 0, (this.targets[0][1] / 50) * (2 * Math.PI));
-                ctx.stroke()
-            }
-
-            // center dot that appears when looking at target
-            if (this.targets[0][1] < 50 ) {
-                ctx.beginPath()
-                ctx.arc(58, 0, 4, 0, 2 * Math.PI);
-                ctx.fill()
-            }
-
-
-            // move up for actual targets
-            ctx.rotate(-this.targets[0][0] * Math.PI / 180) // have to unrotate first
-            ctx.translate(0, -24)
-            ctx.rotate(this.targets[0][0] * Math.PI / 180)
-
-            ctx.strokeStyle = bg_color
-            ctx.fillStyle = bg_color
-
-            
-            // DRAW ACTUAL TARGET
-            if (this.targets[0][1] > 0) {
-                ctx.beginPath()
-                ctx.arc(58, 0, 10, 0, (this.targets[0][1] / 50) * (2 * Math.PI));
-                ctx.stroke()
-            }
-
-            // center dot that appears when looking at target
-            if (this.targets[0][1] < 50 ) {
-                ctx.beginPath()
-                ctx.arc(58, 0, 4, 0, 2 * Math.PI);
-                ctx.fill()
-            }
-
-            ctx.restore() // #4
-            
-        }
-
-
-
-        if (this.state == 5) {
-            drawTextPanel("Start jumping by pressing the jump button")
-
-            // DRAW ARROW
-            const speed = 0.005 // 0.002 makes it oscillate ~every second. smaller = faster, larger = slower.
-            const animValue = Math.sin(performance.now() * speed); // Use a sin wave to occilate between -1 and 1
-
-            const image = this.decalList[3]
-            ctx.drawImage(image, btn_jump.x + 132 + (animValue * 20), btn_jump.y + btn_jump.width/2 - image.height/2)
-        }
-
-
-        if (this.state == 7) {
-            drawTextPanel("Stay on the red platforms")
-            pulseNextButton()
-        }
-
-        
-        if (this.state == 8) {
-            drawTextPanel("Slide horizontally to change the direction of the player")
-            drawFingerSwipe()
-        }
-
-
-        if (this.state == 10) {
-            drawTextPanel("Slow and steady swipes increase speed")
-            drawFingerSwipe()
-            // graphic showing smooth turn vs sharp turn?
-        }
-
-
-        if (this.state == 12) {
-            drawTextPanel("Turn smoothly to gain speed and clear the gap")
-            drawFingerSwipe()
-        }
-
-
-        if (this.state == 14) {
-            drawTextPanel("Don't touch the walls!")
-            drawFingerSwipe()
-        }
-
-
-        if (this.state == 16) {
-            drawTextPanel("Reach the gold endzone to finish the level")
-            drawFingerSwipe()
-        }
-
-
-        if (this.state == 18) {
-            drawTextPanel("Finish levels faster to earn medals")
-            pulseNextButton()
-        }
-
-
-        if (this.state == 19) {
-            drawTextPanel("Click here to select a new level")
-
-            // DRAW ARROW
-            const speed = 0.005 // 0.002 makes it oscillate ~every second. smaller = faster, larger = slower.
-            // Use a sin wave to occilate between -1 and 1
-            const animValue = Math.sin(performance.now() * speed);
-
-            const image = this.decalList[3]
-            ctx.drawImage(image, btn_mainMenu.x + 110 + (animValue * 20), btn_mainMenu.y + btn_mainMenu.width/2 - image.height/2)
-        }
-
-        ctx.restore() // for canvas scaling
-
+        ctx.restore(); // for canvas scaling
     },
-
-}
+};

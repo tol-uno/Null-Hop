@@ -35,7 +35,7 @@ const MapEditor = {
 
     renderedPlatforms: [],
     selectedElements: [], // platforms are their index, "playerStart" = playerStart, checkpoint items are each an array => 1st item is checkpoint index. 2nd is: 1=trigger1, 2=trigger2, 3=playerRespawn
-    snapAmount: 0,
+    snapAmount: 2,
     multiSelect: false,
     dragSelect: false,
     dragSelectMarquee: {
@@ -85,15 +85,15 @@ const MapEditor = {
             if (
                 TouchHandler.dragging == 1 &&
                 !this.dragSelect &&
-                !btn_translate.isPressed &&
-                !btn_resize_BL.isPressed &&
-                !btn_resize_BR.isPressed &&
-                !btn_resize_TR.isPressed &&
-                !btn_resize_TL.isPressed &&
-                btn_angleSlider.confirmed &&
-                btn_playerAngleSlider.confirmed &&
-                btn_checkpointAngleSlider.confirmed &&
-                btn_snappingSlider.confirmed
+                !btn_translate.classList.contains("pressed") &&
+                !btn_resize_BL.classList.contains("pressed") &&
+                !btn_resize_BR.classList.contains("pressed") &&
+                !btn_resize_TR.classList.contains("pressed") &&
+                !btn_resize_TL.classList.contains("pressed") &&
+                !btn_platformAngleSlider.handle.classList.contains("pressed") &&
+                !btn_playerAngleSlider.handle.classList.contains("pressed") &&
+                !btn_checkpointAngleSlider.handle.classList.contains("pressed") &&
+                !btn_snappingSlider.handle.classList.contains("pressed")
             ) {
                 // SCROLLING AROUND SCREEN
 
@@ -168,13 +168,13 @@ const MapEditor = {
                 }
 
                 // UPDATE THE ANGLE OF OBJECTS WHEN THEIR ANGLE SLIDER IS PRESSED
-                if (!btn_angleSlider.confirmed) {
-                    btn_angleSlider.func();
+                if (btn_platformAngleSlider.handle.classList.contains("pressed")) {
+                    btn_platformAngleSlider.func();
                 }
-                if (!btn_playerAngleSlider.confirmed) {
+                if (btn_playerAngleSlider.handle.classList.contains("pressed")) {
                     btn_playerAngleSlider.func();
                 }
-                if (!btn_checkpointAngleSlider.confirmed) {
+                if (btn_checkpointAngleSlider.handle.classList.contains("pressed")) {
                     btn_checkpointAngleSlider.func();
                 }
             }
@@ -294,11 +294,11 @@ const MapEditor = {
         if (this.editorState == 2) {
             // update translate and resize buttons every frame
 
-            if (UserInterface.renderedButtons.includes(btn_translate)) {
-                btn_translate.func(true);
+            if (UserInterface.activeUiGroup.includes(btn_translate)) {
+                btn_translate.func();
             }
 
-            if (UserInterface.renderedButtons.includes(btn_resize_BL)) {
+            if (UserInterface.activeUiGroup.includes(btn_resize_TL)) {
                 btn_resize_BL.func();
                 btn_resize_BR.func();
                 btn_resize_TR.func();
@@ -314,23 +314,23 @@ const MapEditor = {
 
         if (this.editorState == 4) {
             // in map settings screen
-            if (!btn_platformHeightSlider.confirmed) {
-                this.loadedMap.style.platformHeight = btn_platformHeightSlider.value;
+            if (btn_platformHeightSlider.handle.classList.contains("pressed")) {
+                this.loadedMap.style.platformHeight = UserInterface.getSliderValue(btn_platformHeightSlider);
                 PreviewWindow.update();
             }
 
-            if (!btn_wallHeightSlider.confirmed) {
-                this.loadedMap.style.wallHeight = btn_wallHeightSlider.value;
+            if (btn_wallHeightSlider.handle.classList.contains("pressed")) {
+                this.loadedMap.style.wallHeight = UserInterface.getSliderValue(btn_wallHeightSlider);
                 PreviewWindow.update();
             }
 
-            if (!btn_lightDirectionSlider.confirmed) {
-                this.loadedMap.style.lightDirection = btn_lightDirectionSlider.value;
+            if (btn_lightDirectionSlider.handle.classList.contains("pressed")) {
+                this.loadedMap.style.lightDirection = UserInterface.getSliderValue(btn_lightDirectionSlider);
                 PreviewWindow.update();
             }
 
-            if (!btn_lightPitchSlider.confirmed) {
-                this.loadedMap.style.lightPitch = btn_lightPitchSlider.value;
+            if (btn_lightPitchSlider.handle.classList.contains("pressed")) {
+                this.loadedMap.style.lightPitch = UserInterface.getSliderValue(btn_lightPitchSlider);
                 PreviewWindow.update();
             }
         }
@@ -620,14 +620,10 @@ const MapEditor = {
         }
 
         // if released within the edit platform side panel and panel is visible
-        // needs to be matched with MapEditor.render() values
         if (
-            this.editorState == 2 &&
+            this.editorState == 2 && // something is selected
             !this.dragSelect && // dragSelect hides side panel
-            x >= screenWidthUI - 262 &&
-            x <= screenWidthUI - 262 + 218 &&
-            y >= 22 &&
-            y <= 22 + 292
+            UserInterface.isPointInsideElement(x, y, ui_editorSidePanel)
         ) {
             return;
         }
@@ -638,7 +634,7 @@ const MapEditor = {
         if (this.dragSelect) {
             // release from dragSelect
             this.dragSelect = false;
-            btn_dragSelect.func(true); // sync button
+            UserInterface.setToggleState(btn_dragSelect, false); // sync toggle button
 
             // add marqueeSelectedElements to selectedElements
             // need to make sure each platform, checkpoint, and playerStart isnt already selected before adding
@@ -661,6 +657,8 @@ const MapEditor = {
             this.marqueeSelectedElements = [];
 
             this.setButtonGroup();
+            UserInterface.updateMapEditorSidePanel()
+
             return;
         }
 
@@ -710,6 +708,8 @@ const MapEditor = {
             }
 
             this.setButtonGroup();
+            UserInterface.updateMapEditorSidePanel()
+
             return;
         }
 
@@ -735,6 +735,8 @@ const MapEditor = {
                 }
 
                 this.setButtonGroup();
+                UserInterface.updateMapEditorSidePanel()
+
                 clickedCheckpoint = true;
                 return;
             }
@@ -756,6 +758,8 @@ const MapEditor = {
                 }
 
                 this.setButtonGroup();
+                UserInterface.updateMapEditorSidePanel()
+
                 clickedCheckpoint = true;
                 return;
             }
@@ -777,6 +781,8 @@ const MapEditor = {
                 }
 
                 this.setButtonGroup();
+                UserInterface.updateMapEditorSidePanel()
+
                 clickedCheckpoint = true;
                 return;
             }
@@ -803,6 +809,8 @@ const MapEditor = {
                 }
 
                 this.setButtonGroup();
+                UserInterface.updateMapEditorSidePanel()
+
                 return;
             }
         }); // end of looping through all renderedPlatforms
@@ -895,19 +903,28 @@ const MapEditor = {
             // reset everything
 
             MapEditor.loadedMap = null;
+            MapEditor.zoom = 1;
             MapEditor.screen.x = 0;
             MapEditor.screen.y = 0;
             MapEditor.screen.width = screenWidth;
             MapEditor.screen.height = screenHeight;
             MapEditor.scrollVelX = 0;
             MapEditor.scrollVelY = 0;
-            MapEditor.snapAmount = 0;
-            MapEditor.dragSelect = 0;
-            MapEditor.zoom = 1;
+
             MapEditor.renderedPlatforms = [];
             MapEditor.selectedElements = [];
-            btn_snappingSlider.updateState(0);
 
+            MapEditor.dragSelect = false;
+            UserInterface.setToggleState(btn_dragSelect, false);
+            MapEditor.multiSelect = false;
+            UserInterface.setToggleState(btn_multiSelect, false);
+
+            MapEditor.snapAmount = 2;
+            UserInterface.setSliderValue(btn_snappingSlider, 2);
+
+            btn_platformAngleSlider.dataset.step = 2;
+            btn_playerAngleSlider.dataset.step = 2;
+            btn_checkpointAngleSlider.dataset.step = 2;
 
             btn_mapEditor.func(); // press the main menu's Map Editor button to set up Map Editor Browser
         }
@@ -1083,20 +1100,27 @@ const MapEditor = {
         } else {
             // one element is selected
             if (MapEditor.selectedElements.includes("playerStart")) {
-                UserInterface.renderedButtons = UserInterface.btnGroup_editPlayerStart;
+                UserInterface.renderedButtons = UserInterface.btnGroup_editPlayerStart; // kill eventually
                 UserInterface.switchToUiGroup(UserInterface.uiGroup_editPlayerStart);
-                btn_playerAngleSlider.updateState(MapEditor.loadedMap.playerStart.angle);
+                UserInterface.setSliderValue(btn_playerAngleSlider, MapEditor.loadedMap.playerStart.angle, true); // sync
             } else if (Array.isArray(MapEditor.selectedElements[0])) {
                 // checkpoint part is selected
-                UserInterface.renderedButtons = UserInterface.btnGroup_editCheckPoint;
-                UserInterface.switchToUiGroup(UserInterface.uiGroup_editCheckPoint);
-                btn_checkpointAngleSlider.updateState(MapEditor.loadedMap.checkpoints[MapEditor.selectedElements[0][0]].angle); // sync
+                UserInterface.renderedButtons = UserInterface.btnGroup_editCheckpoint;
+                UserInterface.switchToUiGroup(UserInterface.uiGroup_editCheckpoint);
+                UserInterface.setSliderValue(btn_checkpointAngleSlider, MapEditor.loadedMap.checkpoints[MapEditor.selectedElements[0][0]].angle, true); // sync
             } else {
                 // platform is selected
                 UserInterface.renderedButtons = UserInterface.btnGroup_editPlatform;
                 UserInterface.switchToUiGroup(UserInterface.uiGroup_editPlatform);
-                btn_angleSlider.updateState(MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].angle);
-                btn_wall.func(true); // syncs the wall button's toggle state
+                UserInterface.setSliderValue(btn_platformAngleSlider, MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].angle, true); // sync
+
+                const isWall = this.loadedMap.platforms[this.selectedElements[0]].wall;
+                UserInterface.setToggleState(btn_wall, isWall);
+                btn_wall.label.textContent = isWall ? "Wall: Yes" : "Wall: No";
+
+                const isEndZone = this.loadedMap.platforms[this.selectedElements[0]].endzone;
+                UserInterface.setToggleState(btn_endzone, isEndZone);
+                btn_endzone.label.textContent = isEndZone ? "End Zone: Yes" : "End Zone: No";
             }
         }
     },
@@ -1111,5 +1135,38 @@ const MapEditor = {
             if (a[i] !== b[i]) return false;
         }
         return true;
+    },
+
+    indexSelectedElements: function () {
+        // counts how many of each object are within MapEditor.selectedElements
+        const info = {
+            platforms: 0,
+            walls: 0,
+            endZones: 0,
+            checkpoints: 0,
+            playerStart: 0,
+        };
+
+        const checkpointIds = new Set();
+
+        for (const item of this.selectedElements) {
+            if (typeof item === "number") {
+                const platform = MapEditor.loadedMap.platforms[item];
+                if (platform.wall) {
+                    info.walls++;
+                } else if (platform.endzone) {
+                    info.endZones++;
+                } else {
+                    info.platforms++;
+                }
+            } else if (Array.isArray(item)) {
+                checkpointIds.add(item[0]);
+            } else if (item === "playerStart") {
+                info.playerStart++;
+            }
+        }
+
+        info.checkpoints = checkpointIds.size;
+        return info;
     },
 };
