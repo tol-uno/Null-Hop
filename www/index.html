@@ -159,6 +159,8 @@
                 </div>
             </div>
 
+            <div id="ui_restartWarning" class="hidden">Restart Disabled During Tutorial</div>
+
             <div id="tutorial_swipe" class="hidden">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 39.16 36.56">
                     <path
@@ -178,12 +180,15 @@
             </div>
 
             <div id="tutorial_arrow" class="hidden">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 27.32 14.27">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 64 44">
                     <path
-                        fill="var(--uiBackgroundColor)"
-                        d="M21.51 297.13a1.94 1.94 0 0 0 1.37-.57 1.94 1.94 0 0 0 0-2.74l-1.9-1.9h18.78A1.94 1.94 0 0 0 41.7 290a1.94 1.94 0 0 0-1.94-1.94H20.99l1.9-1.9a1.94 1.94 0 0 0 0-2.74 1.94 1.94 0 0 0-2.75 0l-5.2 5.2a1.94 1.94 0 0 0 0 2.74l5.2 5.2a1.94 1.94 0 0 0 1.37.57z"
-                        transform="translate(-14.38 -282.86)"
-                    />
+                        stroke="var(--uiBackgroundColor)"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="8"
+                        d="M20 4 4 20l16 16"
+                    ></path>
+                    <path stroke="var(--uiBackgroundColor)" stroke-linecap="round" stroke-width="8" d="M4 20h56"></path>
                 </svg>
             </div>
 
@@ -425,6 +430,10 @@
                     </div>
                 </button>
 
+                <button id="btn_level_surfacing" class="">
+                    <div>Surfacing</div>
+                </button>
+
                 <button id="btn_level_trespass" class="">
                     <div>Trespass</div>
                 </button>
@@ -439,6 +448,10 @@
 
                 <button id="btn_level_pinnacle" class="">
                     <div>Pinnacle</div>
+                </button>
+
+                <button id="btn_level_rapture" class="">
+                    <div>Rapture</div>
                 </button>
 
                 <button id="btn_level_forever" class="">
@@ -711,6 +724,26 @@
                     <div class="handle" style="--pos: 53%"></div>
                 </div>
             </div>
+
+            <!-- Map Editor Color Picker Screen -->
+
+            <button id="btn_deleteMap" class="hidden">
+                <div>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 64 64">
+                        <path stroke="var(--myForegroundColor)" stroke-width="3" d="M28.75 17.43v-.5a3 3 0 1 1 6 0v.5" />
+                        <path
+                            fill="var(--myForegroundColor)"
+                            d="M44.75 22.45h-25.5a2 2 0 0 1-2-2v-1.17c0-1.1.9-2 2-2h25.5a2 2 0 0 1 2 2v1.17a2 2 0 0 1-2 2Z"
+                        />
+                        <path
+                            fill="var(--myForegroundColor)"
+                            fill-rule="evenodd"
+                            d="M24.02 50.07a2 2 0 0 1-1.97-1.7L18.6 25.43a2 2 0 0 1 1.97-2.3h22.9a2 2 0 0 1 1.99 2.26l-2.97 22.94a2 2 0 0 1-1.99 1.74H24.02Zm.86-23c.61-.06 1.16.39 1.22 1l1.69 17.4a1.12 1.12 0 0 1-2.24.22l-1.68-17.4c-.06-.61.39-1.16 1-1.22Zm6.28 18.51v-17.4a1.12 1.12 0 1 1 2.24 0v17.4a1.12 1.12 0 0 1-2.24 0Zm8.53-18.51c.61.06 1.06.6 1 1.22l-1.68 17.4a1.12 1.12 0 0 1-2.23-.22l1.68-17.4c.06-.61.6-1.06 1.23-1Z"
+                            clip-rule="evenodd"
+                        />
+                    </svg>
+                </div>
+            </button>
 
             <!-- END OF ui-container -->
         </div>

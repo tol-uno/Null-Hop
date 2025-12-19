@@ -26,8 +26,6 @@ const Tutorial = {
         this.pausePlayer = false;
 
         ui_tutorialTextWrapper.style.removeProperty("top");
-        tutorial_arrow.style.removeProperty("top");
-        tutorial_arrow.style.removeProperty("left");
     },
 
     setState: function (newState) {
@@ -93,8 +91,7 @@ const Tutorial = {
                 // pause player after jumping for 1.8 seconds
                 this.pausePlayer = true;
 
-                // move speedometer up when pausing and showing tutorial text
-                ui_speedometer.style.top = "8px";
+                UserInterface.removeUiElement(ui_speedometer);
 
                 UserInterface.addUiElement(ui_tutorialText);
                 ui_tutorialText.textContent = "Stay on the red platforms";
@@ -124,11 +121,11 @@ const Tutorial = {
             case 13:
             case 15:
             case 17: {
-                // Unpause. Move speedometer back down.
+                // Unpause.
                 this.pausePlayer = false;
                 UserInterface.removeUiElement(ui_tutorialText);
                 UserInterface.removeUiElement(tutorial_swipe);
-                ui_speedometer.style.top = "32px";
+                UserInterface.addUiElement(ui_speedometer)
                 break;
             }
 
@@ -141,8 +138,7 @@ const Tutorial = {
                 UserInterface.addUiElement(ui_tutorialText);
                 ui_tutorialText.textContent = "Slow and steady swipes increase speed";
 
-                // move speedometer up when pausing and showing tutorial text
-                ui_speedometer.style.top = "8px";
+                UserInterface.removeUiElement(ui_speedometer);
 
                 document.addEventListener(
                     "touchstart",
@@ -165,8 +161,9 @@ const Tutorial = {
 
                 UserInterface.addUiElement(ui_tutorialText);
                 ui_tutorialText.textContent = "Turn smoothly to gain speed and clear the gap";
-                // move speedometer up when pausing and showing tutorial text
-                ui_speedometer.style.top = "8px";
+
+                UserInterface.removeUiElement(ui_speedometer);
+
                 document.addEventListener(
                     "touchstart",
                     () => {
@@ -187,8 +184,8 @@ const Tutorial = {
 
                 UserInterface.addUiElement(ui_tutorialText);
                 ui_tutorialText.textContent = "Don't touch the walls!";
-                // move speedometer up when pausing and showing tutorial text
-                ui_speedometer.style.top = "8px";
+
+                UserInterface.removeUiElement(ui_speedometer);
 
                 document.addEventListener(
                     "touchstart",
@@ -210,8 +207,8 @@ const Tutorial = {
 
                 UserInterface.addUiElement(ui_tutorialText);
                 ui_tutorialText.textContent = "Reach the gold endzone to finish the level";
-                // move speedometer up when pausing and showing tutorial text
-                ui_speedometer.style.top = "8px";
+
+                UserInterface.removeUiElement(ui_speedometer);
 
                 document.addEventListener(
                     "touchstart",
@@ -231,7 +228,7 @@ const Tutorial = {
                 UserInterface.addUiElement(btn_next);
                 UserInterface.addUiElement(ui_tutorialTextWrapper);
                 UserInterface.addUiElement(ui_tutorialText);
-                ui_tutorialText.textContent = "Finish levels faster to earn medals";
+                ui_tutorialText.textContent = "Finish levels faster to earn medals ⇩";
                 ui_tutorialTextWrapper.style.top = "24px";
                 UserInterface.removeUiElement(ui_speedometer);
 
@@ -245,10 +242,7 @@ const Tutorial = {
 
             case 19: {
                 UserInterface.removeUiElement(btn_next);
-                UserInterface.addUiElement(tutorial_arrow);
-                tutorial_arrow.style.top = "48px";
-                tutorial_arrow.style.left = "142px";
-                ui_tutorialText.textContent = "Click here to select a new level";
+                ui_tutorialText.innerHTML = `Click <span style="border: 2px solid var(--uiForegroundColor); border-radius: 50%; padding: 1px 6.5px 1px 7px;">×</span> to select a new level or <span style="border: 2px solid var(--uiForegroundColor); border-radius: 50%; padding: 0px 6px 2px 6px;">↺</span> to try again`;
                 break;
             }
 

@@ -24,7 +24,34 @@
 
 @font-face {
     font-family: "BAHNSCHRIFT";
-    src: url("../assets/BAHNSCHRIFT.TTF");
+    src: url("../assets/fonts/BAHNSCHRIFT.TTF") format("truetype");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Alte DIN";
+    src: url("../assets/fonts/din1451alt.ttf") format("truetype");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "DINish";
+    src: url("../assets/fonts/DINish-Medium.woff2") format("woff2"), url("../assets/fonts/DINish-Medium.woff") format("woff");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "DINish";
+    src: url("../assets/fonts/DINish-Bold.woff2") format("woff2"), url("../assets/fonts/DINish-Bold.woff") format("woff");
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
 }
 
 html,
@@ -52,7 +79,7 @@ canvas {
 }
 
 #ui-container {
-    font-family: "BAHNSCHRIFT";
+    font-family: "Alte DIN", sans-serif; /* DINish, BAHNSCHRIFT */
     position: fixed;
     left: 0;
     top: 0;
@@ -337,11 +364,13 @@ INDIVIDUAL BUTTON STYLES
 #ui_speedometer {
     font-size: 20px;
     position: absolute;
-    top: 32px;
+    top: 40px;
     left: 50%;
-    transform: translateX(-50%);
-    /* should add a color variable but not sure which:  */
-    /* color: var(--uiForegroundColor); */
+    transform: translate(-50%, -50%);
+
+    transition: transform 100ms ease 0s;
+    font-family: "DINish",  monospace;
+    font-variant-numeric: tabular-nums;
 }
 
 #ui_timerBox {
@@ -460,6 +489,23 @@ INDIVIDUAL BUTTON STYLES
     animation: pulse 800ms infinite;
 }
 
+#ui_restartWarning {
+    position: fixed;
+    left: 132px;
+    transform: translateX(-50%);
+    top: 130px;
+    width: 148px;
+    height: 58px;
+    background-color: var(--uiBackgroundColor);
+    color: var(--uiForegroundColor);
+    font-size: 16px;
+    border-radius: 8px;
+    box-shadow: 0 4px 0 var(--uiBackgroundColor_pressed);
+    animation: pulse 800ms infinite;
+    text-align: center;
+    align-content: center;
+}
+
 .zero-opacity {
     opacity: 0 !important;
     transition: none !important;
@@ -491,7 +537,7 @@ INDIVIDUAL BUTTON STYLES
     position: fixed;
     left: 172px;
     bottom: 56px;
-    width: 88px;
+    width: 75px;
 }
 
 @keyframes swipeX {

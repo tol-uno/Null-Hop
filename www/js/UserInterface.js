@@ -20,13 +20,15 @@ const UserInterface = {
         playTutorial: null,
     },
 
+    levelState: 1, // 1 = pre-start, 2 = playing level, 3 = in endzone
     timer: 0,
     timerStart: null, // set by jump button
-    levelState: 1, // 1 = pre-start, 2 = playing level, 3 = in endzone
 
     leaderboards: {}, // medal times for each map
     records: {}, // users records (personal bests) for each level theyve completed
     previousRecord: 0,
+
+    speedAverager: new Averager(30), // for adjusting how speedometer looks
 
     showVerticalWarning: false,
     showOverstrafeWarning: false,
@@ -275,13 +277,14 @@ const UserInterface = {
             }
 
             if (UserInterface.gamestate == 6) {
-                // in Map Level
+                // in Level
                 // goto back to map browser
                 // either standard or custom depending on MapBrowser state
                 UserInterface.gamestate = 2;
 
                 UserInterface.timer = 0;
                 UserInterface.levelState = 1;
+                ui_speedometer.textContent = "Speed: 0";
 
                 if (MapBrowser.state == 1) {
                     UserInterface.switchToUiGroup(UserInterface.uiGroup_standardMapBrowser);
@@ -315,8 +318,14 @@ const UserInterface = {
         const btn_restart = getByID("btn_restart");
         btn_restart.func = () => {
             if (Tutorial.isActive && Tutorial.state < 18) {
-                // in Tutorial and HAVE NOT reached the end
-                // UNHIDE POPUP ALERT "Restart Disabled During Tutorial"
+                // In Tutorial and HAVE NOT reached the end
+                // Show Popup Alert "Restart Disabled During Tutorial"
+                if (!UserInterface.activeUiGroup.includes(ui_restartWarning)) {
+                    UserInterface.addUiElement(ui_restartWarning);
+                    setTimeout(() => {
+                        UserInterface.removeUiElement(ui_restartWarning);
+                    }, 1500); // waits 1.5 seconds to hide warning
+                }
                 return;
             }
 
@@ -422,6 +431,12 @@ const UserInterface = {
             MapBrowser.updateMapBrowserState();
         };
 
+        const btn_level_surfacing = getByID("btn_level_surfacing");
+        btn_level_surfacing.func = () => {
+            MapBrowser.selectedMapIndex = "Surfacing";
+            MapBrowser.updateMapBrowserState();
+        };
+
         const btn_level_trespass = getByID("btn_level_trespass");
         btn_level_trespass.func = () => {
             MapBrowser.selectedMapIndex = "Trespass";
@@ -446,6 +461,12 @@ const UserInterface = {
             MapBrowser.updateMapBrowserState();
         };
 
+        const btn_level_rapture = getByID("btn_level_rapture");
+        btn_level_rapture.func = () => {
+            MapBrowser.selectedMapIndex = "Rapture";
+            MapBrowser.updateMapBrowserState();
+        };
+
         const btn_level_forever = getByID("btn_level_forever");
         btn_level_forever.func = () => {
             MapBrowser.selectedMapIndex = "Forever";
@@ -464,14 +485,15 @@ const UserInterface = {
             Tutorial.setState(Tutorial.state + 1);
         };
 
+        const ui_restartWarning = getByID("ui_restartWarning");
+
         const tutorial_swipe = getByID("tutorial_swipe");
         const tutorial_swipeVertical = getByID("tutorial_swipeVertical");
         const tutorial_arrow = getByID("tutorial_arrow");
 
         this.tutorial_targetCenter = getByID("target-center");
-        this.tutorial_arc = getByID("arc");    
+        this.tutorial_arc = getByID("arc");
         this.tutorial_dot = getByID("dot");
-        
 
         // ====================
         //  MAP EDITOR BROWSER
@@ -1253,10 +1275,12 @@ const UserInterface = {
             btn_level_pitfall,
             btn_level_cavernAbyss,
             btn_level_crystals,
+            btn_level_surfacing,
             btn_level_trespass,
             btn_level_turmoil,
             btn_level_tangledForest,
             btn_level_pinnacle,
+            btn_level_rapture,
             btn_level_forever,
         ];
         this.uiGroup_customMapBrowser = [btn_mainMenu, getByID("custom-map-browser-info"), ui_mapInfoBox, getByID("custom-map-list-container")];
@@ -1888,7 +1912,7 @@ const UserInterface = {
 
     addUiElement: function (uiElement, allowDuplicates = false) {
         if (!this.activeUiGroup.includes(uiElement) || allowDuplicates) {
-            this.switchToUiGroup(this.activeUiGroup.concat(uiElement));
+            this.switchToUiGroup(this.activeUiGroup.concat(uiElement)); // this isnt very efficient as switchUiGroup removes then re-adds elements FIX
         }
     },
 
@@ -2252,7 +2276,40 @@ const UserInterface = {
                     this.timer = Date.now() - this.timerStart;
 
                     // Update Speed Text. ADD COLOR AND SIZE CHANGES TO THIS BASED OFF OF GAIN
-                    ui_speedometer.textContent = `Speed: ${Math.round(Player.velocity.magnitude())}`;
+
+                    const currentSpeed = Math.round(Player.velocity.magnitude());
+                    this.speedAverager.pushValue(currentSpeed);
+                    const averageSpeed = this.speedAverager.getAverage();
+
+                    // Calculate the difference to determine acceleration or deceleration
+                    const deltaSpeed = currentSpeed - averageSpeed;
+
+                    let arrow;
+
+                    // Update style based on speed change
+                    // if (deltaSpeed > 0) {
+                    //     // Accelerating: scale up text and tint green
+                    //     arrow = deltaSpeed > 10 ? "▲" : "";
+                    //     //const scale = 1 + Math.min(deltaSpeed / 50, 0.5); // adjust 20 & 0.5 for effect
+                    //     const scale = 1 + deltaSpeed / 70;
+                    //     const greenIntensity = Math.min(deltaSpeed * 10, 255); // clamp at 255
+                    //     ui_speedometer.style.color = `rgb(${255 - greenIntensity},255, ${255 - greenIntensity})`;
+                    //     ui_speedometer.style.transform = `translate(-50%, -50%) scale(${scale})`;
+                    // } else if (deltaSpeed < 0) {
+                    //     // Decelerating: tint red
+                    //     arrow = deltaSpeed < 10 ? "▼" : "";
+                    //     const redIntensity = Math.min(-deltaSpeed * 10, 255); // clamp at 255
+                    //     ui_speedometer.style.color = `rgb(255, ${255 - redIntensity}, ${255 - redIntensity})`;
+                    //     ui_speedometer.style.transform = `translate(-50%, -50%) scale(1)`; // default size
+                    // } else {
+                    //     // No change
+                    //     ui_speedometer.style.color = "white";
+                    //     ui_speedometer.style.transform = "translate(-50%, -50%) scale(1)";
+                    //     arrow = "";
+                    // }
+
+                    // ui_speedometer.textContent = `Speed: ${Math.round(Player.velocity.magnitude())} ${arrow}`;
+                    ui_speedometer.textContent = `Speed: ${Math.round(Player.velocity.magnitude())}`; // no arrow
                 } else {
                     // player IS paused
                     this.timerStart += Date.now() - this.timer - this.timerStart; // dont progress timer when paused
