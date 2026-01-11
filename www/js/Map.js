@@ -529,7 +529,7 @@ const Map = {
         /*
         if (UserInterface.settings.debugText == 1) {
             ctx.fillStyle = (UserInterface.darkMode) ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
-            ctx.font = "12px BAHNSCHRIFT"
+            ctx.font = "12px 'Alte DIN'"
             ctx.fillText("angle: " + platform.angle, 0, 20);
             ctx.fillText("position: " + platform.x + ", " + platform.y, 0 , 40)
             ctx.fillText("size: " + platform.width + ", " + platform.height, 0 , 60)

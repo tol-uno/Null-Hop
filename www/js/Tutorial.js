@@ -352,7 +352,7 @@ const Tutorial = {
         ctx.save(); // for canvas scaling
         ctx.scale(UserInterfaceCanvas.scale, UserInterfaceCanvas.scale);
 
-        ctx.font = "16px BAHNSCHRIFT";
+        ctx.font = "16px 'Alte DIN'";
 
         // TUTORIAL DEBUG TEXT
         if (UserInterface.settings.debugText) {

@@ -31,82 +31,40 @@ const ColorPicker = {
     l: 75,
 
     syncGradients: function () {
-        // should be called sync
-        const ctx = UserInterfaceCanvas.ctx;
-
-        // all of these (except hue technically) needs to be created every time a slider is changed
-        this.hueGradient = ctx.createLinearGradient(this.x + 20, 0, this.x + this.width - 40, 0);
-        this.saturationGradient = ctx.createLinearGradient(this.x + 20, 0, this.x + this.width - 40, 0);
-        this.lightnessGradient = ctx.createLinearGradient(this.x + 20, 0, this.x + this.width - 40, 0);
-
-        // HUE BAR (could remove the alpha from all these)
-        this.hueGradient.addColorStop(0 / 360, "hsla(0, 100%, 50%, 1)");
-        this.hueGradient.addColorStop(10 / 360, "hsla(10, 100%, 50%, 1)");
-        this.hueGradient.addColorStop(20 / 360, "hsla(20, 100%, 50%, 1)");
-        this.hueGradient.addColorStop(30 / 360, "hsla(30, 100%, 50%, 1)");
-        this.hueGradient.addColorStop(40 / 360, "hsla(40, 100%, 50%, 1)");
-        this.hueGradient.addColorStop(50 / 360, "hsla(50, 100%, 50%, 1)");
-        this.hueGradient.addColorStop(60 / 360, "hsla(60, 100%, 50%, 1)");
-        this.hueGradient.addColorStop(70 / 360, "hsla(70, 100%, 50%, 1)");
-        this.hueGradient.addColorStop(80 / 360, "hsla(80, 100%, 50%, 1)");
-        this.hueGradient.addColorStop(90 / 360, "hsla(90, 100%, 50%, 1)");
-        this.hueGradient.addColorStop(100 / 360, "hsla(100, 100%, 50%, 1)");
-        this.hueGradient.addColorStop(110 / 360, "hsla(110, 100%, 50%, 1)");
-        this.hueGradient.addColorStop(120 / 360, "hsla(120, 100%, 50%, 1)");
-        this.hueGradient.addColorStop(130 / 360, "hsla(130, 100%, 50%, 1)");
-        this.hueGradient.addColorStop(140 / 360, "hsla(140, 100%, 50%, 1)");
-        this.hueGradient.addColorStop(150 / 360, "hsla(150, 100%, 50%, 1)");
-        this.hueGradient.addColorStop(160 / 360, "hsla(160, 100%, 50%, 1)");
-        this.hueGradient.addColorStop(170 / 360, "hsla(170, 100%, 50%, 1)");
-        this.hueGradient.addColorStop(180 / 360, "hsla(180, 100%, 50%, 1)");
-        this.hueGradient.addColorStop(190 / 360, "hsla(190, 100%, 50%, 1)");
-        this.hueGradient.addColorStop(200 / 360, "hsla(200, 100%, 50%, 1)");
-        this.hueGradient.addColorStop(210 / 360, "hsla(210, 100%, 50%, 1)");
-        this.hueGradient.addColorStop(220 / 360, "hsla(220, 100%, 50%, 1)");
-        this.hueGradient.addColorStop(230 / 360, "hsla(230, 100%, 50%, 1)");
-        this.hueGradient.addColorStop(240 / 360, "hsla(240, 100%, 50%, 1)");
-        this.hueGradient.addColorStop(250 / 360, "hsla(250, 100%, 50%, 1)");
-        this.hueGradient.addColorStop(260 / 360, "hsla(260, 100%, 50%, 1)");
-        this.hueGradient.addColorStop(270 / 360, "hsla(270, 100%, 50%, 1)");
-        this.hueGradient.addColorStop(280 / 360, "hsla(280, 100%, 50%, 1)");
-        this.hueGradient.addColorStop(290 / 360, "hsla(290, 100%, 50%, 1)");
-        this.hueGradient.addColorStop(300 / 360, "hsla(300, 100%, 50%, 1)");
-        this.hueGradient.addColorStop(310 / 360, "hsla(310, 100%, 50%, 1)");
-        this.hueGradient.addColorStop(320 / 360, "hsla(320, 100%, 50%, 1)");
-        this.hueGradient.addColorStop(330 / 360, "hsla(330, 100%, 50%, 1)");
-        this.hueGradient.addColorStop(340 / 360, "hsla(340, 100%, 50%, 1)");
-        this.hueGradient.addColorStop(350 / 360, "hsla(350, 100%, 50%, 1)");
-        this.hueGradient.addColorStop(360 / 360, "hsla(360, 100%, 50%, 1)");
-
-        // SATURATION BAR
-        this.saturationGradient.addColorStop(0, "hsla(" + this.h + ", 0%, 50%, 1)");
-        this.saturationGradient.addColorStop(0.25, "hsla(" + this.h + ", 25%, 50%, 1)");
-        this.saturationGradient.addColorStop(0.5, "hsla(" + this.h + ", 50%, 50%, 1)");
-        this.saturationGradient.addColorStop(0.75, "hsla(" + this.h + ", 75%, 50%, 1)");
-        this.saturationGradient.addColorStop(1, "hsla(" + this.h + ", 100%, 50%, 1)");
-
-        // LIGHTNESS BAR
-        this.lightnessGradient.addColorStop(0, "hsla(" + this.h + ", 100%, 0%, 1)");
-        this.lightnessGradient.addColorStop(0.25, "hsla(" + this.h + ", 100%, 25%, 1)");
-        this.lightnessGradient.addColorStop(0.5, "hsla(" + this.h + ", 100%, 50%, 1)");
-        this.lightnessGradient.addColorStop(0.75, "hsla(" + this.h + ", 100%, 75%, 1)");
-        this.lightnessGradient.addColorStop(1, "hsla(" + this.h + ", 100%, 100%, 1)");
+        // change name to updateColorsCSS
+        ui_colorPicker.style.setProperty("--h", `${this.h}`);
+        ui_colorPicker.style.setProperty("--s", `${this.s}%`);
+        ui_colorPicker.style.setProperty("--l", `${this.l}%`);
     },
 
     update: function () {
-        if (this.hueGradient == null) {
-            // only create gradients once
-            this.syncGradients();
-        }
-
-        if (!btn_hueSlider.confirmed || !btn_saturationSlider.confirmed || !btn_lightnessSlider.confirmed) {
+        if (
+            // a slider is being pressed
+            !btn_hueSlider.handle.classList.contains("pressed") ||
+            !btn_saturationSlider.handle.classList.contains("pressed") ||
+            !btn_lightnessSlider.handle.classList.contains("pressed")
+        ) {
             // update every color every frame
-            ColorPicker.h = btn_hueSlider.value;
-            ColorPicker.s = btn_saturationSlider.value;
-            ColorPicker.l = btn_lightnessSlider.value;
+            ColorPicker.h = UserInterface.getSliderValue(btn_hueSlider);
+            ColorPicker.s = UserInterface.getSliderValue(btn_saturationSlider);
+            ColorPicker.l = UserInterface.getSliderValue(btn_lightnessSlider);
             ColorPicker.updateElementColor();
             ColorPicker.syncGradients();
         }
+    },
+
+    updateButtonColors: function () {
+        btn_backgroundColor.style.setProperty("--myMapColor", `${MapEditor.loadedMap.style.backgroundColor}`);
+        btn_playerColor.style.setProperty("--myMapColor", `${MapEditor.loadedMap.style.playerColor}`);
+        btn_wallTopColor.style.setProperty("--myMapColor", `${MapEditor.loadedMap.style.wallTopColor}`);
+        btn_wallSideColor.style.setProperty("--myMapColor", `${MapEditor.loadedMap.style.wallSideColor}`);
+        btn_platformTopColor.style.setProperty("--myMapColor", `${MapEditor.loadedMap.style.platformTopColor}`);
+        btn_platformSideColor.style.setProperty("--myMapColor", `${MapEditor.loadedMap.style.platformSideColor}`);
+        btn_endZoneTopColor.style.setProperty("--myMapColor", `${MapEditor.loadedMap.style.endZoneTopColor}`);
+        btn_endZoneSideColor.style.setProperty("--myMapColor", `${MapEditor.loadedMap.style.endZoneSideColor}`);
+        btn_directLightColor.style.setProperty("--myMapColor", `${MapEditor.loadedMap.style.directLight}`);
+        btn_ambientLightColor.style.setProperty("--myMapColor", `${MapEditor.loadedMap.style.ambientLight}`);
+
     },
 
     render: function () {
@@ -115,127 +73,15 @@ const ColorPicker = {
 
         if (this.editingElement == 0) {
             // showing all color/element selection buttons
-            // DRAW COLORS BEHIND BUTTONS
-
-            // Background
-            ctx.fillStyle = MapEditor.loadedMap.style.backgroundColor;
-            UserInterfaceCanvas.roundedRect(
-                btn_backgroundColor.x + 8,
-                btn_backgroundColor.y + 8,
-                btn_backgroundColor.width - 16,
-                btn_backgroundColor.height - 16,
-                btn_backgroundColor.height / 2
-            );
-            ctx.fill();
-
-            // Player
-            ctx.fillStyle = MapEditor.loadedMap.style.playerColor;
-            UserInterfaceCanvas.roundedRect(
-                btn_playerColor.x + 8,
-                btn_playerColor.y + 8,
-                btn_playerColor.width - 16,
-                btn_playerColor.height - 16,
-                btn_playerColor.height / 2
-            );
-            ctx.fill();
-
-            // Direct Light
-            ctx.fillStyle = MapEditor.loadedMap.style.directLight;
-            UserInterfaceCanvas.roundedRect(
-                btn_directLightColor.x + 8,
-                btn_directLightColor.y + 8,
-                btn_directLightColor.width - 16,
-                btn_directLightColor.height - 16,
-                btn_directLightColor.height / 2
-            );
-            ctx.fill();
-
-            // Ambient Light
-            ctx.fillStyle = MapEditor.loadedMap.style.ambientLight;
-            UserInterfaceCanvas.roundedRect(
-                btn_ambientLightColor.x + 8,
-                btn_ambientLightColor.y + 8,
-                btn_ambientLightColor.width - 16,
-                btn_ambientLightColor.height - 16,
-                btn_ambientLightColor.height / 2
-            );
-            ctx.fill();
-
-            // Walls
-            ctx.fillStyle = MapEditor.loadedMap.style.wallTopColor;
-            UserInterfaceCanvas.roundedRect(
-                btn_wallTopColor.x + 8,
-                btn_wallTopColor.y + 8,
-                btn_wallTopColor.width - 16,
-                btn_wallTopColor.height - 16,
-                btn_wallTopColor.height / 2
-            );
-            ctx.fill();
-            ctx.fillStyle = MapEditor.loadedMap.style.wallSideColor;
-            UserInterfaceCanvas.roundedRect(
-                btn_wallSideColor.x + 8,
-                btn_wallSideColor.y + 8,
-                btn_wallSideColor.width - 16,
-                btn_wallSideColor.height - 16,
-                btn_wallSideColor.height / 2
-            );
-            ctx.fill();
-
-            // Platforms
-            ctx.fillStyle = MapEditor.loadedMap.style.platformTopColor;
-            UserInterfaceCanvas.roundedRect(
-                btn_platformTopColor.x + 8,
-                btn_platformTopColor.y + 8,
-                btn_platformTopColor.width - 16,
-                btn_platformTopColor.height - 16,
-                btn_platformTopColor.height / 2
-            );
-            ctx.fill();
-            ctx.fillStyle = MapEditor.loadedMap.style.platformSideColor;
-            UserInterfaceCanvas.roundedRect(
-                btn_platformSideColor.x + 8,
-                btn_platformSideColor.y + 8,
-                btn_platformSideColor.width - 16,
-                btn_platformSideColor.height - 16,
-                btn_platformSideColor.height / 2
-            );
-            ctx.fill();
-
-            // Endzones
-            ctx.fillStyle = MapEditor.loadedMap.style.endZoneTopColor;
-            UserInterfaceCanvas.roundedRect(
-                btn_endZoneTopColor.x + 8,
-                btn_endZoneTopColor.y + 8,
-                btn_endZoneTopColor.width - 16,
-                btn_endZoneTopColor.height - 16,
-                btn_endZoneTopColor.height / 2
-            );
-            ctx.fill();
-            ctx.fillStyle = MapEditor.loadedMap.style.endZoneSideColor;
-            UserInterfaceCanvas.roundedRect(
-                btn_endZoneSideColor.x + 8,
-                btn_endZoneSideColor.y + 8,
-                btn_endZoneSideColor.width - 16,
-                btn_endZoneSideColor.height - 16,
-                btn_endZoneSideColor.height / 2
-            );
-            ctx.fill();
-
-            // DRAW ELEMENT TEXT ABOVE BOTTONS
-            ctx.fillStyle = !UserInterface.darkMode ? UserInterface.lightColor_1 : UserInterface.darkColor_1;
-            ctx.font = "28px BAHNSCHRIFT";
-            ctx.fillText("Walls", btn_wallTopColor.x + 41, btn_wallTopColor.y - 12);
-            ctx.fillText("Platforms", btn_platformTopColor.x + 14, btn_platformTopColor.y - 12);
-            ctx.fillText("Endzones", btn_endZoneTopColor.x + 15, btn_endZoneTopColor.y - 12);
 
             // DRAW LINE BETWEEN TOP AND SIDE BUTTONS IF LOCKED
             ctx.strokeStyle = !UserInterface.darkMode ? UserInterface.lightColor_1 : UserInterface.darkColor_1;
             ctx.lineWidth = 8;
             ctx.lineCap = "round";
 
-            drawLockLine(this.lockWallColors, btn_lockWallColors);
-            drawLockLine(this.lockPlatformColors, btn_lockPlatformColors);
-            drawLockLine(this.lockEndzoneColors, btn_lockEndzoneColors);
+            drawLockLine(this.lockWallColors, btn_syncWallColors);
+            drawLockLine(this.lockPlatformColors, btn_syncPlatformColors);
+            drawLockLine(this.lockEndzoneColors, btn_syncEndZoneColors);
             ctx.setLineDash([]);
 
             function drawLockLine(lockToCheck, button) {
@@ -257,74 +103,6 @@ const ColorPicker = {
                 ctx.lineTo(x + 4, y + 68);
                 ctx.stroke();
             }
-        } else {
-            ctx.fillStyle = UserInterface.darkMode ? UserInterface.lightColor_1 : UserInterface.darkColor_1;
-
-            ctx.strokeStyle = !UserInterface.darkMode ? UserInterface.lightColor_1 : UserInterface.darkColor_1;
-            ctx.lineWidth = 4;
-
-            // bounding box
-            UserInterfaceCanvas.roundedRect(this.x, this.y, this.width, this.height, 25);
-            ctx.fill();
-            ctx.stroke();
-
-            // color showcase box
-            ctx.fillStyle = "hsl(" + this.h + ", " + this.s + "%, " + this.l + "%)";
-            UserInterfaceCanvas.roundedRect(this.x + 20, this.y + 20, 120, 80, 10);
-            ctx.fill();
-            ctx.stroke();
-
-            // rgb text
-            ctx.font = "16px BAHNSCHRIFT";
-            ctx.fillStyle = UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
-            ctx.fillText(CanvasArea.HSLToRGB(this.h, this.s, this.l), this.x + 164, this.y + 122);
-
-            // selected element text
-            let selectedColor = null;
-            if (this.editingElement == 1) {
-                selectedColor = "Background";
-            }
-            if (this.editingElement == 2) {
-                selectedColor = "Player";
-            }
-            if (this.editingElement == 3) {
-                selectedColor = "Platform Tops";
-            }
-            if (this.editingElement == 4) {
-                selectedColor = "Platform Sides";
-            }
-            if (this.editingElement == 5) {
-                selectedColor = this.lockWallColors ? "Walls" : "Wall Tops";
-            }
-            if (this.editingElement == 6) {
-                selectedColor = this.lockWallColors ? "Walls" : "Wall Sides";
-            }
-            if (this.editingElement == 7) {
-                selectedColor = "Endzone Tops";
-            }
-            if (this.editingElement == 8) {
-                selectedColor = "Endzone Sides";
-            }
-            if (this.editingElement == 9) {
-                selectedColor = "Direct Light";
-            }
-            if (this.editingElement == 10) {
-                selectedColor = "Ambient Light";
-            }
-
-            if (selectedColor != null) {
-                ctx.fillText(selectedColor, this.x + 164, this.y + 36);
-            }
-
-            // draw gradients for each slider
-            ctx.fillStyle = this.hueGradient;
-            ctx.fillRect(this.x + 16, this.y + 162, this.width - 32, 14);
-
-            ctx.fillStyle = this.saturationGradient;
-            ctx.fillRect(this.x + 16, this.y + 234, this.width - 32, 14);
-
-            ctx.fillStyle = this.lightnessGradient;
-            ctx.fillRect(this.x + 16, this.y + 306, this.width - 32, 14);
         }
     },
 
@@ -347,7 +125,6 @@ const ColorPicker = {
 
     setColorViaRGB: function (rgbStringOrArray) {
         // sets the color pickers color
-
         let color;
 
         if (typeof rgbStringOrArray == "string") {
@@ -369,9 +146,9 @@ const ColorPicker = {
     },
 
     updateSliders: function () {
-        btn_hueSlider.updateState(this.h);
-        btn_saturationSlider.updateState(this.s);
-        btn_lightnessSlider.updateState(this.l);
+        UserInterface.setSliderValue(btn_hueSlider, this.h);
+        UserInterface.setSliderValue(btn_saturationSlider, this.s);
+        UserInterface.setSliderValue(btn_lightnessSlider, this.l);
     },
 
     updateElementColor: function () {

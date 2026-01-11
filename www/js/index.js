@@ -59,24 +59,8 @@ function updateGameArea() {
         MapEditor.update();
     }
 
-    // RENDERING OBJECTS
-    // Rendering Pipeline
-    // Objects that should have their own rendering functions:
-    // Map - for rendering that active map
-    // Player - for rendering the player
-    // MapEditor - for rendering the editing map screen
-
-    // UserInterface - For rendering all user interface - only updated when user interacts with screen.
-    // Other UI objects have .render() functions but they should be called by UserInterface during it's render()
-    // - renders called from within UserInterface: Buttons, SliderUI, ColorPicker
-    // - external renders that arent called by UserInterface: PreviewWindow (called by MapEditor), Tutorial (called by updateGameArea)
-    // - not updated every frame, only when UI updates
-
-    // Not sure how Tutorial should fall into all this..
-    // Its animated elements need to be updated every frame not only on UI interaction
-
     CanvasArea.clear();
-    UserInterfaceCanvas.clear();
+    UserInterfaceCanvas.clear(); // kill
 
     if (UserInterface.gamestate == 2) {
         // In a MapBrowser

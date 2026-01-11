@@ -35,11 +35,6 @@ const UserInterface = {
 
     darkMode: false,
 
-    // lightColor_1 : "#fff8ea", // lighter
-    // lightColor_2 : "#f7f1e4", // darker
-    // darkColor_1 : "#503c4b",
-    // darkColor_2 : "#412b3a",
-
     // should kill these eventually and only use ones defined in CSS
     lightColor_1: "#F5F5F5", // lighter
     lightColor_2: "#E0E0E0", // darker
@@ -80,7 +75,6 @@ const UserInterface = {
         btn_mapEditor.func = () => {
             MapEditor.editorState = 5;
             UserInterface.gamestate = 2;
-            UserInterface.renderedButtons = []; // kill once all map editor button are on new system. Exit edit calls this func()
             UserInterface.switchToUiGroup(UserInterface.uiGroup_mapEditorMapBrowser);
 
             MapBrowser.state = 2;
@@ -219,8 +213,6 @@ const UserInterface = {
                     MapBrowser.selectedMapIndex = -1;
                     UserInterface.gamestate = 1;
 
-                    // UserInterface.renderedButtons = UserInterface.btnGroup_mainMenu; //kill
-                    UserInterface.renderedButtons = []; // kill
                     UserInterface.switchToUiGroup(UserInterface.uiGroup_mainMenu);
 
                     return;
@@ -308,7 +300,6 @@ const UserInterface = {
 
                 // btn_mainMenu only appears in map settings or map color pages while in MapEditor
                 // goto MapEditor main map editing screen
-                UserInterface.renderedButtons = UserInterface.btnGroup_mapEditorInterface;
                 UserInterface.switchToUiGroup(UserInterface.uiGroup_mapEditorInterface);
                 MapEditor.editorState = 1;
                 return;
@@ -378,7 +369,6 @@ const UserInterface = {
             MapBrowser.scrollVel = 0;
 
             UserInterface.gamestate = 5;
-            UserInterface.renderedButtons = []; // kill once ALL map browsers buttons are on NEW systems
             UserInterface.switchToUiGroup([btn_mainMenu]);
 
             if (MapBrowser.state == 1) {
@@ -553,7 +543,12 @@ const UserInterface = {
 
         const btn_importMap = getByID("btn_importMap");
         btn_importMap.func = () => {
-            // UPDATE THIS BUTTON TO INCLUDE FUNCTIONALITY OF btn_importMap_text BUTTON
+            // UPDATE THIS BUTTON TO INCLUDE FUNCTIONALITY OF OLD btn_importMap_text BUTTON:
+            // let mapPaste = prompt("Paste Map Data:");
+            // if (mapPaste) {
+            //     MapEditor.loadedMap = JSON.parse(mapPaste);
+            // }
+
             // LOAD FROM LOCAL FILE SYSTEM
             const input = document.createElement("input");
             input.type = "file";
@@ -662,7 +657,6 @@ const UserInterface = {
             MapEditor.selectedElements = MapEditor.multiSelect
                 ? MapEditor.selectedElements.concat(MapEditor.loadedMap.platforms.length - 1)
                 : [MapEditor.loadedMap.platforms.length - 1];
-            UserInterface.renderedButtons = UserInterface.btnGroup_editPlatform;
             UserInterface.switchToUiGroup(UserInterface.uiGroup_editPlatform);
 
             // SYNC ALL BUTTONS AND SLIDERS
@@ -702,8 +696,8 @@ const UserInterface = {
             MapEditor.editorState = 3; // map colors
             ColorPicker.editingElement = 0;
             PreviewWindow.update();
-            UserInterface.renderedButtons = UserInterface.btnGroup_colorPickerState1;
             UserInterface.switchToUiGroup(UserInterface.uiGroup_colorPickerState1);
+            ColorPicker.updateButtonColors();
         };
 
         const btn_mapSettings = getByID("btn_mapSettings");
@@ -717,7 +711,6 @@ const UserInterface = {
             UserInterface.setSliderValue(btn_lightDirectionSlider, MapEditor.loadedMap.style.lightDirection);
             UserInterface.setSliderValue(btn_lightPitchSlider, MapEditor.loadedMap.style.lightPitch);
 
-            UserInterface.renderedButtons = UserInterface.btnGroup_mapSettings;
             UserInterface.switchToUiGroup(UserInterface.uiGroup_mapSettings);
         };
 
@@ -732,7 +725,6 @@ const UserInterface = {
                 MapEditor.dragSelect = true;
                 MapEditor.multiSelect = true;
                 UserInterface.setToggleState(btn_multiSelect, true); // sync other button's toggle
-                UserInterface.renderedButtons = []; // kill once all main map editor interface buttons are done
                 UserInterface.switchToUiGroup([btn_dragSelect]);
             }
 
@@ -1084,7 +1076,6 @@ const UserInterface = {
 
         const btn_unselect = getByID("btn_unselect");
         btn_unselect.func = () => {
-            UserInterface.renderedButtons = UserInterface.btnGroup_mapEditorInterface; // kill eventually
             UserInterface.switchToUiGroup(UserInterface.uiGroup_mapEditorInterface);
             MapEditor.selectedElements = []; // remove all selected elements
         };
@@ -1219,7 +1210,6 @@ const UserInterface = {
             MapEditor.loadedMap.platforms = MapEditor.loadedMap.platforms.filter((platform) => platform != "remove");
 
             MapEditor.selectedElements = []; // No selected elements after delete
-            UserInterface.renderedButtons = UserInterface.btnGroup_mapEditorInterface;
             UserInterface.switchToUiGroup(UserInterface.uiGroup_mapEditorInterface);
         };
 
@@ -1258,6 +1248,222 @@ const UserInterface = {
             MapEditor.loadedMap.style.lightPitch = UserInterface.getSliderValue(this);
             PreviewWindow.update();
         };
+
+        // ==================
+        //  MAP COLOR PICKER
+        // ==================
+
+        // 0 nothing
+        // 1 bg
+        // 2 player
+        // 3 platform top
+        // 4 platform side
+        // 5 wall top
+        // 6 wall side
+        // 7 end top
+        // 8 end side
+        // 9 direct light
+        // 10 ambient light
+
+        const btn_backgroundColor = getByID("btn_backgroundColor");
+        btn_backgroundColor.func = () => {
+            ColorPicker.editingElement = 1;
+            UserInterface.switchToUiGroup(UserInterface.uiGroup_colorPickerState2);
+            ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.backgroundColor);
+            ColorPicker.updateSliders();
+            ColorPicker.syncGradients();
+        };
+
+        const btn_playerColor = getByID("btn_playerColor");
+        btn_playerColor.func = () => {
+            ColorPicker.editingElement = 2;
+            UserInterface.switchToUiGroup(UserInterface.uiGroup_colorPickerState2);
+            ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.playerColor);
+            ColorPicker.updateSliders();
+            ColorPicker.syncGradients();
+        };
+
+        const btn_directLightColor = getByID("btn_directLightColor");
+        btn_directLightColor.func = () => {
+            ColorPicker.editingElement = 9;
+            UserInterface.switchToUiGroup(UserInterface.uiGroup_colorPickerState2);
+            ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.directLight);
+            ColorPicker.updateSliders();
+            ColorPicker.syncGradients();
+        };
+
+        const btn_ambientLightColor = getByID("btn_ambientLightColor");
+        btn_ambientLightColor.func = () => {
+            ColorPicker.editingElement = 10;
+            UserInterface.switchToUiGroup(UserInterface.uiGroup_colorPickerState2);
+            ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.ambientLight);
+            ColorPicker.updateSliders();
+            ColorPicker.syncGradients();
+        };
+
+        const btn_wallTopColor = getByID("btn_wallTopColor");
+        btn_wallTopColor.func = () => {
+            ColorPicker.editingElement = 5;
+            UserInterface.switchToUiGroup(UserInterface.uiGroup_colorPickerState2);
+            ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.wallTopColor);
+            ColorPicker.updateSliders();
+            ColorPicker.syncGradients();
+        };
+
+        const btn_wallSideColor = getByID("btn_wallSideColor");
+        btn_wallSideColor.func = () => {
+            ColorPicker.editingElement = 6;
+            UserInterface.switchToUiGroup(UserInterface.uiGroup_colorPickerState2);
+            ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.wallSideColor);
+            ColorPicker.updateSliders();
+            ColorPicker.syncGradients();
+        };
+
+        const btn_platformTopColor = getByID("btn_platformTopColor");
+        btn_platformTopColor.func = () => {
+            ColorPicker.editingElement = 3;
+            UserInterface.switchToUiGroup(UserInterface.uiGroup_colorPickerState2);
+            ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.platformTopColor);
+            ColorPicker.updateSliders();
+            ColorPicker.syncGradients();
+        };
+
+        const btn_platformSideColor = getByID("btn_platformSideColor");
+        btn_platformSideColor.func = () => {
+            ColorPicker.editingElement = 4;
+            UserInterface.switchToUiGroup(UserInterface.uiGroup_colorPickerState2);
+            ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.platformSideColor);
+            ColorPicker.updateSliders();
+            ColorPicker.syncGradients();
+        };
+
+        const btn_endZoneTopColor = getByID("btn_endZoneTopColor");
+        btn_endZoneTopColor.func = () => {
+            ColorPicker.editingElement = 7;
+            UserInterface.switchToUiGroup(UserInterface.uiGroup_colorPickerState2);
+            ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.endZoneTopColor);
+            ColorPicker.updateSliders();
+            ColorPicker.syncGradients();
+        };
+
+        const btn_endZoneSideColor = getByID("btn_endZoneSideColor");
+        btn_endZoneSideColor.func = () => {
+            ColorPicker.editingElement = 8;
+            UserInterface.switchToUiGroup(UserInterface.uiGroup_colorPickerState2);
+            ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.endZoneSideColor);
+            ColorPicker.updateSliders();
+            ColorPicker.syncGradients();
+        };
+
+        const btn_syncWallColors = getByID("btn_syncWallColors");
+        btn_syncWallColors.label = btn_syncWallColors.querySelector(".label");
+        btn_syncWallColors.func = function () {
+            if (this.classList.contains("toggled")) {
+                // make colors NOT synced
+                ColorPicker.lockWallColors = false;
+            } else {
+                // make colors synced
+                ColorPicker.lockWallColors = true;
+                MapEditor.loadedMap.style.wallSideColor = MapEditor.loadedMap.style.wallTopColor;
+                PreviewWindow.update();
+                ColorPicker.updateButtonColors();
+            }
+            this.classList.toggle("toggled");
+        };
+
+        const btn_syncPlatformColors = getByID("btn_syncPlatformColors");
+        btn_syncPlatformColors.label = btn_syncPlatformColors.querySelector(".label");
+        btn_syncPlatformColors.func = function () {
+            if (this.classList.contains("toggled")) {
+                // make colors NOT synced
+                ColorPicker.lockPlatformColors = false;
+            } else {
+                // make colors synced
+                ColorPicker.lockPlatformColors = true;
+                MapEditor.loadedMap.style.platformSideColor = MapEditor.loadedMap.style.platformTopColor;
+                PreviewWindow.update();
+                ColorPicker.updateButtonColors();
+            }
+            this.classList.toggle("toggled");
+        };
+
+        const btn_syncEndZoneColors = getByID("btn_syncEndZoneColors");
+        btn_syncEndZoneColors.label = btn_syncEndZoneColors.querySelector(".label");
+        btn_syncEndZoneColors.func = function () {
+            if (this.classList.contains("toggled")) {
+                // make colors NOT synced
+                ColorPicker.lockEndzoneColors = false;
+            } else {
+                // make colors synced
+                ColorPicker.lockEndzoneColors = true;
+                MapEditor.loadedMap.style.endZoneSideColor = MapEditor.loadedMap.style.endZoneTopColor;
+                PreviewWindow.update();
+                ColorPicker.updateButtonColors();
+            }
+            this.classList.toggle("toggled");
+        };
+
+        // MAP COLORS 2ND SCREEN
+        const ui_colorPicker = getByID("ui_colorPicker");
+
+        const btn_unselectColor = getByID("btn_unselectColor");
+        btn_unselectColor.func = () => {
+            UserInterface.switchToUiGroup(UserInterface.uiGroup_colorPickerState1);
+            ColorPicker.editingElement = 0;
+            ColorPicker.updateButtonColors();
+        };
+
+        const btn_copyColor = getByID("btn_copyColor");
+        btn_copyColor.func = () => {
+            ColorPicker.copyColor();
+        };
+
+        const btn_pasteColor = getByID("btn_pasteColor");
+        btn_pasteColor.func = () => {
+            ColorPicker.pasteColor();
+        };
+
+        const btn_hueSlider = getByID("btn_hueSlider");
+        btn_hueSlider.labelValue = btn_hueSlider.querySelector(".label > span");
+        btn_hueSlider.handle = btn_hueSlider.querySelector(".handle");
+        btn_hueSlider.func = function () {
+            const value = UserInterface.getSliderValue(this);
+            ColorPicker.h = value;
+            ui_colorPicker.style.setProperty("--h", `${value}`);
+            ColorPicker.updateElementColor();
+            if (ColorPicker.editingElement == 1 || ColorPicker.editingElement == 9 || ColorPicker.editingElement == 10) {
+                UserInterface.determineButtonColor();
+            }
+        };
+
+        const btn_saturationSlider = getByID("btn_saturationSlider");
+        btn_saturationSlider.labelValue = btn_saturationSlider.querySelector(".label > span");
+        btn_saturationSlider.handle = btn_saturationSlider.querySelector(".handle");
+        btn_saturationSlider.func = function () {
+            const value = UserInterface.getSliderValue(this);
+            ColorPicker.s = value;
+            ui_colorPicker.style.setProperty("--s", `${value}%`);
+            ColorPicker.updateElementColor();
+            if (ColorPicker.editingElement == 1 || ColorPicker.editingElement == 9 || ColorPicker.editingElement == 10) {
+                UserInterface.determineButtonColor();
+            }
+        };
+
+        const btn_lightnessSlider = getByID("btn_lightnessSlider");
+        btn_lightnessSlider.labelValue = btn_lightnessSlider.querySelector(".label > span");
+        btn_lightnessSlider.handle = btn_lightnessSlider.querySelector(".handle");
+        btn_lightnessSlider.func = function () {
+            const value = UserInterface.getSliderValue(this);
+            ColorPicker.l = value;
+            ui_colorPicker.style.setProperty("--l", `${value}%`);
+            ColorPicker.updateElementColor();
+            if (ColorPicker.editingElement == 1 || ColorPicker.editingElement == 9 || ColorPicker.editingElement == 10) {
+                UserInterface.determineButtonColor();
+            }
+        };
+
+        const ui_saturationGradient = getByID("ui_saturationGradient");
+        const ui_lightnessGradient = getByID("ui_lightnessGradient");
 
         // ===========
         //  UI GROUPS
@@ -1360,230 +1566,11 @@ const UserInterface = {
             btn_duplicateElements,
         ];
 
-        this.uiGroup_colorPickerState1 = [btn_mainMenu];
-        this.uiGroup_colorPickerState2 = [];
-        this.uiGroup_mapSettings = [btn_mainMenu, btn_platformHeightSlider, btn_wallHeightSlider, btn_lightDirectionSlider, btn_lightPitchSlider];
-
-        this.activeUiGroup = [];
-        this.switchToUiGroup(UserInterface.uiGroup_mainMenu);
-
-        // [][][][][][][][][][][][][][]
-        //   CREATING THE OLD BUTTONS
-        // [][][][][][][][][][][][][][]
-
-        // MapEditor browser buttons
-        btn_importMap_text = new Button(midX_UI - 150, 250, 300, "", "", 0, "Import Map With Copy & Paste", function () {
-            let mapPaste = prompt("Paste Map Data:");
-            if (mapPaste) {
-                MapEditor.loadedMap = JSON.parse(mapPaste);
-            }
-        });
-
-        // COLOR PICKER BUTTONS AND SLIDERS
-        btn_copyColor = new Button(ColorPicker.x + 154, ColorPicker.y + 46, 90, "", "", 0, "Copy", function () {
-            ColorPicker.copyColor();
-        });
-
-        btn_pasteColor = new Button(ColorPicker.x + 254, ColorPicker.y + 46, 90, "", "", 0, "Paste", function () {
-            ColorPicker.pasteColor();
-        });
-
-        btn_hueSlider = new SliderUI(ColorPicker.x + 16, ColorPicker.y + 148, ColorPicker.width - 32, 0, 360, 1, "Hue", ColorPicker.h, function () {
-            ColorPicker.h = this.value;
-            ColorPicker.updateElementColor();
-            ColorPicker.syncGradients();
-            if (ColorPicker.editingElement == 1 || ColorPicker.editingElement == 9 || ColorPicker.editingElement == 10) {
-                UserInterface.determineButtonColor();
-            }
-        });
-
-        btn_saturationSlider = new SliderUI(
-            ColorPicker.x + 16,
-            ColorPicker.y + 220,
-            ColorPicker.width - 32,
-            0,
-            100,
-            1,
-            "Saturation",
-            ColorPicker.s,
-            function () {
-                ColorPicker.s = this.value;
-                ColorPicker.updateElementColor();
-                ColorPicker.syncGradients();
-                if (ColorPicker.editingElement == 1 || ColorPicker.editingElement == 9 || ColorPicker.editingElement == 10) {
-                    UserInterface.determineButtonColor();
-                }
-            }
-        );
-
-        btn_lightnessSlider = new SliderUI(
-            ColorPicker.x + 16,
-            ColorPicker.y + 292,
-            ColorPicker.width - 32,
-            0,
-            100,
-            1,
-            "Lightness",
-            ColorPicker.l,
-            function () {
-                ColorPicker.l = this.value;
-                ColorPicker.updateElementColor();
-                ColorPicker.syncGradients();
-                if (ColorPicker.editingElement == 1 || ColorPicker.editingElement == 9 || ColorPicker.editingElement == 10) {
-                    UserInterface.determineButtonColor();
-                }
-            }
-        );
-
-        btn_unselectColor = new Button(screenWidthUI - 480, 32, 44, "x_button", "", 0, "", function () {
-            UserInterface.renderedButtons = UserInterface.btnGroup_colorPickerState1;
-            UserInterface.switchToUiGroup(UserInterface.uiGroup_colorPickerState1);
-            ColorPicker.editingElement = 0;
-        });
-
-        // SET COLOR BUTTONS
-        // 0 nothing
-        // 1 bg
-        // 2 player
-        // 3 platform top
-        // 4 platform side
-        // 5 wall top
-        // 6 wall side
-        // 7 end top
-        // 8 end side
-        // 9 direct light
-        // 10 ambient light
-
-        btn_backgroundColor = new Button(screenWidthUI - 498, 32, 208, "background_button", "", 0, "", function () {
-            ColorPicker.editingElement = 1;
-            UserInterface.renderedButtons = UserInterface.btnGroup_colorPickerState2; // kill
-            UserInterface.switchToUiGroup(UserInterface.uiGroup_colorPickerState2);
-            ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.backgroundColor);
-            ColorPicker.updateSliders();
-            ColorPicker.syncGradients();
-        });
-
-        btn_playerColor = new Button(screenWidthUI - 498, 116, 208, "player_button", "", 0, "", function () {
-            ColorPicker.editingElement = 2;
-            UserInterface.renderedButtons = UserInterface.btnGroup_colorPickerState2;
-            UserInterface.switchToUiGroup(UserInterface.uiGroup_colorPickerState2);
-            ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.playerColor);
-            ColorPicker.updateSliders();
-            ColorPicker.syncGradients();
-        });
-
-        btn_directLightColor = new Button(screenWidthUI - 270, 32, 226, "direct_light_button", "", 0, "", function () {
-            ColorPicker.editingElement = 9;
-            UserInterface.renderedButtons = UserInterface.btnGroup_colorPickerState2;
-            UserInterface.switchToUiGroup(UserInterface.uiGroup_colorPickerState2);
-            ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.directLight);
-            ColorPicker.updateSliders();
-            ColorPicker.syncGradients();
-        });
-
-        btn_ambientLightColor = new Button(screenWidthUI - 270, 116, 226, "ambient_light_button", "", 0, "", function () {
-            ColorPicker.editingElement = 10;
-            UserInterface.renderedButtons = UserInterface.btnGroup_colorPickerState2;
-            UserInterface.switchToUiGroup(UserInterface.uiGroup_colorPickerState2);
-            ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.ambientLight);
-            ColorPicker.updateSliders();
-            ColorPicker.syncGradients();
-        });
-
-        btn_wallTopColor = new Button(screenWidthUI - 726, screenHeightUI - 172, 152, "top_button", "", 0, "", function () {
-            ColorPicker.editingElement = 5;
-            UserInterface.renderedButtons = UserInterface.btnGroup_colorPickerState2;
-            UserInterface.switchToUiGroup(UserInterface.uiGroup_colorPickerState2);
-            ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.wallTopColor);
-            ColorPicker.updateSliders();
-            ColorPicker.syncGradients();
-        });
-
-        btn_wallSideColor = new Button(screenWidthUI - 726, screenHeightUI - 96, 152, "side_button", "", 0, "", function () {
-            ColorPicker.editingElement = 6;
-            UserInterface.renderedButtons = UserInterface.btnGroup_colorPickerState2;
-            UserInterface.switchToUiGroup(UserInterface.uiGroup_colorPickerState2);
-            ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.wallSideColor);
-            ColorPicker.updateSliders();
-            ColorPicker.syncGradients();
-        });
-
-        btn_platformTopColor = new Button(screenWidthUI - 498, screenHeightUI - 172, 152, "top_button", "", 0, "", function () {
-            ColorPicker.editingElement = 3;
-            UserInterface.renderedButtons = UserInterface.btnGroup_colorPickerState2;
-            UserInterface.switchToUiGroup(UserInterface.uiGroup_colorPickerState2);
-            ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.platformTopColor);
-            ColorPicker.updateSliders();
-            ColorPicker.syncGradients();
-        });
-
-        btn_platformSideColor = new Button(screenWidthUI - 498, screenHeightUI - 96, 152, "side_button", "", 0, "", function () {
-            ColorPicker.editingElement = 4;
-            UserInterface.renderedButtons = UserInterface.btnGroup_colorPickerState2;
-            UserInterface.switchToUiGroup(UserInterface.uiGroup_colorPickerState2);
-            ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.platformSideColor);
-            ColorPicker.updateSliders();
-            ColorPicker.syncGradients();
-        });
-
-        btn_endZoneTopColor = new Button(screenWidthUI - 270, screenHeightUI - 172, 152, "top_button", "", 0, "", function () {
-            ColorPicker.editingElement = 7;
-            UserInterface.renderedButtons = UserInterface.btnGroup_colorPickerState2;
-            UserInterface.switchToUiGroup(UserInterface.uiGroup_colorPickerState2);
-            ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.endZoneTopColor);
-            ColorPicker.updateSliders();
-            ColorPicker.syncGradients();
-        });
-
-        btn_endZoneSideColor = new Button(screenWidthUI - 270, screenHeightUI - 96, 152, "side_button", "", 0, "", function () {
-            ColorPicker.editingElement = 8;
-            UserInterface.renderedButtons = UserInterface.btnGroup_colorPickerState2;
-            UserInterface.switchToUiGroup(UserInterface.uiGroup_colorPickerState2);
-            ColorPicker.setColorViaRGB(MapEditor.loadedMap.style.endZoneSideColor);
-            ColorPicker.updateSliders();
-            ColorPicker.syncGradients();
-        });
-
-        btn_lockWallColors = new Button(screenWidthUI - 570, screenHeightUI - 130, 56, "lock_button", "lock_button_pressed", 0, "", function () {
-            if (this.toggle) {
-                this.toggle = 0;
-                ColorPicker.lockWallColors = true;
-                MapEditor.loadedMap.style.wallSideColor = MapEditor.loadedMap.style.wallTopColor;
-                PreviewWindow.update();
-            } else {
-                this.toggle = 1;
-                ColorPicker.lockWallColors = false;
-            }
-        });
-
-        btn_lockPlatformColors = new Button(screenWidthUI - 342, screenHeightUI - 130, 56, "lock_button", "lock_button_pressed", 0, "", function () {
-            if (this.toggle) {
-                this.toggle = 0;
-                ColorPicker.lockPlatformColors = true;
-                MapEditor.loadedMap.style.platformSideColor = MapEditor.loadedMap.style.platformTopColor;
-                PreviewWindow.update();
-            } else {
-                this.toggle = 1;
-                ColorPicker.lockPlatformColors = false;
-            }
-        });
-
-        btn_lockEndzoneColors = new Button(screenWidthUI - 114, screenHeightUI - 130, 56, "lock_button", "lock_button_pressed", 0, "", function () {
-            if (this.toggle) {
-                this.toggle = 0;
-                ColorPicker.lockEndzoneColors = true;
-                MapEditor.loadedMap.style.endZoneSideColor = MapEditor.loadedMap.style.endZoneTopColor;
-                PreviewWindow.update();
-            } else {
-                this.toggle = 1;
-                ColorPicker.lockEndzoneColors = false;
-            }
-        });
-
-        // GROUPS OF BUTTONS TO RENDER ON DIFFERENT PAGES
-
-        this.btnGroup_mapEditorInterface = [];
-        this.btnGroup_colorPickerState1 = [
+        this.uiGroup_colorPickerState1 = [
+            btn_mainMenu,
+            getByID("ui_colorPicker_walls"),
+            getByID("ui_colorPicker_platforms"),
+            getByID("ui_colorPicker_endZones"),
             btn_backgroundColor,
             btn_playerColor,
             btn_wallTopColor,
@@ -1594,11 +1581,13 @@ const UserInterface = {
             btn_endZoneSideColor,
             btn_directLightColor,
             btn_ambientLightColor,
-            btn_lockWallColors,
-            btn_lockPlatformColors,
-            btn_lockEndzoneColors,
+
+            btn_syncWallColors,
+            btn_syncPlatformColors,
+            btn_syncEndZoneColors,
         ];
-        this.btnGroup_colorPickerState2 = [
+        this.uiGroup_colorPickerState2 = [
+            ui_colorPicker,
             btn_unselectColor,
             btn_copyColor,
             btn_pasteColor,
@@ -1606,13 +1595,10 @@ const UserInterface = {
             btn_saturationSlider,
             btn_lightnessSlider,
         ];
-        this.btnGroup_mapSettings = [];
-        this.btnGroup_editPlatform = [];
-        this.btnGroup_editPlayerStart = [];
-        this.btnGroup_editCheckpoint = [];
-        this.btnGroup_editMultiSelect = [];
+        this.uiGroup_mapSettings = [btn_mainMenu, btn_platformHeightSlider, btn_wallHeightSlider, btn_lightDirectionSlider, btn_lightPitchSlider];
 
-        this.renderedButtons = []; // kill eventually
+        this.activeUiGroup = [];
+        this.switchToUiGroup(UserInterface.uiGroup_mainMenu);
     },
 
     mapLoaded: function () {
@@ -1836,7 +1822,10 @@ const UserInterface = {
         // luminance = (0.299 * R + 0.587 * G + 0.114 * B)/255
         // console.log("luminance: " + luminance)
 
-        this.darkMode = luminance > 0.77 ? true : false;
+        this.darkMode = luminance > 0.77 ? true : false; // can kill once darkMode is not used by any of the old UI system
+        
+        const modeString = this.darkMode ? "dark" : "light";
+        this.updateUiColorMode(modeString);
     },
 
     updateUiColorMode: function (mode) {
@@ -1923,37 +1912,6 @@ const UserInterface = {
 
     touchStarted: function (x, y, id) {
         // Called By TouchHandler
-        this.renderedButtons.forEach((button) => {
-            // kill eventually
-            if (button.constructor.name == "Button") {
-                // only run on buttons not sliders
-                if (
-                    // if x and y touch is within button
-                    x >= button.x &&
-                    x <= button.x + button.width &&
-                    y >= button.y &&
-                    y <= button.y + button.height
-                ) {
-                    button.pressed();
-                }
-            }
-        });
-
-        this.renderedButtons.forEach((slider) => {
-            // kill eventually
-            if (slider.constructor.name == "SliderUI") {
-                // only run on sliders
-                if (
-                    // if x and y touch is near slider handle
-                    Math.abs(x - slider.sliderX) < 30 &&
-                    Math.abs(y - slider.y) < 30
-                ) {
-                    slider.confirmed = false;
-                }
-            }
-        });
-
-        // NEW DOM BASED UI
 
         for (uiElement of this.activeUiGroup) {
             // butons and toggles
@@ -1987,26 +1945,6 @@ const UserInterface = {
 
         let editorIgnoreRelease = false;
 
-        this.renderedButtons.forEach((button) => {
-            if (button.constructor.name == "Button") {
-                // only run on buttons not sliders
-                if (
-                    // if x and y touch is within button
-                    x >= button.x &&
-                    x <= button.x + button.width &&
-                    y >= button.y &&
-                    y <= button.y + button.height &&
-                    (MapBrowser.scrollVel == 0 || MapBrowser.scrollAmount == null) && // dont release if scrolling through Map Browser
-                    MapEditor.dragSelect == false // dont release if dragSelecting in Map Editor
-                ) {
-                    editorIgnoreRelease = true;
-                    button.released();
-                }
-                button.isPressed = false;
-            }
-        });
-
-        // NEW BUTTONS
         for (uiElement of this.activeUiGroup) {
             if (uiElement.nodeName.toLowerCase() === "button" || uiElement.classList.contains("toggle-container")) {
                 if (
@@ -2217,16 +2155,6 @@ const UserInterface = {
         // update dragged Sliders every frame
         // sliders are only in Settings Page and MapEditor Pages
         if (this.gamestate == 3 || MapEditor.loadedMap) {
-            this.renderedButtons.forEach((button) => {
-                // kill eventually
-                // LOOP RENDERED BUTTONS
-                if (button.constructor.name == "SliderUI") {
-                    // run .update() for only Sliders
-                    button.update();
-                }
-            });
-
-            // NEW DOM WAY
             // Live update position of handle if slider is being dragged
             for (const uiElement of this.activeUiGroup) {
                 if (uiElement.classList.contains("slider")) {
@@ -2330,7 +2258,7 @@ const UserInterface = {
             if (this.settings.debugText == 1) {
                 // DRAWING DEBUG TEXT
                 const textX = 150;
-                ctx.font = "8px BAHNSCHRIFT";
+                ctx.font = "8px 'Alte DIN'";
                 ctx.fillStyle = UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
 
                 ctx.fillText("fps: " + Math.round(1 / dt), textX, 50);
@@ -2398,7 +2326,7 @@ const UserInterface = {
                     ctx.fillRect(midX_UI - 32, midY_UI + 52, 320 * airAcceleration * dt, 6); // Top End clip LIMIT
 
                     // little text for strafeHelper
-                    ctx.font = "12px BAHNSCHRIFT";
+                    ctx.font = "12px 'Alte DIN'";
                     ctx.fillStyle = "white"
                     ctx.fillText(TouchHandler.dragAmountX * this.settings.sensitivity, midX_UI - 100, midY_UI + 38)
                     ctx.fillText("addSpeed: " + Player.addSpeed, midX_UI - 100, midY_UI + 48)
@@ -2409,7 +2337,7 @@ const UserInterface = {
 
                 if (TouchHandler.dragging && this.levelState != 3) {
                     if (Tutorial.pausePlayer == false) {
-                        ctx.font = "16px BAHNSCHRIFT";
+                        ctx.font = "16px 'Alte DIN'";
 
                         if (this.showOverstrafeWarning) {
                             heightOffset = this.showVerticalWarning ? 36 : 0;
@@ -2465,7 +2393,7 @@ const UserInterface = {
                 if (UserInterface.settings.debugText == 1) {
                     // GENERAL MAP EDITOR DEBUG TEXT
                     const textX = 150;
-                    ctx.font = "8px BAHNSCHRIFT";
+                    ctx.font = "8px 'Alte DIN'";
                     ctx.fillStyle = UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
 
                     ctx.fillText("zoom: " + MapEditor.zoom, textX, 50);
@@ -2524,11 +2452,6 @@ const UserInterface = {
                 ctx.restore(); //revert back map editor canvas state changes
             }
         }
-
-        this.renderedButtons.forEach((button) => {
-            // LOOP RENDERED BUTTONS AND RUN THEIR .render()
-            button.render();
-        });
 
         ctx.restore(); // UI SCALING RESTORE
     },

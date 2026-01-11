@@ -232,7 +232,7 @@ const MapBrowser = {
 
         // Map BROWSER DEBUG TEXT
         if (UserInterface.settings.debugText) {
-            ctx.font = "8px BAHNSCHRIFT";
+            ctx.font = "8px 'Alte DIN'";
             ctx.fillStyle = UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
             ctx.fillText("MapIndex: " + this.selectedMapIndex, 44, 200);
             ctx.fillText("scrollAmount: " + this.scrollAmount, 44, 210);

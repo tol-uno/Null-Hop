@@ -726,24 +726,229 @@
             </div>
 
             <!-- Map Editor Color Picker Screen -->
-
-            <button id="btn_deleteMap" class="hidden">
+            <button id="btn_backgroundColor" class="hidden">
                 <div>
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 64 64">
-                        <path stroke="var(--myForegroundColor)" stroke-width="3" d="M28.75 17.43v-.5a3 3 0 1 1 6 0v.5" />
+                    <div>Background</div>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 43 43">
+                        <circle cx="21.5" cy="21.5" r="20" fill="var(--myMapColor)" stroke="var(--myForegroundColor)" stroke-width="3" />
+                    </svg>
+                </div>
+            </button>
+
+            <button id="btn_directLightColor" class="hidden">
+                <div>
+                    <div>Direct Light</div>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 43 43">
+                        <circle cx="21.5" cy="21.5" r="20" fill="var(--myMapColor)" stroke="var(--myForegroundColor)" stroke-width="3" />
+                    </svg>
+                </div>
+            </button>
+
+            <button id="btn_ambientLightColor" class="hidden">
+                <div>
+                    <div>Ambient Light</div>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 43 43">
+                        <circle cx="21.5" cy="21.5" r="20" fill="var(--myMapColor)" stroke="var(--myForegroundColor)" stroke-width="3" />
+                    </svg>
+                </div>
+            </button>
+
+            <button id="btn_playerColor" class="hidden">
+                <div>
+                    <div>Player</div>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 29 47">
+                        <path fill="var(--myMapColor)" d="M1.5 14.23 14.23 1.5l12.73 12.73-12.73 12.73L1.5 14.23Z" />
+                        <path fill="var(--myMapColor)" d="m14.23 26.96 12.73-12.73v18L14.23 44.96v-18Z" />
+                        <path fill="var(--myMapColor)" d="m1.5 14.23 12.73 12.73v18L1.5 32.23v-18Z" />
                         <path
-                            fill="var(--myForegroundColor)"
-                            d="M44.75 22.45h-25.5a2 2 0 0 1-2-2v-1.17c0-1.1.9-2 2-2h25.5a2 2 0 0 1 2 2v1.17a2 2 0 0 1-2 2Z"
+                            stroke="var(--myForegroundColor)"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="3"
+                            d="M1.5 14.23 14.23 1.5l12.73 12.73m-25.46 0 12.73 12.73M1.5 14.23v18l12.73 12.73m12.73-30.73L14.23 26.96m12.73-12.73v18L14.23 44.96m0-18v18"
                         />
                         <path
-                            fill="var(--myForegroundColor)"
-                            fill-rule="evenodd"
-                            d="M24.02 50.07a2 2 0 0 1-1.97-1.7L18.6 25.43a2 2 0 0 1 1.97-2.3h22.9a2 2 0 0 1 1.99 2.26l-2.97 22.94a2 2 0 0 1-1.99 1.74H24.02Zm.86-23c.61-.06 1.16.39 1.22 1l1.69 17.4a1.12 1.12 0 0 1-2.24.22l-1.68-17.4c-.06-.61.39-1.16 1-1.22Zm6.28 18.51v-17.4a1.12 1.12 0 1 1 2.24 0v17.4a1.12 1.12 0 0 1-2.24 0Zm8.53-18.51c.61.06 1.06.6 1 1.22l-1.68 17.4a1.12 1.12 0 0 1-2.23-.22l1.68-17.4c.06-.61.6-1.06 1.23-1Z"
-                            clip-rule="evenodd"
+                            stroke="var(--myForegroundColor)"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="m17.1 17.1-8.36-2.23 6.13-6.13 2.24 8.37Z"
                         />
                     </svg>
                 </div>
             </button>
+
+            <div id="ui_colorPicker_walls" class="hidden">Walls</div>
+
+            <button id="btn_wallTopColor" class="hidden">
+                <div>
+                    <div>Top</div>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 29 47">
+                        <path fill="var(--myMapColor)" d="M1.5 14.23 14.23 1.5l12.73 12.73-12.73 12.73L1.5 14.23Z" />
+                        <path fill="none" d="m14.23 26.96 12.73-12.73v18L14.23 44.96v-18Z" />
+                        <path fill="none" d="m1.5 14.23 12.73 12.73v18L1.5 32.23v-18Z" />
+                        <path
+                            stroke="var(--myForegroundColor)"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="3"
+                            d="M1.5 14.23 14.23 1.5l12.73 12.73m-25.46 0 12.73 12.73M1.5 14.23v18l12.73 12.73m12.73-30.73L14.23 26.96m12.73-12.73v18L14.23 44.96m0-18v18"
+                        />
+                    </svg>
+                </div>
+            </button>
+
+            <button id="btn_wallSideColor" class="hidden">
+                <div>
+                    <div>Side</div>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 29 47">
+                        <path fill="none" d="M1.5 14.23 14.23 1.5l12.73 12.73-12.73 12.73L1.5 14.23Z" />
+                        <path fill="var(--myMapColor)" d="m14.23 26.96 12.73-12.73v18L14.23 44.96v-18Z" />
+                        <path fill="var(--myMapColor)" d="m1.5 14.23 12.73 12.73v18L1.5 32.23v-18Z" />
+                        <path
+                            stroke="var(--myForegroundColor)"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="3"
+                            d="M1.5 14.23 14.23 1.5l12.73 12.73m-25.46 0 12.73 12.73M1.5 14.23v18l12.73 12.73m12.73-30.73L14.23 26.96m12.73-12.73v18L14.23 44.96m0-18v18"
+                        />
+                    </svg>
+                </div>
+            </button>
+
+            <div id="btn_syncWallColors" class="toggle-container toggled hidden">
+                <span class="label">Match<br />Colors</span>
+                <div class="toggle"></div>
+            </div>
+
+            <div id="ui_colorPicker_platforms" class="hidden">Platforms</div>
+
+            <button id="btn_platformTopColor" class="hidden">
+                <div>
+                    <div>Top</div>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 29 47">
+                        <path fill="var(--myMapColor)" d="M1.5 14.23 14.23 1.5l12.73 12.73-12.73 12.73L1.5 14.23Z" />
+                        <path fill="none" d="m14.23 26.96 12.73-12.73v18L14.23 44.96v-18Z" />
+                        <path fill="none" d="m1.5 14.23 12.73 12.73v18L1.5 32.23v-18Z" />
+                        <path
+                            stroke="var(--myForegroundColor)"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="3"
+                            d="M1.5 14.23 14.23 1.5l12.73 12.73m-25.46 0 12.73 12.73M1.5 14.23v18l12.73 12.73m12.73-30.73L14.23 26.96m12.73-12.73v18L14.23 44.96m0-18v18"
+                        />
+                    </svg>
+                </div>
+            </button>
+
+            <button id="btn_platformSideColor" class="hidden">
+                <div>
+                    <div>Side</div>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 29 47">
+                        <path fill="none" d="M1.5 14.23 14.23 1.5l12.73 12.73-12.73 12.73L1.5 14.23Z" />
+                        <path fill="var(--myMapColor)" d="m14.23 26.96 12.73-12.73v18L14.23 44.96v-18Z" />
+                        <path fill="var(--myMapColor)" d="m1.5 14.23 12.73 12.73v18L1.5 32.23v-18Z" />
+                        <path
+                            stroke="var(--myForegroundColor)"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="3"
+                            d="M1.5 14.23 14.23 1.5l12.73 12.73m-25.46 0 12.73 12.73M1.5 14.23v18l12.73 12.73m12.73-30.73L14.23 26.96m12.73-12.73v18L14.23 44.96m0-18v18"
+                        />
+                    </svg>
+                </div>
+            </button>
+
+            <div id="btn_syncPlatformColors" class="toggle-container toggled hidden">
+                <span class="label">Match<br />Colors</span>
+                <div class="toggle"></div>
+            </div>
+
+            <div id="ui_colorPicker_endZones" class="hidden">End Zones</div>
+
+            <button id="btn_endZoneTopColor" class="hidden">
+                <div>
+                    <div>Top</div>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 29 47">
+                        <path fill="var(--myMapColor)" d="M1.5 14.23 14.23 1.5l12.73 12.73-12.73 12.73L1.5 14.23Z" />
+                        <path fill="none" d="m14.23 26.96 12.73-12.73v18L14.23 44.96v-18Z" />
+                        <path fill="none" d="m1.5 14.23 12.73 12.73v18L1.5 32.23v-18Z" />
+                        <path
+                            stroke="var(--myForegroundColor)"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="3"
+                            d="M1.5 14.23 14.23 1.5l12.73 12.73m-25.46 0 12.73 12.73M1.5 14.23v18l12.73 12.73m12.73-30.73L14.23 26.96m12.73-12.73v18L14.23 44.96m0-18v18"
+                        />
+                    </svg>
+                </div>
+            </button>
+
+            <button id="btn_endZoneSideColor" class="hidden">
+                <div>
+                    <div>Side</div>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 29 47">
+                        <path fill="none" d="M1.5 14.23 14.23 1.5l12.73 12.73-12.73 12.73L1.5 14.23Z" />
+                        <path fill="var(--myMapColor)" d="m14.23 26.96 12.73-12.73v18L14.23 44.96v-18Z" />
+                        <path fill="var(--myMapColor)" d="m1.5 14.23 12.73 12.73v18L1.5 32.23v-18Z" />
+                        <path
+                            stroke="var(--myForegroundColor)"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="3"
+                            d="M1.5 14.23 14.23 1.5l12.73 12.73m-25.46 0 12.73 12.73M1.5 14.23v18l12.73 12.73m12.73-30.73L14.23 26.96m12.73-12.73v18L14.23 44.96m0-18v18"
+                        />
+                    </svg>
+                </div>
+            </button>
+
+            <div id="btn_syncEndZoneColors" class="toggle-container toggled hidden">
+                <span class="label">Match<br />Colors</span>
+                <div class="toggle"></div>
+            </div>
+
+            <!-- Color Picker -->
+            <div id="ui_colorPicker" class="hidden">
+                <div id="ui_colorPickerHeader">
+                    <button id="btn_unselectColor" class="short-button">
+                        <div>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 62 62">
+                                <path stroke="var(--myForegroundColor)" stroke-linecap="round" stroke-width="8" d="m19 43 24-24m-24 0 24 24" />
+                            </svg>
+                        </div>
+                    </button>
+                    <div id="ui_colorPreview"></div>
+
+                    <button id="btn_copyColor" class=""><div>Copy</div></button>
+                    <button id="btn_pasteColor" class=""><div>Paste</div></button>
+                </div>
+
+                <div id="btn_hueSlider" class="slider hidden" data-min="0" data-max="360" data-step="1" data-value="0" data-touchid="">
+                    <div class="label">Hue: <span>000</span></div>
+                    <div class="track">
+                        <div class="handle" style="--pos: 0%"></div>
+                    </div>
+                </div>
+
+                <div id="ui_hueGradient"></div>
+
+                <div id="btn_saturationSlider" class="slider hidden" data-min="0" data-max="100" data-step="1" data-value="0" data-touchid="">
+                    <div class="label">Saturation: <span>000</span></div>
+                    <div class="track">
+                        <div class="handle" style="--pos: 0%"></div>
+                    </div>
+                </div>
+
+                <div id="ui_saturationGradient"></div>
+
+                <div id="btn_lightnessSlider" class="slider hidden" data-min="0" data-max="100" data-step="1" data-value="0" data-touchid="">
+                    <div class="label">Lightness: <span>000</span></div>
+                    <div class="track">
+                        <div class="handle" style="--pos: 0%"></div>
+                    </div>
+                </div>
+
+                <div id="ui_lightnessGradient"></div>
+            </div>
 
             <!-- END OF ui-container -->
         </div>
@@ -756,8 +961,6 @@
 
         <script src="js/Utilities.js"></script>
 
-        <script src="js/Button.js"></script>
-        <script src="js/SliderUI.js"></script>
         <script src="js/Vector2D3D.js"></script>
         <script src="js/Averager.js"></script>
         <!-- <script src="js/QueueItem.js"></script> -->

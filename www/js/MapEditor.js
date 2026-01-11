@@ -63,7 +63,6 @@ const MapEditor = {
                 CanvasArea.canvas.style.backgroundColor = this.loadedMap.style.backgroundColor; // set bg color here so it only triggers once not every render frame
                 document.body.style.backgroundColor = this.loadedMap.style.backgroundColor;
 
-                UserInterface.renderedButtons = UserInterface.btnGroup_mapEditorInterface;
                 UserInterface.switchToUiGroup(UserInterface.uiGroup_mapEditorInterface);
                 UserInterface.determineButtonColor();
 
@@ -1087,30 +1086,25 @@ const MapEditor = {
     },
 
     setButtonGroup: function () {
-        // setting btnGroups and syncing nesesary sliders and buttons
+        // setting UiGroups and syncing nesesary sliders and buttons
 
         if (MapEditor.selectedElements.length == 0) {
             // nothing selected
-            UserInterface.renderedButtons = UserInterface.btnGroup_mapEditorInterface;
             UserInterface.switchToUiGroup(UserInterface.uiGroup_mapEditorInterface);
         } else if (MapEditor.selectedElements.length > 1) {
             // multiple elements selected
-            UserInterface.renderedButtons = UserInterface.btnGroup_editMultiSelect;
             UserInterface.switchToUiGroup(UserInterface.uiGroup_editMultiSelect);
         } else {
             // one element is selected
             if (MapEditor.selectedElements.includes("playerStart")) {
-                UserInterface.renderedButtons = UserInterface.btnGroup_editPlayerStart; // kill eventually
                 UserInterface.switchToUiGroup(UserInterface.uiGroup_editPlayerStart);
                 UserInterface.setSliderValue(btn_playerAngleSlider, MapEditor.loadedMap.playerStart.angle, true); // sync
             } else if (Array.isArray(MapEditor.selectedElements[0])) {
                 // checkpoint part is selected
-                UserInterface.renderedButtons = UserInterface.btnGroup_editCheckpoint;
                 UserInterface.switchToUiGroup(UserInterface.uiGroup_editCheckpoint);
                 UserInterface.setSliderValue(btn_checkpointAngleSlider, MapEditor.loadedMap.checkpoints[MapEditor.selectedElements[0][0]].angle, true); // sync
             } else {
                 // platform is selected
-                UserInterface.renderedButtons = UserInterface.btnGroup_editPlatform;
                 UserInterface.switchToUiGroup(UserInterface.uiGroup_editPlatform);
                 UserInterface.setSliderValue(btn_platformAngleSlider, MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].angle, true); // sync
 
