@@ -33,7 +33,7 @@ const Tutorial = {
 
         switch (newState) {
             case 1: {
-                UserInterface.switchToUiGroup([btn_mainMenu, ui_tutorialTextWrapper, ui_tutorialText, tutorial_swipe]);
+                UserInterface.switchToUiGroup(new Set([btn_mainMenu, ui_tutorialTextWrapper, ui_tutorialText, tutorial_swipe]));
                 ui_tutorialText.textContent = "Slide horizontally to turn the player";
                 break;
             }
@@ -125,7 +125,7 @@ const Tutorial = {
                 this.pausePlayer = false;
                 UserInterface.removeUiElement(ui_tutorialText);
                 UserInterface.removeUiElement(tutorial_swipe);
-                UserInterface.addUiElement(ui_speedometer)
+                UserInterface.addUiElement(ui_speedometer);
                 break;
             }
 
@@ -266,7 +266,7 @@ const Tutorial = {
             }
         }
 
-        if (this.state == 1 && !UserInterface.activeUiGroup.includes(btn_next)) {
+        if (this.state == 1 && !UserInterface.activeUiGroup.has(btn_next)) {
             if (Math.abs(Player.lookAngle.getAngleInDegrees() - Map.playerStart.angle) > 45) {
                 UserInterface.addUiElement(btn_next);
             }
@@ -286,7 +286,7 @@ const Tutorial = {
             if (this.targets[0][1] > 0) {
                 if (Math.abs(Player.lookAngle.getAngleInDegrees() - this.targets[0][0]) < 8) {
                     this.targets[0][1] -= 60 * dt;
-                    UserInterface.tutorial_dot.classList.remove("hidden"); // shouldnt be adding and removing hidden class every frame. Low priority FIX
+                    UserInterface.tutorial_dot.classList.remove("hidden"); // dont add or remove "hidden" class every frame -- only do when player first enters or leaves target's angle. Low priority FIX
                 } else {
                     this.targets[0][1] = 50;
                     UserInterface.tutorial_dot.classList.add("hidden");
@@ -345,21 +345,5 @@ const Tutorial = {
             this.setState(18);
             return;
         }
-    },
-
-    render: function () {
-        const ctx = UserInterfaceCanvas.ctx;
-        ctx.save(); // for canvas scaling
-        ctx.scale(UserInterfaceCanvas.scale, UserInterfaceCanvas.scale);
-
-        ctx.font = "16px 'Alte DIN'";
-
-        // TUTORIAL DEBUG TEXT
-        if (UserInterface.settings.debugText) {
-            ctx.fillText("state: " + this.state, midX - 200, 34);
-            // ctx.fillText(this.targets, 300, midY_UI)
-        }
-
-        ctx.restore(); // for canvas scaling
     },
 };

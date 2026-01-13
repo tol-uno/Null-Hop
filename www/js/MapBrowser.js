@@ -66,7 +66,7 @@ const MapBrowser = {
                         MapBrowser.updateMapBrowserState();
                     };
                     container.appendChild(button);
-                    UserInterface.addUiElement(button, true);
+                    UserInterface.addUiElement(button); // removed the true flag to see if it will work
                 }
             } catch (error) {
                 console.error("Failed to load custom maps:", error);
@@ -141,36 +141,36 @@ const MapBrowser = {
             // NOT in map editors browser
 
             // ADDING btn_playMap
-            if (this.selectedMapIndex != -1 && !UserInterface.activeUiGroup.includes(btn_playMap)) {
+            if (this.selectedMapIndex != -1 && !UserInterface.activeUiGroup.has(btn_playMap)) {
                 UserInterface.addUiElement(btn_playMap);
             }
             // REMOVING btn_playMap
-            if (this.selectedMapIndex == -1 && UserInterface.activeUiGroup.includes(btn_playMap)) {
+            if (this.selectedMapIndex == -1 && UserInterface.activeUiGroup.has(btn_playMap)) {
                 UserInterface.removeUiElement(btn_playMap);
             }
 
             // ADDING AND REMOVING btn_playTutorial toggle
-            if (this.state == 1 && this.selectedMapIndex == "Awakening" && !UserInterface.activeUiGroup.includes(btn_playTutorial)) {
+            if (this.state == 1 && this.selectedMapIndex == "Awakening" && !UserInterface.activeUiGroup.has(btn_playTutorial)) {
                 UserInterface.addUiElement(btn_playTutorial);
             }
 
-            if (this.state == 1 && this.selectedMapIndex != "Awakening" && UserInterface.activeUiGroup.includes(btn_playTutorial)) {
+            if (this.state == 1 && this.selectedMapIndex != "Awakening" && UserInterface.activeUiGroup.has(btn_playTutorial)) {
                 UserInterface.removeUiElement(btn_playTutorial);
             }
         } else {
             // in MapEditors browser
             // ADD & REMOVE: btn_editMap, btn_shareMap, btn_deleteMap
 
-            if (this.selectedMapIndex != -1 && !UserInterface.activeUiGroup.includes(btn_editMap)) {
-                UserInterface.addUiElement(btn_editMap)
-                UserInterface.addUiElement(btn_shareMap)
-                UserInterface.addUiElement(btn_deleteMap)
+            if (this.selectedMapIndex != -1 && !UserInterface.activeUiGroup.has(btn_editMap)) {
+                UserInterface.addUiElement(btn_editMap);
+                UserInterface.addUiElement(btn_shareMap);
+                UserInterface.addUiElement(btn_deleteMap);
             }
 
-            if (this.selectedMapIndex == -1 && UserInterface.activeUiGroup.includes(btn_editMap)) {
-                UserInterface.removeUiElement(btn_editMap)
-                UserInterface.removeUiElement(btn_shareMap)
-                UserInterface.removeUiElement(btn_deleteMap)
+            if (this.selectedMapIndex == -1 && UserInterface.activeUiGroup.has(btn_editMap)) {
+                UserInterface.removeUiElement(btn_editMap);
+                UserInterface.removeUiElement(btn_shareMap);
+                UserInterface.removeUiElement(btn_deleteMap);
             }
         }
     },
@@ -221,26 +221,5 @@ const MapBrowser = {
             // No leaderboards -> hide medal list
             ui_mapInfoBox.querySelector(".medalList").classList.add("hidden");
         }
-    },
-
-    render: function () {
-        // called every frame when gamestate == 2
-
-        const ctx = UserInterfaceCanvas.ctx;
-        ctx.save(); // UI scale save
-        ctx.scale(UserInterfaceCanvas.scale, UserInterfaceCanvas.scale);
-
-        // Map BROWSER DEBUG TEXT
-        if (UserInterface.settings.debugText) {
-            ctx.font = "8px 'Alte DIN'";
-            ctx.fillStyle = UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
-            ctx.fillText("MapIndex: " + this.selectedMapIndex, 44, 200);
-            ctx.fillText("scrollAmount: " + this.scrollAmount, 44, 210);
-            ctx.fillText("scrollY: " + this.scrollY, 44, 220);
-            ctx.fillText("scrollVel: " + this.scrollVel, 44, 230);
-            ctx.fillText("maxScroll: " + this.maxScroll, 44, 250);
-        }
-
-        ctx.restore(); // UI scale restore
     },
 };

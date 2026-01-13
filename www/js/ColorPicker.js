@@ -64,46 +64,6 @@ const ColorPicker = {
         btn_endZoneSideColor.style.setProperty("--myMapColor", `${MapEditor.loadedMap.style.endZoneSideColor}`);
         btn_directLightColor.style.setProperty("--myMapColor", `${MapEditor.loadedMap.style.directLight}`);
         btn_ambientLightColor.style.setProperty("--myMapColor", `${MapEditor.loadedMap.style.ambientLight}`);
-
-    },
-
-    render: function () {
-        const ctx = UserInterfaceCanvas.ctx;
-        // Scaling is done in UserInterface where this ColorPicker.render() is called
-
-        if (this.editingElement == 0) {
-            // showing all color/element selection buttons
-
-            // DRAW LINE BETWEEN TOP AND SIDE BUTTONS IF LOCKED
-            ctx.strokeStyle = !UserInterface.darkMode ? UserInterface.lightColor_1 : UserInterface.darkColor_1;
-            ctx.lineWidth = 8;
-            ctx.lineCap = "round";
-
-            drawLockLine(this.lockWallColors, btn_syncWallColors);
-            drawLockLine(this.lockPlatformColors, btn_syncPlatformColors);
-            drawLockLine(this.lockEndzoneColors, btn_syncEndZoneColors);
-            ctx.setLineDash([]);
-
-            function drawLockLine(lockToCheck, button) {
-                if (lockToCheck) {
-                    ctx.setLineDash([]);
-                } else {
-                    ctx.setLineDash([0, 14]);
-                }
-
-                const x = button.x;
-                const y = button.y;
-
-                ctx.beginPath();
-                ctx.moveTo(x + 4, y - 12);
-                ctx.lineTo(x + 12, y - 12);
-                ctx.arcTo(x + 28, y - 12, x + 28, y + 4, 16);
-                ctx.lineTo(x + 28, y + 52);
-                ctx.arcTo(x + 28, y + 68, x + 12, y + 68, 16);
-                ctx.lineTo(x + 4, y + 68);
-                ctx.stroke();
-            }
-        }
     },
 
     getColor: function () {

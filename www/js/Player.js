@@ -162,11 +162,14 @@ const Player = {
             this.addSpeed = maxVelocity - this.currentSpeedProjected;
 
             // show overstrafe warning BROKEN FIX
-            if (this.addSpeed > 320 * airAcceleration * dt) {
-                // 11:04 in zweeks video shows why u lose speed
+            // if (this.addSpeed > 320 * airAcceleration * dt) {
+            if (TouchHandler.dragAmountX * UserInterface.settings.sensitivity * dt > 0.4) { // not the right way to do this
+                // 11:04 in zweeks bhopping video he shows why u lose speed
                 if (UserInterface.showOverstrafeWarning == false) {
+                    UserInterface.addUiElement(ui_overstrafeWarning);
                     UserInterface.showOverstrafeWarning = true;
                     setTimeout(() => {
+                        UserInterface.removeUiElement(ui_overstrafeWarning);
                         UserInterface.showOverstrafeWarning = false;
                     }, 1500); // wait 1.5 seconds to hide warning
                 }
@@ -229,7 +232,7 @@ const Player = {
                 this.jumpValue = 0;
                 this.jumpVelocity = 200;
             } else {
-                btn_restart.func()
+                btn_restart.func();
             }
             updatePlayerPoligon();
         };
@@ -444,7 +447,8 @@ const Player = {
                 this.endSlow -= 2 * dt;
             } else {
                 this.endSlow = 0;
-                if (ui_endScreen.classList.contains("hidden")) { // not a great way of doing this. Maybe add a levelState = 4?
+                if (ui_endScreen.classList.contains("hidden")) {
+                    // not a great way of doing this. Maybe add a levelState = 4?
                     UserInterface.activateEndScreen();
                 }
             }
@@ -466,7 +470,7 @@ const Player = {
 
         // CHANGING CAMERA ZOOM and OFFSET BASED ON SPEED
         // add current zoom level to averager
-        this.speedCameraOffset.zoomAverager.pushValue(UserInterfaceCanvas.mapToRange(this.velocity.magnitude(), 100, 1100, 1.5, 0.5));
+        this.speedCameraOffset.zoomAverager.pushValue(mapToRange(this.velocity.magnitude(), 100, 1100, 1.5, 0.5));
 
         // apply averager zoom to actual zoom
         this.speedCameraOffset.zoom = this.speedCameraOffset.zoomAverager.getAverage();

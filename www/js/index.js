@@ -25,7 +25,6 @@ function onDeviceReady() {
     AudioHandler.init();
     CanvasArea.start();
     PlayerCanvas.start();
-    UserInterfaceCanvas.start();
 
     UserInterface.start();
 }
@@ -60,26 +59,15 @@ function updateGameArea() {
     }
 
     CanvasArea.clear();
-    UserInterfaceCanvas.clear(); // kill
-
-    if (UserInterface.gamestate == 2) {
-        // In a MapBrowser
-        MapBrowser.render();
-    }
 
     if (UserInterface.gamestate == 6) {
         Map.render(); // draws Player lower shadow too
         Player.render();
-        if (Tutorial.isActive) {
-            Tutorial.render();
-        }
     }
 
     if (UserInterface.gamestate == 7) {
         MapEditor.render();
     }
-
-    UserInterface.render();
 
     requestAnimationFrame(updateGameArea);
 }

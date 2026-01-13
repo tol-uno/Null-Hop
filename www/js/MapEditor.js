@@ -5,7 +5,7 @@ const MapEditor = {
     // 2 = platform edit menu
     // 3 = map color page
     // 4 = map settings page
-    // 5 = custom map browser screen
+    // 5 = loading map screen
 
     loadedMap: null,
     scrollAmountX: null,
@@ -210,6 +210,12 @@ const MapEditor = {
                 this.dragSelectMarquee.width = Math.max(touch.startX, touch.x) - this.dragSelectMarquee.x;
                 this.dragSelectMarquee.height = Math.max(touch.startY, touch.y) - this.dragSelectMarquee.y;
 
+                // updating the DOM element pos and size
+                ui_dragSelectMarquee.style.left = `${this.dragSelectMarquee.x}px`;
+                ui_dragSelectMarquee.style.top = `${this.dragSelectMarquee.y}px`;
+                ui_dragSelectMarquee.style.width = `${this.dragSelectMarquee.width}px`;
+                ui_dragSelectMarquee.style.height = `${this.dragSelectMarquee.height}px`;
+
                 // marquee rectangle (screen coords) will need to be translated to global map cordinates to compare with platform positions
                 const globalMarqueeCornerTL = this.convertToMapCord(this.dragSelectMarquee.x, this.dragSelectMarquee.y);
                 const globalMarqueeCornerBR = this.convertToMapCord(
@@ -293,11 +299,11 @@ const MapEditor = {
         if (this.editorState == 2) {
             // update translate and resize buttons every frame
 
-            if (UserInterface.activeUiGroup.includes(btn_translate)) {
+            if (UserInterface.activeUiGroup.has(btn_translate)) {
                 btn_translate.func();
             }
 
-            if (UserInterface.activeUiGroup.includes(btn_resize_TL)) {
+            if (UserInterface.activeUiGroup.has(btn_resize_TL)) {
                 btn_resize_BL.func();
                 btn_resize_BR.func();
                 btn_resize_TR.func();
@@ -441,7 +447,7 @@ const MapEditor = {
                     ctx.restore(); // restoring platform rotation and translation
 
                     // PLAFORM RENDERING DEBUG TEXT
-                    // if (UserInterface.settings.debugText == 1) { // draw platform height indicators
+                    // if (UserInterface.settings.debugText == 1) {
                     //     ctx.fillStyle = "#FFFFFF";
                     //     ctx.fillText("position: " + platform.x + ", " + platform.y, platform.x + 5, platform.y - 5);
 
@@ -634,6 +640,11 @@ const MapEditor = {
             // release from dragSelect
             this.dragSelect = false;
             UserInterface.setToggleState(btn_dragSelect, false); // sync toggle button
+            // Move marquee offscreen (reset it)
+            ui_dragSelectMarquee.style.left = "-10px";
+            ui_dragSelectMarquee.style.top = "-10px";
+            ui_dragSelectMarquee.style.width = "0px";
+            ui_dragSelectMarquee.style.height = "0px";
 
             // add marqueeSelectedElements to selectedElements
             // need to make sure each platform, checkpoint, and playerStart isnt already selected before adding
@@ -656,7 +667,7 @@ const MapEditor = {
             this.marqueeSelectedElements = [];
 
             this.setButtonGroup();
-            UserInterface.updateMapEditorSidePanel()
+            UserInterface.updateMapEditorSidePanel();
 
             return;
         }
@@ -707,7 +718,7 @@ const MapEditor = {
             }
 
             this.setButtonGroup();
-            UserInterface.updateMapEditorSidePanel()
+            UserInterface.updateMapEditorSidePanel();
 
             return;
         }
@@ -734,7 +745,7 @@ const MapEditor = {
                 }
 
                 this.setButtonGroup();
-                UserInterface.updateMapEditorSidePanel()
+                UserInterface.updateMapEditorSidePanel();
 
                 clickedCheckpoint = true;
                 return;
@@ -757,7 +768,7 @@ const MapEditor = {
                 }
 
                 this.setButtonGroup();
-                UserInterface.updateMapEditorSidePanel()
+                UserInterface.updateMapEditorSidePanel();
 
                 clickedCheckpoint = true;
                 return;
@@ -780,7 +791,7 @@ const MapEditor = {
                 }
 
                 this.setButtonGroup();
-                UserInterface.updateMapEditorSidePanel()
+                UserInterface.updateMapEditorSidePanel();
 
                 clickedCheckpoint = true;
                 return;
@@ -808,7 +819,7 @@ const MapEditor = {
                 }
 
                 this.setButtonGroup();
-                UserInterface.updateMapEditorSidePanel()
+                UserInterface.updateMapEditorSidePanel();
 
                 return;
             }
@@ -1076,8 +1087,8 @@ const MapEditor = {
     },
 
     convertToMapCord: function (screenX, screenY) {
-        const mapX = UserInterfaceCanvas.mapToRange(screenX, 0, screenWidthUI, this.screen.cornerX, this.screen.cornerX + this.screen.width);
-        const mapY = UserInterfaceCanvas.mapToRange(screenY, 0, screenHeightUI, this.screen.cornerY, this.screen.cornerY + this.screen.height);
+        const mapX = mapToRange(screenX, 0, screenWidthUI, this.screen.cornerX, this.screen.cornerX + this.screen.width);
+        const mapY = mapToRange(screenY, 0, screenHeightUI, this.screen.cornerY, this.screen.cornerY + this.screen.height);
 
         return {
             x: mapX,
@@ -1102,7 +1113,11 @@ const MapEditor = {
             } else if (Array.isArray(MapEditor.selectedElements[0])) {
                 // checkpoint part is selected
                 UserInterface.switchToUiGroup(UserInterface.uiGroup_editCheckpoint);
-                UserInterface.setSliderValue(btn_checkpointAngleSlider, MapEditor.loadedMap.checkpoints[MapEditor.selectedElements[0][0]].angle, true); // sync
+                UserInterface.setSliderValue(
+                    btn_checkpointAngleSlider,
+                    MapEditor.loadedMap.checkpoints[MapEditor.selectedElements[0][0]].angle,
+                    true
+                ); // sync
             } else {
                 // platform is selected
                 UserInterface.switchToUiGroup(UserInterface.uiGroup_editPlatform);

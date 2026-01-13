@@ -78,7 +78,10 @@
                 <div id="strafeHandle"></div>
             </div>
 
-            <div id="ui_verticalWarning" class="hidden">DON'T SWIPE VERTICAL</div>
+            <div id="ui_warningContainer" class="hidden">
+                <div id="ui_verticalWarning" class="hidden">DON'T SWIPE VERTICAL</div>
+                <div id="ui_overstrafeWarning" class="hidden">TURNING TOO FAST!</div>
+            </div>
 
             <div id="ui_timerBox" class="hidden">
                 <span style="display: block">Time: 0:00.000</span>
@@ -138,6 +141,8 @@
                     </svg>
                 </div>
             </button>
+
+            <div id="ui_debugText" class="hidden">Debug Text</div>
 
             <!-- TUTORIAL -->
             <div id="ui_tutorialTextWrapper" class="hidden">
@@ -695,6 +700,8 @@
                 </div>
             </button>
 
+            <div id="ui_dragSelectMarquee" class="hidden"></div>
+
             <!-- Map Settings Sliders -->
 
             <div id="btn_platformHeightSlider" class="slider hidden" data-min="0" data-max="360" data-step="1" data-value="36" data-touchid="">
@@ -970,7 +977,6 @@
         <script src="js/TouchHandler.js"></script>
         <script src="js/AudioHandler.js"></script>
         <script src="js/UserInterface.js"></script>
-        <script src="js/UserInterfaceCanvas.js"></script>
         <script src="js/MapBrowser.js"></script>
         <script src="js/MapEditor.js"></script>
         <script src="js/ColorPicker.js"></script>

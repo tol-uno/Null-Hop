@@ -1,8 +1,4 @@
 const UserInterface = {
-    // The UI, both buttons and custom drawn elements, are positioned in non-scaled coordinated
-    // The canvas coords they use are based on the CSS pixels and do not take into account device DPI
-    // They are rendered using an increased UserInterfaceCanvas.scale, their logic is all non-scaled
-
     gamestate: 1,
     // 1: main menu
     // 2: level select map browser
@@ -106,6 +102,12 @@ const UserInterface = {
             // sync with UserInterface.settings.debugText
             this.classList.toggle("toggled"); // .toggle adds or removes class depending on if it's already added
             UserInterface.settings.debugText = UserInterface.getToggleState(this); // adjust settings to match toggle state
+            // unhiding or hiding debug text (doesnt add to activeGroup so it never gets switched off)
+            if (UserInterface.settings.debugText) {
+                ui_debugText.classList.remove("hidden");
+            } else {
+                ui_debugText.classList.add("hidden");
+            }
             UserInterface.writeSettings();
         };
 
@@ -139,6 +141,7 @@ const UserInterface = {
                 UserInterface.setSliderValue(btn_sensitivitySlider, UserInterface.settings.sensitivity);
                 UserInterface.setSliderValue(btn_volumeSlider, UserInterface.settings.volume);
                 UserInterface.setToggleState(btn_debugText, UserInterface.settings.debugText);
+                ui_debugText.classList.add("hidden"); // hide debug text DOM element
                 UserInterface.setToggleState(btn_strafeHUD, UserInterface.settings.strafeHUD);
                 UserInterface.setToggleState(btn_playTutorial, UserInterface.settings.playTutorial);
                 AudioHandler.setVolume(UserInterface.settings.volume);
@@ -173,7 +176,9 @@ const UserInterface = {
             ui_strafeHelper.handle.style.left = rel + "px";
         };
 
+        const ui_warningContainer = getByID("ui_warningContainer");
         const ui_verticalWarning = getByID("ui_verticalWarning");
+        const ui_overstrafeWarning = getByID("ui_overstrafeWarning");
 
         const btn_mainMenu = getByID("btn_mainMenu");
         btn_mainMenu.func = () => {
@@ -277,6 +282,7 @@ const UserInterface = {
                 UserInterface.timer = 0;
                 UserInterface.levelState = 1;
                 ui_speedometer.textContent = "Speed: 0";
+                gravity = 500;
 
                 if (MapBrowser.state == 1) {
                     UserInterface.switchToUiGroup(UserInterface.uiGroup_standardMapBrowser);
@@ -311,7 +317,7 @@ const UserInterface = {
             if (Tutorial.isActive && Tutorial.state < 18) {
                 // In Tutorial and HAVE NOT reached the end
                 // Show Popup Alert "Restart Disabled During Tutorial"
-                if (!UserInterface.activeUiGroup.includes(ui_restartWarning)) {
+                if (!UserInterface.activeUiGroup.has(ui_restartWarning)) {
                     UserInterface.addUiElement(ui_restartWarning);
                     setTimeout(() => {
                         UserInterface.removeUiElement(ui_restartWarning);
@@ -349,6 +355,8 @@ const UserInterface = {
 
         const ui_endScreen = getByID("ui_endScreen");
 
+        const ui_debugText = getByID("ui_debugText");
+
         // ======================
         //  STANDARD MAP BROWSER
         // ======================
@@ -369,7 +377,7 @@ const UserInterface = {
             MapBrowser.scrollVel = 0;
 
             UserInterface.gamestate = 5;
-            UserInterface.switchToUiGroup([btn_mainMenu]);
+            UserInterface.switchToUiGroup(new Set([btn_mainMenu]));
 
             if (MapBrowser.state == 1) {
                 // in normal maps browser
@@ -725,7 +733,8 @@ const UserInterface = {
                 MapEditor.dragSelect = true;
                 MapEditor.multiSelect = true;
                 UserInterface.setToggleState(btn_multiSelect, true); // sync other button's toggle
-                UserInterface.switchToUiGroup([btn_dragSelect]);
+                UserInterface.switchToUiGroup(new Set([btn_dragSelect, ui_dragSelectMarquee]));
+                // set ui_dragSelectMarquee size to zero
             }
 
             this.classList.toggle("toggled");
@@ -824,20 +833,8 @@ const UserInterface = {
 
                 // element(s) map coords mapped to screen coords
                 // mapToRange(number, inMin, inMax, outMin, outMax)
-                const xMapped = UserInterfaceCanvas.mapToRange(
-                    avgMidX,
-                    MapEditor.screen.cornerX,
-                    MapEditor.screen.cornerX + MapEditor.screen.width,
-                    0,
-                    screenWidthUI
-                );
-                const yMapped = UserInterfaceCanvas.mapToRange(
-                    avgMidY,
-                    MapEditor.screen.cornerY,
-                    MapEditor.screen.cornerY + MapEditor.screen.height,
-                    0,
-                    screenHeightUI
-                );
+                const xMapped = mapToRange(avgMidX, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, screenWidthUI);
+                const yMapped = mapToRange(avgMidY, MapEditor.screen.cornerY, MapEditor.screen.cornerY + MapEditor.screen.height, 0, screenHeightUI);
 
                 // position button in the middle of element(s)
                 if (MapEditor.selectedElements.length > 1) {
@@ -893,14 +890,14 @@ const UserInterface = {
 
                     // Map btn pos from UI coords to global map coords
                     // mapToRange(number, inMin, inMax, outMin, outMax)
-                    const btnGlobalX = UserInterfaceCanvas.mapToRange(
+                    const btnGlobalX = mapToRange(
                         btnPos.x,
                         0,
                         screenWidthUI,
                         MapEditor.screen.cornerX,
                         MapEditor.screen.cornerX + MapEditor.screen.width
                     );
-                    const btnGlobalY = UserInterfaceCanvas.mapToRange(
+                    const btnGlobalY = mapToRange(
                         btnPos.y,
                         0,
                         screenHeightUI,
@@ -913,14 +910,14 @@ const UserInterface = {
                 } else {
                     // use offset for single item
 
-                    xMapped = UserInterfaceCanvas.mapToRange(
+                    xMapped = mapToRange(
                         btnPos.x - conditioningArray[i].offSet * MapEditor.zoom,
                         0,
                         screenWidthUI,
                         MapEditor.screen.cornerX,
                         MapEditor.screen.cornerX + MapEditor.screen.width
                     );
-                    yMapped = UserInterfaceCanvas.mapToRange(
+                    yMapped = mapToRange(
                         btnPos.y - conditioningArray[i].offSet * MapEditor.zoom,
                         0,
                         screenHeightUI,
@@ -955,14 +952,14 @@ const UserInterface = {
             if (!btn.classList.contains("pressed")) {
                 // position button at corner of element
                 const corner = platform.corners[cornerIndex];
-                const cornerMappedX = UserInterfaceCanvas.mapToRange(
+                const cornerMappedX = mapToRange(
                     platform.x + corner[0],
                     MapEditor.screen.cornerX,
                     MapEditor.screen.cornerX + MapEditor.screen.width,
                     0,
                     screenWidthUI
                 );
-                const cornerMappedY = UserInterfaceCanvas.mapToRange(
+                const cornerMappedY = mapToRange(
                     platform.y + corner[1],
                     MapEditor.screen.cornerY,
                     MapEditor.screen.cornerY + MapEditor.screen.height,
@@ -998,14 +995,14 @@ const UserInterface = {
             const pinned = platform.corners[pinnedIndex];
             const pinnedX_map = platform.x + pinned[0];
             const pinnedY_map = platform.y + pinned[1];
-            const pinnedX_screen = UserInterfaceCanvas.mapToRange(
+            const pinnedX_screen = mapToRange(
                 pinnedX_map,
                 MapEditor.screen.cornerX,
                 MapEditor.screen.cornerX + MapEditor.screen.width,
                 0,
                 screenWidthUI
             );
-            const pinnedY_screen = UserInterfaceCanvas.mapToRange(
+            const pinnedY_screen = mapToRange(
                 pinnedY_map,
                 MapEditor.screen.cornerY,
                 MapEditor.screen.cornerY + MapEditor.screen.height,
@@ -1022,8 +1019,8 @@ const UserInterface = {
             const rotated = drag.clone().rotate(-platform.angle);
 
             // set width and height using rotatedDragFromPinned
-            platform.width = Math.round(widthSign * rotated.x * UserInterfaceCanvas.scale);
-            platform.height = Math.round(heightSign * rotated.y * UserInterfaceCanvas.scale);
+            platform.width = Math.round(widthSign * rotated.x * CanvasArea.scale);
+            platform.height = Math.round(heightSign * rotated.y * CanvasArea.scale);
 
             // snapping and restricting size
             if (MapEditor.snapAmount > 0) {
@@ -1212,6 +1209,8 @@ const UserInterface = {
             MapEditor.selectedElements = []; // No selected elements after delete
             UserInterface.switchToUiGroup(UserInterface.uiGroup_mapEditorInterface);
         };
+
+        const ui_dragSelectMarquee = getByID("ui_dragSelectMarquee");
 
         // ======================
         //  MAP SETTINGS SLIDERS
@@ -1468,9 +1467,9 @@ const UserInterface = {
         // ===========
         //  UI GROUPS
         // ===========
-        this.uiGroup_mainMenu = [getByID("main-title"), btn_play, btn_settings, btn_mapEditor, getByID("menu-background")];
-        this.uiGroup_settings = [btn_mainMenu, btn_sensitivitySlider, btn_volumeSlider, btn_debugText, btn_strafeHUD, btn_resetSettings];
-        this.uiGroup_standardMapBrowser = [
+        this.uiGroup_mainMenu = new Set([getByID("main-title"), btn_play, btn_settings, btn_mapEditor, getByID("menu-background")]);
+        this.uiGroup_settings = new Set([btn_mainMenu, btn_sensitivitySlider, btn_volumeSlider, btn_debugText, btn_strafeHUD, btn_resetSettings]);
+        this.uiGroup_standardMapBrowser = new Set([
             btn_mainMenu,
             btn_customMaps,
             ui_mapInfoBox,
@@ -1488,24 +1487,30 @@ const UserInterface = {
             btn_level_pinnacle,
             btn_level_rapture,
             btn_level_forever,
-        ];
-        this.uiGroup_customMapBrowser = [btn_mainMenu, getByID("custom-map-browser-info"), ui_mapInfoBox, getByID("custom-map-list-container")];
-        this.uiGroup_inLevel = [
+        ]);
+        this.uiGroup_customMapBrowser = new Set([
+            btn_mainMenu,
+            getByID("custom-map-browser-info"),
+            ui_mapInfoBox,
+            getByID("custom-map-list-container"),
+        ]);
+        this.uiGroup_inLevel = new Set([
             ui_speedometer,
             ui_timerBox,
             // ui_strafeHelper,
+            // ui_restartWarning,
+            ui_warningContainer,
             // ui_verticalWarning,
-            // ui_restartWarning, // Not done
-            // ui_overstrafeWarning, // Not done
+            // ui_overstrafeWarning, // broken
             btn_mainMenu,
             btn_restart,
             btn_jump,
-        ];
-        this.uiGroup_endScreen = [ui_speedometer, btn_mainMenu, btn_restart, btn_jump, ui_endScreen];
+        ]);
+        this.uiGroup_endScreen = new Set([ui_speedometer, btn_mainMenu, btn_restart, btn_jump, ui_endScreen]);
 
-        this.uiGroup_mapEditorMapBrowser = [btn_mainMenu, getByID("custom-map-list-container"), ui_mapInfoBox, btn_newMap, btn_importMap];
+        this.uiGroup_mapEditorMapBrowser = new Set([btn_mainMenu, getByID("custom-map-list-container"), ui_mapInfoBox, btn_newMap, btn_importMap]);
 
-        this.uiGroup_mapEditorInterface = [
+        this.uiGroup_mapEditorInterface = new Set([
             btn_exitMapEditor,
             btn_addPlatform,
             btn_addCheckpoint,
@@ -1514,8 +1519,8 @@ const UserInterface = {
             btn_dragSelect,
             btn_multiSelect,
             btn_snappingSlider,
-        ];
-        this.uiGroup_editPlatform = [
+        ]);
+        this.uiGroup_editPlatform = new Set([
             btn_exitMapEditor,
             btn_dragSelect,
             btn_multiSelect,
@@ -1532,8 +1537,8 @@ const UserInterface = {
             btn_endzone,
             btn_deleteElements,
             btn_duplicateElements,
-        ];
-        this.uiGroup_editPlayerStart = [
+        ]);
+        this.uiGroup_editPlayerStart = new Set([
             btn_exitMapEditor,
             btn_dragSelect,
             btn_multiSelect,
@@ -1542,8 +1547,8 @@ const UserInterface = {
             ui_editorSidePanel,
             btn_unselect,
             btn_playerAngleSlider,
-        ];
-        this.uiGroup_editCheckpoint = [
+        ]);
+        this.uiGroup_editCheckpoint = new Set([
             btn_exitMapEditor,
             btn_dragSelect,
             btn_multiSelect,
@@ -1553,8 +1558,8 @@ const UserInterface = {
             btn_unselect,
             btn_checkpointAngleSlider,
             btn_deleteElements,
-        ];
-        this.uiGroup_editMultiSelect = [
+        ]);
+        this.uiGroup_editMultiSelect = new Set([
             btn_exitMapEditor,
             btn_dragSelect,
             btn_multiSelect,
@@ -1564,9 +1569,9 @@ const UserInterface = {
             btn_unselect,
             btn_deleteElements,
             btn_duplicateElements,
-        ];
+        ]);
 
-        this.uiGroup_colorPickerState1 = [
+        this.uiGroup_colorPickerState1 = new Set([
             btn_mainMenu,
             getByID("ui_colorPicker_walls"),
             getByID("ui_colorPicker_platforms"),
@@ -1585,8 +1590,8 @@ const UserInterface = {
             btn_syncWallColors,
             btn_syncPlatformColors,
             btn_syncEndZoneColors,
-        ];
-        this.uiGroup_colorPickerState2 = [
+        ]);
+        this.uiGroup_colorPickerState2 = new Set([
             ui_colorPicker,
             btn_unselectColor,
             btn_copyColor,
@@ -1594,17 +1599,17 @@ const UserInterface = {
             btn_hueSlider,
             btn_saturationSlider,
             btn_lightnessSlider,
-        ];
-        this.uiGroup_mapSettings = [btn_mainMenu, btn_platformHeightSlider, btn_wallHeightSlider, btn_lightDirectionSlider, btn_lightPitchSlider];
+        ]);
+        this.uiGroup_mapSettings = new Set([
+            btn_mainMenu,
+            btn_platformHeightSlider,
+            btn_wallHeightSlider,
+            btn_lightDirectionSlider,
+            btn_lightPitchSlider,
+        ]);
 
-        this.activeUiGroup = [];
+        this.activeUiGroup = new Set();
         this.switchToUiGroup(UserInterface.uiGroup_mainMenu);
-    },
-
-    mapLoaded: function () {
-        // called at the end of Map.parseMapData()
-        UserInterface.gamestate = 6;
-        UserInterface.switchToUiGroup(this.uiGroup_inLevel);
     },
 
     getLeaderboards: async function () {
@@ -1639,6 +1644,12 @@ const UserInterface = {
         UserInterface.setSliderValue(btn_sensitivitySlider, UserInterface.settings.sensitivity);
         UserInterface.setSliderValue(btn_volumeSlider, UserInterface.settings.volume);
         UserInterface.setToggleState(btn_debugText, UserInterface.settings.debugText);
+        // unhiding or hiding debug text (doesnt add to activeGroup so it never gets switched off)
+        if (UserInterface.settings.debugText) {
+            ui_debugText.classList.remove("hidden");
+        } else {
+            ui_debugText.classList.add("hidden");
+        }
         UserInterface.setToggleState(btn_strafeHUD, UserInterface.settings.strafeHUD);
         UserInterface.setToggleState(btn_playTutorial, UserInterface.settings.playTutorial);
         AudioHandler.setVolume(UserInterface.settings.volume);
@@ -1769,13 +1780,7 @@ const UserInterface = {
         const slidersTouchID = Number(slider.dataset.touchid);
         const touch = TouchHandler.touches.find((touch) => touch.identifier === slidersTouchID);
 
-        const value = UserInterfaceCanvas.mapToRange(
-            touch.x,
-            sliderRect.left,
-            sliderRect.right,
-            Number(slider.dataset.min),
-            Number(slider.dataset.max)
-        );
+        const value = mapToRange(touch.x, sliderRect.left, sliderRect.right, Number(slider.dataset.min), Number(slider.dataset.max));
 
         this.setSliderValue(slider, value);
     },
@@ -1822,8 +1827,8 @@ const UserInterface = {
         // luminance = (0.299 * R + 0.587 * G + 0.114 * B)/255
         // console.log("luminance: " + luminance)
 
-        this.darkMode = luminance > 0.77 ? true : false; // can kill once darkMode is not used by any of the old UI system
-        
+        this.darkMode = luminance > 0.77 ? true : false; // can kill once darkMode is not used by any of the old UI system (map editor highlighting etc.)
+
         const modeString = this.darkMode ? "dark" : "light";
         this.updateUiColorMode(modeString);
     },
@@ -1862,47 +1867,30 @@ const UserInterface = {
         return minutes + ":" + extraSeconds;
     },
 
-    truncateText: function (text, clampToWidth) {
-        // kill maybe unless i think ill need it for map naming or something
-        if (UserInterfaceCanvas.ctx.measureText(text).width > clampToWidth) {
-            while (UserInterfaceCanvas.ctx.measureText(text + "...").width > clampToWidth || text.endsWith(" ")) {
-                // also removes end char if its a space
-                text = text.slice(0, -1); // slice off last character
+    switchToUiGroup: function (newUiGroup) {
+        // uiGroups need to be Sets()
+
+        for (const element of this.activeUiGroup) {
+            if (!newUiGroup.has(element)) {
+                element.classList.add("hidden");
             }
-            return text + "...";
-        } else {
-            return text;
-        }
-    },
-
-    switchToUiGroup: function (uiGroup) {
-        // alternative way that removes the need to track current active uiGroup
-        // const visibleElements = document.querySelectorAll('#ui-container :not(.hidden)');
-
-        // there is also this .toggle function if it is applicable to use here
-        // element.classList.toggle("hidden");
-
-        // Hide all ui elements currently showing
-        for (element of this.activeUiGroup) {
-            element.classList.add("hidden");
         }
 
-        // Unhide all ui elements in uiGroup
-        for (element of uiGroup) {
+        for (const element of newUiGroup) {
             element.classList.remove("hidden");
         }
 
-        this.activeUiGroup = uiGroup;
+        this.activeUiGroup = newUiGroup;
     },
 
     removeUiElement: function (uiElement) {
-        this.switchToUiGroup(this.activeUiGroup.filter((item) => item !== uiElement));
+        this.activeUiGroup.delete(uiElement);
+        uiElement.classList.add("hidden");
     },
 
-    addUiElement: function (uiElement, allowDuplicates = false) {
-        if (!this.activeUiGroup.includes(uiElement) || allowDuplicates) {
-            this.switchToUiGroup(this.activeUiGroup.concat(uiElement)); // this isnt very efficient as switchUiGroup removes then re-adds elements FIX
-        }
+    addUiElement: function (uiElement) {
+        this.activeUiGroup.add(uiElement);
+        uiElement.classList.remove("hidden");
     },
 
     isPointInsideElement: function (x, y, element) {
@@ -1913,7 +1901,7 @@ const UserInterface = {
     touchStarted: function (x, y, id) {
         // Called By TouchHandler
 
-        for (uiElement of this.activeUiGroup) {
+        for (const uiElement of this.activeUiGroup) {
             // butons and toggles
             if (uiElement.nodeName.toLowerCase() === "button" || uiElement.classList.contains("toggle-container")) {
                 // only run buttons and toggles (and sliders eventually)
@@ -1945,7 +1933,7 @@ const UserInterface = {
 
         let editorIgnoreRelease = false;
 
-        for (uiElement of this.activeUiGroup) {
+        for (const uiElement of this.activeUiGroup) {
             if (uiElement.nodeName.toLowerCase() === "button" || uiElement.classList.contains("toggle-container")) {
                 if (
                     this.isPointInsideElement(x, y, uiElement) &&
@@ -2152,6 +2140,15 @@ const UserInterface = {
     },
 
     update: function () {
+        // gamestate:
+        // 1: main menu
+        // 2: level select map browser
+        // 3: settings
+        // 4: store
+        // 5: loading map page
+        // 6: in level
+        // 7: in map editor
+
         // update dragged Sliders every frame
         // sliders are only in Settings Page and MapEditor Pages
         if (this.gamestate == 3 || MapEditor.loadedMap) {
@@ -2172,6 +2169,7 @@ const UserInterface = {
                     ui_strafeHelper.func();
 
                     // Calculate whether to DRAW VERTICAL WARNING
+                    // Overstrafe Warning is in Player.update() code
                     if (!Tutorial.pausePlayer) {
                         const averageX = Math.abs(TouchHandler.averageDragX.getAverage());
                         const averageY = Math.abs(TouchHandler.averageDragY.getAverage());
@@ -2191,10 +2189,7 @@ const UserInterface = {
                 // Update Timer Box's Text
                 if (Tutorial.isActive == false) {
                     ui_timerBox.children[0].textContent = `Time: ${UserInterface.secondsToMinutes(this.timer)}`;
-                    // FIX DONT CALCULATE THE RECORD EVERY TIME -- CACHE IT
-                    ui_timerBox.children[1].textContent = `Record: ${UserInterface.secondsToMinutes(
-                        this.records[Map.name] == null ? 0 : this.records[Map.name]
-                    )}`;
+                    // record text is set once during Map.initMap()
                 }
             }
 
@@ -2214,6 +2209,7 @@ const UserInterface = {
 
                     let arrow;
 
+                    // FIX or KILL this stuff
                     // Update style based on speed change
                     // if (deltaSpeed > 0) {
                     //     // Accelerating: scale up text and tint green
@@ -2244,215 +2240,76 @@ const UserInterface = {
                 }
             }
         }
-    },
 
-    render: function () {
-        const ctx = UserInterfaceCanvas.ctx;
-        ctx.save(); // UI SCALING SAVE
-        ctx.scale(UserInterfaceCanvas.scale, UserInterfaceCanvas.scale); // All UI elements are positioned on original CSS cords. this brings them up to device DPI resolution
+        // UPDATING DEBUG TEXT DEPENDING ON GAMESTATE
+        if (this.settings.debugText) {
+            if (this.gamestate == 2) {
+                // Map Browser debug text
+                ui_debugText.textContent = `selectedMapIndex: ${MapBrowser.selectedMapIndex} \r\n`;
+                ui_debugText.textContent += `scrollAmount: ${MapBrowser.scrollAmount} \r\n`;
+                ui_debugText.textContent += `scrollY: ${MapBrowser.scrollY} \r\n`;
+                ui_debugText.textContent += `scrollVel: ${MapBrowser.scrollVel} \r\n`;
+                ui_debugText.textContent += `maxScroll: ${MapBrowser.maxScroll} \r\n`;
+            } else if (this.gamestate == 6) {
+                // In Level debug text
+                ui_debugText.textContent = `fps: ${Math.round(1 / dt)} \r\n`;
+                ui_debugText.textContent += `dt (rounded): ${Math.round(dt * 1000) / 1000} seconds \r\n`;
+                ui_debugText.textContent += `renderedPlatforms: ${Map.renderedPlatforms.length} \r\n`;
+                ui_debugText.textContent += `endZonesToCheck: ${Map.endZonesToCheck.length} \r\n`;
+                ui_debugText.textContent += `cameraZoom: ${Math.round(Player.speedCameraOffset.zoom * 1000) / 1000} \r\n`;
+                ui_debugText.textContent += `offsetDir: ${Math.round(Player.speedCameraOffset.direction.x)}, ${Math.round(
+                    Player.speedCameraOffset.direction.y
+                )} \r\n`;
+                ui_debugText.textContent += `player pos: ${Math.round(Player.x)}, ${Math.round(Player.y)} \r\n`;
+                ui_debugText.textContent += `lookAngle: ${Player.lookAngle.getAngleInDegrees()} \r\n`;
+                ui_debugText.textContent += `dragAmountX: ${TouchHandler.dragAmountX} \r\n`;
 
-        if (this.gamestate == 6) {
-            // In Level
-            ctx.fillStyle = UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
-
-            if (this.settings.debugText == 1) {
-                // DRAWING DEBUG TEXT
-                const textX = 150;
-                ctx.font = "8px 'Alte DIN'";
-                ctx.fillStyle = UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
-
-                ctx.fillText("fps: " + Math.round(1 / dt), textX, 50);
-                ctx.fillText("rounded dt: " + Math.round(dt * 1000) / 1000 + " seconds", textX, 60);
-                ctx.fillText("renderedPlatforms Count: " + Map.renderedPlatforms.length, textX, 70);
-                ctx.fillText("endZonesToCheck: " + Map.endZonesToCheck, textX, 80);
-                ctx.fillText("dragging: " + TouchHandler.dragging, textX, 90);
-                ctx.fillText("cameraZoom: " + Player.speedCameraOffset.zoom, textX, 100);
-                ctx.fillText(
-                    "offsetDir: " + Math.round(Player.speedCameraOffset.direction.x) + ", " + Math.round(Player.speedCameraOffset.direction.y),
-                    textX,
-                    110
-                );
                 if (TouchHandler.dragging) {
-                    ctx.fillText("touch x: " + TouchHandler.touches[0].x, textX, 120);
-                    ctx.fillText("touch y: " + TouchHandler.touches[0].y, textX, 130);
+                    ui_debugText.textContent += `touch pos: ${TouchHandler.touches[0].x}, ${TouchHandler.touches[0].y} \r\n`;
                 }
-                ctx.fillText("dragAmountX: " + TouchHandler.dragAmountX, textX, 140);
-                ctx.fillText("velocity: " + Math.round(Player.velocity.magnitude()), textX, 150);
-                ctx.fillText("Player pos: " + Math.round(Player.x) + ", " + Math.round(Player.y), textX, 160);
-                ctx.fillText("lookAngle: " + Player.lookAngle.getAngleInDegrees(), textX, 170);
-                ctx.fillText("Timer: " + UserInterface.secondsToMinutes(this.timer), textX, 180);
-
-                /*
-                // DRAWING PLAYER MOVEMENT DEBUG VECTORS
-                // Player wish_velocity
-                ctx.strokeStyle = "#FF00FF";
-                ctx.lineWidth = 2
-                ctx.beginPath();
-                ctx.moveTo(midX_UI, midY_UI);
-                ctx.lineTo(midX_UI + Player.wish_velocity.x * 75, midY_UI + Player.wish_velocity.y * 75);
-                ctx.stroke();
-
-                // Player velocity
-                ctx.strokeStyle = "#0000FF";
-                ctx.lineWidth = 4
-                ctx.beginPath();
-                ctx.moveTo(midX_UI, midY_UI);
-                ctx.lineTo(midX_UI + Player.velocity.x, midY_UI + Player.velocity.y);
-                ctx.stroke();
-
-                // Player lookAngle
-                ctx.strokeStyle = "#FF00FF";
-                ctx.lineWidth = 2
-                ctx.beginPath();
-                ctx.moveTo(midX_UI, midY_UI);
-                ctx.lineTo(midX_UI + Player.lookAngle.x * 100, midY_UI + Player.lookAngle.y * 100);
-                ctx.stroke();
-
-                ctx.strokeStyle = "#000000"; // resetting
-                ctx.lineWidth = 1
-                */
-            }
-
-            if (this.settings.strafeHUD == 1) {
-                // STRAFE OPTIMIZER HUD
-                if (this.settings.debugText == 1) {
-                    // disabled
-                    /*
-                    // DRAW THE LITTLE GRAPHS UNDER PLAYER
-                    ctx.save()
-                    ctx.fillStyle = "blue"
-                    ctx.fillRect(midX_UI - 32, midY_UI + 32, 10 * Math.abs(TouchHandler.dragAmountX) * this.settings.sensitivity, 6); // YOUR STRAFE
-                    ctx.fillRect(midX_UI - 32, midY_UI + 42, Player.addSpeed, 6); // ADDSPEED
-                    ctx.fillRect(midX_UI - 32, midY_UI + 52, 320 * airAcceleration * dt, 6); // Top End clip LIMIT
-
-                    // little text for strafeHelper
-                    ctx.font = "12px 'Alte DIN'";
-                    ctx.fillStyle = "white"
-                    ctx.fillText(TouchHandler.dragAmountX * this.settings.sensitivity, midX_UI - 100, midY_UI + 38)
-                    ctx.fillText("addSpeed: " + Player.addSpeed, midX_UI - 100, midY_UI + 48)
-                    ctx.fillText("addSpeed Clip: " + 320 * airAcceleration * dt, midX_UI - 100, midY_UI + 58)
-                    ctx.restore()
-                    */
+                if (Tutorial.isActive) {
+                    ui_debugText.textContent += `tutorial state: ${Tutorial.state} \r\n`;
                 }
+            } else if (this.gamestate == 7) {
+                // Map Editor Debug Text
+                ui_debugText.textContent = `zoom: ${Math.round(MapEditor.zoom * 1000) / 1000} \r\n`;
+                ui_debugText.textContent += `screen pos: ${Math.round(MapEditor.screen.x * 100) / 100}, ${
+                    Math.round(MapEditor.screen.y * 100) / 100
+                } \r\n`;
+                ui_debugText.textContent += `screen size: ${Math.round(MapEditor.screen.width * 100) / 100}, ${
+                    Math.round(MapEditor.screen.height * 100) / 100
+                } \r\n`;
+                ui_debugText.textContent += `screen corner pos: ${Math.round(MapEditor.screen.cornerX * 100) / 100}, ${
+                    Math.round(MapEditor.screen.cornerY * 100) / 100
+                } \r\n`;
+                ui_debugText.textContent += `rendered platforms: ${MapEditor.renderedPlatforms.length} \r\n`;
+                ui_debugText.textContent += `editorState: ${MapEditor.editorState} \r\n`;
+                ui_debugText.textContent += `selectedElements: ${MapEditor.selectedElements} \r\n`;
+                ui_debugText.textContent += `zoom ratio: ${Math.round(TouchHandler.zoom.ratio * 1000) / 1000} \r\n`;
 
-                if (TouchHandler.dragging && this.levelState != 3) {
-                    if (Tutorial.pausePlayer == false) {
-                        ctx.font = "16px 'Alte DIN'";
+                if (TouchHandler.dragging) {
+                    ui_debugText.textContent += `touch pos (UI): ${TouchHandler.touches[0].x}, ${TouchHandler.touches[0].y} \r\n`;
+                    const touchMapped = MapEditor.convertToMapCord(TouchHandler.touches[0].x, TouchHandler.touches[0].y);
+                    ui_debugText.textContent += `touch pos (map): ${Math.round(touchMapped.x * 100) / 100}, ${
+                        Math.round(touchMapped.y * 100) / 100
+                    } \r\n`;
 
-                        if (this.showOverstrafeWarning) {
-                            heightOffset = this.showVerticalWarning ? 36 : 0;
-                            UserInterfaceCanvas.roundedRect(
-                                midX_UI - 150,
-                                screenHeightUI - 130 - heightOffset,
-                                ctx.measureText("TURNING TOO FAST!").width + 24,
-                                24,
-                                8
-                            );
-                            ctx.fillStyle = UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
-                            ctx.fill();
+                    if (MapEditor.dragSelect) {
+                        const marquee = MapEditor.dragSelectMarquee;
+                        const globalMarqueeCornerTL = MapEditor.convertToMapCord(marquee.x, marquee.y);
+                        const globalMarqueeCornerBR = MapEditor.convertToMapCord(marquee.x + marquee.width, marquee.y + marquee.height);
 
-                            ctx.fillStyle = !UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
-                            ctx.fillText("TURNING TOO FAST!", midX_UI - 138, screenHeightUI - 120 - heightOffset);
-                        }
+                        ui_debugText.textContent += `marquee (map xywh): ${Math.round(globalMarqueeCornerTL.x)}, ${Math.round(
+                            globalMarqueeCornerTL.y
+                        )}, ${Math.round(globalMarqueeCornerBR.x - globalMarqueeCornerTL.x)}, ${Math.round(
+                            globalMarqueeCornerBR.y - globalMarqueeCornerTL.y
+                        )} \r\n`;
                     }
                 }
+            } else {
+                // generic debug text for all other screens
+                ui_debugText.textContent = `fps: ${Math.round(1 / dt)} \r\n`;
             }
         }
-
-        if (this.gamestate == 7) {
-            // In Map Editor
-
-            if (MapEditor.editorState == 3) {
-                // IN COLOR SETTINGS
-                ColorPicker.render();
-            }
-
-            if (MapEditor.loadedMap !== null && MapEditor.editorState != 3 && MapEditor.editorState != 4) {
-                // MAP EDITOR UI
-                ctx.save(); // to revert map editor canvas state changes
-
-                if (MapEditor.editorState == 1 || MapEditor.editorState == 2) {
-                    // Draw UI (not Side Panel yet) for Main edit screen or platform edit screen
-                    ctx.fillStyle = UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
-
-                    // Draw dragSelect rectangle marquee
-                    if (MapEditor.dragSelect && TouchHandler.dragging) {
-                        ctx.lineWidth = 4;
-                        ctx.strokeStyle = ctx.fillStyle = UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
-                        ctx.setLineDash([6, 10]);
-                        ctx.strokeRect(
-                            MapEditor.dragSelectMarquee.x,
-                            MapEditor.dragSelectMarquee.y,
-                            MapEditor.dragSelectMarquee.width,
-                            MapEditor.dragSelectMarquee.height
-                        );
-                        ctx.setLineDash([]);
-                    }
-                }
-
-                if (UserInterface.settings.debugText == 1) {
-                    // GENERAL MAP EDITOR DEBUG TEXT
-                    const textX = 150;
-                    ctx.font = "8px 'Alte DIN'";
-                    ctx.fillStyle = UserInterface.darkMode ? UserInterface.darkColor_1 : UserInterface.lightColor_1;
-
-                    ctx.fillText("zoom: " + MapEditor.zoom, textX, 50);
-                    ctx.fillText("screen.x: " + MapEditor.screen.x, textX, 60);
-                    ctx.fillText("screen.y: " + MapEditor.screen.y, textX, 70);
-                    ctx.fillText("screen.width: " + MapEditor.screen.width, textX, 80);
-                    ctx.fillText("screen.height: " + MapEditor.screen.height, textX, 90);
-                    ctx.fillText("screen.cornerX: " + MapEditor.screen.cornerX, textX, 100);
-                    ctx.fillText("screen.cornerY: " + MapEditor.screen.cornerY, textX, 110);
-
-                    ctx.fillText("rendered platforms: " + MapEditor.renderedPlatforms.length, textX, 120);
-                    ctx.fillText("editorState: " + MapEditor.editorState, textX, 130);
-                    ctx.fillText("selectedElements: " + MapEditor.selectedElements, textX, 140);
-
-                    if (TouchHandler.dragging) {
-                        ctx.fillText(
-                            "touch (UI cords): " + Math.round(TouchHandler.touches[0].x) + ", " + Math.round(TouchHandler.touches[0].y),
-                            textX,
-                            150
-                        );
-                        const touchMapped = MapEditor.convertToMapCord(TouchHandler.touches[0].x, TouchHandler.touches[0].y);
-                        ctx.fillText("touch global map coords: " + Math.round(touchMapped.x) + ", " + Math.round(touchMapped.y), textX, 160);
-
-                        if (MapEditor.dragSelect) {
-                            const globalMarqueeCornerTL = MapEditor.convertToMapCord(MapEditor.dragSelectMarquee.x, MapEditor.dragSelectMarquee.y);
-                            const globalMarqueeCornerBR = MapEditor.convertToMapCord(
-                                MapEditor.dragSelectMarquee.x + MapEditor.dragSelectMarquee.width,
-                                MapEditor.dragSelectMarquee.y + MapEditor.dragSelectMarquee.height
-                            );
-
-                            ctx.fillText(
-                                "global marquee: " +
-                                    Math.round(globalMarqueeCornerTL.x) +
-                                    "," +
-                                    Math.round(globalMarqueeCornerTL.y) +
-                                    "," +
-                                    Math.round(globalMarqueeCornerBR.x - globalMarqueeCornerTL.x) +
-                                    "," +
-                                    Math.round(globalMarqueeCornerBR.y - globalMarqueeCornerTL.y),
-                                textX,
-                                170
-                            );
-                        }
-                    }
-
-                    ctx.fillText("zoom ratio: " + TouchHandler.zoom.ratio, textX, 180);
-
-                    if (TouchHandler.zoom.isZooming) {
-                        // draw center point between two fingers of zoom
-                        ctx.save();
-                        ctx.translate(TouchHandler.zoom.x, TouchHandler.zoom.y);
-                        ctx.fillRect(-3, -3, 6, 6);
-                        ctx.restore();
-                    }
-                }
-                ctx.restore(); //revert back map editor canvas state changes
-            }
-        }
-
-        ctx.restore(); // UI SCALING RESTORE
     },
 };

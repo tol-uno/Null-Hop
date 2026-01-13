@@ -6,7 +6,6 @@ Need to use within an asyc function and use await: "data = await readFile()"
 @param { "text" | "arraybuffer" } readDataAs - determines what kind of data this function returns
 @returns {Promise<void>} Returns a promise that resolves to raw unparsed text or arraybuffer
 */
-
 function readFile(baseDirectory = "local", subDirectory = "", fileName, readDataAs = "text") {
     return new Promise((resolve, reject) => {
         let basePath;
@@ -63,7 +62,6 @@ Must be used within an async function with await: "await writeFile()"
 @param {string} subDirectory - Optional subdirectory within the data directory (e.g., "maps")
 @returns {Promise<void>} - Returns a promise that resolves when file is successfully written
 */
-
 function writeFile(fileName, blobData, subDirectory = "") {
     return new Promise((resolve, reject) => {
         // Validate input
@@ -127,22 +125,8 @@ function writeFile(fileName, blobData, subDirectory = "") {
     });
 }
 
-function isBlack(color) {
-    if (!color) return false;
-    const normalized = color.trim().toLowerCase();
-    return (
-        normalized === "black" || normalized === "#000" || normalized === "#000000" || normalized === "rgb(0,0,0)" || normalized === "rgb(0, 0, 0)"
-    );
-}
 
-function isWhite(color) {
-    if (!color) return false;
-    const normalized = color.trim().toLowerCase();
-    return (
-        normalized === "white" ||
-        normalized === "#fff" ||
-        normalized === "#ffffff" ||
-        normalized === "rgb(255,255,255)" ||
-        normalized === "rgb(255, 255, 255)"
-    );
+function mapToRange(number, inMin, inMax, outMin, outMax) {
+    // MAP TO RANGE: https://stackoverflow.com/questions/10756313/javascript-jquery-map-a-range-of-numbers-to-another-range-of-numbers
+    return ((number - inMin) * (outMax - outMin)) / (inMax - inMin) + outMin;
 }
