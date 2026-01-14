@@ -4,6 +4,8 @@ const Player = {
     currentSpeedProjected: 0,
     addSpeed: 0, // initialized here so that userInterface can access for debug
 
+    previousJumpSpeed: 0, // for jump stats display
+
     speedCameraOffset: {
         zoom: 1, // from 1 (default) to 0.5 (zoomed out)
         direction: new Vector2D3D(0, 0),
@@ -163,7 +165,8 @@ const Player = {
 
             // show overstrafe warning BROKEN FIX
             // if (this.addSpeed > 320 * airAcceleration * dt) {
-            if (TouchHandler.dragAmountX * UserInterface.settings.sensitivity * dt > 0.4) { // not the right way to do this
+            if (TouchHandler.dragAmountX * UserInterface.settings.sensitivity * dt > 0.4) {
+                // not the right way to do this
                 // 11:04 in zweeks bhopping video he shows why u lose speed
                 if (UserInterface.showOverstrafeWarning == false) {
                     UserInterface.addUiElement(ui_overstrafeWarning);
@@ -231,6 +234,7 @@ const Player = {
                 this.velocity.set(100, 0).rotate(this.lookAngle.getAngleInDegrees());
                 this.jumpValue = 0;
                 this.jumpVelocity = 200;
+                this.previousJumpSpeed = 100;
             } else {
                 btn_restart.func();
             }
@@ -383,6 +387,23 @@ const Player = {
                     // play random jump sound
                     // AudioHandler.playSound(AudioHandler[`jump${Math.floor(Math.random() * 3) + 1}Audio`], true);
                     AudioHandler.playAudio(AudioHandler.JumpSFXBuffer, { volume: 0.8 });
+
+                    // set jump stats
+
+                    // fail and go to checkpoint: reset previousJumpSpeed to 100
+                    // restart level/leave level: reset previousJumpSpeed to 150
+                    const deltaSpeed = Math.round(this.velocity.magnitude() - this.previousJumpSpeed);
+                    this.previousJumpSpeed = this.velocity.magnitude();
+                    ui_jumpStats.textContent = deltaSpeed != 0 ? `${deltaSpeed > 0 ? "+" : "-"}${Math.abs(deltaSpeed)}` : ""; // ▲▼
+                    ui_jumpStats.style.opacity = "1";
+                    ui_jumpStats.style.transform = "translateY(0px)";
+                    ui_jumpStats.style.animation = `fadeOut 0.65s forwards cubic-bezier(0.7, 0, 1.0, 1.0), ${
+                        deltaSpeed > 0 ? "moveUp" : "moveDown"
+                    } 0.65s forwards linear`;
+                    setTimeout(() => {
+                        ui_jumpStats.style.opacity = "0";
+                        ui_jumpStats.style.animation = "";
+                    }, 650);
                 }
             } else {
                 this.jumpValue += this.jumpVelocity * dt;
@@ -489,6 +510,7 @@ const Player = {
 
     startLevel: function () {
         this.velocity.set(150, 0).rotate(this.lookAngle.getAngleInDegrees());
+        this.previousJumpSpeed = 150;
     },
 
     checkCollision: function (arrayOfPlatformsToCheck) {

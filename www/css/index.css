@@ -358,9 +358,45 @@ INDIVIDUAL BUTTON STYLES
     position: absolute;
     top: 40px;
     left: 50%;
-    transform: translate(-50%, -50%);
+    transform: translateX(-50%);
     font-family: "DINish", monospace;
     font-variant-numeric: tabular-nums;
+}
+
+#ui_jumpStats {
+    font-size: 20px;
+    position: absolute;
+    top: 40px;
+    left: 56%;
+    font-family: "DINish", monospace;
+    font-variant-numeric: tabular-nums;
+    opacity: 0;
+    transform: translateY(0);
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+@keyframes moveUp {
+    from {
+        transform: translateY(0);
+    }
+    to {
+        transform: translateY(-11px);
+    }
+}
+@keyframes moveDown {
+    from {
+        transform: translateY(0);
+    }
+    to {
+        transform: translateY(10px);
+    }
 }
 
 #ui_timerBox {
@@ -395,7 +431,6 @@ INDIVIDUAL BUTTON STYLES
     border-radius: 50%;
     transform: translateX(-50%);
 }
-
 
 #ui_warningContainer {
     display: flex;

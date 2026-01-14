@@ -155,6 +155,7 @@ const UserInterface = {
         // ==========
 
         const ui_speedometer = getByID("ui_speedometer");
+        const ui_jumpStats = getByID("ui_jumpStats");
 
         const ui_timerBox = getByID("ui_timerBox");
 
@@ -332,6 +333,7 @@ const UserInterface = {
             }
 
             ui_speedometer.textContent = "Speed: 0";
+            ui_jumpStats.textContent = "";
             UserInterface.timer = 0;
             UserInterface.levelState = 1;
             Player.checkpointIndex = -1;
@@ -435,6 +437,12 @@ const UserInterface = {
             MapBrowser.updateMapBrowserState();
         };
 
+        const btn_level_wheatFields = getByID("btn_level_wheatFields");
+        btn_level_wheatFields.func = () => {
+            MapBrowser.selectedMapIndex = "Wheat Fields";
+            MapBrowser.updateMapBrowserState();
+        };
+
         const btn_level_trespass = getByID("btn_level_trespass");
         btn_level_trespass.func = () => {
             MapBrowser.selectedMapIndex = "Trespass";
@@ -456,6 +464,12 @@ const UserInterface = {
         const btn_level_pinnacle = getByID("btn_level_pinnacle");
         btn_level_pinnacle.func = () => {
             MapBrowser.selectedMapIndex = "Pinnacle";
+            MapBrowser.updateMapBrowserState();
+        };
+
+        const btn_level_moonlight = getByID("btn_level_moonlight");
+        btn_level_moonlight.func = () => {
+            MapBrowser.selectedMapIndex = "Moonlight";
             MapBrowser.updateMapBrowserState();
         };
 
@@ -1481,10 +1495,12 @@ const UserInterface = {
             btn_level_cavernAbyss,
             btn_level_crystals,
             btn_level_surfacing,
+            btn_level_wheatFields,
             btn_level_trespass,
             btn_level_turmoil,
             btn_level_tangledForest,
             btn_level_pinnacle,
+            btn_level_moonlight,
             btn_level_rapture,
             btn_level_forever,
         ]);
@@ -1496,6 +1512,7 @@ const UserInterface = {
         ]);
         this.uiGroup_inLevel = new Set([
             ui_speedometer,
+            ui_jumpStats,
             ui_timerBox,
             // ui_strafeHelper,
             // ui_restartWarning,
