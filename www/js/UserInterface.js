@@ -20,7 +20,7 @@ const UserInterface = {
     timer: 0,
     timerStart: null, // set by jump button
 
-    leaderboards: {}, // medal times for each map
+    medals: {}, // medal times for each map
     records: {}, // users records (personal bests) for each level theyve completed
     previousRecord: 0,
 
@@ -42,7 +42,7 @@ const UserInterface = {
 
         this.getSettings();
         this.getRecords();
-        this.getLeaderboards();
+        this.getMedals();
         this.checkCustomMapsDirectoryExists();
 
         function getByID(id) {
@@ -760,8 +760,10 @@ const UserInterface = {
                 // turn off multiSelect
                 MapEditor.multiSelect = false;
                 if (MapEditor.selectedElements.length > 1) {
-                    MapEditor.selectedElements = [MapEditor.selectedElements[MapEditor.selectedElements.length - 1]]; // make it only select the last element in the array
+                    // MapEditor.selectedElements = [MapEditor.selectedElements[MapEditor.selectedElements.length - 1]]; // make it only select the last element in the array
+                    MapEditor.selectedElements = []; // no selected items after multiselect turned off
                     MapEditor.setButtonGroup();
+                    UserInterface.updateMapEditorSidePanel();
                 }
             } else {
                 // turn on multiSelect
@@ -1629,11 +1631,11 @@ const UserInterface = {
         this.switchToUiGroup(UserInterface.uiGroup_mainMenu);
     },
 
-    getLeaderboards: async function () {
-        // Get leaderboards (level medal times) directly through cordova local storage (www)
+    getMedals: async function () {
+        // Get level's medal times directly through cordova local storage (www)
 
-        const leaderboardData = await readFile("local", "assets/", "leaderboards.json", "text");
-        this.leaderboards = JSON.parse(leaderboardData);
+        const medalData = await readFile("local", "assets/", "medals.json", "text");
+        this.medals = JSON.parse(medalData);
     },
 
     getSettings: async function () {
@@ -2012,8 +2014,8 @@ const UserInterface = {
         }
 
         // update medal times and activeMedal OR hide medal list
-        const mapLeaderboard = this.leaderboards[Map.name];
-        if (mapLeaderboard !== undefined) {
+        const mapMedal = this.medals[Map.name];
+        if (mapMedal !== undefined) {
             ui_endScreen.querySelector(".medalList").classList.remove("hidden");
 
             const goldMedal = ui_endScreen.querySelector(".gold");
@@ -2021,9 +2023,9 @@ const UserInterface = {
             const bronzeMedal = ui_endScreen.querySelector(".bronze");
 
             // update times
-            goldMedal.textContent = this.secondsToMinutes(mapLeaderboard.gold);
-            silverMedal.textContent = this.secondsToMinutes(mapLeaderboard.silver);
-            bronzeMedal.textContent = this.secondsToMinutes(mapLeaderboard.bronze);
+            goldMedal.textContent = this.secondsToMinutes(mapMedal.gold);
+            silverMedal.textContent = this.secondsToMinutes(mapMedal.silver);
+            bronzeMedal.textContent = this.secondsToMinutes(mapMedal.bronze);
 
             // remove activeMedal from all
             goldMedal.classList.remove("activeMedal");
@@ -2031,15 +2033,15 @@ const UserInterface = {
             bronzeMedal.classList.remove("activeMedal");
 
             // set activeMedal
-            if (this.timer <= mapLeaderboard.gold) {
+            if (this.timer <= mapMedal.gold) {
                 goldMedal.classList.add("activeMedal");
-            } else if (this.timer <= mapLeaderboard.silver) {
+            } else if (this.timer <= mapMedal.silver) {
                 silverMedal.classList.add("activeMedal");
-            } else if (this.timer <= mapLeaderboard.bronze) {
+            } else if (this.timer <= mapMedal.bronze) {
                 bronzeMedal.classList.add("activeMedal");
             }
         } else {
-            // No leaderboards -> hide medal list
+            // No medals -> hide medal list
             ui_endScreen.querySelector(".medalList").classList.add("hidden");
         }
     },

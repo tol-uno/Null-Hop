@@ -191,8 +191,8 @@ const MapBrowser = {
         ui_mapInfoBox.querySelector(".yourTime").textContent = `Your Time: ${yourTimeInSeconds}`;
 
         // update medal times and active medal OR hide medal list
-        const mapLeaderboard = UserInterface.leaderboards[this.selectedMapIndex];
-        if (mapLeaderboard !== undefined) {
+        const mapMedals = UserInterface.medals[this.selectedMapIndex];
+        if (mapMedals !== undefined) {
             ui_mapInfoBox.querySelector(".medalList").classList.remove("hidden");
 
             const goldMedal = ui_mapInfoBox.querySelector(".gold");
@@ -200,9 +200,9 @@ const MapBrowser = {
             const bronzeMedal = ui_mapInfoBox.querySelector(".bronze");
 
             // update times
-            goldMedal.textContent = UserInterface.secondsToMinutes(mapLeaderboard.gold);
-            silverMedal.textContent = UserInterface.secondsToMinutes(mapLeaderboard.silver);
-            bronzeMedal.textContent = UserInterface.secondsToMinutes(mapLeaderboard.bronze);
+            goldMedal.textContent = UserInterface.secondsToMinutes(mapMedals.gold);
+            silverMedal.textContent = UserInterface.secondsToMinutes(mapMedals.silver);
+            bronzeMedal.textContent = UserInterface.secondsToMinutes(mapMedals.bronze);
 
             // remove activeMedal from all
             goldMedal.classList.remove("activeMedal");
@@ -210,15 +210,15 @@ const MapBrowser = {
             bronzeMedal.classList.remove("activeMedal");
 
             // set activeMedal
-            if (personalBest <= mapLeaderboard.gold) {
+            if (personalBest <= mapMedals.gold) {
                 goldMedal.classList.add("activeMedal");
-            } else if (personalBest <= mapLeaderboard.silver) {
+            } else if (personalBest <= mapMedals.silver) {
                 silverMedal.classList.add("activeMedal");
-            } else if (personalBest <= mapLeaderboard.bronze) {
+            } else if (personalBest <= mapMedals.bronze) {
                 bronzeMedal.classList.add("activeMedal");
             }
         } else {
-            // No leaderboards -> hide medal list
+            // No medals -> hide medal list
             ui_mapInfoBox.querySelector(".medalList").classList.add("hidden");
         }
     },

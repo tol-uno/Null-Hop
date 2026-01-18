@@ -1,11 +1,10 @@
 <?xml version='1.0' encoding='utf-8'?>
 <widget id="com.mel.www" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>Null Hop</name>
-    <description>A Jumping Journey</description>
+    <description>A jumping journey with skill based movement.</description>
     <author email="masonpowers46@gmail.com" href="https://masonpowers.com">
         Mason Powers
     </author>
-    <icon src="www/assets/images/app_icon.png" width="1080" height="1080"/>
     <content src="index.html" />
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
@@ -42,7 +41,7 @@
         <preference name="SuppressesLongPressGesture" value="true" />
         <preference name="Suppresses3DTouchGesture" value="true" />
         <preference name="Allow3DTouchLinkPreview" value="false" />
-        <preference name="deployment-target" value="12.0" />
+        <preference name="deployment-target" value="13.0" />
 
         <!-- These are set to suppress messages in xcode console -->
         <preference name="AllowNewWindows" value="false" />
@@ -52,59 +51,9 @@
         <preference name="AllowBackForwardNavigationGestures" value="false" />
         <preference name="AutoHideSplashScreen" value="true" />
         
-        <!-- APP ICONS -->
-        <!-- iphone notification 20pt -->
-        <icon src="res/ios/icon-20@2x.png" width="40" height="40" />
-        <icon src="res/ios/icon-20@3x.png" width="60" height="60" />
-
-        <!-- iphone settings -->
-        <icon src="res/ios/icon-29@1x.png" width="29" height="29" />
-        <icon src="res/ios/icon-29@2x.png" width="58" height="58" />
-        <icon src="res/ios/icon-29@3x.png" width="87" height="87" />
-
-        <!-- iphone spotlight -->
-        <icon src="res/ios/icon-40@2x.png" width="80" height="80" />
-        <icon src="res/ios/icon-40@3x.png" width="120" height="120" />
-
-        <!-- iphone app IOS 5,6 57pt -->
-        <!-- not needed -->
-
-        <!-- iphone app -->
-        <icon src="res/ios/icon-60@2x.png" width="120" height="120" />
-        <icon src="res/ios/icon-60@3x.png" width="180" height="180" />
-
-
-        <!-- ipad notification -->
-        <icon src="res/ios/icon-20@1x.png" width="20" height="20" />
-        <!-- 20@2x -->
-
-        <!-- ipad settings -->
-        <!-- 29@1x and 29@2x -->
-
-        <!-- ipad spotlight -->
-        <icon src="res/ios/icon-40@1x.png" width="40" height="40" />
-        <!-- 40@2x -->
-
-        <!-- ipad spotlight IOS 5,6 50pt -->
-        <!-- not needed -->
-
-        <!-- ipad app IOS 5,6 72pt -->
-        <!-- not needed -->
-
-        <!-- ipad app -->
-        <icon src="res/ios/icon-76@1x.png" width="76" height="76" />
-        <icon src="res/ios/icon-76@2x.png" width="152" height="152" />
-
-        <!-- ipad pro app -->
-        <icon src="res/ios/icon-83.5@2x.png" width="167" height="167" />
-
-        <!-- app store ios -->
-        <icon src="res/ios/icon-1024@1x.png" width="1024" height="1024" />
-
-        <!-- bunch of watch icons -->
-        <!-- not needed -->
+        <!-- APP ICON -->
+        <icon src="res/ios/icon-1024@1x.png"/>
 
     </platform>
 
 </widget>
-
