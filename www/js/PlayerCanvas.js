@@ -1,24 +1,21 @@
 const PlayerCanvas = {
-    
-    start : function() { // called in deviceReady
-        this.canvas = document.createElement("canvas")
+    start: function () {
+        // called in onDeviceReady()
 
-        this.scale = CanvasArea.scale
+        this.canvas = document.getElementById("player-canvas");
+        this.ctx = this.canvas.getContext("2d");
 
+        this.scale = CanvasArea.scale;
+
+        this.setSize();
+    },
+
+    setSize: function () {
         this.canvas.width = screenWidth;
         this.canvas.height = screenHeight;
-
-        this.canvas.style.width = screenWidthUI + "px";
-        this.canvas.style.height = screenHeightUI + "px";
-
-        this.canvas.style.display = "none"
-
-        this.ctx = this.canvas.getContext("2d");
-        document.body.insertBefore(this.canvas, document.body.childNodes[0]);
-        },
-
-
-    clear : function(x = 0, y = 0) { // CLEARS WHOLE CANVAS
-        this.ctx.clearRect(x, y, screenWidth, screenHeight)
     },
-}
+
+    clear: function (x = 0, y = 0) {
+        this.ctx.clearRect(x, y, screenWidth, screenHeight);
+    },
+};

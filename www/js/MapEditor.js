@@ -5,7 +5,6 @@ const MapEditor = {
     // 2 = platform edit menu
     // 3 = map color page
     // 4 = map settings page
-    // 5 = loading map screen
 
     loadedMap: null,
     scrollAmountX: null,
@@ -53,29 +52,132 @@ const MapEditor = {
     editQueue: [], // gets filled with QueueItems
     recordingEdit: false,
 
-    update: function () {
-        // when map is loaded for editing
-        if (this.editorState == 5) {
-            // in MapBrowser screen
-            if (this.loadedMap !== null) {
-                // if map is loaded then switch to Main Map Edit screen
+    initMap: async function (name) {
+        if (name == -1) {
+            // generate new map
+            this.loadedMap = {
+                playerStart: {
+                    x: 350,
+                    y: 250,
+                    angle: 0,
+                },
+                checkpoints: [],
+                style: {
+                    backgroundColor: "rgb(139,202,218)",
+                    playerColor: "rgb(240,240,240)",
+                    platformTopColor: "rgb(209,70,63)",
+                    platformSideColor: "rgb(209,70,63)",
+                    wallTopColor: "rgb(125,94,49)",
+                    wallSideColor: "rgb(125,94,49)",
+                    endZoneTopColor: "rgb(255,218,98)",
+                    endZoneSideColor: "rgb(255,218,98)",
+                    directLight: "rgb(89,89,89)",
+                    ambientLight: "rgb(191,191,191)",
+                    platformHeight: 25,
+                    wallHeight: 50,
+                    lightDirection: 180,
+                    lightPitch: 45,
+                },
+                platforms: [
+                    {
+                        x: 350,
+                        y: 60,
+                        width: 100,
+                        height: 100,
+                        angle: 0,
+                        endzone: 1,
+                        wall: 0,
+                    },
+                    {
+                        x: 350,
+                        y: 250,
+                        width: 100,
+                        height: 100,
+                        angle: 45,
+                        endzone: 0,
+                        wall: 0,
+                    },
+                ],
+            };
 
-                CanvasArea.canvas.style.backgroundColor = this.loadedMap.style.backgroundColor; // set bg color here so it only triggers once not every render frame
-                document.body.style.backgroundColor = this.loadedMap.style.backgroundColor;
+            // calculates the initial hypotenuse angleRad and corners for each platform
+            this.loadedMap.platforms.forEach((platform) => this.updatePlatformCorners(platform));
+        } else if (name == -2) {
+            // import map from users file system
 
-                UserInterface.switchToUiGroup(UserInterface.uiGroup_mapEditorInterface);
-                UserInterface.determineButtonColor();
+            // UPDATE THIS BUTTON TO INCLUDE FUNCTIONALITY OF OLD btn_importMap_text BUTTON:
+            // let mapPaste = prompt("Paste Map Data:");
+            // if (mapPaste) {
+            //     MapEditor.loadedMap = JSON.parse(mapPaste);
+            // }
+            try {
+                this.loadedMap = await new Promise((resolve, reject) => {
+                    const input = document.createElement("input");
+                    input.type = "file";
+                    input.accept = ".txt,.json";
+                    document.body.appendChild(input);
 
-                this.screen.x = this.loadedMap.playerStart.x;
-                this.screen.y = this.loadedMap.playerStart.y;
-                this.screen.width = screenWidth / this.zoom;
-                this.screen.height = screenHeight / this.zoom;
-                this.screen.cornerX = this.screen.x - this.screen.width / 2;
-                this.screen.cornerY = this.screen.y - this.screen.height / 2;
+                    input.addEventListener("change", () => {
+                        const file = input.files[0];
 
-                this.editorState = 1;
+                        // Clean up input after use
+                        document.body.removeChild(input);
+
+                        if (!file) {
+                            reject("No file selected");
+                            return;
+                        }
+
+                        const reader = new FileReader();
+
+                        reader.onload = (e) => {
+                            try {
+                                resolve(JSON.parse(e.target.result));
+                            } catch (err) {
+                                reject(err);
+                            }
+                        };
+
+                        reader.onerror = () => reject(reader.error);
+
+                        reader.readAsText(file);
+                    });
+
+                    input.click(); // Trigger the file dialog
+                });
+            } catch (err) {
+                alert("Failed to load map: " + err);
+                btn_mapEditor.func();
+                return;
             }
+        } else {
+            // load existing map
+            const mapDataRaw = await readFile("device", "maps", name + ".json", "text");
+            this.loadedMap = JSON.parse(mapDataRaw);
         }
+
+        // switch to main MapEditor screen
+
+        CanvasArea.canvas.style.backgroundColor = this.loadedMap.style.backgroundColor;
+        CanvasArea.canvas.classList.remove("hidden");
+
+        UserInterface.switchToUiGroup(UserInterface.uiGroup_mapEditorInterface);
+        UserInterface.determineButtonColor(); 
+
+        this.screen.x = this.loadedMap.playerStart.x;
+        this.screen.y = this.loadedMap.playerStart.y;
+        this.screen.width = screenWidth / this.zoom;
+        this.screen.height = screenHeight / this.zoom;
+        this.screen.cornerX = this.screen.x - this.screen.width / 2;
+        this.screen.cornerY = this.screen.y - this.screen.height / 2;
+
+        this.editorState = 1;
+
+        UserInterface.gamestate = 7; // start updating MapEditor
+    },
+
+    update: function () {
+        // called whenever gamestate == 7
 
         if (this.editorState == 1 || this.editorState == 2) {
             // main map edit screen OR platform select screen
@@ -220,7 +322,7 @@ const MapEditor = {
                 const globalMarqueeCornerTL = this.convertToMapCord(this.dragSelectMarquee.x, this.dragSelectMarquee.y);
                 const globalMarqueeCornerBR = this.convertToMapCord(
                     this.dragSelectMarquee.x + this.dragSelectMarquee.width,
-                    this.dragSelectMarquee.y + this.dragSelectMarquee.height
+                    this.dragSelectMarquee.y + this.dragSelectMarquee.height,
                 );
 
                 // takes a rectangle defined by center coordinates (x, y), width, height, and angle in radians
@@ -229,7 +331,7 @@ const MapEditor = {
                     (globalMarqueeCornerTL.y + globalMarqueeCornerBR.y) / 2,
                     globalMarqueeCornerBR.x - globalMarqueeCornerTL.x,
                     globalMarqueeCornerBR.y - globalMarqueeCornerTL.y,
-                    0
+                    0,
                 );
 
                 this.marqueeSelectedElements = [];
@@ -368,11 +470,11 @@ const MapEditor = {
                     ctx.translate(platform.x, platform.y);
 
                     if (platform.wall) {
-                        ctx.fillStyle = CanvasArea.getShadedColor(MapEditor.loadedMap.style.wallSideColor, 0.3);
+                        ctx.fillStyle = CanvasArea.getShadedColor(this.loadedMap.style.wallSideColor, 0.3, this.loadedMap.style);
                     } else if (platform.endzone) {
-                        ctx.fillStyle = CanvasArea.getShadedColor(MapEditor.loadedMap.style.endZoneSideColor, 0.3);
+                        ctx.fillStyle = CanvasArea.getShadedColor(this.loadedMap.style.endZoneSideColor, 0.3, this.loadedMap.style);
                     } else {
-                        ctx.fillStyle = CanvasArea.getShadedColor(MapEditor.loadedMap.style.platformSideColor, 0.3);
+                        ctx.fillStyle = CanvasArea.getShadedColor(this.loadedMap.style.platformSideColor, 0.3, this.loadedMap.style);
                     }
 
                     // corners array order: BL BR TR TL
@@ -465,7 +567,7 @@ const MapEditor = {
                         ctx.translate(platform.x, platform.y - MapEditor.loadedMap.style.wallHeight);
                         ctx.rotate((platform.angle * Math.PI) / 180);
 
-                        ctx.strokeStyle = CanvasArea.getShadedColor(this.loadedMap.style.wallTopColor, 0.25);
+                        ctx.strokeStyle = CanvasArea.getShadedColor(this.loadedMap.style.wallTopColor, 0.25, this.loadedMap.style);
                         ctx.lineWidth = 4;
 
                         ctx.strokeRect(-platform.width / 2 + 2, -platform.height / 2 + 2, platform.width - 4, platform.height - 4);
@@ -864,12 +966,12 @@ const MapEditor = {
             const map = this.loadedMap;
 
             downloadMap = {};
-            (downloadMap.playerStart = {
+            ((downloadMap.playerStart = {
                 x: map.playerStart.x,
                 y: map.playerStart.y,
                 angle: map.playerStart.angle,
             }),
-                (downloadMap.checkpoints = map.checkpoints);
+                (downloadMap.checkpoints = map.checkpoints));
             downloadMap.style = {
                 platformTopColor: map.style.platformTopColor,
                 platformSideColor: map.style.platformSideColor,
@@ -907,36 +1009,6 @@ const MapEditor = {
             writeCustomMap(downloadMap, "custom_map");
         } else {
             exitEdit();
-        }
-
-        function exitEdit() {
-            // reset everything
-
-            MapEditor.loadedMap = null;
-            MapEditor.zoom = 1;
-            MapEditor.screen.x = 0;
-            MapEditor.screen.y = 0;
-            MapEditor.screen.width = screenWidth;
-            MapEditor.screen.height = screenHeight;
-            MapEditor.scrollVelX = 0;
-            MapEditor.scrollVelY = 0;
-
-            MapEditor.renderedPlatforms = [];
-            MapEditor.selectedElements = [];
-
-            MapEditor.dragSelect = false;
-            UserInterface.setToggleState(btn_dragSelect, false);
-            MapEditor.multiSelect = false;
-            UserInterface.setToggleState(btn_multiSelect, false);
-
-            MapEditor.snapAmount = 2;
-            UserInterface.setSliderValue(btn_snappingSlider, 2);
-
-            btn_platformAngleSlider.dataset.step = 2;
-            btn_playerAngleSlider.dataset.step = 2;
-            btn_checkpointAngleSlider.dataset.step = 2;
-
-            btn_mapEditor.func(); // press the main menu's Map Editor button to set up Map Editor Browser
         }
 
         function sortPlatforms(platforms) {
@@ -1084,6 +1156,38 @@ const MapEditor = {
             console.log("Successful Map Save");
             exitEdit();
         }
+
+        function exitEdit() {
+            // reset everything and go back to MapBrowser
+
+            MapEditor.loadedMap = null;
+            MapEditor.zoom = 1;
+            MapEditor.screen.x = 0;
+            MapEditor.screen.y = 0;
+            MapEditor.screen.width = screenWidth;
+            MapEditor.screen.height = screenHeight;
+            MapEditor.scrollVelX = 0;
+            MapEditor.scrollVelY = 0;
+
+            MapEditor.renderedPlatforms = [];
+            MapEditor.selectedElements = [];
+
+            MapEditor.dragSelect = false;
+            UserInterface.setToggleState(btn_dragSelect, false);
+            MapEditor.multiSelect = false;
+            UserInterface.setToggleState(btn_multiSelect, false);
+
+            MapEditor.snapAmount = 2;
+            UserInterface.setSliderValue(btn_snappingSlider, 2);
+
+            btn_platformAngleSlider.dataset.step = 2;
+            btn_playerAngleSlider.dataset.step = 2;
+            btn_checkpointAngleSlider.dataset.step = 2;
+
+            CanvasArea.canvas.classList.add("hidden");
+
+            btn_mapEditor.func(); // press the main menu's Map Editor button to set up Map Editor Browser
+        }
     },
 
     convertToMapCord: function (screenX, screenY) {
@@ -1116,7 +1220,7 @@ const MapEditor = {
                 UserInterface.setSliderValue(
                     btn_checkpointAngleSlider,
                     MapEditor.loadedMap.checkpoints[MapEditor.selectedElements[0][0]].angle,
-                    true
+                    true,
                 ); // sync
             } else {
                 // platform is selected

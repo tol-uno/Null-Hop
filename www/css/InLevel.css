@@ -1,0 +1,195 @@
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+@keyframes moveUp {
+    from {
+        transform: translateY(0);
+    }
+    to {
+        transform: translateY(-11px);
+    }
+}
+
+@keyframes moveDown {
+    from {
+        transform: translateY(0);
+    }
+    to {
+        transform: translateY(10px);
+    }
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.07);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+#btn_mainMenu {
+    position: fixed;
+    left: 44px;
+    top: 40px;
+    width: 68px;
+    height: 68px;
+}
+
+#btn_restart {
+    position: fixed;
+    left: 44px;
+    top: 128px;
+    width: 68px;
+    height: 68px;
+}
+
+#btn_jump {
+    position: fixed;
+    left: 44px;
+    bottom: 40px;
+    width: 96px;
+    height: 96px;
+}
+
+#ui_timerBox {
+    position: fixed;
+    top: 40px;
+    right: 44px;
+    padding: 10px 16px;
+    background-color: var(--uiBackgroundColor);
+    box-shadow: 0 8px 0 var(--uiBackgroundColor_pressed);
+    border-radius: 16px;
+    color: var(--uiForegroundColor);
+    font-size: 20px;
+}
+
+#ui_speedometer {
+    font-size: 20px;
+    position: absolute;
+    top: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: "DINish", monospace;
+    font-variant-numeric: tabular-nums;
+}
+
+#ui_jumpStats {
+    font-size: 20px;
+    position: absolute;
+    top: 40px;
+    left: calc(50% + 56px);
+    font-family: "DINish", monospace;
+    font-variant-numeric: tabular-nums;
+    opacity: 0;
+    transform: translateY(0);
+}
+
+#ui_strafeHelper {
+    overflow: hidden;
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 72px;
+    width: 300px;
+    height: 14px;
+    border-radius: 99px;
+    outline: 4px solid var(--uiBackgroundColor);
+}
+
+#strafeHandle {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    background-color: var(--uiBackgroundColor);
+    border-radius: 50%;
+    transform: translateX(-50%);
+}
+
+#ui_warningContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 104px;
+}
+
+#ui_verticalWarning,
+#ui_overstrafeWarning {
+    width: 190px;
+    height: 28px;
+    background-color: var(--uiBackgroundColor);
+    color: var(--uiForegroundColor);
+    font-size: 16px;
+    border-radius: 8px;
+    box-shadow: 0 4px 0 var(--uiBackgroundColor_pressed);
+    animation: pulse 800ms infinite;
+    text-align: center;
+    align-content: center;
+}
+
+#ui_debugText {
+    position: fixed;
+    top: 40px;
+    left: 120px;
+    background-color: rgba(0, 0, 0, 0.4);
+    border-radius: 8px;
+    color: white;
+    padding: 8px;
+    font-size: 8px;
+    white-space: pre;
+    line-height: 1.3;
+    z-index: 10;
+    font-family: "DINish", monospace;
+    font-variant-numeric: tabular-nums;
+}
+
+@media (orientation: portrait) {
+    #btn_mainMenu {
+        left: 28px;
+        top: 64px;
+    }
+
+    #btn_restart {
+        left: 28px;
+        top: 156px;
+    }
+
+    #btn_jump {
+        left: 28px;
+        bottom: 64px;
+    }
+
+    #ui_timerBox {
+        top: unset;
+        bottom: 64px;
+        right: 28px;
+    }
+
+    #ui_speedometer {
+        top: 64px;
+    }
+
+    #ui_jumpStats {
+        top: 64px;
+    }
+
+    #ui_strafeHelper {
+        bottom: 180px;
+    }
+
+    #ui_warningContainer {
+        bottom: 212px;
+    }
+}

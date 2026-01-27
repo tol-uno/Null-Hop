@@ -1,0 +1,360 @@
+#btn_customMaps {
+    position: fixed;
+    top: 40px;
+    right: 44px;
+    width: 240px;
+    height: 64px;
+    font-size: 32px;
+}
+
+#btn_playMap {
+    position: fixed;
+    right: 44px;
+    bottom: 40px;
+    width: 110px;
+    height: 64px;
+    font-size: 32px;
+}
+
+#btn_playTutorial {
+    position: absolute;
+    width: 212px;
+    right: 192px;
+    bottom: 54px;
+}
+
+#custom-map-browser-info {
+    position: fixed;
+    top: 40px;
+    right: 44px;
+    padding: 0 16px;
+    background-color: var(--uiBackgroundColor);
+    box-shadow: 0 8px 0 var(--uiBackgroundColor_pressed);
+    border-radius: 16px;
+    color: var(--uiForegroundColor);
+    font-size: 20px;
+    width: 400px;
+    height: 56px;
+    text-align: center;
+    align-content: center;
+}
+
+/* MAP EDITOR MAP BROWSER */
+#btn_newMap {
+    position: fixed;
+    top: 40px;
+    right: 268px;
+    width: 168px;
+    height: 64px;
+    font-size: 32px;
+}
+
+#btn_importMap {
+    position: fixed;
+    top: 40px;
+    right: 44px;
+    width: 200px;
+    height: 64px;
+    font-size: 32px;
+}
+
+#btn_editMap {
+    position: fixed;
+    bottom: 40px;
+    right: 220px;
+    width: 168px;
+    height: 64px;
+    font-size: 32px;
+}
+
+#btn_shareMap {
+    position: fixed;
+    right: 132px;
+    bottom: 40px;
+    width: 64px;
+    height: 64px;
+    touch-action: manipulation; /* allow native touch events for share button */
+}
+
+#btn_deleteMap {
+    position: fixed;
+    right: 44px;
+    bottom: 40px;
+    width: 64px;
+    height: 64px;
+}
+
+/* .CLASS covers both standard map browser and custom map browser */
+.map-list-container {
+    position: fixed;
+    top: 0;
+    left: 120px;
+    width: 320px;
+    height: 100%;
+    padding: 40px;
+    overflow: scroll;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.map-list-container button > div {
+    width: 256px;
+    height: 128px;
+    border-radius: 16px;
+    font-size: 24px;
+}
+
+.btn_customMap span {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 26px;
+}
+
+#ui_mapInfoBox,
+#ui_endScreen {
+    position: fixed;
+    background-color: var(--uiBackgroundColor);
+    color: var(--uiForegroundColor);
+    width: min(calc(100% - 56px), 400px);
+    height: 162px;
+    border-radius: 24px;
+    display: flex;
+    gap: 8px;
+    padding: 16px;
+    box-shadow: 0 8px 0 var(--uiBackgroundColor_pressed);
+}
+
+#ui_mapInfoBox {
+    top: 128px;
+    right: 44px;
+}
+
+#ui_endScreen {
+    width: min(calc(100% - 56px), 448px);
+    height: 204px;
+    top: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+#ui_mapInfoBox > :first-child,
+#ui_endScreen > :first-child {
+    display: flex;
+    width: 100%;
+    /* overflow-x: hidden; */
+    overflow-wrap: break-word;
+    flex-direction: column;
+    justify-content: center;
+    gap: 16px;
+}
+
+#ui_mapInfoBox .mapName {
+    font-size: 32px;
+    line-height: 1.1;
+    overflow: hidden;
+}
+
+#ui_endScreen .mapName {
+    font-size: 32px;
+    line-height: 1;
+}
+
+#ui_mapInfoBox .yourTime {
+    font-size: 20px;
+}
+
+#ui_endScreen .yourTime {
+    font-size: 58px;
+    line-height: 0.9;
+}
+
+#ui_endScreen .yourRecord {
+    font-size: 22px;
+}
+
+.medalList {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: end;
+    font-size: 24px;
+    gap: 10px;
+}
+
+#ui_endScreen .medalList {
+    gap: 18px;
+}
+
+.medalList > div {
+    display: flex;
+    gap: 8px;
+    justify-content: end;
+    align-items: center;
+    padding-right: 6px;
+    justify-content: space-between;
+    width: 128px;
+}
+
+.bronze::before,
+.silver::before,
+.gold::before {
+    content: "";
+    width: 16px;
+    height: 16px;
+    margin-top: -4px;
+    border-radius: 50%;
+}
+
+.gold::before {
+    color: #f1b62c;
+    background-color: #f1b62c;
+    border: 3px solid #fde320;
+    box-shadow: 0 3px 0 #f1b62c;
+}
+
+.silver::before {
+    color: #8c9a9b;
+    background-color: #8c9a9b;
+    border: 3px solid #d4d4d6;
+    box-shadow: 0 3px 0 #8c9a9b;
+}
+
+.bronze::before {
+    color: #e6823e;
+    background-color: #e6823e;
+    border: 3px solid #f4a46f;
+    box-shadow: 0 3px 0 #e6823e;
+}
+
+.activeMedal {
+    font-size: 30px;
+    padding: 6px 0 6px 6px;
+    box-shadow: 0 5px 0 var(--uiForegroundColor);
+    border: 3px solid var(--uiForegroundColor);
+    border-radius: 10px;
+    margin-top: -4px;
+    width: 160px !important;
+}
+
+.activeMedal::before {
+    width: 24px !important;
+    height: 24px !important;
+    box-shadow: 0 4px !important;
+}
+
+@media (orientation: portrait) {
+    #btn_customMaps {
+        top: 64px;
+        right: 28px;
+    }
+
+    #btn_playMap {
+        bottom: 64px;
+        right: 28px;
+    }
+
+    #btn_playTutorial {
+        bottom: 76px;
+        right: unset;
+        left: 28px;
+        width: 190px;
+    }
+
+    #btn_playTutorial > .label {
+        font-size: 22px;
+    }
+
+    #btn_editMap {
+        bottom: 64px;
+        right: unset;
+        left: 28px;
+    }
+
+    #btn_shareMap {
+        right: 112px;
+        bottom: 64px;
+    }
+
+    #btn_deleteMap {
+        right: 28px;
+        bottom: 64px;
+    }
+
+    /* .CLASS covers both standard map browser and custom map browser */
+    .map-list-container {
+        top: 344px;
+        left: 28px;
+        width: calc(100% - 56px);
+        border-radius: 24px;
+        height: 400px;
+        /*         border: 3px solid var(--uiForegroundColor); */
+        background-color: var(--uiBackgroundColor);
+        /*         box-shadow: 0px 8px var(--uiForegroundColor); */
+        box-shadow: 0px 8px var(--uiBackgroundColor_pressed);
+    }
+
+    .map-list-container::after {
+        content: "";
+        position: fixed;
+        bottom: 152px;
+        width: calc(100% - 56px);
+        height: 40px;
+        /* 		border:0.5px solid red; */
+        background: linear-gradient(
+            to top,
+            rgba(245, 245, 245, 1) 0%,
+            rgba(245, 245, 245, 0.987) 8.1%,
+            rgba(245, 245, 245, 0.951) 15.5%,
+            rgba(245, 245, 245, 0.896) 22.5%,
+            rgba(245, 245, 245, 0.825) 29%,
+            rgba(245, 245, 245, 0.741) 35.3%,
+            rgba(245, 245, 245, 0.648) 41.2%,
+            rgba(245, 245, 245, 0.55) 47.1%,
+            rgba(245, 245, 245, 0.45) 52.9%,
+            rgba(245, 245, 245, 0.352) 58.8%,
+            rgba(245, 245, 245, 0.259) 64.7%,
+            rgba(245, 245, 245, 0.175) 71%,
+            rgba(245, 245, 245, 0.104) 77.5%,
+            rgba(245, 245, 245, 0.049) 84.5%,
+            rgba(245, 245, 245, 0.013) 91.9%,
+            rgba(245, 245, 245, 0) 100%
+        );
+    }
+
+    #custom-map-browser-info {
+        top: 64px;
+        right: 28px;
+        width: 64%;
+        font-size: 18px;
+        line-height: 1.2;
+        padding: 0px 32px;
+        height: 64px;
+    }
+
+    #btn_newMap {
+        top: 64px;
+        right: 172px;
+        width: 108px;
+        font-size: 28px;
+    }
+
+    #btn_importMap {
+        top: 64px;
+        right: 28px;
+        width: 128px;
+        font-size: 28px;
+    }
+
+    #ui_mapInfoBox {
+        top: 156px;
+        right: 28px;
+    }
+
+    #ui_endScreen {
+        top: calc(50% - 102px);
+    }
+}

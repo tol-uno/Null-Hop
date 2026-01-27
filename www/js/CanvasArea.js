@@ -1,34 +1,31 @@
 const CanvasArea = {
-    // called in deviceReady
     start: function () {
-        this.canvas = document.createElement("canvas");
+        // called in onDeviceReady()
 
-        screenWidthUI = window.outerWidth; // UI is position on unscaled canvas
-        screenHeightUI = window.outerHeight;
+        this.canvas = document.getElementById("map-canvas");
+        this.ctx = this.canvas.getContext("2d");
 
         this.scale = window.devicePixelRatio || 1;
+
+        this.setSize();
+    },
+
+    setSize: function () {
+        // these screen size vars are initialized in index.js for global accesss
+
+        screenWidthUI = window.outerWidth;
+        screenHeightUI = window.outerHeight;
 
         this.canvas.width = screenWidth = screenWidthUI * this.scale;
         this.canvas.height = screenHeight = screenHeightUI * this.scale;
 
-        this.canvas.style.width = screenWidthUI + "px";
-        this.canvas.style.height = screenHeightUI + "px";
-
         midX = screenWidth / 2;
         midY = screenHeight / 2;
-        midX_UI = screenWidthUI / 2; 
+        midX_UI = screenWidthUI / 2;
         midY_UI = screenHeightUI / 2;
-
-        this.ctx = this.canvas.getContext("2d", { alpha: false });
-        document.body.insertBefore(this.canvas, document.body.childNodes[0]);
-
-        prevDateNow = performance.now();
-
-        requestAnimationFrame(updateGameArea);
     },
 
     clear: function () {
-        // CLEARS WHOLE CANVAS
         this.ctx.clearRect(0, 0, screenWidth, screenHeight);
     },
 
@@ -37,51 +34,41 @@ const CanvasArea = {
         // [ {x:1, y:1}, {x:2, y:2} ]
         // [ [1, 1], [2, 2] ]
         // returns points out in whatever format they where input as
-        
+
         const isArrayFormat = Array.isArray(points[0]);
-    
+
         // Normalize to {x, y} format
-        const normalizedPoints = points.map(p =>
-            isArrayFormat ? { x: p[0], y: p[1] } : p
-        );
-    
+        const normalizedPoints = points.map((p) => (isArrayFormat ? { x: p[0], y: p[1] } : p));
+
         function cross(a, b, o) {
             return (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x);
         }
-    
-        normalizedPoints.sort((a, b) =>
-            a.x === b.x ? a.y - b.y : a.x - b.x
-        );
-    
+
+        normalizedPoints.sort((a, b) => (a.x === b.x ? a.y - b.y : a.x - b.x));
+
         const lower = [];
         for (let i = 0; i < normalizedPoints.length; i++) {
-            while (
-                lower.length >= 2 &&
-                cross(lower[lower.length - 2], lower[lower.length - 1], normalizedPoints[i]) <= 0
-            ) {
+            while (lower.length >= 2 && cross(lower[lower.length - 2], lower[lower.length - 1], normalizedPoints[i]) <= 0) {
                 lower.pop();
             }
             lower.push(normalizedPoints[i]);
         }
-    
+
         const upper = [];
         for (let i = normalizedPoints.length - 1; i >= 0; i--) {
-            while (
-                upper.length >= 2 &&
-                cross(upper[upper.length - 2], upper[upper.length - 1], normalizedPoints[i]) <= 0
-            ) {
+            while (upper.length >= 2 && cross(upper[upper.length - 2], upper[upper.length - 1], normalizedPoints[i]) <= 0) {
                 upper.pop();
             }
             upper.push(normalizedPoints[i]);
         }
-    
+
         upper.pop();
         lower.pop();
         const result = lower.concat(upper);
-    
+
         // Convert back to original format if needed
         if (isArrayFormat) {
-            return result.map(p => [p.x, p.y]);
+            return result.map((p) => [p.x, p.y]);
         } else {
             return result;
         }
@@ -93,15 +80,7 @@ const CanvasArea = {
         const k = (n) => (n + h / 30) % 12;
         const a = s * Math.min(l, 1 - l);
         const f = (n) => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
-        return (
-            "rgb(" +
-            Math.round(255 * f(0)) +
-            "," +
-            Math.round(255 * f(8)) +
-            "," +
-            Math.round(255 * f(4)) +
-            ")"
-        );
+        return "rgb(" + Math.round(255 * f(0)) + "," + Math.round(255 * f(8)) + "," + Math.round(255 * f(4)) + ")";
     },
 
     RGBToHSL: function (r, g, b) {
@@ -137,25 +116,16 @@ const CanvasArea = {
         return [Math.round(h * 360), Math.round(s * 100), Math.round(l * 100)];
     },
 
-    getShadedColor: function (color, litPercent) {
+    getShadedColor: function (color, litPercent, styleData) {
         // litPercent is how much influence the direct light has on the surface.
         // 1 = completly lit by direct
         // 0 = no direct light only ambient light is illuminating surface
         // 0.5 means direct and ambient have equal influence over lighting the surface
 
         const directWeight = litPercent;
-        const ambientWeight = 1 - litPercent;
 
-        let directLight;
-        let ambientLight;
-
-        if (UserInterface.gamestate == 5 || UserInterface.gamestate == 6) {
-            directLight = Map.style.directLight ?? "rba(255,255,255)";
-            ambientLight = Map.style.ambientLight ?? "rba(50,50,50)";
-        } else {
-            directLight = MapEditor.loadedMap.style.directLight ?? "rba(255,255,255)";
-            ambientLight = MapEditor.loadedMap.style.ambientLight ?? "rba(50,50,50)";
-        }
+        let directLight = styleData.directLight ?? "rba(255,255,255)";
+        let ambientLight = styleData.ambientLight ?? "rba(50,50,50)";
 
         // parse main color
         color = color.replace(/[^\d,.]/g, "").split(",");
@@ -187,12 +157,6 @@ const CanvasArea = {
             g: ((color.g * directLight.g) / 255) * directWeight,
             b: ((color.b * directLight.b) / 255) * directWeight,
         };
-
-        // const colorWithAmbientWeighted = {
-        //     r : color.r * ambientLight.r/255 * ambientWeight,
-        //     g : color.g * ambientLight.g/255 * ambientWeight,
-        //     b : color.b * ambientLight.b/255 * ambientWeight,
-        // }
 
         const colorWithAmbientWeighted = {
             r: (color.r * ambientLight.r) / 255,
@@ -247,6 +211,8 @@ const CanvasArea = {
 
         return gradient;
     },
+
+    // FIX move these to Utilities.js
 
     // takes a rectangle defined by center coordinates (x, y), width, height, and angle in radians
     // returns an array of global corner points in clockwise order, starting from the top-left corner

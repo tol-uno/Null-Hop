@@ -29,6 +29,7 @@ const UserInterface = {
     showVerticalWarning: false,
     showOverstrafeWarning: false,
 
+    orientation: null,
     darkMode: false,
 
     // should kill these eventually and only use ones defined in CSS
@@ -44,6 +45,16 @@ const UserInterface = {
         this.getRecords();
         this.getMedals();
         this.checkCustomMapsDirectoryExists();
+
+        screen.orientation.addEventListener("change", function (event) {
+            UserInterface.orientation = event.target.type.startsWith("landscape") ? "landscape" : "portrait";
+            CanvasArea.setSize();
+            PlayerCanvas.setSize();
+            if (UserInterface.gamestate == 2) {
+                MapBrowser.setMaxScroll();
+                // FIX should multiply the scrollPos by the ratio of the Map Buttons dimensions to stay in the same position
+            }
+        });
 
         function getByID(id) {
             return document.getElementById(id);
@@ -69,11 +80,9 @@ const UserInterface = {
 
         const btn_mapEditor = getByID("btn_mapEditor");
         btn_mapEditor.func = () => {
-            MapEditor.editorState = 5;
             UserInterface.gamestate = 2;
             UserInterface.switchToUiGroup(UserInterface.uiGroup_mapEditorMapBrowser);
-
-            MapBrowser.state = 2;
+            MapBrowser.state = 3;
             MapBrowser.init();
         };
 
@@ -202,50 +211,30 @@ const UserInterface = {
             // 2 = platform edit menu
             // 3 = map color page
             // 4 = map settings page
-            // 5 = MapEditor MapBrowser screen
 
             // MapBrowser.state
-            // 0 = disabled
             // 1 = standard map browser
             // 2 = custom map browser
+            // 3 = editor map browser
 
-            // in one of the 3 MapBrowsers
+            // in one of the three MapBrowsers
             if (UserInterface.gamestate == 2) {
-                // in STANDARD map browser
-                if (MapBrowser.state == 1) {
-                    // goto main menu
-                    MapBrowser.state = 0;
-                    MapBrowser.scrollY = 0;
+                if (MapBrowser.state == 1 || MapBrowser.state == 3) {
+                    // in STANDARD map browser => goto main menu
+                    // in EDITOR map browser => goto main menu
+                    MapBrowser.scrollPos = 0;
                     MapBrowser.selectedMapIndex = -1;
                     UserInterface.gamestate = 1;
-
                     UserInterface.switchToUiGroup(UserInterface.uiGroup_mainMenu);
-
                     return;
                 }
 
-                // in CUSTOM map browser -- could be the one you play maps from or the map editor
                 if (MapBrowser.state == 2) {
-                    // go back to standard map browser OR to main main menu if in Map Editor
-
-                    // in MapEditor's map browser
-                    if (MapEditor.editorState == 5) {
-                        // goto main menu
-                        MapBrowser.state = 0;
-                        MapBrowser.scrollY = 0;
-                        MapBrowser.selectedMapIndex = -1;
-
-                        UserInterface.gamestate = 1;
-                        MapEditor.editorState = 0;
-
-                        UserInterface.switchToUiGroup(UserInterface.uiGroup_mainMenu);
-
-                        return;
-                    }
-
-                    // goto play standard map browser
-                    MapBrowser.state = 1;
+                    // in CUSTOM map browser => go back to standard map browser
+                    MapBrowser.scrollPos = 0;
+                    MapBrowser.selectedMapIndex = -1;
                     UserInterface.switchToUiGroup(UserInterface.uiGroup_standardMapBrowser);
+                    MapBrowser.state = 1;
                     MapBrowser.init();
                     return;
                 }
@@ -260,17 +249,19 @@ const UserInterface = {
             }
 
             if (UserInterface.gamestate == 5) {
-                // in Loading Map page
-                // goto standard map browser OR custom browser
-                UserInterface.gamestate = 2;
+                // in Loading Map screen
+                // goto one of three map browsers standard, custom, or editor
 
                 if (MapBrowser.state == 1) {
                     UserInterface.switchToUiGroup(UserInterface.uiGroup_standardMapBrowser);
-                } else {
+                } else if (MapBrowser.state == 2) {
                     UserInterface.switchToUiGroup(UserInterface.uiGroup_customMapBrowser);
+                } else if (MapBrowser.state == 3) {
+                    UserInterface.switchToUiGroup(UserInterface.uiGroup_mapEditorMapBrowser);
                 }
 
                 MapBrowser.init();
+                UserInterface.gamestate = 2;
                 return;
             }
 
@@ -285,6 +276,8 @@ const UserInterface = {
                 ui_speedometer.textContent = "Speed: 0";
                 gravity = 500;
 
+                CanvasArea.canvas.classList.add("hidden");
+
                 if (MapBrowser.state == 1) {
                     UserInterface.switchToUiGroup(UserInterface.uiGroup_standardMapBrowser);
                 } else {
@@ -294,7 +287,7 @@ const UserInterface = {
                 MapBrowser.init();
 
                 if (Tutorial.isActive) {
-                    // leaving tutorial level
+                    // if leaving tutorial level
                     Tutorial.isActive = false;
                     Tutorial.reset();
                 }
@@ -375,7 +368,7 @@ const UserInterface = {
 
         const btn_playMap = getByID("btn_playMap");
         btn_playMap.func = () => {
-            MapBrowser.scrollY = 0;
+            MapBrowser.scrollPos = 0;
             MapBrowser.scrollVel = 0;
 
             UserInterface.gamestate = 5;
@@ -410,79 +403,79 @@ const UserInterface = {
         const btn_level_awakening = getByID("btn_level_awakening");
         btn_level_awakening.func = () => {
             MapBrowser.selectedMapIndex = "Awakening";
-            MapBrowser.updateMapBrowserState();
+            MapBrowser.updateMapBrowserUI();
         };
 
         const btn_level_pitfall = getByID("btn_level_pitfall");
         btn_level_pitfall.func = () => {
             MapBrowser.selectedMapIndex = "Pitfall";
-            MapBrowser.updateMapBrowserState();
+            MapBrowser.updateMapBrowserUI();
         };
 
         const btn_level_cavernAbyss = getByID("btn_level_cavernAbyss");
         btn_level_cavernAbyss.func = () => {
             MapBrowser.selectedMapIndex = "Cavern Abyss";
-            MapBrowser.updateMapBrowserState();
+            MapBrowser.updateMapBrowserUI();
         };
 
         const btn_level_crystals = getByID("btn_level_crystals");
         btn_level_crystals.func = () => {
             MapBrowser.selectedMapIndex = "Crystals";
-            MapBrowser.updateMapBrowserState();
+            MapBrowser.updateMapBrowserUI();
         };
 
         const btn_level_surfacing = getByID("btn_level_surfacing");
         btn_level_surfacing.func = () => {
             MapBrowser.selectedMapIndex = "Surfacing";
-            MapBrowser.updateMapBrowserState();
+            MapBrowser.updateMapBrowserUI();
         };
 
         const btn_level_wheatFields = getByID("btn_level_wheatFields");
         btn_level_wheatFields.func = () => {
             MapBrowser.selectedMapIndex = "Wheat Fields";
-            MapBrowser.updateMapBrowserState();
+            MapBrowser.updateMapBrowserUI();
         };
 
         const btn_level_trespass = getByID("btn_level_trespass");
         btn_level_trespass.func = () => {
             MapBrowser.selectedMapIndex = "Trespass";
-            MapBrowser.updateMapBrowserState();
+            MapBrowser.updateMapBrowserUI();
         };
 
         const btn_level_turmoil = getByID("btn_level_turmoil");
         btn_level_turmoil.func = () => {
             MapBrowser.selectedMapIndex = "Turmoil";
-            MapBrowser.updateMapBrowserState();
+            MapBrowser.updateMapBrowserUI();
         };
 
         const btn_level_tangledForest = getByID("btn_level_tangledForest");
         btn_level_tangledForest.func = () => {
             MapBrowser.selectedMapIndex = "Tangled Forest";
-            MapBrowser.updateMapBrowserState();
+            MapBrowser.updateMapBrowserUI();
         };
 
         const btn_level_pinnacle = getByID("btn_level_pinnacle");
         btn_level_pinnacle.func = () => {
             MapBrowser.selectedMapIndex = "Pinnacle";
-            MapBrowser.updateMapBrowserState();
+            MapBrowser.updateMapBrowserUI();
         };
 
         const btn_level_moonlight = getByID("btn_level_moonlight");
         btn_level_moonlight.func = () => {
             MapBrowser.selectedMapIndex = "Moonlight";
-            MapBrowser.updateMapBrowserState();
+            MapBrowser.updateMapBrowserUI();
         };
 
         const btn_level_rapture = getByID("btn_level_rapture");
         btn_level_rapture.func = () => {
             MapBrowser.selectedMapIndex = "Rapture";
-            MapBrowser.updateMapBrowserState();
+            MapBrowser.updateMapBrowserUI();
         };
 
         const btn_level_forever = getByID("btn_level_forever");
         btn_level_forever.func = () => {
             MapBrowser.selectedMapIndex = "Forever";
-            MapBrowser.updateMapBrowserState();
+            MapBrowser.updateMapBrowserUI();
         };
 
         // ==========
@@ -512,109 +505,29 @@ const UserInterface = {
         // ====================
         const btn_newMap = getByID("btn_newMap");
         btn_newMap.func = function () {
-            MapEditor.loadedMap = {
-                playerStart: {
-                    x: 350,
-                    y: 250,
-                    angle: 0,
-                },
-                checkpoints: [],
-                style: {
-                    backgroundColor: "rgb(139,202,218)",
-                    playerColor: "rgb(240,240,240)",
-                    platformTopColor: "rgb(209,70,63)",
-                    platformSideColor: "rgb(209,70,63)",
-                    wallTopColor: "rgb(125,94,49)",
-                    wallSideColor: "rgb(125,94,49)",
-                    endZoneTopColor: "rgb(255,218,98)",
-                    endZoneSideColor: "rgb(255,218,98)",
-                    directLight: "rgb(89,89,89)",
-                    ambientLight: "rgb(191,191,191)",
-                    platformHeight: 25,
-                    wallHeight: 50,
-                    lightDirection: 180,
-                    lightPitch: 45,
-                },
-                platforms: [
-                    {
-                        x: 350,
-                        y: 60,
-                        width: 100,
-                        height: 100,
-                        angle: 0,
-                        endzone: 1,
-                        wall: 0,
-                    },
-                    {
-                        x: 350,
-                        y: 250,
-                        width: 100,
-                        height: 100,
-                        angle: 45,
-                        endzone: 0,
-                        wall: 0,
-                    },
-                ],
-            };
-
-            // calculates the initial hypotenuse angleRad and corners for each platform
-            MapEditor.loadedMap.platforms.forEach((platform) => MapEditor.updatePlatformCorners(platform));
-
-            UserInterface.gamestate = 7;
+            MapBrowser.scrollVel = 0;
+            MapBrowser.scrollPos = 0;
+            UserInterface.gamestate = 5;
+            UserInterface.switchToUiGroup(new Set([btn_mainMenu]));
+            MapEditor.initMap(-1); // -1 indicates new map
         };
 
         const btn_importMap = getByID("btn_importMap");
         btn_importMap.func = () => {
-            // UPDATE THIS BUTTON TO INCLUDE FUNCTIONALITY OF OLD btn_importMap_text BUTTON:
-            // let mapPaste = prompt("Paste Map Data:");
-            // if (mapPaste) {
-            //     MapEditor.loadedMap = JSON.parse(mapPaste);
-            // }
-
-            // LOAD FROM LOCAL FILE SYSTEM
-            const input = document.createElement("input");
-            input.type = "file";
-            input.accept = ".txt"; // or "application/json"
-            document.body.appendChild(input);
-
-            input.addEventListener("change", function () {
-                const file = input.files[0];
-                if (!file) return;
-
-                const reader = new FileReader();
-
-                reader.onload = (e) => {
-                    try {
-                        // Attempt to parse the JSON from the file
-                        MapEditor.loadedMap = JSON.parse(e.target.result);
-                        UserInterface.gamestate = 7;
-                    } catch (error) {
-                        alert("Failed to load map: " + error.message);
-                    }
-                };
-
-                reader.onerror = (e) => {
-                    alert("Error reading file: " + e.target.error.name);
-                };
-
-                reader.readAsText(file);
-
-                // Clean up input after use
-                document.body.removeChild(input);
-            });
-
-            input.click(); // Trigger the file dialog
+            MapBrowser.scrollVel = 0;
+            MapBrowser.scrollPos = 0;
+            UserInterface.gamestate = 5;
+            UserInterface.switchToUiGroup(new Set([btn_mainMenu]));
+            MapEditor.initMap(-2); // -2 indicates imported map
         };
 
         const btn_editMap = getByID("btn_editMap");
         btn_editMap.func = async () => {
             MapBrowser.scrollVel = 0;
-            MapBrowser.scrollY = 0;
-
-            const mapDataRaw = await readFile("device", "maps", MapBrowser.selectedMapIndex + ".json", "text");
-
-            MapEditor.loadedMap = JSON.parse(mapDataRaw);
-            UserInterface.gamestate = 7;
+            MapBrowser.scrollPos = 0;
+            UserInterface.gamestate = 5;
+            UserInterface.switchToUiGroup(new Set([btn_mainMenu]));
+            MapEditor.initMap(MapBrowser.selectedMapIndex);
         };
 
         const btn_shareMap = getByID("btn_shareMap");
@@ -643,7 +556,7 @@ const UserInterface = {
                                 },
                                 function () {
                                     alert("file does not exist");
-                                }
+                                },
                             );
                         });
                     });
@@ -763,7 +676,6 @@ const UserInterface = {
                     // MapEditor.selectedElements = [MapEditor.selectedElements[MapEditor.selectedElements.length - 1]]; // make it only select the last element in the array
                     MapEditor.selectedElements = []; // no selected items after multiselect turned off
                     MapEditor.setButtonGroup();
-                    UserInterface.updateMapEditorSidePanel();
                 }
             } else {
                 // turn on multiSelect
@@ -861,7 +773,7 @@ const UserInterface = {
                     UserInterface.setGizmoBtnPos(
                         this,
                         xMapped + conditioningArray[0].offSet * MapEditor.zoom,
-                        yMapped + conditioningArray[0].offSet * MapEditor.zoom
+                        yMapped + conditioningArray[0].offSet * MapEditor.zoom,
                     );
                 }
                 return;
@@ -911,14 +823,14 @@ const UserInterface = {
                         0,
                         screenWidthUI,
                         MapEditor.screen.cornerX,
-                        MapEditor.screen.cornerX + MapEditor.screen.width
+                        MapEditor.screen.cornerX + MapEditor.screen.width,
                     );
                     const btnGlobalY = mapToRange(
                         btnPos.y,
                         0,
                         screenHeightUI,
                         MapEditor.screen.cornerY,
-                        MapEditor.screen.cornerY + MapEditor.screen.height
+                        MapEditor.screen.cornerY + MapEditor.screen.height,
                     );
 
                     xMapped = btnGlobalX - offSetFromAvgMidGlobalX;
@@ -931,14 +843,14 @@ const UserInterface = {
                         0,
                         screenWidthUI,
                         MapEditor.screen.cornerX,
-                        MapEditor.screen.cornerX + MapEditor.screen.width
+                        MapEditor.screen.cornerX + MapEditor.screen.width,
                     );
                     yMapped = mapToRange(
                         btnPos.y - conditioningArray[i].offSet * MapEditor.zoom,
                         0,
                         screenHeightUI,
                         MapEditor.screen.cornerY,
-                        MapEditor.screen.cornerY + MapEditor.screen.height
+                        MapEditor.screen.cornerY + MapEditor.screen.height,
                     );
                 }
 
@@ -973,14 +885,14 @@ const UserInterface = {
                     MapEditor.screen.cornerX,
                     MapEditor.screen.cornerX + MapEditor.screen.width,
                     0,
-                    screenWidthUI
+                    screenWidthUI,
                 );
                 const cornerMappedY = mapToRange(
                     platform.y + corner[1],
                     MapEditor.screen.cornerY,
                     MapEditor.screen.cornerY + MapEditor.screen.height,
                     0,
-                    screenHeightUI
+                    screenHeightUI,
                 );
                 UserInterface.setGizmoBtnPos(btn, cornerMappedX + offsetX, cornerMappedY + offsetY);
                 return;
@@ -1016,21 +928,21 @@ const UserInterface = {
                 MapEditor.screen.cornerX,
                 MapEditor.screen.cornerX + MapEditor.screen.width,
                 0,
-                screenWidthUI
+                screenWidthUI,
             );
             const pinnedY_screen = mapToRange(
                 pinnedY_map,
                 MapEditor.screen.cornerY,
                 MapEditor.screen.cornerY + MapEditor.screen.height,
                 0,
-                screenHeightUI
+                screenHeightUI,
             );
 
             // get drag vector (from pinnedCorner -> buttonPos) (unscaled by zoom)
             // dividing by zoom brings it back to real map scale
             const drag = new Vector2D3D(
                 (btnPos.x - offsetX - pinnedX_screen) / MapEditor.zoom,
-                (btnPos.y - offsetY - pinnedY_screen) / MapEditor.zoom
+                (btnPos.y - offsetY - pinnedY_screen) / MapEditor.zoom,
             );
             const rotated = drag.clone().rotate(-platform.angle);
 
@@ -1710,6 +1622,9 @@ const UserInterface = {
             this.previousRecord = record == null ? 0 : this.records[Map.name]; // save previous record
             this.records[Map.name] = this.timer;
             this.writeRecords();
+
+            // update record text in timer box
+            ui_timerBox.children[1].textContent = `Record: ${this.secondsToMinutes(this.records[Map.name] == null ? 0 : this.records[Map.name])}`;
         }
     },
 
@@ -1736,14 +1651,14 @@ const UserInterface = {
                             },
                             function (err) {
                                 console.error("Error creating maps directory:", err);
-                            }
+                            },
                         );
                     },
                     function (err) {
                         console.error("Error resolving data directory for creating /maps:", err);
-                    }
+                    },
                 );
-            }
+            },
         );
     },
 
@@ -2006,7 +1921,7 @@ const UserInterface = {
         if (this.timer == this.records[Map.name]) {
             // new record text
             ui_endScreen.querySelector(".yourRecord").textContent = `New Record!  -(${this.secondsToMinutes(
-                Math.abs(this.previousRecord - this.records[Map.name])
+                Math.abs(this.previousRecord - this.records[Map.name]),
             )})`;
         } else {
             // display normal record
@@ -2228,7 +2143,7 @@ const UserInterface = {
 
                     let arrow;
 
-                    // FIX or KILL this stuff
+                    // FIX or KILL this stuff ^ v
                     // Update style based on speed change
                     // if (deltaSpeed > 0) {
                     //     // Accelerating: scale up text and tint green
@@ -2266,7 +2181,7 @@ const UserInterface = {
                 // Map Browser debug text
                 ui_debugText.textContent = `selectedMapIndex: ${MapBrowser.selectedMapIndex} \r\n`;
                 ui_debugText.textContent += `scrollAmount: ${MapBrowser.scrollAmount} \r\n`;
-                ui_debugText.textContent += `scrollY: ${MapBrowser.scrollY} \r\n`;
+                ui_debugText.textContent += `scrollPos: ${MapBrowser.scrollPos} \r\n`;
                 ui_debugText.textContent += `scrollVel: ${MapBrowser.scrollVel} \r\n`;
                 ui_debugText.textContent += `maxScroll: ${MapBrowser.maxScroll} \r\n`;
             } else if (this.gamestate == 6) {
@@ -2277,7 +2192,7 @@ const UserInterface = {
                 ui_debugText.textContent += `endZonesToCheck: ${Map.endZonesToCheck.length} \r\n`;
                 ui_debugText.textContent += `cameraZoom: ${Math.round(Player.speedCameraOffset.zoom * 1000) / 1000} \r\n`;
                 ui_debugText.textContent += `offsetDir: ${Math.round(Player.speedCameraOffset.direction.x)}, ${Math.round(
-                    Player.speedCameraOffset.direction.y
+                    Player.speedCameraOffset.direction.y,
                 )} \r\n`;
                 ui_debugText.textContent += `player pos: ${Math.round(Player.x)}, ${Math.round(Player.y)} \r\n`;
                 ui_debugText.textContent += `lookAngle: ${Player.lookAngle.getAngleInDegrees()} \r\n`;
@@ -2319,9 +2234,9 @@ const UserInterface = {
                         const globalMarqueeCornerBR = MapEditor.convertToMapCord(marquee.x + marquee.width, marquee.y + marquee.height);
 
                         ui_debugText.textContent += `marquee (map xywh): ${Math.round(globalMarqueeCornerTL.x)}, ${Math.round(
-                            globalMarqueeCornerTL.y
+                            globalMarqueeCornerTL.y,
                         )}, ${Math.round(globalMarqueeCornerBR.x - globalMarqueeCornerTL.x)}, ${Math.round(
-                            globalMarqueeCornerBR.y - globalMarqueeCornerTL.y
+                            globalMarqueeCornerBR.y - globalMarqueeCornerTL.y,
                         )} \r\n`;
                     }
                 }

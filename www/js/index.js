@@ -23,10 +23,14 @@ function onDeviceReady() {
 
     TouchHandler.init();
     AudioHandler.init();
+
     CanvasArea.start();
     PlayerCanvas.start();
 
     UserInterface.start();
+
+    prevDateNow = performance.now();
+    requestAnimationFrame(updateGameArea);
 }
 
 // CALLED EVERY FRAME

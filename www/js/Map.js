@@ -9,7 +9,6 @@ const Map = {
     playerClip: null, // calculated every frame
 
     initMap: async function (name, isCustom = false) {
-        // initializing a normal map (not custom)
         this.platforms = [];
         this.playerStart = null;
         this.style = null;
@@ -29,18 +28,17 @@ const Map = {
 
         this.parseMapData(JSON.parse(mapDataRaw)); // sets up map data, styles, lighting, shadows, shadow clips, etc
 
-        CanvasArea.canvas.style.backgroundColor = this.style.shaded_backgroundColor;
-
         Player.initPlayer(this.playerStart.x, this.playerStart.y, this.playerStart.angle);
 
-        UserInterface.determineButtonColor();
+        CanvasArea.canvas.style.backgroundColor = this.style.shaded_backgroundColor;
+        CanvasArea.canvas.classList.remove("hidden");
 
-        UserInterface.gamestate = 6; // switch to in level
         UserInterface.switchToUiGroup(UserInterface.uiGroup_inLevel);
+        UserInterface.determineButtonColor();
 
         // set record text in timer box
         ui_timerBox.children[1].textContent = `Record: ${UserInterface.secondsToMinutes(
-            UserInterface.records[name] == null ? 0 : UserInterface.records[name]
+            UserInterface.records[name] == null ? 0 : UserInterface.records[name],
         )}`;
 
         // switch to low gravity for maps with moon in the name
@@ -49,6 +47,8 @@ const Map = {
         } else {
             gravity = 500;
         }
+
+        UserInterface.gamestate = 6; // switch to in level
     },
 
     parseMapData: function (jsonData) {
@@ -157,25 +157,25 @@ const Map = {
                 clipToUse.moveTo(
                     // bot left
                     platform.x + platform.corners[0][0], // x
-                    platform.y + platform.corners[0][1] // y
+                    platform.y + platform.corners[0][1], // y
                 );
 
                 clipToUse.lineTo(
                     // bot right
                     platform.x + platform.corners[1][0],
-                    platform.y + platform.corners[1][1]
+                    platform.y + platform.corners[1][1],
                 );
 
                 clipToUse.lineTo(
                     // top right
                     platform.x + platform.corners[2][0],
-                    platform.y + platform.corners[2][1]
+                    platform.y + platform.corners[2][1],
                 );
 
                 clipToUse.lineTo(
                     // top left
                     platform.x + platform.corners[3][0],
-                    platform.y + platform.corners[3][1]
+                    platform.y + platform.corners[3][1],
                 );
 
                 clipToUse.closePath();
@@ -261,13 +261,13 @@ const Map = {
 
                                 clipPolygon.moveTo(
                                     platform.x + platform.clipPoints[i][0], // x
-                                    platform.y + platform.clipPoints[i][1] // y
+                                    platform.y + platform.clipPoints[i][1], // y
                                 );
                             } else {
                                 // its not the first point in the hull so use lineTo
                                 clipPolygon.lineTo(
                                     platform.x + platform.clipPoints[i][0], // x
-                                    platform.y + platform.clipPoints[i][1] // y
+                                    platform.y + platform.clipPoints[i][1], // y
                                 );
                             }
                         }
@@ -348,10 +348,10 @@ const Map = {
                 litPercent3 = 0;
             } // clamp to 0 to 1
 
-            platform.shaded_topColor = CanvasArea.getShadedColor(colorToUse1, litPercentTop);
-            platform.shaded_sideColor1 = CanvasArea.getShadedColor(colorToUse2, litPercent1);
-            platform.shaded_sideColor2 = CanvasArea.getShadedColor(colorToUse2, litPercent2);
-            platform.shaded_sideColor3 = CanvasArea.getShadedColor(colorToUse2, litPercent3);
+            platform.shaded_topColor = CanvasArea.getShadedColor(colorToUse1, litPercentTop, mapData.style);
+            platform.shaded_sideColor1 = CanvasArea.getShadedColor(colorToUse2, litPercent1, mapData.style);
+            platform.shaded_sideColor2 = CanvasArea.getShadedColor(colorToUse2, litPercent2, mapData.style);
+            platform.shaded_sideColor3 = CanvasArea.getShadedColor(colorToUse2, litPercent3, mapData.style);
 
             // SHADOW POLYGON
 
@@ -408,11 +408,19 @@ const Map = {
 
         // calculate all other map colors
         // THESE ALL NEED TO USE 3D Normal Vectors for calculations
-        mapData.style.shaded_backgroundColor = CanvasArea.getShadedColor(mapData.style.backgroundColor, litPercentTop);
+        mapData.style.shaded_backgroundColor = CanvasArea.getShadedColor(mapData.style.backgroundColor, litPercentTop, mapData.style);
 
-        mapData.style.shadow_platformColor = CanvasArea.getShadedColor(mapData.style.platformTopColor, Math.max(0, litPercentTop - 0.7)); // shadow brightness can be between 0 and 0.3
-        mapData.style.shadow_endzoneColor = CanvasArea.getShadedColor(mapData.style.endZoneTopColor, Math.max(0, litPercentTop - 0.7));
-        mapData.style.shadow_backgroundColor = CanvasArea.getShadedColor(mapData.style.backgroundColor, Math.max(0, litPercentTop - 0.7));
+        mapData.style.shadow_platformColor = CanvasArea.getShadedColor(
+            mapData.style.platformTopColor,
+            Math.max(0, litPercentTop - 0.7),
+            mapData.style,
+        ); // shadow brightness can be between 0 and 0.3
+        mapData.style.shadow_endzoneColor = CanvasArea.getShadedColor(mapData.style.endZoneTopColor, Math.max(0, litPercentTop - 0.7), mapData.style);
+        mapData.style.shadow_backgroundColor = CanvasArea.getShadedColor(
+            mapData.style.backgroundColor,
+            Math.max(0, litPercentTop - 0.7),
+            mapData.style,
+        );
     },
 
     renderPlatform: function (ctx, mapData, platform) {

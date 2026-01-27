@@ -1,14 +1,14 @@
 const MapBrowser = {
-    // should set back to 0 at some points
-    // 0 = disabled
-    // 1 = standard map browser
-    // 2 = custom map browser
-    state: 0,
-    scrollY: 0,
+    state: 1,
+    // 1: standard
+    // 2: custom
+    // 3: editor
+
+    scrollPos: 0,
     scrollVel: 0,
     scrollVelAverager: new Averager(5),
     scrollAmount: null,
-    selectedMapIndex: -1, // -1 == no map selected ... string of map name when a map is selected
+    selectedMapIndex: -1, // -1 == no map selected ... becomes a string of map name when a map is selected
     maxScroll: -40,
     infoBox: {
         x: window.outerWidth - 444,
@@ -16,22 +16,20 @@ const MapBrowser = {
         width: 400, // set dynamically in .render()
         height: 162, // set dynamically
     },
+    container: null,
 
     init: async function () {
-        if (this.state === 1) {
-            // Standard Map Browser
-            this.scrollY = 0;
-            this.scrollVel = 0;
-            this.selectedMapIndex = -1;
-        } else if (this.state === 2) {
-            // Custom Map Browser
-            this.scrollY = 0;
-            this.scrollVel = 0;
-            this.selectedMapIndex = -1;
+        this.scrollPos = 0;
+        this.scrollVel = 0;
+        this.selectedMapIndex = -1;
 
-            const container = document.getElementById("custom-map-list-container");
-            container.innerHTML = ""; // clear all previous custom buttons
+        this.container = document.querySelector(".map-list-container:not(.hidden)"); // there are two containers only one should be visible/used at a time. Set by uiGroups
 
+        // if in one of the two Map Browsers that use custom maps
+        if (this.state >= 2) {
+            this.container.innerHTML = ""; // clear all previous custom buttons
+
+            // fetch custom maps from cordova file system and map to buttons
             try {
                 const entries = await new Promise((resolve, reject) => {
                     window.resolveLocalFileSystemURL(
@@ -40,7 +38,7 @@ const MapBrowser = {
                             const reader = fileSystem.createReader();
                             reader.readEntries(resolve, reject);
                         },
-                        reject
+                        reject,
                     );
                 });
 
@@ -63,45 +61,60 @@ const MapBrowser = {
                     button.innerHTML = buttonHTML.trim();
                     button.func = () => {
                         MapBrowser.selectedMapIndex = mapName;
-                        MapBrowser.updateMapBrowserState();
+                        MapBrowser.updateMapBrowserUI();
                     };
-                    container.appendChild(button);
-                    UserInterface.addUiElement(button); // removed the true flag to see if it will work
+                    this.container.appendChild(button);
+                    UserInterface.addUiElement(button);
                 }
             } catch (error) {
                 console.error("Failed to load custom maps:", error);
             }
         }
 
-        // Set maxScroll
-        const container = document.querySelector(".map-list-container:not(.hidden)");
-        if (container) {
-            this.maxScroll = container.scrollHeight - container.clientHeight;
-            this.maxScroll *= -1;
-        }
+        this.setMaxScroll();
 
-        this.updateMapBrowserState();
+        this.updateMapBrowserUI();
+    },
+
+    setMaxScroll: function () {
+        // Set maxScroll
+        this.maxScroll = this.container.scrollHeight - this.container.clientHeight;
+        // this.maxScroll =
+        //     UserInterface.orientation == "landscape"
+        //         ? this.container.scrollHeight - this.container.clientHeight
+        //         : this.container.scrollWidth - this.container.clientWidth;
+
+        this.maxScroll *= -1;
     },
 
     update: function () {
         // called every frame when gamestate == 2
-
         // change the position of buttons on scroll
-        // update this to just check if touch is within new DOM button container
-        if (TouchHandler.dragging == 1 && TouchHandler.touches[0].x > 110 && TouchHandler.touches[0].x < 460) {
+
+        // touch is within DOM container
+        if (
+            TouchHandler.dragging == 1 &&
+            TouchHandler.touches[0].x > this.container.offsetLeft &&
+            TouchHandler.touches[0].x < this.container.offsetLeft + this.container.clientWidth &&
+            TouchHandler.touches[0].y > this.container.offsetTop &&
+            TouchHandler.touches[0].y < this.container.offsetTop + this.container.clientHeight
+        ) {
+            // if start of a new scroll
             if (this.scrollAmount == null) {
-                // start of scroll
-                this.scrollAmount = this.scrollY;
+                this.scrollAmount = this.scrollPos;
             }
 
-            // is scrolling
-            this.scrollAmount += TouchHandler.dragAmountY;
+            // get right drag direction based on orientation
+            // applicableTouchDrag = UserInterface.orientation == "landscape" ? TouchHandler.dragAmountY : TouchHandler.dragAmountX;
+            applicableTouchDrag = TouchHandler.dragAmountY;
+
+            this.scrollAmount += applicableTouchDrag;
 
             // sets scrollVel to average drag amount of past 10 frames
-            this.scrollVelAverager.pushValue(TouchHandler.dragAmountY);
+            this.scrollVelAverager.pushValue(applicableTouchDrag);
             this.scrollVel = this.scrollVelAverager.getAverage();
 
-            this.scrollY = this.scrollAmount;
+            this.scrollPos = this.scrollAmount;
         } else {
             // not dragging
 
@@ -111,7 +124,7 @@ const MapBrowser = {
                 this.scrollVelAverager.clear();
             }
 
-            this.scrollY += this.scrollVel;
+            this.scrollPos += this.scrollVel;
             if (Math.abs(this.scrollVel) > 0.1) {
                 // apply friction
                 this.scrollVel -= this.scrollVel * 5 * dt;
@@ -121,62 +134,62 @@ const MapBrowser = {
         }
 
         // stopping scrolling
-        if (this.scrollY > 0) {
-            this.scrollY = 0;
+        if (this.scrollPos > 0) {
+            this.scrollPos = 0;
         }
-        if (this.scrollY < this.maxScroll) {
-            this.scrollY = this.maxScroll;
+        if (this.scrollPos < this.maxScroll) {
+            this.scrollPos = this.maxScroll;
         }
 
-        document.querySelector(".map-list-container:not(.hidden)").scrollTop = -this.scrollY;
+        // if (UserInterface.orientation == "landscape") {
+        //     this.container.scrollTop = -this.scrollPos;
+        // } else {
+        //     this.container.scrollLeft = -this.scrollPos;
+        // }
+
+        this.container.scrollTop = -this.scrollPos;
     },
 
-    updateMapBrowserState: function () {
+    updateMapBrowserUI: function () {
         // updates the MapInfoBox and adds/ removes the nessesary buttons when map buttons are clicked
-        this.updateMapInfoBox();
 
         // ENABLING and DISABLING btn_playMap, btn_playTutorial, btn_editMap, btn_shareMap, btn_deleteMap
 
-        if (MapEditor.editorState !== 5) {
-            // NOT in map editors browser
+        if (this.state != 3) {
+            // In standard or custom MapBrowser
 
             // ADDING btn_playMap
-            if (this.selectedMapIndex != -1 && !UserInterface.activeUiGroup.has(btn_playMap)) {
+            if (this.selectedMapIndex != -1) {
                 UserInterface.addUiElement(btn_playMap);
-            }
-            // REMOVING btn_playMap
-            if (this.selectedMapIndex == -1 && UserInterface.activeUiGroup.has(btn_playMap)) {
+            } else {
+                // REMOVING btn_playMap
                 UserInterface.removeUiElement(btn_playMap);
             }
 
-            // ADDING AND REMOVING btn_playTutorial toggle
-            if (this.state == 1 && this.selectedMapIndex == "Awakening" && !UserInterface.activeUiGroup.has(btn_playTutorial)) {
+            // ADDING btn_playTutorial toggle
+            if (this.state == 1 && this.selectedMapIndex == "Awakening") {
                 UserInterface.addUiElement(btn_playTutorial);
             }
 
-            if (this.state == 1 && this.selectedMapIndex != "Awakening" && UserInterface.activeUiGroup.has(btn_playTutorial)) {
+            // REMOVING btn_playTutorial toggle
+            if (this.state == 1 && this.selectedMapIndex != "Awakening") {
                 UserInterface.removeUiElement(btn_playTutorial);
             }
         } else {
-            // in MapEditors browser
+            // In MapEditor's browser
             // ADD & REMOVE: btn_editMap, btn_shareMap, btn_deleteMap
-
-            if (this.selectedMapIndex != -1 && !UserInterface.activeUiGroup.has(btn_editMap)) {
+            if (this.selectedMapIndex != -1) {
                 UserInterface.addUiElement(btn_editMap);
                 UserInterface.addUiElement(btn_shareMap);
                 UserInterface.addUiElement(btn_deleteMap);
-            }
-
-            if (this.selectedMapIndex == -1 && UserInterface.activeUiGroup.has(btn_editMap)) {
+            } else {
                 UserInterface.removeUiElement(btn_editMap);
                 UserInterface.removeUiElement(btn_shareMap);
                 UserInterface.removeUiElement(btn_deleteMap);
             }
         }
-    },
 
-    // this could be inside of updateMapBrowserState
-    updateMapInfoBox: function () {
+        // SET UP MAP INFO BOX
         if (this.selectedMapIndex == -1) {
             ui_mapInfoBox.querySelector(".mapName").textContent = "Select A Map";
             ui_mapInfoBox.querySelector(".yourTime").textContent = ``;
