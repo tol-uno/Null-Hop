@@ -247,7 +247,7 @@ const Tutorial = {
             }
 
             // default: {
-            // }
+            // } 
         }
     },
 

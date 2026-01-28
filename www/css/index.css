@@ -280,6 +280,7 @@ INDIVIDUAL BUTTON STYLES (MOVE TO OWN CSS FILES)
     top: 36px;
     width: 100%;
     justify-content: center;
+    pointer-events: none;
 }
 
 #ui_tutorialText {
@@ -289,6 +290,7 @@ INDIVIDUAL BUTTON STYLES (MOVE TO OWN CSS FILES)
     padding: 14px 24px;
     border-radius: 16px;
     box-shadow: 0 8px var(--uiBackgroundColor_pressed);
+    pointer-events: none;
 }
 
 #btn_next {

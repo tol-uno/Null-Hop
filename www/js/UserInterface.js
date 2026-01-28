@@ -9,11 +9,11 @@ const UserInterface = {
     // 7: in map editor
 
     settings: {
-        sensitivity: null,
-        volume: null,
-        debugText: null,
-        strafeHUD: null,
-        playTutorial: null,
+        sensitivity: 1.0,
+        volume: 0.5,
+        debugText: 0,
+        strafeHUD: 1,
+        playTutorial: 1,
     },
 
     levelState: 1, // 1 = pre-start, 2 = playing level, 3 = in endzone
@@ -276,6 +276,11 @@ const UserInterface = {
                 UserInterface.levelState = 1;
                 ui_speedometer.textContent = "Speed: 0";
                 gravity = 500;
+
+                UserInterface.removeUiElement(ui_verticalWarning);
+                UserInterface.removeUiElement(ui_overstrafeWarning);
+                UserInterface.ui_verticalWarning = false;
+                UserInterface.showOverstrafeWarning = false;
 
                 CanvasArea.canvas.classList.add("hidden");
 
@@ -1552,39 +1557,38 @@ const UserInterface = {
     },
 
     getSettings: async function () {
+        let loadedSettings = {};
+
         try {
             const settingsData = await readFile("device", "", "settings.json", "text");
-            this.settings = JSON.parse(settingsData);
-        } catch (error) {
-            if (error === "Failed to getFile: 1") {
-                // File doesn't exist: initialize default settings
-                this.settings = {
-                    sensitivity: 0.5,
-                    volume: 0.1,
-                    debugText: 0,
-                    strafeHUD: 1,
-                    playTutorial: 1,
-                };
-                this.writeSettings();
-            } else {
-                console.error("Error while getting settings:", error);
-                return;
+
+            if (settingsData) {
+                loadedSettings = JSON.parse(settingsData);
             }
+        } catch (error) {
+            // File missing or parsing error -> fall back to defaults
+            console.log("Using default settings", error);
         }
 
-        // Sync UI after settings are ready
-        UserInterface.setSliderValue(btn_sensitivitySlider, UserInterface.settings.sensitivity);
-        UserInterface.setSliderValue(btn_volumeSlider, UserInterface.settings.volume);
-        UserInterface.setToggleState(btn_debugText, UserInterface.settings.debugText);
-        // unhiding or hiding debug text (doesnt add to activeGroup so it never gets switched off)
-        if (UserInterface.settings.debugText) {
-            ui_debugText.classList.remove("hidden");
-        } else {
-            ui_debugText.classList.add("hidden");
-        }
-        UserInterface.setToggleState(btn_strafeHUD, UserInterface.settings.strafeHUD);
-        UserInterface.setToggleState(btn_playTutorial, UserInterface.settings.playTutorial);
-        AudioHandler.setVolume(UserInterface.settings.volume);
+        // properties in settings will be overwritten by any properties in loadedSettings.
+        this.settings = {
+            ...this.settings, // spread syntax
+            ...loadedSettings,
+        };
+
+        this.writeSettings();
+
+        // Sync UI
+        this.setSliderValue(btn_sensitivitySlider, this.settings.sensitivity);
+        this.setSliderValue(btn_volumeSlider, this.settings.volume);
+        this.setToggleState(btn_debugText, this.settings.debugText);
+        this.setToggleState(btn_strafeHUD, this.settings.strafeHUD);
+        this.setToggleState(btn_playTutorial, this.settings.playTutorial);
+        
+        AudioHandler.setVolume(this.settings.volume);
+        
+        // unhiding or hiding debug text (doesnt get added to activeGroup so it never gets switched off)
+        ui_debugText.classList.toggle("hidden", !this.settings.debugText);
     },
 
     writeSettings: function () {
