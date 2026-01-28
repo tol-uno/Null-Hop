@@ -1,0 +1,119 @@
+#ui_endScreen {
+    position: fixed;
+    background-color: var(--uiBackgroundColor);
+    color: var(--uiForegroundColor);
+    width: calc(50% - 44px);
+    /*     height: 162px; */
+    border-radius: 24px;
+    display: flex;
+    gap: 8px;
+    padding: 16px;
+    box-shadow: 0 8px 0 var(--uiBackgroundColor_pressed);
+}
+
+#ui_endScreen {
+    width: min(calc(100% - 56px), 448px);
+    height: 204px;
+    top: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+#ui_endScreen > :first-child {
+    display: flex;
+    width: 100%;
+    /* overflow-x: hidden; */
+    overflow-wrap: break-word;
+    flex-direction: column;
+    justify-content: center;
+    gap: 16px;
+}
+
+#ui_endScreen .mapName {
+    font-size: 32px;
+    line-height: 1;
+}
+
+#ui_endScreen .yourTime {
+    font-size: 58px;
+    line-height: 0.9;
+}
+
+#ui_endScreen .yourRecord {
+    font-size: 22px;
+}
+
+#ui_endScreen .medalList {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: end;
+    font-size: 24px;
+    gap: 10px;
+    gap: 18px;
+}
+
+#ui_endScreen .medalList > div {
+    display: flex;
+    gap: 8px;
+    justify-content: end;
+    align-items: center;
+    padding-right: 6px;
+    justify-content: space-between;
+    width: 128px;
+}
+
+/* THESE ARE DUPLICATED WITHIN MAPBROWSERS CSS */
+
+#ui_endScreen .bronze::before,
+#ui_endScreen .silver::before,
+#ui_endScreen .gold::before {
+    content: "";
+    width: 16px;
+    height: 16px;
+    margin-top: -4px;
+    border-radius: 50%;
+}
+
+#ui_endScreen .gold::before {
+    color: #f1b62c;
+    background-color: #f1b62c;
+    border: 3px solid #fde320;
+    box-shadow: 0 3px 0 #f1b62c;
+}
+
+#ui_endScreen .silver::before {
+    color: #8c9a9b;
+    background-color: #8c9a9b;
+    border: 3px solid #d4d4d6;
+    box-shadow: 0 3px 0 #8c9a9b;
+}
+
+#ui_endScreen .bronze::before {
+    color: #e6823e;
+    background-color: #e6823e;
+    border: 3px solid #f4a46f;
+    box-shadow: 0 3px 0 #e6823e;
+}
+
+#ui_endScreen .activeMedal {
+    font-size: 30px;
+    padding: 6px 0 6px 6px;
+    box-shadow: 0 5px 0 var(--uiForegroundColor);
+    border: 3px solid var(--uiForegroundColor);
+    border-radius: 10px;
+    margin-top: -4px;
+    width: 160px !important;
+}
+
+#ui_endScreen .activeMedal::before {
+    width: 24px !important;
+    height: 24px !important;
+    box-shadow: 0 4px !important;
+}
+
+@media (orientation: portrait) {
+    #ui_endScreen {
+        top: calc(50% - 102px);
+    }
+}

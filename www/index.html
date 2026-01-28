@@ -14,7 +14,8 @@
         <link rel="stylesheet" type="text/css" href="css/MainMenu.css" />
         <link rel="stylesheet" type="text/css" href="css/Settings.css" />
         <link rel="stylesheet" type="text/css" href="css/InLevel.css" />
-        <link rel="stylesheet" type="text/css" href="css/MapBrowserAndEndScreen.css" />
+        <link rel="stylesheet" type="text/css" href="css/MapBrowsers.css" />
+        <link rel="stylesheet" type="text/css" href="css/EndScreen.css"></link>
 
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black" />
@@ -43,10 +44,12 @@
         <div id="ui-container">
             <!-- MAIN MENU -->
             <img id="menu-background" src="assets/images/menu_background.png" />
-            <h1 id="main-title">Null Hop</h1>
-            <button id="btn_play" class="hidden"><div>Play</div></button>
-            <button id="btn_settings" class="hidden"><div>Settings</div></button>
-            <button id="btn_mapEditor" class="hidden"><div>Map Editor</div></button>
+            <div id="main-menu-container">
+                <h1 id="main-title">Null Hop</h1>
+                <button id="btn_play" class="hidden"><div>Play</div></button>
+                <button id="btn_settings" class="hidden"><div>Settings</div></button>
+                <button id="btn_mapEditor" class="hidden"><div>Map Editor</div></button>
+            </div>
 
             <!-- SETTINGS -->
             <div id="btn_sensitivitySlider" class="slider hidden" data-min="0.1" data-max="3" data-step="0.1" data-value="0.5" data-touchid="">

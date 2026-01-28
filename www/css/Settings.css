@@ -1,29 +1,29 @@
 #btn_sensitivitySlider {
     position: absolute;
-    top: 40px;
+    top: 12%;
     left: 160px;
-    width: 320px;
+    width: 40%;
 }
 
 #btn_volumeSlider {
     position: absolute;
-    top: 128px;
+    top: 32%;
     left: 160px;
-    width: 320px;
+    width: 40%;
 }
 
 #btn_debugText {
     position: absolute;
-    width: 320px;
+    top: 56%;
     left: 160px;
-    top: 228px;
+    width: 40%;
 }
 
 #btn_strafeHUD {
     position: absolute;
-    width: 320px;
+    top: 72%;
     left: 160px;
-    top: 300px;
+    width: 40%;
 }
 
 #btn_resetSettings {
@@ -31,38 +31,64 @@
     position: absolute;
     width: 180px;
     right: 44px;
-    bottom: 40px;
+    bottom: 28px;
     line-height: 1.1;
     height: 64px;
 }
 
+@media (orientation: landscape) and (width < 650px) {
+    /*     adjustments for very small landscape screens */
+    #btn_debugText > .label,
+    #btn_strafeHUD > .label {
+        font-size: 16px;
+    }
+
+    #btn_resetSettings {
+        width: 126px;
+        font-size: 16px;
+    }
+}
+
 @media (orientation: portrait) {
     #btn_sensitivitySlider {
-        top: 170px;
+        top: calc(25%);
         left: 40px;
         width: calc(100% - 80px);
     }
 
     #btn_volumeSlider {
-        top: 260px;
+        top: 35%;
         left: 40px;
         width: calc(100% - 80px);
     }
 
     #btn_debugText {
-        top: 400px;
+        top: 50%;
         left: 40px;
         width: calc(100% - 80px);
     }
 
     #btn_strafeHUD {
-        top: 470px;
+        top: 60%;
         left: 40px;
         width: calc(100% - 80px);
     }
 
     #btn_resetSettings {
-        right: 40px;
+        right: 28px;
         bottom: 80px;
+    }
+
+    @media (width < 650px) {
+        /* adjustments for very small portrait screens */
+        #btn_debugText > .label,
+        #btn_strafeHUD > .label {
+            font-size: 16px;
+        }
+
+        #btn_resetSettings {
+            width: 126px;
+            font-size: 16px;
+        }
     }
 }

@@ -1,0 +1,434 @@
+/* BUTTONS */
+
+#btn_customMaps {
+    position: fixed;
+    top: 28px;
+    right: 44px;
+    width: 240px;
+    height: 64px;
+    font-size: 32px;
+}
+
+#btn_playTutorial {
+    position: absolute;
+    width: 124px;
+    right: 172px;
+    bottom: 28px;
+    flex-direction: column;
+}
+
+#btn_playTutorial > .label {
+    font-size: 20px;
+    margin-bottom: 10px;
+}
+
+#btn_playMap {
+    position: fixed;
+    right: 44px;
+    bottom: 28px;
+    width: 110px;
+    height: 64px;
+    font-size: 32px;
+}
+
+#btn_newMap {
+    position: fixed;
+    top: 28px;
+    left: 50%;
+    width: 152px;
+    height: 64px;
+    font-size: 32px;
+}
+
+#btn_importMap {
+    position: fixed;
+    top: 28px;
+    right: 44px;
+    width: 190px;
+    height: 64px;
+    font-size: 32px;
+}
+
+#btn_editMap {
+    position: fixed;
+    bottom: 28px;
+    left: 50%;
+    width: 168px;
+    height: 64px;
+    font-size: 32px;
+}
+
+#btn_shareMap {
+    position: fixed;
+    right: 132px;
+    bottom: 28px;
+    width: 64px;
+    height: 64px;
+    touch-action: manipulation; /* allow native touch events for share button */
+}
+
+#btn_deleteMap {
+    position: fixed;
+    right: 44px;
+    bottom: 28px;
+    width: 64px;
+    height: 64px;
+}
+
+/* INFO ON WHERE TO CREATE AND IMPORT MAPS (Rename this) */
+#custom-map-browser-info {
+    position: fixed;
+    top: 28px;
+    right: 44px;
+    padding: 0 16px;
+    background-color: var(--uiBackgroundColor);
+    box-shadow: 0 8px 0 var(--uiBackgroundColor_pressed);
+    border-radius: 16px;
+    color: var(--uiForegroundColor);
+    font-size: 18px;
+    width: calc(50% - 44px);
+    height: 56px;
+    text-align: center;
+    align-content: center;
+}
+
+/* SCROLLING MAP LIST */
+/* .CLASS covers both standard map browser and custom map browser */
+.map-list-container {
+    /*     border: 1px solid red; */
+    position: fixed;
+    top: 0;
+    left: 116px;
+    width: calc(50% - 116px);
+    height: 100%;
+    padding: 40px 20px;
+    overflow: scroll;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.map-list-container button {
+    width: 100%;
+    aspect-ratio: 2/1;
+}
+
+.map-list-container button > div {
+    border-radius: 16px;
+    font-size: 24px;
+}
+
+.btn_customMap span {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 26px;
+}
+
+/* MAP INFO BOX */
+#ui_mapInfoBox {
+    position: fixed;
+    top: 112px;
+    bottom: 112px;
+    right: 44px;
+    width: calc(50% - 44px);
+    border-radius: 24px;
+    display: flex;
+    gap: 8px;
+    padding: 16px;
+    color: var(--uiForegroundColor);
+    background-color: var(--uiBackgroundColor);
+    box-shadow: 0 8px 0 var(--uiBackgroundColor_pressed);
+}
+
+/* container for mapname and your time */
+#ui_mapInfoBox > :first-child {
+    display: flex;
+    flex-direction: column;
+    flex-basis: 50%;
+    overflow: hidden;
+    overflow-wrap: break-word;
+    justify-content: center;
+    gap: 16px;
+    /*     border: 1px solid pink */
+}
+
+#ui_mapInfoBox .mapName {
+    font-size: 4vw;
+    line-height: 1.1;
+}
+
+#ui_mapInfoBox .yourTime {
+    font-size: 2vw;
+}
+
+#ui_mapInfoBox .medalList {
+    flex-basis: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: end;
+    font-size: 2.2vw;
+    /*     border: 1px solid blue; */
+}
+
+#ui_mapInfoBox .medalList > div {
+    /*     border: 1px solid red; */
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    padding-right: 6px;
+    justify-content: end;
+}
+
+#ui_mapInfoBox .bronze::before,
+#ui_mapInfoBox .silver::before,
+#ui_mapInfoBox .gold::before {
+    content: "";
+    width: 16px;
+    height: 16px;
+    margin-top: -4px;
+    border-radius: 50%;
+}
+
+#ui_mapInfoBox .gold::before {
+    color: #f1b62c;
+    background-color: #f1b62c;
+    border: 3px solid #fde320;
+    box-shadow: 0 3px 0 #f1b62c;
+}
+
+#ui_mapInfoBox .silver::before {
+    color: #8c9a9b;
+    background-color: #8c9a9b;
+    border: 3px solid #d4d4d6;
+    box-shadow: 0 3px 0 #8c9a9b;
+}
+
+#ui_mapInfoBox .bronze::before {
+    color: #e6823e;
+    background-color: #e6823e;
+    border: 3px solid #f4a46f;
+    box-shadow: 0 3px 0 #e6823e;
+}
+
+#ui_mapInfoBox .activeMedal {
+    font-size: 3vw;
+    padding: 6px 0 6px 6px;
+    box-shadow: 0 5px 0 var(--uiForegroundColor);
+    border: 3px solid var(--uiForegroundColor);
+    border-radius: 10px;
+    margin-top: -4px;
+}
+
+#ui_mapInfoBox .activeMedal::before {
+    width: 24px !important;
+    height: 24px !important;
+    box-shadow: 0 4px !important;
+}
+
+@media (orientation: landscape) {
+    /* adjustments for very small landscape screens */
+    
+    @media (width < 800px) {
+        #btn_importMap {
+            font-size: 24px;
+            width: 130px;
+        }
+        #btn_newMap {
+            font-size: 24px;
+            width: 110px;
+        }
+
+        
+        #btn_editMap {
+            font-size: 24px;
+            width: 120px;
+        }
+
+        #btn_shareMap {
+            right: 116px;
+        }
+
+        .btn_customMap span {
+            font-size: 18px;
+        }
+        
+        #ui_mapInfoBox {
+            padding: 8px;
+        }
+    }
+}
+
+@media (orientation: portrait) {
+    #btn_customMaps {
+        top: 64px;
+        right: 28px;
+        @media (width <= 375px) {
+            font-size: 24px;
+            width: 180px;
+        }
+    }
+
+    #btn_playMap {
+        bottom: 64px;
+        right: 28px;
+    }
+
+    #btn_playTutorial {
+        bottom: 64px;
+        right: 150px;
+    }
+
+    #btn_newMap {
+        top: 64px;
+        left: unset;
+        right: 160px;
+        width: 96px;
+        font-size: 26px;
+    }
+
+    #btn_importMap {
+        top: 64px;
+        right: 28px;
+        width: 120px;
+        font-size: 26px;
+    }
+
+    #btn_editMap {
+        bottom: 64px;
+        right: unset;
+        left: 28px;
+    }
+
+    #btn_shareMap {
+        right: 112px;
+        bottom: 64px;
+    }
+
+    #btn_deleteMap {
+        right: 28px;
+        bottom: 64px;
+    }
+
+    #custom-map-browser-info {
+        top: 64px;
+        right: 28px;
+        line-height: 1.2;
+        padding: 0px 32px;
+        height: 64px;
+        width: 60%;
+        font-size: 16px;
+    }
+
+    /* .CLASS covers both standard map browser and custom map browser */
+    .map-list-container {
+        top: 344px;
+        left: 28px;
+        width: calc(100% - 56px);
+        border-radius: 24px;
+        height: auto;
+        bottom: 148px;
+        padding: 40px 28px;
+        background-color: var(--uiBackgroundColor);
+        box-shadow: 0px 8px var(--uiBackgroundColor_pressed);
+    }
+
+    .map-list-container::after {
+        content: "";
+        position: fixed;
+        bottom: 148px;
+        width: calc(100% - 56px);
+        height: 40px;
+        border-radius: 0px 0px 24px 24px; /* needed for chrome */
+        /*         border:0.5px solid red; */
+        background: linear-gradient(
+            to top,
+            rgba(245, 245, 245, 1) 0%,
+            rgba(245, 245, 245, 0.987) 8.1%,
+            rgba(245, 245, 245, 0.951) 15.5%,
+            rgba(245, 245, 245, 0.896) 22.5%,
+            rgba(245, 245, 245, 0.825) 29%,
+            rgba(245, 245, 245, 0.741) 35.3%,
+            rgba(245, 245, 245, 0.648) 41.2%,
+            rgba(245, 245, 245, 0.55) 47.1%,
+            rgba(245, 245, 245, 0.45) 52.9%,
+            rgba(245, 245, 245, 0.352) 58.8%,
+            rgba(245, 245, 245, 0.259) 64.7%,
+            rgba(245, 245, 245, 0.175) 71%,
+            rgba(245, 245, 245, 0.104) 77.5%,
+            rgba(245, 245, 245, 0.049) 84.5%,
+            rgba(245, 245, 245, 0.013) 91.9%,
+            rgba(245, 245, 245, 0) 100%
+        );
+    }
+
+    #ui_mapInfoBox {
+        top: 156px;
+        right: 28px;
+        left: 28px;
+        width: auto;
+        height: 166px;
+    }
+
+    #ui_mapInfoBox .mapName {
+        font-size: 8vw;
+    }
+
+    #ui_mapInfoBox .yourTime {
+        font-size: 4vw;
+    }
+
+    #ui_mapInfoBox .medalList {
+        font-size: 5vw;
+    }
+
+    #ui_mapInfoBox .activeMedal {
+        font-size: 6vw;
+    }
+    
+    @media (width < 370px){
+        /* adjustments for very small portrait screens */
+        #btn_playMap {
+            bottom: 28px;
+        }
+        
+        #btn_newMap {
+            font-size: 22px;
+            width: 80px;
+            right: 136px;
+        }
+        
+        #btn_importMap {
+            font-size: 22px;
+            width: 100px;
+        }
+        
+        #btn_editMap {
+            bottom: 28px;
+            font-size: 20px;
+            width: 112px
+        }
+        
+        #btn_shareMap {
+            bottom:28px
+        }
+        
+        #btn_deleteMap {
+            bottom: 28px;
+        }
+        
+        .map-list-container {
+            bottom: 110px;
+            padding: 16px 42px;
+        }
+        
+        .map-list-container::after {
+            bottom: 110px;
+            height: 26px
+        }
+        
+    }
+}
