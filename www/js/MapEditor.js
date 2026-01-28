@@ -52,8 +52,10 @@ const MapEditor = {
     editQueue: [], // gets filled with QueueItems
     recordingEdit: false,
 
+    cancelImport: null,
+
     initMap: async function (name) {
-        if (name == -1) {
+        if (name === -1) {
             // generate new map
             this.loadedMap = {
                 playerStart: {
@@ -102,54 +104,64 @@ const MapEditor = {
 
             // calculates the initial hypotenuse angleRad and corners for each platform
             this.loadedMap.platforms.forEach((platform) => this.updatePlatformCorners(platform));
-        } else if (name == -2) {
+        } else if (name === -2) {
             // import map from users file system
 
-            // UPDATE THIS BUTTON TO INCLUDE FUNCTIONALITY OF OLD btn_importMap_text BUTTON:
+            // UPDATE THIS FUNCTION TO INCLUDE FUNCTIONALITY OF OLD btn_importMap_text BUTTON:
             // let mapPaste = prompt("Paste Map Data:");
             // if (mapPaste) {
             //     MapEditor.loadedMap = JSON.parse(mapPaste);
             // }
+
             try {
                 this.loadedMap = await new Promise((resolve, reject) => {
                     const input = document.createElement("input");
                     input.type = "file";
                     input.accept = ".txt,.json";
+                    input.style.display = "none";
                     document.body.appendChild(input);
 
-                    input.addEventListener("change", () => {
-                        const file = input.files[0];
+                    let finished = false;
 
-                        // Clean up input after use
-                        document.body.removeChild(input);
+                    const cleanup = () => {
+                        input.remove();
+                    };
+
+                    this.cancelImport = () => {
+                        if (finished) return;
+                        finished = true;
+                        cleanup();
+                        reject("Exited file selector");
+                    };
+
+                    input.addEventListener("change", async () => {
+                        if (finished) return;
+                        finished = true;
+
+                        const file = input.files[0];
+                        cleanup();
 
                         if (!file) {
                             reject("No file selected");
                             return;
                         }
 
-                        const reader = new FileReader();
-
-                        reader.onload = (e) => {
-                            try {
-                                resolve(JSON.parse(e.target.result));
-                            } catch (err) {
-                                reject(err);
-                            }
-                        };
-
-                        reader.onerror = () => reject(reader.error);
-
-                        reader.readAsText(file);
+                        try {
+                            const text = await file.text();
+                            resolve(JSON.parse(text));
+                        } catch {
+                            reject("Invalid file");
+                        }
                     });
 
-                    input.click(); // Trigger the file dialog
+                    input.click();
                 });
             } catch (err) {
                 alert("Failed to load map: " + err);
                 btn_mapEditor.func();
                 return;
             }
+            
         } else {
             // load existing map
             const mapDataRaw = await readFile("device", "maps", name + ".json", "text");
@@ -162,7 +174,7 @@ const MapEditor = {
         CanvasArea.canvas.classList.remove("hidden");
 
         UserInterface.switchToUiGroup(UserInterface.uiGroup_mapEditorInterface);
-        UserInterface.determineButtonColor(); 
+        UserInterface.determineButtonColor();
 
         this.screen.x = this.loadedMap.playerStart.x;
         this.screen.y = this.loadedMap.playerStart.y;

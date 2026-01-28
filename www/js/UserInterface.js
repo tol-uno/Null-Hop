@@ -258,6 +258,7 @@ const UserInterface = {
                     UserInterface.switchToUiGroup(UserInterface.uiGroup_customMapBrowser);
                 } else if (MapBrowser.state == 3) {
                     UserInterface.switchToUiGroup(UserInterface.uiGroup_mapEditorMapBrowser);
+                    MapEditor.cancelImport?.(); // in case of a failed map import
                 }
 
                 MapBrowser.init();
@@ -1834,19 +1835,22 @@ const UserInterface = {
 
     touchStarted: function (x, y, id) {
         // Called By TouchHandler
+        // items that dont need interaction should have pointerevents:none in css so they dont block touches.
+
+        const hit = document.elementFromPoint(x, y);
+        if (!hit) return;
 
         for (const uiElement of this.activeUiGroup) {
-            // butons and toggles
-            if (uiElement.nodeName.toLowerCase() === "button" || uiElement.classList.contains("toggle-container")) {
-                // only run buttons and toggles (and sliders eventually)
+            if (!uiElement.contains(hit)) continue; // skip to next uiElement in loop
 
-                if (this.isPointInsideElement(x, y, uiElement)) {
-                    uiElement.classList.add("pressed");
-                }
+            // buttons & toggles
+            if (uiElement.nodeName.toLowerCase() === "button" || uiElement.classList.contains("toggle-container")) {
+                uiElement.classList.add("pressed");
             }
+
             // sliders
             if (uiElement.classList.contains("slider")) {
-                if (this.isPointInsideElement(x, y, uiElement.handle)) {
+                if (uiElement.handle.contains(hit)) {
                     uiElement.handle.classList.add("pressed");
                     uiElement.dataset.touchid = id;
                 }
@@ -1854,7 +1858,6 @@ const UserInterface = {
         }
 
         if (this.gamestate == 6 && this.levelState !== 3) {
-            // In Level and not at endscreen
             this.addUiElement(ui_strafeHelper);
         }
     },
@@ -1865,43 +1868,41 @@ const UserInterface = {
         // run button's function if clicked
         // run MapEditor.touchRelease if active and no buttons are pressed
 
+        const hit = document.elementFromPoint(x, y);
         let editorIgnoreRelease = false;
 
         for (const uiElement of this.activeUiGroup) {
+            // BUTTONS & TOGGLES
             if (uiElement.nodeName.toLowerCase() === "button" || uiElement.classList.contains("toggle-container")) {
-                if (
-                    this.isPointInsideElement(x, y, uiElement) &&
-                    uiElement.classList.contains("pressed") &&
-                    (MapBrowser.scrollVel == 0 || MapBrowser.scrollAmount == null) && // dont release if scrolling through Map Browser
-                    MapEditor.dragSelect == false // dont release if dragSelecting in Map Editor
-                ) {
+                const isPressed = uiElement.classList.contains("pressed");
+                const isUnderFinger = hit && uiElement.contains(hit);
+
+                if (isPressed && isUnderFinger && (MapBrowser.scrollVel == 0 || MapBrowser.scrollAmount == null) && MapEditor.dragSelect == false) {
                     uiElement.func();
                     editorIgnoreRelease = true;
                 }
-                uiElement.classList.remove("pressed");
 
-                // SLIDERS
-            } else if (uiElement.classList.contains("slider") && Number(uiElement.dataset.touchid) == id) {
+                uiElement.classList.remove("pressed");
+            }
+
+            // SLIDERS (capture-based)
+            else if (uiElement.classList.contains("slider") && Number(uiElement.dataset.touchid) === id) {
                 uiElement.func();
                 uiElement.handle.classList.remove("pressed");
+                uiElement.dataset.touchid = null;
                 editorIgnoreRelease = true;
             }
         }
 
+        // IN-LEVEL hide ui_strafeHelper
         if (this.gamestate == 6) {
-            // In Level
-            if (TouchHandler.touches.length == 0) {
-                // no more touches on screen
+            if (TouchHandler.touches.length === 0) {
                 UserInterface.removeUiElement(ui_strafeHelper);
             }
         }
 
-        if (
-            // In MapEditor and no button was pressed -> pass touch onto MapEditor's logic checks
-            editorIgnoreRelease == false &&
-            UserInterface.gamestate == 7 &&
-            (MapEditor.editorState == 1 || MapEditor.editorState == 2)
-        ) {
+        // In MapEditor and no button was pressed -> pass touch onto MapEditor's logic checks
+        if (editorIgnoreRelease === false && UserInterface.gamestate == 7 && (MapEditor.editorState == 1 || MapEditor.editorState == 2)) {
             MapEditor.touchReleased(x, y);
         }
     },

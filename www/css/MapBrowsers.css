@@ -337,6 +337,7 @@
     }
 
     .map-list-container::after {
+        pointer-events: none;
         content: "";
         position: fixed;
         bottom: 148px;

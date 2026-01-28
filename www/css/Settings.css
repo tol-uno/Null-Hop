@@ -79,7 +79,7 @@
         bottom: 80px;
     }
 
-    @media (width < 650px) {
+    @media (width < 360px) {
         /* adjustments for very small portrait screens */
         #btn_debugText > .label,
         #btn_strafeHUD > .label {
