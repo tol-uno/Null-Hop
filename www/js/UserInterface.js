@@ -881,6 +881,11 @@ const UserInterface = {
         const btn_resize_BL = getByID("btn_resize_BL");
 
         function resizeBtnFuncLogic(btn, cornerIndex, pinnedIndex, offsetX, offsetY, widthSign, heightSign) {
+            // FIX - remove the offsetX and offsetY and just calculate it on the fly: 
+            // widthSign * buttonRect.width/2 
+            // heightSign * buttonRect.height/2
+            // update function calls when params are removed
+            
             const platform = MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]];
 
             if (!btn.classList.contains("pressed")) {
@@ -1550,8 +1555,9 @@ const UserInterface = {
     },
 
     getMedals: async function () {
-        // Get level's medal times directly through cordova local storage (www)
+        // FIX this can just be an const object instead of a seperate file.
 
+        // Get level's medal times directly through cordova local storage (www)
         const medalData = await readFile("local", "assets/", "medals.json", "text");
         this.medals = JSON.parse(medalData);
     },
@@ -1584,9 +1590,9 @@ const UserInterface = {
         this.setToggleState(btn_debugText, this.settings.debugText);
         this.setToggleState(btn_strafeHUD, this.settings.strafeHUD);
         this.setToggleState(btn_playTutorial, this.settings.playTutorial);
-        
+
         AudioHandler.setVolume(this.settings.volume);
-        
+
         // unhiding or hiding debug text (doesnt get added to activeGroup so it never gets switched off)
         ui_debugText.classList.toggle("hidden", !this.settings.debugText);
     },
@@ -1738,22 +1744,18 @@ const UserInterface = {
         }
     },
 
-    // 2 Map Editor Platform Manipulation Button Position Functions (38px buttons only!)
+    // For the 2 Map Editor Platform Manipulation Button Position Functions
     setGizmoBtnPos: function (button, xPosForMiddleOfBtn, yPosForMiddleOfBtn) {
-        // 19 is half of button's 38px size
-        if (xPosForMiddleOfBtn !== undefined) {
-            button.style.left = `${xPosForMiddleOfBtn - 19}px`;
-        }
-        if (yPosForMiddleOfBtn !== undefined) {
-            button.style.top = `${yPosForMiddleOfBtn - 19}px`;
-        }
+        const buttonRect = button.getBoundingClientRect();
+        button.style.left = `${xPosForMiddleOfBtn - buttonRect.width / 2}px`;
+        button.style.top = `${yPosForMiddleOfBtn - buttonRect.height / 2}px`;
     },
 
     getGizmoBtnPos: function (button) {
-        // 19 is half of button's 38px size
+        const buttonRect = button.getBoundingClientRect();
         return {
-            x: parseFloat(getComputedStyle(button).left) + 19,
-            y: parseFloat(getComputedStyle(button).top) + 19,
+            x: buttonRect.x + buttonRect.width / 2,
+            y: buttonRect.y + buttonRect.height / 2,
         };
     },
 

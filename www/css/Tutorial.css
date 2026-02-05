@@ -1,0 +1,134 @@
+#ui_tutorialTextWrapper {
+    position: fixed;
+    display: flex;
+    top: 36px;
+    width: 100%;
+    justify-content: center;
+    pointer-events: none;
+}
+
+#ui_tutorialText {
+    background-color: var(--uiBackgroundColor);
+    color: var(--uiForegroundColor);
+    font-size: 22px;
+    padding: 14px 24px;
+    border-radius: 16px;
+    box-shadow: 0 8px var(--uiBackgroundColor_pressed);
+    pointer-events: none;
+}
+
+#btn_next {
+    position: absolute;
+    top: 0;
+    left: 100%;
+    margin-left: 16px;
+
+    width: 60px;
+    height: 60px;
+    animation: pulse 800ms infinite;
+}
+
+#ui_restartWarning {
+    position: fixed;
+    left: 132px;
+    transform: translateX(-50%);
+    top: 130px;
+    width: 148px;
+    height: 58px;
+    background-color: var(--uiBackgroundColor);
+    color: var(--uiForegroundColor);
+    font-size: 16px;
+    border-radius: 8px;
+    box-shadow: 0 4px 0 var(--uiBackgroundColor_pressed);
+    animation: pulse 800ms infinite;
+    text-align: center;
+    align-content: center;
+}
+
+.zero-opacity {
+    opacity: 0 !important;
+    transition: none !important;
+}
+
+#tutorial_swipe {
+    animation: swipeX 4s infinite cubic-bezier(0.3, 0, 0.7, 1);
+    position: fixed;
+    right: 44%;
+    bottom: 10%;
+    width: 120px;
+    opacity: 1;
+    transition: opacity 500ms ease-in-out;
+    z-index: 1;
+}
+
+#tutorial_swipeVertical {
+    animation: swipeY 2.5s infinite cubic-bezier(0.3, 0, 0.7, 1);
+    position: fixed;
+    left: 26%;
+    bottom: 18%;
+    width: 110px;
+    opacity: 1;
+    transition: opacity 500ms ease-in-out;
+}
+
+#tutorial_arrow {
+    animation: arrowPoint 2s infinite ease-in-out;
+    position: fixed;
+    left: 172px;
+    bottom: 56px;
+    width: 75px;
+}
+
+@keyframes swipeX {
+    0% {
+        transform: translateX(-100px);
+    }
+    50% {
+        transform: translateX(100px);
+    }
+    100% {
+        transform: translateX(-100px);
+    }
+}
+
+@keyframes swipeY {
+    0% {
+        transform: translateY(-50px);
+    }
+    50% {
+        transform: translateY(50px);
+    }
+    100% {
+        transform: translateY(-50px);
+    }
+}
+
+@keyframes arrowPoint {
+    0% {
+        transform: translateX(-20px);
+    }
+    50% {
+        transform: translateX(20px);
+    }
+    100% {
+        transform: translateX(-20px);
+    }
+}
+
+#target-center {
+    --angle: 0deg;
+
+    position: fixed;
+    width: 0;
+    height: 0;
+    left: 50%;
+    top: 50%;
+    transform: rotate(var(--angle));
+}
+
+#target {
+    position: fixed;
+    margin-left: 32px;
+    margin-top: -32px;
+    transform: rotate(calc(-1 * var(--angle)));
+}

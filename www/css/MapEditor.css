@@ -1,0 +1,202 @@
+/* Map Editor Main Interface */
+#btn_exitMapEditor {
+    position: fixed;
+    left: 44px;
+    top: 40px;
+    width: 68px;
+    height: 68px;
+}
+
+#btn_addPlatform {
+    position: fixed;
+    right: 44px;
+    top: 40px;
+    width: 190px;
+    height: 56px;
+    font-size: 20px;
+}
+
+#btn_addCheckpoint {
+    position: fixed;
+    right: 44px;
+    top: 114px;
+    width: 190px;
+    height: 56px;
+    font-size: 20px;
+}
+
+#btn_mapSettings {
+    position: fixed;
+    right: 44px;
+    top: 188px;
+    width: 160px;
+    height: 56px;
+    font-size: 20px;
+}
+
+#btn_mapColors {
+    position: fixed;
+    right: 44px;
+    top: 262px;
+    width: 160px;
+    height: 56px;
+    font-size: 20px;
+}
+
+#btn_dragSelect {
+    position: fixed;
+    height: 60px;
+    left: 44px;
+    bottom: 216px;
+    flex-direction: column;
+    align-items: start;
+}
+
+#btn_multiSelect {
+    position: fixed;
+    height: 60px;
+    left: 44px;
+    bottom: 128px;
+    flex-direction: column;
+    align-items: start;
+}
+
+#btn_dragSelect > .label,
+#btn_multiSelect > .label {
+    font-size: 16px;
+}
+
+#btn_snappingSlider {
+    position: absolute;
+    bottom: 48px;
+    left: 44px;
+    width: 200px;
+}
+
+#btn_snappingSlider > .label {
+    font-size: 16px;
+}
+
+#btn_translate,
+#btn_resize_TL,
+#btn_resize_TR,
+#btn_resize_BL,
+#btn_resize_BR {
+    position: fixed;
+    width: 38px;
+    height: 38px;
+}
+
+#ui_editorSidePanel {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    right: 44px;
+    top: 22px;
+    width: 218px;
+    /* size and pos needs to align with map editor touch released values */
+    border-radius: 27.5px;
+    padding: 10px;
+    padding-bottom: 24px;
+    gap: 12px;
+
+    color: var(--uiForegroundColor);
+    background-color: var(--uiBackgroundColor);
+    z-index: 1;
+}
+
+#element-title-box {
+    display: flex;
+    flex-direction: row;
+    gap: 12px;
+    align-items: center;
+}
+
+#ui_elementTitle {
+}
+
+#ui_elementInfo {
+    line-height: 1.5;
+}
+
+#btn_unselect {
+    width: 44px;
+    height: 44px;
+}
+
+#btn_platformAngleSlider,
+#btn_playerAngleSlider,
+#btn_checkpointAngleSlider {
+    width: 100%;
+    margin-bottom: 6px;
+}
+
+#btn_platformAngleSlider > .label,
+#btn_playerAngleSlider > .label,
+#btn_checkpointAngleSlider > .label {
+    font-size: 16px;
+    margin-bottom: 14px;
+    /* text-align: center; */
+}
+
+#btn_wall,
+#btn_endzone {
+    width: 100%;
+}
+
+#btn_wall > .label,
+#btn_endzone > .label {
+    font-size: 16px;
+}
+
+#btn_duplicateElements {
+    position: fixed;
+    right: 112px;
+    bottom: 40px;
+    width: 148px;
+    height: 56px;
+    font-size: 22px;
+}
+
+#btn_deleteElements {
+    position: fixed;
+    right: 44px;
+    bottom: 40px;
+    width: 56px;
+    height: 56px;
+}
+
+#ui_dragSelectMarquee {
+    position: fixed;
+    border: 4px dotted var(--uiForegroundColor);
+}
+
+/* Map Settings Sliders */
+
+#btn_platformHeightSlider {
+    position: fixed;
+    top: 40px;
+    right: 60px;
+    width: 320px;
+}
+
+#btn_wallHeightSlider {
+    position: fixed;
+    top: 128px;
+    right: 60px;
+    width: 320px;
+}
+
+#btn_lightDirectionSlider {
+    position: fixed;
+    top: 216px;
+    right: 60px;
+    width: 320px;
+}
+
+#btn_lightPitchSlider {
+    position: fixed;
+    top: 304px;
+    right: 60px;
+    width: 320px;
+}

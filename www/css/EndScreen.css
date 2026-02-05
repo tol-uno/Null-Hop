@@ -1,70 +1,63 @@
 #ui_endScreen {
     position: fixed;
-    background-color: var(--uiBackgroundColor);
-    color: var(--uiForegroundColor);
-    width: calc(50% - 44px);
-    /*     height: 162px; */
-    border-radius: 24px;
+    top: 25%;
+    bottom: 25%;
+    left: 50%;
+    width: 50%;
+    transform: translateX(-50%);
+    border-radius: 2.8vw;
     display: flex;
     gap: 8px;
     padding: 16px;
+    color: var(--uiForegroundColor);
+    background-color: var(--uiBackgroundColor);
     box-shadow: 0 8px 0 var(--uiBackgroundColor_pressed);
 }
 
-#ui_endScreen {
-    width: min(calc(100% - 56px), 448px);
-    height: 204px;
-    top: 100px;
-    left: 50%;
-    transform: translateX(-50%);
-}
-
+/* container for mapname and your time */
 #ui_endScreen > :first-child {
     display: flex;
-    width: 100%;
-    /* overflow-x: hidden; */
-    overflow-wrap: break-word;
     flex-direction: column;
+    flex-basis: 50%;
+    overflow: hidden;
+
+    overflow-wrap: break-word;
     justify-content: center;
     gap: 16px;
 }
 
 #ui_endScreen .mapName {
-    font-size: 32px;
+    font-size: 3vw;
     line-height: 1;
 }
 
 #ui_endScreen .yourTime {
-    font-size: 58px;
+    font-size: 5vw;
     line-height: 0.9;
 }
 
 #ui_endScreen .yourRecord {
-    font-size: 22px;
+    font-size: 2vw;
 }
 
 #ui_endScreen .medalList {
     display: flex;
+    flex-basis: 50%;
     flex-direction: column;
-    justify-content: center;
+    justify-content: space-around;
     align-items: end;
-    font-size: 24px;
-    gap: 10px;
-    gap: 18px;
+    font-size: 2.2vw;
 }
 
 #ui_endScreen .medalList > div {
     display: flex;
     gap: 8px;
-    justify-content: end;
     align-items: center;
     padding-right: 6px;
-    justify-content: space-between;
-    width: 128px;
+    justify-content: end;
 }
 
-/* THESE ARE DUPLICATED WITHIN MAPBROWSERS CSS */
-
+/* THESE ARE EXACT DUPLICATS OF WHATS IN MapBrowsers CSS */
 #ui_endScreen .bronze::before,
 #ui_endScreen .silver::before,
 #ui_endScreen .gold::before {
@@ -97,13 +90,12 @@
 }
 
 #ui_endScreen .activeMedal {
-    font-size: 30px;
+    font-size: 3vw;
     padding: 6px 0 6px 6px;
     box-shadow: 0 5px 0 var(--uiForegroundColor);
     border: 3px solid var(--uiForegroundColor);
     border-radius: 10px;
     margin-top: -4px;
-    width: 160px !important;
 }
 
 #ui_endScreen .activeMedal::before {
@@ -112,8 +104,45 @@
     box-shadow: 0 4px !important;
 }
 
+@media (orientation: landscape) {
+    /* adjustments for very small landscape screens */
+
+    @media (width < 800px) {
+        #ui_endScreen {
+            padding: 8px;
+        }
+    }
+}
+
 @media (orientation: portrait) {
     #ui_endScreen {
-        top: calc(50% - 102px);
+        top: 35%;
+        right: 28px;
+        left: 28px;
+        height: 180px;
+        width: unset;
+        transform: unset;
+        bottom: unset;
+        border-radius: 5.5vw;
+    }
+
+    #ui_endScreen .mapName {
+        font-size: 6vw;
+    }
+
+    #ui_endScreen .yourTime {
+        font-size: 10vw;
+    }
+
+    #ui_endScreen .yourRecord {
+        font-size: 4vw;
+    }
+
+    #ui_endScreen .medalList {
+        font-size: 5vw;
+    }
+
+    #ui_endScreen .activeMedal {
+        font-size: 6vw;
     }
 }

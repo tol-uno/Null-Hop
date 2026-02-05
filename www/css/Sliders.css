@@ -1,0 +1,68 @@
+.slider {
+    position: relative;
+    width: 22vw;
+}
+
+.slider > .label {
+    display: block;
+    font-size: 2vw;
+    margin-bottom: 2.2vw;
+    user-select: none;
+    -webkit-user-select: none;
+    color: var(--uiForegroundColor);
+}
+
+.track {
+    padding: 0 1.5vw;
+    height: 0.9vw;
+    background: var(--uiForegroundColor);
+    border-radius: 0.4vw;
+}
+
+.handle {
+    position: absolute;
+    height: 3.1vw;
+    width: 3.1vw;
+    border-radius: 50%;
+    left: var(--pos);
+    transform: translateX(calc(-1 * var(--pos)));
+    margin-top: -1.6vw;
+    border: 0.35vw solid var(--uiForegroundColor);
+    background-color: var(--uiBackgroundColor);
+    box-shadow: 0 0.35vw 0 var(--uiForegroundColor);
+}
+
+.handle.pressed {
+    background-color: var(--uiBackgroundColor_pressed);
+    box-shadow: 0 0 0 var(--uiForegroundColor);
+    margin-top: -1.2vw;
+}
+
+@media (orientation: portrait) {
+    .slider {
+        width: 48vw;
+    }
+
+    .slider > .label {
+        font-size: 4.3vw;
+        margin-bottom: 4.8vw;
+    }
+
+    .track {
+        padding: 0 3.1vw;
+        height: 1.9vw;
+        border-radius: 1vw;
+    }
+    .handle {
+        height: 6.8vw;
+        width: 6.8vw;
+        margin-top: -3.4vw;
+        border: 0.76vw solid var(--uiForegroundColor);
+        box-shadow: 0 0.76vw 0 var(--uiForegroundColor);
+    }
+    .handle.pressed {
+        background-color: var(--uiBackgroundColor_pressed);
+        box-shadow: 0 0 0 var(--uiForegroundColor);
+        margin-top: -2.7vw;
+    }
+}

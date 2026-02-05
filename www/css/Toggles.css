@@ -1,0 +1,83 @@
+.toggle-container {
+    position: relative;
+    display: inline-flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    touch-action: none;
+}
+
+.toggle {
+    border: 0.35vw solid var(--uiForegroundColor);
+    border-radius: 10vw;
+    box-shadow: 0 0.4vw var(--uiForegroundColor);
+    position: relative;
+    width: 7.1vw;
+    height: 3.6vw;
+    padding: 0 0.2vw 0 0.2vw;
+    background-color: var(--uiBackgroundColor);
+    transition: background-color 200ms;
+}
+
+.toggle:before {
+    /* this :before is the handle that moves back and forth */
+    position: absolute;
+    box-sizing: border-box; /* not inherited for some reason*/
+    content: "";
+    height: 3vw;
+    width: 3vw;
+    bottom: 0.6vw;
+    border: 0.35vw solid var(--uiForegroundColor);
+    border-radius: 10vw;
+    box-shadow: 0 0.35vw 0 var(--uiForegroundColor);
+    background-color: var(--uiBackgroundColor);
+    transition: transform 200ms cubic-bezier(0.2, 0.32, 0.62, 1.68);
+}
+
+.toggle-container.toggled .toggle {
+    background-color: rgb(134, 213, 240);
+}
+
+.toggle-container.toggled .toggle:before {
+    transform: translateX(100%);
+}
+
+.toggle-container.pressed .toggle:before {
+    background-color: var(--uiBackgroundColor_pressed);
+    box-shadow: 0 0.1vw 0 var(--uiForegroundColor);
+    bottom: 0.35vw;
+}
+
+.toggle-container .label {
+    color: var(--uiForegroundColor);
+    font-size: 2.7vw;
+    user-select: none;
+}
+
+@media (orientation: portrait) {
+    .toggle {
+        border: 0.76vw solid var(--uiForegroundColor);
+        box-shadow: 0 1vw var(--uiForegroundColor);
+        width: 15.5vw;
+        height: 7.7vw;
+        padding: 0 0.5vw 0 0.5vw;
+    }
+
+    .toggle:before {
+        /* this :before is the handle that moves back and forth */
+        height: 6.5vw;
+        width: 6.5vw;
+        bottom: 1.2vw;
+        border: 0.76vw solid var(--uiForegroundColor);
+        box-shadow: 0 0.76vw 0 var(--uiForegroundColor);
+    }
+
+    .toggle-container.pressed .toggle:before {
+        box-shadow: 0 0.2vw 0 var(--uiForegroundColor);
+        bottom: 0.76vw;
+    }
+
+    .toggle-container .label {
+        font-size: 5.8vw;
+    }
+}
