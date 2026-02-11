@@ -15,6 +15,7 @@
         <preference name="BackgroundColor" value="#37906Dff"/>
         <!-- <preference name="Orientation" value="landscape" /> -->
 
+
         <!--
             ldpi    : 36x36 px
             mdpi    : 48x48 px
@@ -29,6 +30,12 @@
         <icon src="res/android/xhdpi.png" density="xhdpi" />
         <icon src="res/android/xxhdpi.png" density="xxhdpi" />
         <icon src="res/android/xxxhdpi.png" density="xxxhdpi" />
+
+        <!-- SPLASH SCREEN -->
+        <!-- This preference is used for both animated and non-animated icons -->
+        <!-- The current acceptable asset files can either be a XML Vector Drawable or PNG. -->
+        <!-- <preference name="AndroidWindowSplashScreenAnimatedIcon" value="res/android/splashscreen.xml" /> -->
+        <preference name="AndroidWindowSplashScreenAnimatedIcon" value="res/ios/icon-1024@1x.png" />
 
     </platform>
 
@@ -53,6 +60,9 @@
         
         <!-- APP ICON -->
         <icon src="res/ios/icon-1024@1x.png"/>
+
+        <!-- SPLASH SCREEN -->
+        <splash src="/res/ios/Default@2x~universal~anyany.png" />
 
     </platform>
 

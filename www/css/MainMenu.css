@@ -46,8 +46,8 @@
 
 @media (orientation: portrait) {
     #main-menu-container {
-        height: 90%;
-        gap: 5%;
+        height: 95%;
+        gap: 3%;
     }
     #main-title {
         font-size: 20vw;
