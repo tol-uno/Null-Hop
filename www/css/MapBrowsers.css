@@ -110,12 +110,17 @@
 
 .map-list-container button {
     width: 100%;
-    aspect-ratio: 2/1;
 }
 
 .map-list-container button > div {
+    background-color: var(--uiForegroundColor);
     border-radius: 1.8vw;
     font-size: 2.7vw;
+}
+
+.map-list-container button > div > svg {
+    /* parent div's border radius - parent's border line width */
+    border-radius: calc(1.8vw - 0.35vw);
 }
 
 .btn_customMap span {
@@ -350,6 +355,11 @@
     .map-list-container button > div {
         border-radius: 3.9vw;
         font-size: 5.8vw;
+    }
+
+    .map-list-container button > div > svg {
+        /* parent div's border radius - parent's border line width */
+        border-radius: calc(3.9vw - 0.76vw);
     }
 
     #ui_mapInfoBox {

@@ -44,13 +44,26 @@ const MapBrowser = {
 
                 for (const mapEntry of entries) {
                     const mapName = String(mapEntry.name.split(".")[0]);
+
+                    const generateColorsFromString = (s) => {
+                        const hash = s.split("").reduce((h, c) => ((h << 5) - h + c.charCodeAt(0)) | 0, 0);
+                        return [...Array(4)].map((_, i) => {
+                            const baseHue = (hash + i * 137) % 360;
+                            const lightness = 40 + (hash % 20);
+                            return `hsl(${baseHue}, 70%, ${lightness}%)`;
+                        });
+                    };
+
+                    const randomColors = generateColorsFromString(mapName);
+
                     const buttonHTML = `
                     <div>
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 256 128">
-                            <circle cx="24" cy="24" r="10" stroke="var(--uiForegroundColor)" stroke-width="4" />
-                            <circle cx="232" cy="24" r="10" stroke="var(--uiForegroundColor)" stroke-width="4" />
-                            <circle cx="24" cy="104" r="10" stroke="var(--uiForegroundColor)" stroke-width="4" />
-                            <circle cx="232" cy="104" r="10" stroke="var(--uiForegroundColor)" stroke-width="4" />
+                            <path fill="var(--uiBackgroundColor)" d="M0 0h256v128H0z" />
+                            <circle cx="27" cy="27" r="13" stroke="var(--uiForegroundColor)" fill="${randomColors[0]}" stroke-width="4" />
+                            <circle cx="229" cy="27" r="13" stroke="var(--uiForegroundColor)" fill="${randomColors[1]}" stroke-width="4" />
+                            <circle cx="27" cy="101" r="13" stroke="var(--uiForegroundColor)" fill="${randomColors[2]}" stroke-width="4" />
+                            <circle cx="229" cy="101" r="13" stroke="var(--uiForegroundColor)" fill="${randomColors[3]}" stroke-width="4" />
                         </svg>
                         <span>${mapName}</span>
                     </div>

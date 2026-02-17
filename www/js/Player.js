@@ -98,6 +98,7 @@ const Player = {
         const updatePlayerPoligon = () => {
             // arrow function so that "this" can be used to refer to Player
             // needs to be called at different times depending on levelState
+            // FIX this should use a single shadowPolygon instance of Polygon and just update it every frame as opposed to creating new ones
             this.playerPoligon = CanvasArea.createPoligon(this.x, this.y, 32, 32, this.angleRad);
         };
 
@@ -505,6 +506,7 @@ const Player = {
         this.speedCameraOffset.direction.y = this.speedCameraOffset.dirAveragerY.getAverage();
 
         // Update shadowCorners here for use by Map to render Player lower shadow
+        // FIX this should use a single shadowPolygon instance of Polygon and just update it every frame as opposed to creating new ones
         this.shadowCorners = CanvasArea.createPoligon(this.x, this.y, 30, 30, this.angleRad); // 30x30 instead of 32x32
     },
 

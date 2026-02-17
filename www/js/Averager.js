@@ -11,14 +11,8 @@ class Averager {
     }
 
     getAverage() {
-        const average = this.frames.reduce((a, b) => a + b) / this.frames.length
-        return average
-    }
-
-    getAverage() {
         if (this.frames.length === 0) return 0; // reduce cant work on empty array and would divide by zero bc initial value is set to 0
-        const average = this.frames.reduce((a, b) => a + b, 0) / this.frames.length;
-        return average;
+        return this.frames.reduce((a, b) => a + b, 0) / this.frames.length;
     }
 
     clear() {
