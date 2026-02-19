@@ -797,16 +797,16 @@ const UserInterface = {
             // would have to track full touch drag from when press starts till press ends
 
             // panning if at edges of screen
-            if (btnPos.x > screenWidthUI - 270) {
+            if (btnPos.x > screenWidthUI - 64) {
                 MapEditor.screen.x += (400 / MapEditor.zoom) * dt;
             }
-            if (btnPos.x < 60) {
+            if (btnPos.x < 64) {
                 MapEditor.screen.x -= (400 / MapEditor.zoom) * dt;
             }
-            if (btnPos.y > screenHeightUI - 60) {
+            if (btnPos.y > screenHeightUI - 64) {
                 MapEditor.screen.y += (400 / MapEditor.zoom) * dt;
             }
-            if (btnPos.y < 30) {
+            if (btnPos.y < 48) {
                 MapEditor.screen.y -= (400 / MapEditor.zoom) * dt;
             }
 
@@ -917,16 +917,16 @@ const UserInterface = {
 
             // panning when drag near edges of screen
             const panSpeed = (400 / MapEditor.zoom) * dt;
-            if (btnPos.x > screenWidthUI - 270) {
+            if (btnPos.x > screenWidthUI - 64) {
                 MapEditor.screen.x += panSpeed;
             }
-            if (btnPos.x < 60) {
+            if (btnPos.x < 64) {
                 MapEditor.screen.x -= panSpeed;
             }
-            if (btnPos.y > screenHeightUI - 60) {
+            if (btnPos.y > screenHeightUI - 64) {
                 MapEditor.screen.y += panSpeed;
             }
-            if (btnPos.y < 30) {
+            if (btnPos.y < 48) {
                 MapEditor.screen.y -= panSpeed;
             }
 

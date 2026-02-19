@@ -727,51 +727,62 @@
             </button>
 
             <div id="ui_editorSidePanel" class="hidden">
-                <div id="element-title-box">
-                    <button id="btn_unselect" class="short-button hidden">
-                        <div>
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 62 62">
-                                <path stroke="var(--myForegroundColor)" stroke-linecap="round" stroke-width="8" d="m19 43 24-24m-24 0 24 24" />
-                            </svg>
+                <div class="splitSection">
+                    <div id="element-title-box">
+                        <button id="btn_unselect" class="short-button hidden">
+                            <div>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 62 62">
+                                    <path stroke="var(--myForegroundColor)" stroke-linecap="round" stroke-width="8" d="m19 43 24-24m-24 0 24 24" />
+                                </svg>
+                            </div>
+                        </button>
+                        <div id="ui_elementTitle">Element Name</div>
+                    </div>
+
+                    <div id="ui_elementInfo">
+                        Position: 333, 888<br />
+                        Size: 100, 100
+                    </div>
+                </div>
+                <div class="splitSection">
+                    <div id="btn_platformAngleSlider" class="slider hidden" data-min="-45" data-max="45" data-step="2" data-value="0" data-touchid="">
+                        <div class="label">Angle: <span>000</span></div>
+                        <div class="track">
+                            <div class="handle" style="--pos: 50%"></div>
                         </div>
-                    </button>
-                    <div id="ui_elementTitle">Element Name</div>
-                </div>
-
-                <div id="ui_elementInfo">
-                    Position: 333, 888<br />
-                    Size: 100, 100
-                </div>
-
-                <div id="btn_platformAngleSlider" class="slider hidden" data-min="-45" data-max="45" data-step="2" data-value="0" data-touchid="">
-                    <div class="label">Angle: <span>000</span></div>
-                    <div class="track">
-                        <div class="handle" style="--pos: 50%"></div>
                     </div>
-                </div>
 
-                <div id="btn_playerAngleSlider" class="slider hidden" data-min="0" data-max="360" data-step="2" data-value="0" data-touchid="">
-                    <div class="label">Angle: <span>000</span></div>
-                    <div class="track">
-                        <div class="handle" style="--pos: 0%"></div>
+                    <div id="btn_playerAngleSlider" class="slider hidden" data-min="0" data-max="360" data-step="2" data-value="0" data-touchid="">
+                        <div class="label">Angle: <span>000</span></div>
+                        <div class="track">
+                            <div class="handle" style="--pos: 0%"></div>
+                        </div>
                     </div>
-                </div>
 
-                <div id="btn_checkpointAngleSlider" class="slider hidden" data-min="0" data-max="360" data-step="2" data-value="0" data-touchid="">
-                    <div class="label">Respawn Angle: <span>000</span></div>
-                    <div class="track">
-                        <div class="handle" style="--pos: 0%"></div>
+                    <div
+                        id="btn_checkpointAngleSlider"
+                        class="slider hidden"
+                        data-min="0"
+                        data-max="360"
+                        data-step="2"
+                        data-value="0"
+                        data-touchid=""
+                    >
+                        <div class="label">Respawn Angle: <span>000</span></div>
+                        <div class="track">
+                            <div class="handle" style="--pos: 0%"></div>
+                        </div>
                     </div>
-                </div>
 
-                <div id="btn_wall" class="toggle-container hidden">
-                    <span class="label">Wall: NaN</span>
-                    <div class="toggle"></div>
-                </div>
+                    <div id="btn_wall" class="toggle-container hidden">
+                        <span class="label">Wall: NaN</span>
+                        <div class="toggle"></div>
+                    </div>
 
-                <div id="btn_endzone" class="toggle-container hidden">
-                    <span class="label">End Zone: NaN</span>
-                    <div class="toggle"></div>
+                    <div id="btn_endzone" class="toggle-container hidden">
+                        <span class="label">End Zone: NaN</span>
+                        <div class="toggle"></div>
+                    </div>
                 </div>
             </div>
 

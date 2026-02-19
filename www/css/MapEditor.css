@@ -1,80 +1,71 @@
 /* Map Editor Main Interface */
+
 #btn_exitMapEditor {
     position: fixed;
-    left: 44px;
-    top: 40px;
-    width: 68px;
-    height: 68px;
+    left: 5%;
+    top: 5%;
+    width: 7.5vw;
+    height: 7.5vw;
+}
+
+#btn_addPlatform,
+#btn_addCheckpoint,
+#btn_mapSettings,
+#btn_mapColors {
+    position: fixed;
+    right: 5%;
+    height: 6.3vw;
+    font-size: 2.2vw;
 }
 
 #btn_addPlatform {
-    position: fixed;
-    right: 44px;
-    top: 40px;
-    width: 190px;
-    height: 56px;
-    font-size: 20px;
+    top: 5%;
+    width: 21.2vw;
 }
 
 #btn_addCheckpoint {
-    position: fixed;
-    right: 44px;
-    top: 114px;
-    width: 190px;
-    height: 56px;
-    font-size: 20px;
+    top: 25%;
+    width: 21.2vw;
 }
 
 #btn_mapSettings {
-    position: fixed;
-    right: 44px;
-    top: 188px;
-    width: 160px;
-    height: 56px;
-    font-size: 20px;
+    top: 45%;
+    width: 17.9vw;
 }
 
 #btn_mapColors {
+    top: 65%;
+    width: 17.9vw;
+}
+
+#btn_dragSelect,
+#btn_multiSelect {
     position: fixed;
-    right: 44px;
-    top: 262px;
-    width: 160px;
-    height: 56px;
-    font-size: 20px;
+    height: 6.7vw;
+    left: 5%;
+    flex-direction: column;
+    align-items: start;
 }
 
 #btn_dragSelect {
-    position: fixed;
-    height: 60px;
-    left: 44px;
-    bottom: 216px;
-    flex-direction: column;
-    align-items: start;
+    top: 32%;
 }
 
 #btn_multiSelect {
-    position: fixed;
-    height: 60px;
-    left: 44px;
-    bottom: 128px;
-    flex-direction: column;
-    align-items: start;
+    top: 54%;
 }
 
 #btn_dragSelect > .label,
-#btn_multiSelect > .label {
-    font-size: 16px;
+#btn_multiSelect > .label,
+#btn_snappingSlider > .label {
+    font-size: 1.8vw;
 }
 
 #btn_snappingSlider {
-    position: absolute;
-    bottom: 48px;
-    left: 44px;
-    width: 200px;
-}
-
-#btn_snappingSlider > .label {
-    font-size: 16px;
+    position: fixed;
+    bottom: 12%;
+    left: 5%;
+    width: 22.3vw;
 }
 
 #btn_translate,
@@ -83,36 +74,33 @@
 #btn_resize_BL,
 #btn_resize_BR {
     position: fixed;
-    width: 38px;
-    height: 38px;
+    width: 4.2vw;
+    height: 4.2vw;
 }
 
 #ui_editorSidePanel {
-    position: absolute;
+    position: fixed;
     display: flex;
     flex-direction: column;
-    right: 44px;
-    top: 22px;
-    width: 218px;
-    /* size and pos needs to align with map editor touch released values */
-    border-radius: 27.5px;
-    padding: 10px;
-    padding-bottom: 24px;
-    gap: 12px;
-
+    right: 5%;
+    top: 5%;
+    width: 25%;
+    border-radius: 3.1vw;
+    padding: 1.1vw;
+    gap: 0.8vw;
     color: var(--uiForegroundColor);
     background-color: var(--uiBackgroundColor);
     z-index: 1;
+    font-size: 1.8vw;
+    box-shadow: 0 0.9vw 0 var(--uiBackgroundColor_pressed);
 }
 
 #element-title-box {
     display: flex;
     flex-direction: row;
-    gap: 12px;
+    gap: 1.3vw;
     align-items: center;
-}
-
-#ui_elementTitle {
+    margin-bottom: 1vw;
 }
 
 #ui_elementInfo {
@@ -120,83 +108,258 @@
 }
 
 #btn_unselect {
-    width: 44px;
-    height: 44px;
+    width: 4.9vw;
+    height: 4.9vw;
 }
 
 #btn_platformAngleSlider,
 #btn_playerAngleSlider,
 #btn_checkpointAngleSlider {
     width: 100%;
-    margin-bottom: 6px;
+    margin-bottom: 1.6vw;
 }
 
 #btn_platformAngleSlider > .label,
 #btn_playerAngleSlider > .label,
 #btn_checkpointAngleSlider > .label {
-    font-size: 16px;
-    margin-bottom: 14px;
-    /* text-align: center; */
+    font-size: 1.8vw;
+    margin-bottom: 1.6vw;
 }
 
-#btn_wall,
+#btn_wall {
+    width: 100%;
+    margin-bottom: 1.6vw;
+}
+
 #btn_endzone {
     width: 100%;
+    margin-bottom: 0.8vw;
 }
 
 #btn_wall > .label,
 #btn_endzone > .label {
-    font-size: 16px;
+    font-size: 1.8vw;
 }
 
 #btn_duplicateElements {
     position: fixed;
-    right: 112px;
-    bottom: 40px;
-    width: 148px;
-    height: 56px;
-    font-size: 22px;
+    right: 13%;
+    bottom: 10%;
+    width: 16.5vw;
+    height: 6.25vw;
+    font-size: 2.5vw;
 }
 
 #btn_deleteElements {
     position: fixed;
-    right: 44px;
-    bottom: 40px;
-    width: 56px;
-    height: 56px;
+    right: 5%;
+    bottom: 10%;
+    width: 6.25vw;
+    height: 6.25vw;
 }
 
 #ui_dragSelectMarquee {
     position: fixed;
-    border: 4px dotted var(--uiForegroundColor);
+    border: 0.5vw dotted var(--uiForegroundColor);
 }
 
 /* Map Settings Sliders */
 
-#btn_platformHeightSlider {
+#btn_platformHeightSlider,
+#btn_wallHeightSlider,
+#btn_lightDirectionSlider,
+#btn_lightPitchSlider {
     position: fixed;
-    top: 40px;
-    right: 60px;
-    width: 320px;
+    right: 5%;
+    width: 40%;
+}
+
+#btn_platformHeightSlider {
+    top: 10%;
 }
 
 #btn_wallHeightSlider {
-    position: fixed;
-    top: 128px;
-    right: 60px;
-    width: 320px;
+    top: 30%;
 }
 
 #btn_lightDirectionSlider {
-    position: fixed;
-    top: 216px;
-    right: 60px;
-    width: 320px;
+    top: 50%;
 }
 
 #btn_lightPitchSlider {
-    position: fixed;
-    top: 304px;
-    right: 60px;
-    width: 320px;
+    top: 70%;
+}
+
+@media (orientation: portrait) {
+    #btn_exitMapEditor {
+        top: 7%;
+        width: 15.5vw;
+        height: 15.5vw;
+    }
+
+    #btn_addPlatform,
+    #btn_addCheckpoint,
+    #btn_mapSettings,
+    #btn_mapColors {
+        top: unset;
+        height: 13.5vw;
+        font-size: 4.8vw;
+    }
+
+    #btn_addPlatform {
+        right: unset;
+        left: 5%;
+        bottom: 16%;
+        width: 45.9vw;
+    }
+
+    #btn_addCheckpoint {
+        right: unset;
+        left: 5%;
+        bottom: 7%;
+        width: 45.9vw;
+    }
+
+    #btn_mapSettings {
+        bottom: 16%;
+        width: 38.6vw;
+    }
+
+    #btn_mapColors {
+        bottom: 7%;
+        width: 38.6vw;
+    }
+
+    #btn_dragSelect {
+        height: 14.5vw;
+        top: 20%;
+    }
+
+    #btn_multiSelect {
+        height: 14.4vw;
+        top: 32%;
+    }
+
+    #btn_dragSelect > .label,
+    #btn_multiSelect > .label,
+    #btn_snappingSlider > .label {
+        font-size: 3.9vw;
+    }
+
+    #btn_snappingSlider {
+        bottom: unset;
+        left: unset;
+        top: 8%;
+        right: 5%;
+        width: 48.3vw;
+    }
+
+    #btn_translate,
+    #btn_resize_TL,
+    #btn_resize_TR,
+    #btn_resize_BL,
+    #btn_resize_BR {
+        width: 9.2vw;
+        height: 9.2vw;
+    }
+
+    #ui_editorSidePanel {
+        right: 5%;
+        left: 5%;
+        top: unset;
+        bottom: 14%;
+        width: unset;
+        border-radius: 6.6vw;
+        padding: 3vw;
+        flex-direction: row;
+        font-size: 3.9vw;
+        box-shadow: 0 1.9vw 0 var(--uiBackgroundColor_pressed);
+    }
+
+    #ui_editorSidePanel .splitSection {
+        width: 50%;
+    }
+
+    #element-title-box {
+        gap: 2.9vw;
+        margin-bottom: 3vw;
+    }
+
+    #ui_elementInfo {
+        line-height: 2;
+    }
+
+    #btn_unselect {
+        width: 10.6vw;
+        height: 10.6vw;
+    }
+
+    #btn_platformAngleSlider,
+    #btn_playerAngleSlider,
+    #btn_checkpointAngleSlider {
+        width: 100%;
+        margin-bottom: 4vw;
+    }
+
+    #btn_platformAngleSlider > .label,
+    #btn_playerAngleSlider > .label,
+    #btn_checkpointAngleSlider > .label {
+        font-size: 3.9vw;
+        margin-bottom: 3.4vw;
+    }
+
+    #btn_wall {
+        margin-bottom: 4vw;
+    }
+
+    #btn_wall > .label,
+    #btn_endzone > .label {
+        font-size: 3.9vw;
+    }
+
+    #btn_duplicateElements {
+        right: 22%;
+        bottom: 5%;
+        width: 35.7vw;
+        height: 13.5vw;
+        font-size: 5.3vw;
+    }
+
+    #btn_deleteElements {
+        right: 5%;
+        bottom: 5%;
+        width: 13.5vw;
+        height: 13.5vw;
+    }
+
+    #ui_dragSelectMarquee {
+        border: 1vw dotted var(--uiForegroundColor);
+    }
+
+    /* Map Settings Sliders */
+
+    #btn_platformHeightSlider,
+    #btn_wallHeightSlider,
+    #btn_lightDirectionSlider,
+    #btn_lightPitchSlider {
+        left: 5%;
+        width: auto;
+        top: unset;
+    }
+
+    #btn_platformHeightSlider {
+        bottom: 40%;
+    }
+
+    #btn_wallHeightSlider {
+        bottom: 30%;
+    }
+
+    #btn_lightDirectionSlider {
+        bottom: 20%;
+    }
+
+    #btn_lightPitchSlider {
+        bottom: 10%;
+    }
 }
