@@ -20,7 +20,6 @@ const UserInterface = {
     timer: 0,
     timerStart: null, // set by jump button
 
-    medals: {}, // medal times for each map
     records: {}, // users records (personal bests) for each level theyve completed
     previousRecord: 0,
 
@@ -38,12 +37,84 @@ const UserInterface = {
     darkColor_1: "#454545",
     darkColor_2: "#363636",
 
+    medals: {
+        Awakening: {
+            gold: 18000,
+            silver: 25000,
+            bronze: 40000,
+        },
+        Pitfall: {
+            gold: 40000,
+            silver: 55000,
+            bronze: 75000,
+        },
+        "Cavern Abyss": {
+            gold: 30283,
+            silver: 42142,
+            bronze: 48033,
+        },
+        Crystals: {
+            gold: 15000,
+            silver: 20000,
+            bronze: 25000,
+        },
+        "Lost Lanterns": {
+            gold: 15000,
+            silver: 20000,
+            bronze: 25000,
+        },
+        Surfacing: {
+            gold: 15000,
+            silver: 20000,
+            bronze: 25000,
+        },
+        "Wheat Fields": {
+            gold: 15000,
+            silver: 20000,
+            bronze: 25000,
+        },
+        Trespass: {
+            gold: 15000,
+            silver: 20000,
+            bronze: 25000,
+        },
+        Turmoil: {
+            gold: 13283,
+            silver: 14330,
+            bronze: 15244,
+        },
+        "Tangled Forest": {
+            gold: 15000,
+            silver: 20000,
+            bronze: 25000,
+        },
+        Pinnacle: {
+            gold: 15000,
+            silver: 20000,
+            bronze: 25000,
+        },
+        Moonlight: {
+            gold: 15000,
+            silver: 20000,
+            bronze: 25000,
+        },
+        Rapture: {
+            gold: 15000,
+            silver: 20000,
+            bronze: 25000,
+        },
+        Forever: {
+            gold: 13283,
+            silver: 14330,
+            bronze: 15244,
+        },
+    },
+
     start: function () {
         // where all buttons are created
 
         this.getSettings();
         this.getRecords();
-        this.getMedals();
         this.checkCustomMapsDirectoryExists();
 
         screen.orientation.addEventListener("change", function (event) {
@@ -881,11 +952,11 @@ const UserInterface = {
         const btn_resize_BL = getByID("btn_resize_BL");
 
         function resizeBtnFuncLogic(btn, cornerIndex, pinnedIndex, offsetX, offsetY, widthSign, heightSign) {
-            // FIX - remove the offsetX and offsetY and just calculate it on the fly: 
-            // widthSign * buttonRect.width/2 
+            // FIX - remove the offsetX and offsetY and just calculate it on the fly:
+            // widthSign * buttonRect.width/2
             // heightSign * buttonRect.height/2
             // update function calls when params are removed
-            
+
             const platform = MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]];
 
             if (!btn.classList.contains("pressed")) {
@@ -1554,20 +1625,11 @@ const UserInterface = {
         this.switchToUiGroup(UserInterface.uiGroup_mainMenu);
     },
 
-    getMedals: async function () {
-        // FIX this can just be an const object instead of a seperate file.
-
-        // Get level's medal times directly through cordova local storage (www)
-        const medalData = await readFile("local", "assets/", "medals.json", "text");
-        this.medals = JSON.parse(medalData);
-    },
-
     getSettings: async function () {
         let loadedSettings = {};
 
         try {
             const settingsData = await readFile("device", "", "settings.json", "text");
-
             if (settingsData) {
                 loadedSettings = JSON.parse(settingsData);
             }
@@ -1605,19 +1667,15 @@ const UserInterface = {
     getRecords: async function () {
         try {
             const recordsData = await readFile("device", "", "records.json", "text");
-            this.records = JSON.parse(recordsData);
-        } catch (error) {
-            if (error == "Failed to getFile: 1") {
-                // file doesnt exist
-
-                // records.json doesn't exist , initialize empty records file
-                this.records = {
-                    unlocked: 1,
-                };
-                this.writeRecords(); // Write the default empty records to file
-            } else {
-                console.error("Error while getting records:", error);
+            if (recordsData) {
+                this.records = JSON.parse(recordsData);
             }
+        } catch (error) {
+            // records.json doesn't exist -- initialize empty records file
+            this.records = {
+                unlocked: 1,
+            };
+            this.writeRecords(); // Write the default empty records to file
         }
     },
 

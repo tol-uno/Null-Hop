@@ -2,13 +2,12 @@
     position: absolute;
     display: flex;
     flex-direction: column;
-    top: 28px;
-    bottom: 40px;
-    right: 44px;
+    top: 5%;
+    bottom: 5%;
+    right: 5%;
     width: 48%;
-    border-radius: 27.5px;
-    padding: 14px;
-    /* gap: 16px; */
+    border-radius: 3.1vw;
+    padding: 1.6vw;
     justify-content: space-between;
 
     color: var(--uiForegroundColor);
@@ -19,7 +18,7 @@
     --s: 0;
     --l: 0;
 
-    box-shadow: 0 8px 0 var(--uiBackgroundColor_pressed);
+    box-shadow: 0 0.9vw 0 var(--uiBackgroundColor_pressed);
 }
 
 #ui_colorPickerHeader {
@@ -28,23 +27,23 @@
 }
 
 #btn_unselectColor {
-    width: 44px;
-    height: 44px;
+    width: 4.9vw;
+    height: 4.9vw;
 }
 
 #ui_colorPreview {
-    border: 3px solid var(--uiForegroundColor);
+    border: 0.35vw solid var(--uiForegroundColor);
     background-color: hsl(var(--h), var(--s), var(--l));
-    width: 112px;
-    height: 64px;
-    border-radius: 16px;
+    width: 12.5vw;
+    height: 7.1vw;
+    border-radius: 1.8vw;
 }
 
 #btn_copyColor,
 #btn_pasteColor {
-    width: 96px;
-    height: 56px;
-    font-size: 22px;
+    width: 10.7vw;
+    height: 6.3vw;
+    font-size: 2.5vw;
 }
 
 #btn_hueSlider,
@@ -56,14 +55,14 @@
 #btn_hueSlider > .label,
 #btn_saturationSlider > .label,
 #btn_lightnessSlider > .label {
-    margin-bottom: 14px;
-    font-size: 16px;
+    margin-bottom: 1.6vw;
+    font-size: 1.8vw;
 }
 
 #ui_hueGradient {
     width: 100%;
-    height: 16px;
-    border-radius: 5px;
+    height: 1.8vw;
+    border-radius: 0.6vw;
     background-image: linear-gradient(
         90deg,
         hsl(0, 100%, 50%),
@@ -107,14 +106,14 @@
 }
 #ui_saturationGradient {
     width: 100%;
-    height: 16px;
-    border-radius: 5px;
+    height: 1.8vw;
+    border-radius: 0.6vw;
     background-image: linear-gradient(90deg, hsl(var(--h), 0%, var(--l)), hsl(var(--h), 100%, var(--l)));
 }
 #ui_lightnessGradient {
     width: 100%;
-    height: 16px;
-    border-radius: 5px;
+    height: 1.8vw;
+    border-radius: 0.6vw;
     background-image: linear-gradient(
         90deg,
         hsl(var(--h), var(--s), 0%),
@@ -142,7 +141,7 @@
 #btn_directLightColor,
 #btn_ambientLightColor {
     position: fixed;
-    height: 56px;
+    height: 6.3vw;
 }
 
 #btn_backgroundColor > div,
@@ -155,9 +154,8 @@
 #btn_endZoneSideColor > div,
 #btn_directLightColor > div,
 #btn_ambientLightColor > div {
-    gap: 0px;
-    padding: 4px;
-    font-size: 22px;
+    padding: 0.4vw;
+    font-size: 2.5vw;
 }
 
 #btn_backgroundColor > div > div,
@@ -183,19 +181,19 @@
 #btn_endZoneSideColor > div > svg,
 #btn_directLightColor > div > svg,
 #btn_ambientLightColor > div > svg {
-    width: 42px;
-}
-
-#btn_backgroundColor {
-    bottom: 40px;
-    left: 200px;
-    width: 200px;
+    width: 4.7vw;
 }
 
 #btn_playerColor {
-    bottom: 40px;
-    left: 44px;
-    width: 140px;
+    bottom: 10%;
+    left: 5%;
+    width: 15.6vw;
+}
+
+#btn_backgroundColor {
+    bottom: 10%;
+    left: 22.3vw;
+    width: 22.3vw;
 }
 
 #btn_directLightColor {
@@ -296,4 +294,97 @@
 #btn_syncEndZoneColors > .label {
     font-size: 16px;
     text-align: center;
+}
+
+@media (orientation: portrait) {
+    #ui_colorPicker {
+        left: 5%;
+        bottom: 10%;
+        top: unset;
+        width: unset;
+        height: 40%;
+        border-radius: 6.6vw;
+        padding: 3.4vw;
+        box-shadow: 0 1.9vw 0 var(--uiBackgroundColor_pressed);
+    }
+
+    #btn_unselectColor {
+        width: 10.6vw;
+        height: 10.6vw;
+    }
+
+    #ui_colorPreview {
+        border: 0.76vw solid var(--uiForegroundColor);
+        width: 21vw;
+        height: 15.5vw;
+        border-radius: 3.8vw;
+    }
+
+    #btn_copyColor,
+    #btn_pasteColor {
+        width: 21vw;
+        height: 13.5vw;
+        font-size: 5.3vw;
+    }
+
+    #btn_hueSlider > .label,
+    #btn_saturationSlider > .label,
+    #btn_lightnessSlider > .label {
+        margin-bottom: 3.4vw;
+        font-size: 3.9vw;
+    }
+
+    #ui_hueGradient,
+    #ui_saturationGradient,
+    #ui_lightnessGradient {
+        height: 3.9vw;
+        border-radius: 1.2vw;
+    }
+
+    #btn_backgroundColor,
+    #btn_playerColor,
+    #btn_wallTopColor,
+    #btn_wallSideColor,
+    #btn_platformTopColor,
+    #btn_platformSideColor,
+    #btn_endZoneTopColor,
+    #btn_endZoneSideColor,
+    #btn_directLightColor,
+    #btn_ambientLightColor {
+        height: 13.5vw;
+    }
+
+    #btn_backgroundColor > div,
+    #btn_playerColor > div,
+    #btn_wallTopColor > div,
+    #btn_wallSideColor > div,
+    #btn_platformTopColor > div,
+    #btn_platformSideColor > div,
+    #btn_endZoneTopColor > div,
+    #btn_endZoneSideColor > div,
+    #btn_directLightColor > div,
+    #btn_ambientLightColor > div {
+        padding: 1vw;
+        font-size: 5.3vw;
+    }
+
+    #btn_backgroundColor > div > svg,
+    #btn_playerColor > div > svg,
+    #btn_wallTopColor > div > svg,
+    #btn_wallSideColor > div > svg,
+    #btn_platformTopColor > div > svg,
+    #btn_platformSideColor > div > svg,
+    #btn_endZoneTopColor > div > svg,
+    #btn_endZoneSideColor > div > svg,
+    #btn_directLightColor > div > svg,
+    #btn_ambientLightColor > div > svg {
+        width: 10.1vw;
+    }
+
+    #btn_backgroundColor {
+        bottom: 20%;
+        left: unset;
+        right: 5%;
+        width: 48.3vw;
+    }
 }
