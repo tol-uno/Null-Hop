@@ -237,7 +237,13 @@ const Player = {
                 this.jumpVelocity = 200;
                 this.previousJumpSpeed = 100;
             } else {
-                btn_restart.func();
+                // similar code to btn_restart.func();
+                ui_speedometer.textContent = "Speed: 0";
+                ui_jumpStats.textContent = "";
+                UserInterface.timer = 0;
+                UserInterface.levelState = 1;
+                Player.checkpointIndex = -1;
+                Player.restart();
             }
             updatePlayerPoligon();
         };
