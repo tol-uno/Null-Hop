@@ -559,7 +559,6 @@ const UserInterface = {
         //  TUTORIAL
         // ==========
 
-        const ui_tutorialTextWrapper = getByID("ui_tutorialTextWrapper");
         const ui_tutorialText = getByID("ui_tutorialText");
 
         const btn_next = getByID("btn_next");

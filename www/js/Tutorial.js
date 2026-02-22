@@ -33,7 +33,7 @@ const Tutorial = {
 
         switch (newState) {
             case 1: {
-                UserInterface.switchToUiGroup(new Set([btn_mainMenu, ui_tutorialTextWrapper, ui_tutorialText, tutorial_swipe]));
+                UserInterface.switchToUiGroup(new Set([btn_mainMenu, ui_tutorialText, tutorial_swipe]));
                 ui_tutorialText.textContent = "Slide horizontally to turn the player";
                 break;
             }
@@ -226,10 +226,8 @@ const Tutorial = {
                 // Ending the level sets a new uiGroup so have to unhide stuff again
 
                 UserInterface.addUiElement(btn_next);
-                UserInterface.addUiElement(ui_tutorialTextWrapper);
                 UserInterface.addUiElement(ui_tutorialText);
                 ui_tutorialText.textContent = "Finish levels faster to earn medals ⇩";
-                ui_tutorialTextWrapper.style.top = "24px";
                 UserInterface.removeUiElement(ui_speedometer);
 
                 UserInterface.setToggleState(btn_playTutorial, false);
@@ -242,7 +240,7 @@ const Tutorial = {
 
             case 19: {
                 UserInterface.removeUiElement(btn_next);
-                ui_tutorialText.innerHTML = `Click <span style="border: 2px solid var(--uiForegroundColor); border-radius: 50%; padding: 1px 6.5px 1px 7px;">×</span> to select a new level or <span style="border: 2px solid var(--uiForegroundColor); border-radius: 50%; padding: 0px 6px 2px 6px;">↺</span> to try again`;
+                ui_tutorialText.innerHTML = `Click <span style="border: 2px solid var(--uiForegroundColor); border-radius: 50%; padding: 0px 7.5px 2px 8px;">×</span> to select a new level or <span style="border: 2px solid var(--uiForegroundColor); border-radius: 50%; padding: 0px 4px 2px 3px;">↺</span> to try again`;
                 break;
             }
 

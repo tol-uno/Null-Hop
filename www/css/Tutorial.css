@@ -1,10 +1,8 @@
 #ui_tutorialTextWrapper {
     position: fixed;
-    display: flex;
-    top: 36px;
-    width: 100%;
-    justify-content: center;
-    pointer-events: none;
+    top: 5%;
+    left: 50%;
+    transform: translateX(-50%);
 }
 
 #ui_tutorialText {
@@ -14,7 +12,7 @@
     padding: 14px 24px;
     border-radius: 16px;
     box-shadow: 0 8px var(--uiBackgroundColor_pressed);
-    pointer-events: none;
+    width: max-content;
 }
 
 #btn_next {
