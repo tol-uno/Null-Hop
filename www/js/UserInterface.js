@@ -421,7 +421,12 @@ const UserInterface = {
                 UserInterface.timerStart = Date.now();
                 UserInterface.levelState = 2;
                 Player.startLevel();
-                UserInterface.removeUiElement(btn_jump);
+
+                const removeJumpBtn = setTimeout(() => {
+                    if (UserInterface.levelState >= 2) {
+                        UserInterface.removeUiElement(btn_jump);
+                    }
+                }, 200);
             }
         };
 

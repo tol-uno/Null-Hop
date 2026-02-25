@@ -197,15 +197,16 @@
 }
 
 #btn_directLightColor {
-    bottom: 40px;
-    right: 270px;
-    width: 210px;
+    bottom: 10%;
+    right: 30%;
+    width: 23.4vw;
+    font-size: 10px;
 }
 
 #btn_ambientLightColor {
-    bottom: 40px;
-    right: 44px;
-    width: 210px;
+    bottom: 10%;
+    right: 5%;
+    width: 23.4vw;
 }
 
 #btn_wallTopColor {
@@ -381,10 +382,26 @@
         width: 10.1vw;
     }
 
+    #btn_playerColor {
+        bottom: 20%;
+        width: 37vw;
+    }
+
     #btn_backgroundColor {
         bottom: 20%;
         left: unset;
         right: 5%;
         width: 48.3vw;
+    }
+
+    #btn_directLightColor {
+        right: unset;
+        left: 5%;
+        width: 43vw;
+    }
+
+    #btn_ambientLightColor {
+        right: 5%;
+        width: 43vw;
     }
 }
