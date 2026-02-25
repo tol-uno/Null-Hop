@@ -238,6 +238,7 @@ const Player = {
                 this.previousJumpSpeed = 100;
             } else {
                 // similar code to btn_restart.func();
+                UserInterface.switchToUiGroup(UserInterface.uiGroup_inLevel);
                 ui_speedometer.textContent = "Speed: 0";
                 ui_jumpStats.textContent = "";
                 UserInterface.timer = 0;

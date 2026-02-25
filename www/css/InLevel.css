@@ -59,6 +59,7 @@
     bottom: 5%;
     width: 10.7vw;
     height: 10.7vw;
+    animation: pulse 800ms infinite;
 }
 
 #ui_timerBox {

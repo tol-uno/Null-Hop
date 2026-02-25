@@ -397,10 +397,8 @@ const UserInterface = {
                 return;
             }
 
-            if (UserInterface.levelState == 3) {
-                // if already finished level
-                UserInterface.switchToUiGroup(UserInterface.uiGroup_inLevel);
-            }
+            // brings back the start jumping button
+            UserInterface.switchToUiGroup(UserInterface.uiGroup_inLevel);
 
             ui_speedometer.textContent = "Speed: 0";
             ui_jumpStats.textContent = "";
@@ -409,8 +407,8 @@ const UserInterface = {
             Player.checkpointIndex = -1;
             Player.restart();
 
-            // only reaches this code if tutorial is on last two states (pretty much completed)
             if (Tutorial.isActive) {
+                // only reaches this code if tutorial is on last two states (pretty much completed)
                 Tutorial.isActive = false;
                 Tutorial.reset();
             }
@@ -419,9 +417,11 @@ const UserInterface = {
         const btn_jump = getByID("btn_jump");
         btn_jump.func = () => {
             if (UserInterface.levelState == 1) {
+                // Can KILL this check since btn wont be visible unless levelState == 1
                 UserInterface.timerStart = Date.now();
                 UserInterface.levelState = 2;
                 Player.startLevel();
+                UserInterface.removeUiElement(btn_jump);
             }
         };
 
@@ -1518,7 +1518,7 @@ const UserInterface = {
             btn_restart,
             btn_jump,
         ]);
-        this.uiGroup_endScreen = new Set([ui_speedometer, btn_mainMenu, btn_restart, btn_jump, ui_endScreen]);
+        this.uiGroup_endScreen = new Set([ui_speedometer, btn_mainMenu, btn_restart, ui_endScreen]);
 
         this.uiGroup_mapEditorMapBrowser = new Set([btn_mainMenu, getByID("custom-map-list-container"), ui_mapInfoBox, btn_newMap, btn_importMap]);
 
@@ -1866,7 +1866,8 @@ const UserInterface = {
     },
 
     switchToUiGroup: function (newUiGroup) {
-        // uiGroups need to be Sets()
+        // uiGroup need to be a Set()
+        // None of these functions should mutate the uiGroups
 
         for (const element of this.activeUiGroup) {
             if (!newUiGroup.has(element)) {
@@ -1878,7 +1879,7 @@ const UserInterface = {
             element.classList.remove("hidden");
         }
 
-        this.activeUiGroup = newUiGroup;
+        this.activeUiGroup = new Set(newUiGroup);
     },
 
     removeUiElement: function (uiElement) {
