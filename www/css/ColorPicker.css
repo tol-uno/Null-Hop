@@ -52,9 +52,9 @@
     width: 100%;
 }
 
-#btn_hueSlider > .label,
-#btn_saturationSlider > .label,
-#btn_lightnessSlider > .label {
+#btn_hueSlider>.label,
+#btn_saturationSlider>.label,
+#btn_lightnessSlider>.label {
     margin-bottom: 1.6vw;
     font-size: 1.8vw;
 }
@@ -63,71 +63,69 @@
     width: 100%;
     height: 1.8vw;
     border-radius: 0.6vw;
-    background-image: linear-gradient(
-        90deg,
-        hsl(0, 100%, 50%),
-        hsl(10, 100%, 50%),
-        hsl(20, 100%, 50%),
-        hsl(30, 100%, 50%),
-        hsl(40, 100%, 50%),
-        hsl(50, 100%, 50%),
-        hsl(60, 100%, 50%),
-        hsl(70, 100%, 50%),
-        hsl(80, 100%, 50%),
-        hsl(90, 100%, 50%),
-        hsl(100, 100%, 50%),
-        hsl(110, 100%, 50%),
-        hsl(120, 100%, 50%),
-        hsl(130, 100%, 50%),
-        hsl(140, 100%, 50%),
-        hsl(150, 100%, 50%),
-        hsl(160, 100%, 50%),
-        hsl(170, 100%, 50%),
-        hsl(180, 100%, 50%),
-        hsl(190, 100%, 50%),
-        hsl(200, 100%, 50%),
-        hsl(210, 100%, 50%),
-        hsl(220, 100%, 50%),
-        hsl(230, 100%, 50%),
-        hsl(240, 100%, 50%),
-        hsl(250, 100%, 50%),
-        hsl(260, 100%, 50%),
-        hsl(270, 100%, 50%),
-        hsl(280, 100%, 50%),
-        hsl(290, 100%, 50%),
-        hsl(300, 100%, 50%),
-        hsl(310, 100%, 50%),
-        hsl(320, 100%, 50%),
-        hsl(330, 100%, 50%),
-        hsl(340, 100%, 50%),
-        hsl(350, 100%, 50%),
-        hsl(360, 100%, 50%)
-    );
+    background-image: linear-gradient(90deg,
+            hsl(0, 100%, 50%),
+            hsl(10, 100%, 50%),
+            hsl(20, 100%, 50%),
+            hsl(30, 100%, 50%),
+            hsl(40, 100%, 50%),
+            hsl(50, 100%, 50%),
+            hsl(60, 100%, 50%),
+            hsl(70, 100%, 50%),
+            hsl(80, 100%, 50%),
+            hsl(90, 100%, 50%),
+            hsl(100, 100%, 50%),
+            hsl(110, 100%, 50%),
+            hsl(120, 100%, 50%),
+            hsl(130, 100%, 50%),
+            hsl(140, 100%, 50%),
+            hsl(150, 100%, 50%),
+            hsl(160, 100%, 50%),
+            hsl(170, 100%, 50%),
+            hsl(180, 100%, 50%),
+            hsl(190, 100%, 50%),
+            hsl(200, 100%, 50%),
+            hsl(210, 100%, 50%),
+            hsl(220, 100%, 50%),
+            hsl(230, 100%, 50%),
+            hsl(240, 100%, 50%),
+            hsl(250, 100%, 50%),
+            hsl(260, 100%, 50%),
+            hsl(270, 100%, 50%),
+            hsl(280, 100%, 50%),
+            hsl(290, 100%, 50%),
+            hsl(300, 100%, 50%),
+            hsl(310, 100%, 50%),
+            hsl(320, 100%, 50%),
+            hsl(330, 100%, 50%),
+            hsl(340, 100%, 50%),
+            hsl(350, 100%, 50%),
+            hsl(360, 100%, 50%));
 }
+
 #ui_saturationGradient {
     width: 100%;
     height: 1.8vw;
     border-radius: 0.6vw;
     background-image: linear-gradient(90deg, hsl(var(--h), 0%, var(--l)), hsl(var(--h), 100%, var(--l)));
 }
+
 #ui_lightnessGradient {
     width: 100%;
     height: 1.8vw;
     border-radius: 0.6vw;
-    background-image: linear-gradient(
-        90deg,
-        hsl(var(--h), var(--s), 0%),
-        hsl(var(--h), var(--s), 10%),
-        hsl(var(--h), var(--s), 20%),
-        hsl(var(--h), var(--s), 30%),
-        hsl(var(--h), var(--s), 40%),
-        hsl(var(--h), var(--s), 50%),
-        hsl(var(--h), var(--s), 60%),
-        hsl(var(--h), var(--s), 70%),
-        hsl(var(--h), var(--s), 80%),
-        hsl(var(--h), var(--s), 90%),
-        hsl(var(--h), var(--s), 100%)
-    );
+    background-image: linear-gradient(90deg,
+            hsl(var(--h), var(--s), 0%),
+            hsl(var(--h), var(--s), 10%),
+            hsl(var(--h), var(--s), 20%),
+            hsl(var(--h), var(--s), 30%),
+            hsl(var(--h), var(--s), 40%),
+            hsl(var(--h), var(--s), 50%),
+            hsl(var(--h), var(--s), 60%),
+            hsl(var(--h), var(--s), 70%),
+            hsl(var(--h), var(--s), 80%),
+            hsl(var(--h), var(--s), 90%),
+            hsl(var(--h), var(--s), 100%));
 }
 
 #btn_backgroundColor,
@@ -142,45 +140,45 @@
 #btn_ambientLightColor {
     position: fixed;
     height: 6.3vw;
-}
-
-#btn_backgroundColor > div,
-#btn_playerColor > div,
-#btn_wallTopColor > div,
-#btn_wallSideColor > div,
-#btn_platformTopColor > div,
-#btn_platformSideColor > div,
-#btn_endZoneTopColor > div,
-#btn_endZoneSideColor > div,
-#btn_directLightColor > div,
-#btn_ambientLightColor > div {
-    padding: 0.4vw;
     font-size: 2.5vw;
 }
 
-#btn_backgroundColor > div > div,
-#btn_playerColor > div > div,
-#btn_wallTopColor > div > div,
-#btn_wallSideColor > div > div,
-#btn_platformTopColor > div > div,
-#btn_platformSideColor > div > div,
-#btn_endZoneTopColor > div > div,
-#btn_endZoneSideColor > div > div,
-#btn_directLightColor > div > div,
-#btn_ambientLightColor > div > div {
+#btn_backgroundColor>div,
+#btn_playerColor>div,
+#btn_wallTopColor>div,
+#btn_wallSideColor>div,
+#btn_platformTopColor>div,
+#btn_platformSideColor>div,
+#btn_endZoneTopColor>div,
+#btn_endZoneSideColor>div,
+#btn_directLightColor>div,
+#btn_ambientLightColor>div {
+    padding: 0.4vw;
+}
+
+#btn_backgroundColor>div>div,
+#btn_playerColor>div>div,
+#btn_wallTopColor>div>div,
+#btn_wallSideColor>div>div,
+#btn_platformTopColor>div>div,
+#btn_platformSideColor>div>div,
+#btn_endZoneTopColor>div>div,
+#btn_endZoneSideColor>div>div,
+#btn_directLightColor>div>div,
+#btn_ambientLightColor>div>div {
     flex-grow: 1;
 }
 
-#btn_backgroundColor > div > svg,
-#btn_playerColor > div > svg,
-#btn_wallTopColor > div > svg,
-#btn_wallSideColor > div > svg,
-#btn_platformTopColor > div > svg,
-#btn_platformSideColor > div > svg,
-#btn_endZoneTopColor > div > svg,
-#btn_endZoneSideColor > div > svg,
-#btn_directLightColor > div > svg,
-#btn_ambientLightColor > div > svg {
+#btn_backgroundColor>div>svg,
+#btn_playerColor>div>svg,
+#btn_wallTopColor>div>svg,
+#btn_wallSideColor>div>svg,
+#btn_platformTopColor>div>svg,
+#btn_platformSideColor>div>svg,
+#btn_endZoneTopColor>div>svg,
+#btn_endZoneSideColor>div>svg,
+#btn_directLightColor>div>svg,
+#btn_ambientLightColor>div>svg {
     width: 4.7vw;
 }
 
@@ -200,7 +198,6 @@
     bottom: 10%;
     right: 30%;
     width: 23.4vw;
-    font-size: 10px;
 }
 
 #btn_ambientLightColor {
@@ -210,90 +207,90 @@
 }
 
 #btn_wallTopColor {
-    top: 80px;
-    right: 356px;
-    width: 120px;
+    top: 18%;
+    right: 40%;
+    width: 13.4vw;
 }
 
 #btn_wallSideColor {
-    top: 156px;
-    right: 356px;
-    width: 120px;
+    top: 37%;
+    right: 40%;
+    width: 13.4vw;
 }
 
 #btn_platformTopColor {
-    top: 80px;
-    right: 200px;
-    width: 120px;
+    top: 18%;
+    right: 22.5%;
+    width: 13.4vw;
 }
 
 #btn_platformSideColor {
-    top: 156px;
-    right: 200px;
-    width: 120px;
+    top: 37%;
+    right: 22.5%;
+    width: 13.4vw;
 }
 
 #btn_endZoneTopColor {
-    top: 80px;
-    right: 44px;
-    width: 120px;
+    top: 18%;
+    right: 5%;
+    width: 13.4vw;
 }
 
 #btn_endZoneSideColor {
-    top: 156px;
-    right: 44px;
-    width: 120px;
+    top: 37%;
+    right: 5%;
+    width: 13.4vw;
 }
 
 #ui_colorPicker_walls {
     color: var(--uiForegroundColor);
-    font-size: 28px;
+    font-size: 3.1vw;
     position: fixed;
-    right: 384px;
-    top: 34px;
+    right: 43%;
+    top: 5%;
 }
 
 #ui_colorPicker_platforms {
     color: var(--uiForegroundColor);
-    font-size: 28px;
+    font-size: 3.1vw;
     position: fixed;
-    right: 204px;
-    top: 34px;
+    right: 23%;
+    top: 5%;
 }
 
 #ui_colorPicker_endZones {
     color: var(--uiForegroundColor);
-    font-size: 28px;
+    font-size: 3.1vw;
     position: fixed;
-    right: 44px;
-    top: 34px;
+    right: 5%;
+    top: 5%;
 }
 
 #btn_syncWallColors {
     position: fixed;
-    right: 356px;
-    top: 232px;
-    width: 116px;
+    right: 40%;
+    top: 56%;
+    width: 12.9vw;
 }
 
 #btn_syncPlatformColors {
     position: fixed;
-    right: 200px;
-    top: 232px;
-    width: 116px;
+    right: 22.5%;
+    top: 56%;
+    width: 12.9vw;
 }
 
 #btn_syncEndZoneColors {
     position: fixed;
-    right: 44px;
-    top: 232px;
-    width: 116px;
+    right: 5%;
+    top: 56%;
+    width: 12.9vw;
 }
 
-#btn_syncWallColors > .label,
-#btn_syncPlatformColors > .label,
-#btn_syncEndZoneColors > .label {
-    font-size: 16px;
+#btn_syncWallColors>.label,
+#btn_syncPlatformColors>.label,
+#btn_syncEndZoneColors>.label {
+    font-size: 1.8vw;
     text-align: center;
 }
 
@@ -328,9 +325,9 @@
         font-size: 5.3vw;
     }
 
-    #btn_hueSlider > .label,
-    #btn_saturationSlider > .label,
-    #btn_lightnessSlider > .label {
+    #btn_hueSlider>.label,
+    #btn_saturationSlider>.label,
+    #btn_lightnessSlider>.label {
         margin-bottom: 3.4vw;
         font-size: 3.9vw;
     }
@@ -353,32 +350,32 @@
     #btn_directLightColor,
     #btn_ambientLightColor {
         height: 13.5vw;
-    }
-
-    #btn_backgroundColor > div,
-    #btn_playerColor > div,
-    #btn_wallTopColor > div,
-    #btn_wallSideColor > div,
-    #btn_platformTopColor > div,
-    #btn_platformSideColor > div,
-    #btn_endZoneTopColor > div,
-    #btn_endZoneSideColor > div,
-    #btn_directLightColor > div,
-    #btn_ambientLightColor > div {
-        padding: 1vw;
         font-size: 5.3vw;
     }
 
-    #btn_backgroundColor > div > svg,
-    #btn_playerColor > div > svg,
-    #btn_wallTopColor > div > svg,
-    #btn_wallSideColor > div > svg,
-    #btn_platformTopColor > div > svg,
-    #btn_platformSideColor > div > svg,
-    #btn_endZoneTopColor > div > svg,
-    #btn_endZoneSideColor > div > svg,
-    #btn_directLightColor > div > svg,
-    #btn_ambientLightColor > div > svg {
+    #btn_backgroundColor>div,
+    #btn_playerColor>div,
+    #btn_wallTopColor>div,
+    #btn_wallSideColor>div,
+    #btn_platformTopColor>div,
+    #btn_platformSideColor>div,
+    #btn_endZoneTopColor>div,
+    #btn_endZoneSideColor>div,
+    #btn_directLightColor>div,
+    #btn_ambientLightColor>div {
+        padding: 1vw;
+    }
+
+    #btn_backgroundColor>div>svg,
+    #btn_playerColor>div>svg,
+    #btn_wallTopColor>div>svg,
+    #btn_wallSideColor>div>svg,
+    #btn_platformTopColor>div>svg,
+    #btn_platformSideColor>div>svg,
+    #btn_endZoneTopColor>div>svg,
+    #btn_endZoneSideColor>div>svg,
+    #btn_directLightColor>div>svg,
+    #btn_ambientLightColor>div>svg {
         width: 10.1vw;
     }
 
@@ -395,13 +392,96 @@
     }
 
     #btn_directLightColor {
+        font-size: 4.4vw;
         right: unset;
         left: 5%;
         width: 43vw;
     }
 
     #btn_ambientLightColor {
-        right: 5%;
+        font-size: 4.4vw;
         width: 43vw;
+    }
+
+    #btn_wallTopColor {
+        top: 45%;
+        right: unset;
+        left: 5%;
+        width: 29vw;
+    }
+
+    #btn_wallSideColor {
+        top: 54%;
+        right: unset;
+        left: 5%;
+        width: 29vw;
+    }
+
+    #btn_platformTopColor {
+        top: 45%;
+        right: 50%;
+        transform: translateX(50%);
+        width: 29vw;
+    }
+
+    #btn_platformSideColor {
+        top: 54%;
+        right: 50%;
+        transform: translateX(50%);
+        width: 29vw;
+    }
+
+    #btn_endZoneTopColor {
+        top: 45%;
+        width: 29vw;
+    }
+
+    #btn_endZoneSideColor {
+        top: 54%;
+        width: 29vw;
+    }
+
+    #ui_colorPicker_walls {
+        font-size: 5.3vw;
+        left: 13%;
+        top: 40%;
+    }
+
+    #ui_colorPicker_platforms {
+        font-size: 5.3vw;
+        right: 50%;
+        transform: translateX(50%);
+        top: 40%;
+    }
+
+    #ui_colorPicker_endZones {
+        font-size: 5.3vw;
+        right: 7.5%;
+        top: 40%;
+    }
+
+    #btn_syncWallColors {
+        left: 5%;
+        top: 63%;
+        width: 28vw;
+    }
+
+    #btn_syncPlatformColors {
+        right: 50%;
+        transform: translateX(50%);
+        top: 63%;
+        width: 28vw;
+    }
+
+    #btn_syncEndZoneColors {
+        right: 5%;
+        top: 63%;
+        width: 28vw;
+    }
+
+    #btn_syncWallColors>.label,
+    #btn_syncPlatformColors>.label,
+    #btn_syncEndZoneColors>.label {
+        font-size: 3.9vw;
     }
 }

@@ -3,44 +3,52 @@
     top: 5%;
     left: 50%;
     transform: translateX(-50%);
+    /* border: 3px solid green; */
+    max-width: 90%;
 }
 
 #ui_tutorialText {
     background-color: var(--uiBackgroundColor);
     color: var(--uiForegroundColor);
-    font-size: 22px;
-    padding: 14px 24px;
-    border-radius: 16px;
-    box-shadow: 0 8px var(--uiBackgroundColor_pressed);
+    font-size: 2.5vw;
+    padding: 1.6vw 2.7vw;
+    border-radius: 1.8vw;
+    box-shadow: 0 0.9vw var(--uiBackgroundColor_pressed);
     width: max-content;
+    max-width: 100%;
+    text-align: center;
 }
 
 #btn_next {
     position: absolute;
     top: 0;
     left: 100%;
-    margin-left: 16px;
-
-    width: 60px;
-    height: 60px;
+    margin-left: 1.8vw;
+    width: 6.7vw;
+    height: 6.7vw;
     animation: pulse 800ms infinite;
 }
 
-#ui_restartWarning {
+#ui_menuLabel,
+#ui_restartLabel {
     position: fixed;
-    left: 132px;
-    transform: translateX(-50%);
-    top: 130px;
-    width: 148px;
-    height: 58px;
+    left: 15%;
+    padding: 2vw;
     background-color: var(--uiBackgroundColor);
     color: var(--uiForegroundColor);
-    font-size: 16px;
-    border-radius: 8px;
-    box-shadow: 0 4px 0 var(--uiBackgroundColor_pressed);
-    animation: pulse 800ms infinite;
+    font-size: 2vw;
+    border-radius: 1.8vw;
+    box-shadow: 0 0.9vw var(--uiBackgroundColor_pressed);
     text-align: center;
     align-content: center;
+}
+
+#ui_menuLabel {
+    top: 6%;
+}
+
+#ui_restartLabel {
+    top: 28%;
 }
 
 .zero-opacity {
@@ -51,9 +59,9 @@
 #tutorial_swipe {
     animation: swipeX 4s infinite cubic-bezier(0.3, 0, 0.7, 1);
     position: fixed;
-    right: 44%;
+    right: 42%;
     bottom: 10%;
-    width: 120px;
+    width: 13.4vw;
     opacity: 1;
     transition: opacity 500ms ease-in-out;
     z-index: 1;
@@ -64,7 +72,7 @@
     position: fixed;
     left: 26%;
     bottom: 18%;
-    width: 110px;
+    width: 12.3vw;
     opacity: 1;
     transition: opacity 500ms ease-in-out;
 }
@@ -72,32 +80,36 @@
 #tutorial_arrow {
     animation: arrowPoint 2s infinite ease-in-out;
     position: fixed;
-    left: 172px;
-    bottom: 56px;
-    width: 75px;
+    left: 20%;
+    bottom: 10%;
+    width: 8.4vw;
 }
 
 @keyframes swipeX {
     0% {
-        transform: translateX(-100px);
+        transform: translateX(-100%);
     }
+
     50% {
-        transform: translateX(100px);
+        transform: translateX(100%);
     }
+
     100% {
-        transform: translateX(-100px);
+        transform: translateX(-100%);
     }
 }
 
 @keyframes swipeY {
     0% {
-        transform: translateY(-50px);
+        transform: translateY(-30%);
     }
+
     50% {
-        transform: translateY(50px);
+        transform: translateY(30%);
     }
+
     100% {
-        transform: translateY(-50px);
+        transform: translateY(-30%);
     }
 }
 
@@ -105,9 +117,11 @@
     0% {
         transform: translateX(-20px);
     }
+
     50% {
         transform: translateX(20px);
     }
+
     100% {
         transform: translateX(-20px);
     }
@@ -126,7 +140,70 @@
 
 #target {
     position: fixed;
-    margin-left: 32px;
-    margin-top: -32px;
+    margin-left: 3.6vw;
+    margin-top: -3.6vw;
+    width: 7.1vw;
+    height: 7.1vw;
     transform: rotate(calc(-1 * var(--angle)));
+}
+
+
+@media (orientation: portrait) {
+    #ui_tutorialTextWrapper {
+        top: 20%;
+    }
+
+    #ui_tutorialText {
+        font-size: 4.8vw;
+        padding: 3.4vw 5.8vw;
+        border-radius: 3.9vw;
+        box-shadow: 0 1.9vw var(--uiBackgroundColor_pressed);
+    }
+
+    #btn_next {
+        top: 150%;
+        left: unset;
+        right: 0;
+        width: 14.5vw;
+        height: 14.5vw;
+    }
+
+    #ui_restartLabel,
+    #ui_menuLabel {
+        left: 26%;
+        padding: 4vw;
+        font-size: 4.8vw;
+        border-radius: 3.9vw;
+        box-shadow: 0 1.9vw var(--uiBackgroundColor_pressed);
+    }
+
+    #ui_menuLabel {
+        top: 7%;
+    }
+
+    #ui_restartLabel {
+        top: 19%;
+    }
+
+    #tutorial_swipe {
+        right: 35%;
+        animation: swipeX 4s infinite cubic-bezier(0.3, 0, 0.7, 1);
+        width: 29vw;
+    }
+
+    #tutorial_swipeVertical {
+        width: 26.6vw;
+    }
+
+    #tutorial_arrow {
+        left: 35%;
+        width: 18.1vw;
+    }
+
+    #target {
+        margin-left: 7.7vw;
+        margin-top: -7.7vw;
+        width: 15.5vw;
+        height: 15.5vw;
+    }
 }

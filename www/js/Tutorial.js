@@ -67,7 +67,6 @@ const Tutorial = {
 
             case 5: {
                 ui_tutorialText.textContent = "Start jumping by pressing the jump button";
-                UserInterface.addUiElement(btn_restart);
                 UserInterface.addUiElement(btn_jump);
                 UserInterface.addUiElement(tutorial_arrow);
                 UserInterface.removeUiElement(tutorial_swipe);
@@ -200,7 +199,7 @@ const Tutorial = {
             // 15 unpause
 
             case 16: {
-                // Hit checkpoint. Ednzone text
+                // Hit checkpoint. Endzone text
                 this.pausePlayer = true;
                 UserInterface.addUiElement(tutorial_swipe);
                 tutorial_swipe.classList.add("zero-opacity");
@@ -224,11 +223,12 @@ const Tutorial = {
 
             case 18: {
                 // Ending the level sets a new uiGroup so have to unhide stuff again
-
+                
                 UserInterface.addUiElement(btn_next);
                 UserInterface.addUiElement(ui_tutorialText);
-                ui_tutorialText.textContent = "Finish levels faster to earn medals ⇩";
+                ui_tutorialText.textContent = "Finish levels faster to earn medals";
                 UserInterface.removeUiElement(ui_speedometer);
+                UserInterface.removeUiElement(btn_restart); // would get in the way of text. Add in next state
 
                 UserInterface.setToggleState(btn_playTutorial, false);
                 UserInterface.settings.playTutorial = false;
@@ -239,8 +239,13 @@ const Tutorial = {
             }
 
             case 19: {
+                UserInterface.removeUiElement(ui_tutorialText);
                 UserInterface.removeUiElement(btn_next);
-                ui_tutorialText.innerHTML = `Click <span style="border: 2px solid var(--uiForegroundColor); border-radius: 50%; padding: 0px 7.5px 2px 8px;">×</span> to select a new level or <span style="border: 2px solid var(--uiForegroundColor); border-radius: 50%; padding: 0px 4px 2px 3px;">↺</span> to try again`;
+                UserInterface.addUiElement(btn_restart);
+                // Add two labels next to the main menu and restart buttons
+                UserInterface.addUiElement(ui_menuLabel)
+                UserInterface.addUiElement(ui_restartLabel)
+                // ui_tutorialText.innerHTML = `Click <span style="border: 2px solid var(--uiForegroundColor); border-radius: 50%; padding: 0px 7.5px 2px 8px;">×</span> to select a new level or <span style="border: 2px solid var(--uiForegroundColor); border-radius: 50%; padding: 0px 4px 2px 3px;">↺</span> to try again`;
                 break;
             }
 

@@ -385,18 +385,6 @@ const UserInterface = {
 
         const btn_restart = getByID("btn_restart");
         btn_restart.func = () => {
-            if (Tutorial.isActive && Tutorial.state < 18) {
-                // In Tutorial and HAVE NOT reached the end
-                // Show Popup Alert "Restart Disabled During Tutorial"
-                if (!UserInterface.activeUiGroup.has(ui_restartWarning)) {
-                    UserInterface.addUiElement(ui_restartWarning);
-                    setTimeout(() => {
-                        UserInterface.removeUiElement(ui_restartWarning);
-                    }, 1500); // waits 1.5 seconds to hide warning
-                }
-                return;
-            }
-
             // brings back the start jumping button
             UserInterface.switchToUiGroup(UserInterface.uiGroup_inLevel);
 
@@ -417,13 +405,18 @@ const UserInterface = {
         const btn_jump = getByID("btn_jump");
         btn_jump.func = () => {
             if (UserInterface.levelState == 1) {
-                // Can KILL this check since btn wont be visible unless levelState == 1
+                // so user cant fire button again as it's fading out
                 UserInterface.timerStart = Date.now();
                 UserInterface.levelState = 2;
                 Player.startLevel();
 
-                const removeJumpBtn = setTimeout(() => {
+                btn_jump.style.animation = "fadeOut 200ms forwards cubic-bezier(0.7, 0, 1.0, 1.0)";
+
+                setTimeout(() => {
+                    btn_jump.style.opacity = "1"; // reset fade out
+                    btn_jump.style.animation = "";
                     if (UserInterface.levelState >= 2) {
+                        btn_jump.classList.remove("pressed");
                         UserInterface.removeUiElement(btn_jump);
                     }
                 }, 200);
@@ -571,7 +564,8 @@ const UserInterface = {
             Tutorial.setState(Tutorial.state + 1);
         };
 
-        const ui_restartWarning = getByID("ui_restartWarning");
+        const ui_restartLabel = getByID("ui_restartLabel");
+        const ui_menuLabel = getByID("ui_menuLabel");
 
         const tutorial_swipe = getByID("tutorial_swipe");
         const tutorial_swipeVertical = getByID("tutorial_swipeVertical");
@@ -1515,7 +1509,8 @@ const UserInterface = {
             ui_jumpStats,
             ui_timerBox,
             // ui_strafeHelper,
-            // ui_restartWarning,
+            // ui_menuLabel
+            // ui_restartLabel,
             ui_warningContainer,
             // ui_verticalWarning,
             // ui_overstrafeWarning, // broken
