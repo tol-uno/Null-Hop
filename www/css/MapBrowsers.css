@@ -153,7 +153,6 @@
     overflow-wrap: break-word;
     justify-content: center;
     gap: 1.8vw;
-    /*     border: 1px solid pink */
 }
 
 #ui_mapInfoBox .mapName {
@@ -174,11 +173,9 @@
     font-size: 2.5vw;
     font-family: "DINish", monospace;
     font-variant-numeric: tabular-nums;
-    /*     border: 1px solid blue; */
 }
 
 #ui_mapInfoBox .medalList > div {
-    /*         border: 1px solid red; */
     display: flex;
     gap: 1.2vw;
     padding-right: 1vw;

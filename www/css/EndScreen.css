@@ -3,15 +3,15 @@
     top: 25%;
     bottom: 25%;
     left: 50%;
-    width: 50%;
     transform: translateX(-50%);
-    border-radius: 2.8vw;
+    width: 50%;
+    border-radius: 2.6vw;
     display: flex;
-    gap: 8px;
-    padding: 16px;
+    gap: 0.9vw;
+    padding: 1.8vw;
     color: var(--uiForegroundColor);
     background-color: var(--uiBackgroundColor);
-    box-shadow: 0 8px 0 var(--uiBackgroundColor_pressed);
+    box-shadow: 0 0.9vw 0 var(--uiBackgroundColor_pressed);
 }
 
 /* container for mapname and your time */
@@ -20,24 +20,23 @@
     flex-direction: column;
     flex-basis: 50%;
     overflow: hidden;
-
     overflow-wrap: break-word;
     justify-content: center;
-    gap: 16px;
+    gap: 1.8vw;
 }
 
 #ui_endScreen .mapName {
-    font-size: 3vw;
+    font-size: 3.2vw;
     line-height: 1;
 }
 
 #ui_endScreen .yourTime {
-    font-size: 5vw;
+    font-size: 5.7vw;
     line-height: 0.9;
 }
 
 #ui_endScreen .yourRecord {
-    font-size: 2vw;
+    font-size: 2.3vw;
 }
 
 #ui_endScreen .medalList {
@@ -46,14 +45,17 @@
     flex-direction: column;
     justify-content: space-around;
     align-items: end;
-    font-size: 2.2vw;
+    font-size: 2.5vw;
+    font-family: "DINish", monospace;
+    font-variant-numeric: tabular-nums;
 }
 
 #ui_endScreen .medalList > div {
     display: flex;
-    gap: 8px;
+    gap: 1.2vw;
+    padding-right: 1vw;
+    padding-left: 1vw;
     align-items: center;
-    padding-right: 6px;
     justify-content: end;
 }
 
@@ -62,87 +64,123 @@
 #ui_endScreen .silver::before,
 #ui_endScreen .gold::before {
     content: "";
-    width: 16px;
-    height: 16px;
-    margin-top: -4px;
+    width: 1.8vw;
+    height: 1.8vw;
+    margin-top: -0.4vw;
     border-radius: 50%;
 }
 
 #ui_endScreen .gold::before {
     color: #f1b62c;
     background-color: #f1b62c;
-    border: 3px solid #fde320;
-    box-shadow: 0 3px 0 #f1b62c;
+    border: 0.35vw solid #fde320;
+    box-shadow: 0 0.35vw #f1b62c;
 }
 
 #ui_endScreen .silver::before {
     color: #8c9a9b;
     background-color: #8c9a9b;
-    border: 3px solid #d4d4d6;
-    box-shadow: 0 3px 0 #8c9a9b;
+    border: 0.35vw solid #d4d4d6;
+    box-shadow: 0 0.35vw #8c9a9b;
 }
 
 #ui_endScreen .bronze::before {
     color: #e6823e;
     background-color: #e6823e;
-    border: 3px solid #f4a46f;
-    box-shadow: 0 3px 0 #e6823e;
+    border: 0.35vw solid #f4a46f;
+    box-shadow: 0 0.35vw #e6823e;
 }
 
 #ui_endScreen .activeMedal {
-    font-size: 3vw;
-    padding: 6px 0 6px 6px;
-    box-shadow: 0 5px 0 var(--uiForegroundColor);
-    border: 3px solid var(--uiForegroundColor);
-    border-radius: 10px;
-    margin-top: -4px;
+    font-size: 3.4vw;
+    padding: 0.7vw;
+    box-shadow: 0 0.6vw var(--uiBackgroundColor_pressed);
+    border: 0.35vw solid var(--uiForegroundColor);
+    border-radius: 1.8vw;
+    margin-top: -0.4vw;
 }
 
 #ui_endScreen .activeMedal::before {
-    width: 24px !important;
-    height: 24px !important;
-    box-shadow: 0 4px !important;
-}
-
-@media (orientation: landscape) {
-    /* adjustments for very small landscape screens */
-
-    @media (width < 800px) {
-        #ui_endScreen {
-            padding: 8px;
-        }
-    }
+    width: 2.7vw !important;
+    height: 2.7vw !important;
+    box-shadow: 0 0.4vw !important;
 }
 
 @media (orientation: portrait) {
     #ui_endScreen {
-        top: 35%;
-        right: 28px;
-        left: 28px;
-        height: 180px;
+        top: 40%;
+        right: 5%;
+        left: 5%;
+        bottom: 38%;
         width: unset;
         transform: unset;
-        bottom: unset;
-        border-radius: 5.5vw;
+        border-radius: 5.8vw;
+        gap: 1.9vw;
+        padding: 3.9vw;
+        box-shadow: 0 1.9vw 0 var(--uiBackgroundColor_pressed);
+    }
+
+    #ui_endScreen > :first-child {
+        gap: 3.9vw;
     }
 
     #ui_endScreen .mapName {
-        font-size: 6vw;
+        font-size: 5.6vw;
     }
 
     #ui_endScreen .yourTime {
-        font-size: 10vw;
+        font-size: 10.5vw;
     }
 
     #ui_endScreen .yourRecord {
-        font-size: 4vw;
+        font-size: 4.1vw;
     }
 
     #ui_endScreen .medalList {
         font-size: 5vw;
     }
 
+    #ui_endScreen .medalList > div {
+        gap: 2vw;
+        padding-right: 2vw;
+        padding-left: 2vw;
+    }
+
+    #ui_endScreen .bronze::before,
+    #ui_endScreen .silver::before,
+    #ui_endScreen .gold::before {
+        width: 3.9vw;
+        height: 3.9vw;
+        margin-top: -1vw;
+    }
+
+    #ui_endScreen .gold::before {
+        border: 0.76vw solid #fde320;
+        box-shadow: 0 0.76vw #f1b62c;
+    }
+
+    #ui_endScreen .silver::before {
+        border: 0.76vw solid #d4d4d6;
+        box-shadow: 0 0.76vw #8c9a9b;
+    }
+
+    #ui_endScreen .bronze::before {
+        border: 0.76vw solid #f4a46f;
+        box-shadow: 0 0.76vw #e6823e;
+    }
+
     #ui_endScreen .activeMedal {
-        font-size: 6vw;
+        font-size: 6.5vw;
+        padding: 1.4vw;
+        box-shadow: 0 1.2vw var(--uiBackgroundColor_pressed);
+        border: 0.76vw solid var(--uiForegroundColor);
+        border-radius: 3.3vw;
+        margin-top: -1vw;
+    }
+
+    #ui_endScreen .activeMedal::before {
+        width: 5.8vw !important;
+        height: 5.8vw !important;
+        box-shadow: 0 1vw !important;
     }
 }

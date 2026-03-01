@@ -34,6 +34,7 @@
     position: fixed;
     left: 15%;
     padding: 2vw;
+    border: 0.3vw solid var(--uiBackgroundColor_pressed);
     background-color: var(--uiBackgroundColor);
     color: var(--uiForegroundColor);
     font-size: 2vw;
@@ -147,7 +148,6 @@
     transform: rotate(calc(-1 * var(--angle)));
 }
 
-
 @media (orientation: portrait) {
     #ui_tutorialTextWrapper {
         top: 20%;
@@ -174,6 +174,7 @@
         padding: 4vw;
         font-size: 4.8vw;
         border-radius: 3.9vw;
+        border: none;
         box-shadow: 0 1.9vw var(--uiBackgroundColor_pressed);
     }
 
