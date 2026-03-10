@@ -25,14 +25,15 @@ class Vector2D3D {
     //     this.x += vector.x;
     //     this.y += vector.y;
     //     this.z += vector.z;
+    //     return this;
     // }
 
-    // UNUSED
-    // subtract(vector) {
-    //     this.x -= vector.x;
-    //     this.y -= vector.y;
-    //     this.z -= vector.z
-    // }
+    subtract(vector) {
+        this.x -= vector.x;
+        this.y -= vector.y;
+        this.z -= vector.z;
+        return this;
+    }
 
     multiply(scalar) {
         this.x *= scalar;
@@ -52,6 +53,16 @@ class Vector2D3D {
 
     dotProduct(vector) {
         return this.x * vector.x + this.y * vector.y + this.z * vector.z;
+    }
+
+    crossProduct(vector) {
+        // cross product results in a third vector that is perpendicular to both of the original vectors
+        const x = this.x;
+        const y = this.y;
+        this.x = y * vector.z - this.z * vector.y;
+        this.y = this.z * vector.x - x * vector.z;
+        this.z = x * vector.y - y * vector.x;
+        return this;
     }
 
     magnitude() {
