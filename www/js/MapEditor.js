@@ -161,7 +161,6 @@ const MapEditor = {
                 btn_mapEditor.func();
                 return;
             }
-            
         } else {
             // load existing map
             const mapDataRaw = await readFile("device", "maps", name + ".json", "text");
@@ -176,6 +175,20 @@ const MapEditor = {
         UserInterface.switchToUiGroup(UserInterface.uiGroup_mapEditorInterface);
         UserInterface.determineButtonColor();
 
+        // Sync ColorPicker wall and side toggles
+        const endZoneColorsMatch = this.loadedMap.style.endZoneSideColor == this.loadedMap.style.endZoneTopColor;
+        UserInterface.setToggleState(btn_syncEndZoneColors, endZoneColorsMatch);
+        ColorPicker.lockEndzoneColors = endZoneColorsMatch;
+
+        const wallColorsMatch = this.loadedMap.style.wallSideColor == this.loadedMap.style.wallTopColor;
+        UserInterface.setToggleState(btn_syncWallColors, wallColorsMatch);
+        ColorPicker.lockWallColors = wallColorsMatch;
+
+        const platformColorsMatch = this.loadedMap.style.platformSideColor == this.loadedMap.style.platformTopColor;
+        UserInterface.setToggleState(btn_syncPlatformColors, platformColorsMatch);
+        ColorPicker.lockPlatformColors = platformColorsMatch;
+
+        // Set up screen
         this.screen.x = this.loadedMap.playerStart.x;
         this.screen.y = this.loadedMap.playerStart.y;
         this.screen.width = screenWidth / this.zoom;
