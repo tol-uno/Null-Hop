@@ -48,6 +48,8 @@ const Map = {
             gravity = 500;
         }
 
+        renderer.setMapData(this)
+
         UserInterface.gamestate = 6; // switch to in level
     },
 
