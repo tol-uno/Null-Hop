@@ -1,10 +1,29 @@
 {
   "playerStart": {
-    "x": 341,
+    "x": 342,
     "y": 562,
     "angle": 264
   },
-  "checkpoints": [],
+  "checkpoints": [
+    {
+      "triggerX1": 102,
+      "triggerY1": 178,
+      "triggerX2": 574,
+      "triggerY2": 186,
+      "x": 348,
+      "y": 210,
+      "angle": 270
+    },
+    {
+      "triggerX1": 136,
+      "triggerY1": -868,
+      "triggerX2": 608,
+      "triggerY2": -856,
+      "x": 334,
+      "y": -890,
+      "angle": 270
+    }
+  ],
   "style": {
     "platformTopColor": "rgb(96,88,62)",
     "platformSideColor": "rgb(96,88,62)",
@@ -23,8 +42,8 @@
   },
   "platforms": [
     {
-      "x": 489.6598162844208,
-      "y": -156.50890802409526,
+      "x": 484,
+      "y": -1302,
       "width": 28,
       "height": 123,
       "angle": 3,
@@ -68,19 +87,19 @@
           -60.683013000005076
         ]
       ],
-      "leftMostCornerX": 472.46034148891573,
-      "leftMostCornerY": -95.82589502409019,
-      "rightMostCornerX": 506.85929107992587,
-      "rightMostCornerY": -217.19192102410034,
-      "topCornerX": 478.89766410679783,
-      "topCornerY": -218.65732779890277,
-      "botCornerX": 500.42196846204376,
-      "botCornerY": -94.36048824928776,
+      "leftMostCornerX": 466.80052520449493,
+      "leftMostCornerY": -1241.316986999995,
+      "rightMostCornerX": 501.19947479550507,
+      "rightMostCornerY": -1362.683013000005,
+      "topCornerX": 473.23784782237703,
+      "topCornerY": -1364.1484197748075,
+      "botCornerX": 494.76215217762297,
+      "botCornerY": -1239.8515802251925,
       "occludes": []
     },
     {
-      "x": 574.1076840273463,
-      "y": -161.68126635678712,
+      "x": 568,
+      "y": -1308,
       "width": 29,
       "height": 193,
       "angle": 39,
@@ -124,21 +143,21 @@
           -65.86943961037505
         ]
       ],
-      "leftMostCornerX": 502.1096498499109,
-      "leftMostCornerY": -95.81182674641207,
-      "rightMostCornerX": 646.1057182047816,
-      "rightMostCornerY": -227.55070596716217,
-      "topCornerX": 623.5684853225296,
-      "topCornerY": -245.80099730760745,
-      "botCornerX": 524.646882732163,
-      "botCornerY": -77.5615354059668,
+      "leftMostCornerX": 496.0019658225646,
+      "leftMostCornerY": -1242.1305603896249,
+      "rightMostCornerX": 639.9980341774353,
+      "rightMostCornerY": -1373.8694396103751,
+      "topCornerX": 617.4608012951833,
+      "topCornerY": -1392.1197309508202,
+      "botCornerX": 518.5391987048167,
+      "botCornerY": -1223.8802690491798,
       "occludes": [
         0
       ]
     },
     {
-      "x": 669,
-      "y": 25,
+      "x": 662,
+      "y": -1120,
       "width": 50,
       "height": 30,
       "angle": -38,
@@ -182,21 +201,21 @@
           -3.5713755790406285
         ]
       ],
-      "leftMostCornerX": 640.0648090299471,
-      "leftMostCornerY": 28.571375579040627,
-      "rightMostCornerX": 697.9351909700529,
-      "rightMostCornerY": 21.428624420959373,
-      "topCornerX": 679.4653467102831,
-      "topCornerY": -2.211698187242284,
-      "botCornerX": 658.5346532897169,
-      "botCornerY": 52.211698187242284,
+      "leftMostCornerX": 633.0648090299471,
+      "leftMostCornerY": -1116.4286244209593,
+      "rightMostCornerX": 690.9351909700529,
+      "rightMostCornerY": -1123.5713755790407,
+      "topCornerX": 672.4653467102831,
+      "topCornerY": -1147.2116981872423,
+      "botCornerX": 651.5346532897169,
+      "botCornerY": -1092.7883018127577,
       "occludes": [
         1
       ]
     },
     {
-      "x": 651.7820886102869,
-      "y": 82.22345568813913,
+      "x": 646,
+      "y": -1064,
       "width": 125,
       "height": 27,
       "angle": -38,
@@ -240,21 +259,21 @@
           -27.8406970341629
         ]
       ],
-      "leftMostCornerX": 594.2199865929704,
-      "leftMostCornerY": 110.06415272230203,
-      "rightMostCornerX": 709.3441906276034,
-      "rightMostCornerY": 54.382758653976225,
-      "topCornerX": 692.7213307938107,
-      "topCornerY": 33.106468306594735,
-      "botCornerX": 610.8428464267631,
-      "botCornerY": 131.34044306968352,
+      "leftMostCornerX": 588.4378979826835,
+      "leftMostCornerY": -1036.159302965837,
+      "rightMostCornerX": 703.5621020173165,
+      "rightMostCornerY": -1091.840697034163,
+      "topCornerX": 686.9392421835237,
+      "topCornerY": -1113.1169873815443,
+      "botCornerX": 605.0607578164763,
+      "botCornerY": -1014.8830126184556,
       "occludes": [
         2
       ]
     },
     {
-      "x": 778.4471899403607,
-      "y": 96.616587467257,
+      "x": 772,
+      "y": -1050,
       "width": 271,
       "height": 23,
       "angle": -10,
@@ -298,22 +317,22 @@
           -12.204038914228667
         ]
       ],
-      "leftMostCornerX": 643.0087853640368,
-      "leftMostCornerY": 108.82062638148567,
-      "rightMostCornerX": 913.8855945166845,
-      "rightMostCornerY": 84.41254855302834,
-      "topCornerX": 909.8916864303451,
-      "topCornerY": 61.761970233747554,
-      "botCornerX": 647.0026934503762,
-      "botCornerY": 131.47120470076646,
+      "leftMostCornerX": 636.5615954236762,
+      "leftMostCornerY": -1037.7959610857713,
+      "rightMostCornerX": 907.4384045763238,
+      "rightMostCornerY": -1062.2040389142287,
+      "topCornerX": 903.4444964899844,
+      "topCornerY": -1084.8546172335095,
+      "botCornerX": 640.5555035100156,
+      "botCornerY": -1015.1453827664906,
       "occludes": [
         2,
         3
       ]
     },
     {
-      "x": 627,
-      "y": 149.5,
+      "x": 620,
+      "y": -996,
       "width": 126,
       "height": 29,
       "angle": 0,
@@ -357,22 +376,22 @@
           -14.5
         ]
       ],
-      "leftMostCornerX": 564,
-      "leftMostCornerY": 164,
-      "rightMostCornerX": 690,
-      "rightMostCornerY": 135,
-      "topCornerX": 564,
-      "topCornerY": 135,
-      "botCornerX": 690,
-      "botCornerY": 164,
+      "leftMostCornerX": 557,
+      "leftMostCornerY": -981.5,
+      "rightMostCornerX": 683,
+      "rightMostCornerY": -1010.5,
+      "topCornerX": 557,
+      "topCornerY": -1010.5,
+      "botCornerX": 683,
+      "botCornerY": -981.5,
       "occludes": [
         3,
         4
       ]
     },
     {
-      "x": 462.88657990620857,
-      "y": -20.237383067418804,
+      "x": 456,
+      "y": -1166,
       "width": 34,
       "height": 149,
       "angle": 33,
@@ -416,22 +435,22 @@
           -53.22209371667863
         ]
       ],
-      "leftMostCornerX": 408.0535721425168,
-      "leftMostCornerY": 32.984710649259824,
-      "rightMostCornerX": 517.7195876699003,
-      "rightMostCornerY": -73.45947678409743,
-      "topCornerX": 489.20478835975587,
-      "topCornerY": -91.97720397460836,
-      "botCornerX": 436.56837145266127,
-      "botCornerY": 51.50243783977075,
+      "leftMostCornerX": 401.16699223630826,
+      "leftMostCornerY": -1112.7779062833213,
+      "rightMostCornerX": 510.83300776369174,
+      "rightMostCornerY": -1219.2220937166787,
+      "topCornerX": 482.3182084535473,
+      "topCornerY": -1237.7398209071896,
+      "botCornerX": 429.6817915464527,
+      "botCornerY": -1094.2601790928104,
       "occludes": [
         0,
         1
       ]
     },
     {
-      "x": 343,
-      "y": -262,
+      "x": 336,
+      "y": -1408,
       "width": 16,
       "height": 138,
       "angle": -20,
@@ -475,19 +494,19 @@
           62.10262968762233
         ]
       ],
-      "leftMostCornerX": 311.8830691442416,
-      "leftMostCornerY": -324.1026296876223,
-      "rightMostCornerX": 374.1169308557584,
-      "rightMostCornerY": -199.89737031237766,
-      "topCornerX": 326.9181510768161,
-      "topCornerY": -329.574951980833,
-      "botCornerX": 359.0818489231839,
-      "botCornerY": -194.42504801916698,
+      "leftMostCornerX": 304.8830691442416,
+      "leftMostCornerY": -1470.1026296876223,
+      "rightMostCornerX": 367.1169308557584,
+      "rightMostCornerY": -1345.8973703123777,
+      "topCornerX": 319.9181510768161,
+      "topCornerY": -1475.574951980833,
+      "botCornerX": 352.0818489231839,
+      "botCornerY": -1340.425048019167,
       "occludes": []
     },
     {
-      "x": 387,
-      "y": -648,
+      "x": 380,
+      "y": -1794,
       "width": 45,
       "height": 47,
       "angle": 45,
@@ -531,19 +550,19 @@
           -0.7071067811865515
         ]
       ],
-      "leftMostCornerX": 354.47308806541884,
-      "leftMostCornerY": -647.2928932188134,
-      "rightMostCornerX": 419.52691193458116,
-      "rightMostCornerY": -648.7071067811866,
-      "topCornerX": 387.70710678118655,
-      "topCornerY": -680.5269119345812,
-      "botCornerX": 386.29289321881345,
-      "botCornerY": -615.4730880654188,
+      "leftMostCornerX": 347.47308806541884,
+      "leftMostCornerY": -1793.2928932188136,
+      "rightMostCornerX": 412.52691193458116,
+      "rightMostCornerY": -1794.7071067811864,
+      "topCornerX": 380.70710678118655,
+      "topCornerY": -1826.5269119345812,
+      "botCornerX": 379.29289321881345,
+      "botCornerY": -1761.4730880654188,
       "occludes": []
     },
     {
-      "x": 415,
-      "y": -619,
+      "x": 408,
+      "y": -1764,
       "width": 18,
       "height": 61,
       "angle": 45,
@@ -587,21 +606,21 @@
           -15.202795795510772
         ]
       ],
-      "leftMostCornerX": 387.0692821431314,
-      "leftMostCornerY": -603.7972042044893,
-      "rightMostCornerX": 442.9307178568686,
-      "rightMostCornerY": -634.2027957955107,
-      "topCornerX": 430.2027957955108,
-      "topCornerY": -646.9307178568686,
-      "botCornerX": 399.7972042044892,
-      "botCornerY": -591.0692821431314,
+      "leftMostCornerX": 380.0692821431314,
+      "leftMostCornerY": -1748.7972042044892,
+      "rightMostCornerX": 435.9307178568686,
+      "rightMostCornerY": -1779.2027957955108,
+      "topCornerX": 423.2027957955108,
+      "topCornerY": -1791.9307178568686,
+      "botCornerX": 392.7972042044892,
+      "botCornerY": -1736.0692821431314,
       "occludes": [
         8
       ]
     },
     {
-      "x": 427,
-      "y": -578,
+      "x": 420,
+      "y": -1724,
       "width": 31,
       "height": 84,
       "angle": 45,
@@ -645,22 +664,22 @@
           -18.73832970144351
         ]
       ],
-      "leftMostCornerX": 386.34136008177353,
-      "leftMostCornerY": -559.2616702985565,
-      "rightMostCornerX": 467.65863991822647,
-      "rightMostCornerY": -596.7383297014435,
-      "topCornerX": 445.7383297014435,
-      "topCornerY": -618.6586399182265,
-      "botCornerX": 408.2616702985565,
-      "botCornerY": -537.3413600817735,
+      "leftMostCornerX": 379.34136008177353,
+      "leftMostCornerY": -1705.2616702985565,
+      "rightMostCornerX": 460.65863991822647,
+      "rightMostCornerY": -1742.7383297014435,
+      "topCornerX": 438.7383297014435,
+      "topCornerY": -1764.6586399182265,
+      "botCornerX": 401.2616702985565,
+      "botCornerY": -1683.3413600817735,
       "occludes": [
         8,
         9
       ]
     },
     {
-      "x": 431,
-      "y": -535,
+      "x": 424,
+      "y": -1680,
       "width": 20,
       "height": 73,
       "angle": 45,
@@ -704,21 +723,21 @@
           -18.73832970144351
         ]
       ],
-      "leftMostCornerX": 398.11953467482556,
-      "leftMostCornerY": -516.2616702985565,
-      "rightMostCornerX": 463.88046532517444,
-      "rightMostCornerY": -553.7383297014435,
-      "topCornerX": 449.7383297014435,
-      "topCornerY": -567.8804653251744,
-      "botCornerX": 412.2616702985565,
-      "botCornerY": -502.11953467482556,
+      "leftMostCornerX": 391.11953467482556,
+      "leftMostCornerY": -1661.2616702985565,
+      "rightMostCornerX": 456.88046532517444,
+      "rightMostCornerY": -1698.7383297014435,
+      "topCornerX": 442.7383297014435,
+      "topCornerY": -1712.8804653251746,
+      "botCornerX": 405.2616702985565,
+      "botCornerY": -1647.1195346748254,
       "occludes": [
         10
       ]
     },
     {
-      "x": 353,
-      "y": -624,
+      "x": 346,
+      "y": -1770,
       "width": 19,
       "height": 53,
       "angle": -42,
@@ -762,21 +781,21 @@
           13.336597114741796
         ]
       ],
-      "leftMostCornerX": 328.208163089455,
-      "leftMostCornerY": -637.3365971147418,
-      "rightMostCornerX": 377.791836910545,
-      "rightMostCornerY": -610.6634028852582,
-      "topCornerX": 342.3279147735255,
-      "topCornerY": -650.0500786355601,
-      "botCornerX": 363.6720852264745,
-      "botCornerY": -597.9499213644399,
+      "leftMostCornerX": 321.208163089455,
+      "leftMostCornerY": -1783.3365971147418,
+      "rightMostCornerX": 370.791836910545,
+      "rightMostCornerY": -1756.6634028852582,
+      "topCornerX": 335.3279147735255,
+      "topCornerY": -1796.05007863556,
+      "botCornerX": 356.6720852264745,
+      "botCornerY": -1743.94992136444,
       "occludes": [
         8
       ]
     },
     {
-      "x": 333,
-      "y": -590,
+      "x": 326,
+      "y": -1736,
       "width": 31,
       "height": 84,
       "angle": -45,
@@ -820,22 +839,22 @@
           18.73832970144351
         ]
       ],
-      "leftMostCornerX": 292.34136008177353,
-      "leftMostCornerY": -608.7383297014435,
-      "rightMostCornerX": 373.65863991822647,
-      "rightMostCornerY": -571.2616702985565,
-      "topCornerX": 314.2616702985565,
-      "topCornerY": -630.6586399182265,
-      "botCornerX": 351.7383297014435,
-      "botCornerY": -549.3413600817735,
+      "leftMostCornerX": 285.34136008177353,
+      "leftMostCornerY": -1754.7383297014435,
+      "rightMostCornerX": 366.65863991822647,
+      "rightMostCornerY": -1717.2616702985565,
+      "topCornerX": 307.2616702985565,
+      "topCornerY": -1776.6586399182265,
+      "botCornerX": 344.7383297014435,
+      "botCornerY": -1695.3413600817735,
       "occludes": [
         8,
         12
       ]
     },
     {
-      "x": 376,
-      "y": -543,
+      "x": 370,
+      "y": -1688,
       "width": 16,
       "height": 33,
       "angle": 0,
@@ -879,21 +898,21 @@
           -16.5
         ]
       ],
-      "leftMostCornerX": 368,
-      "leftMostCornerY": -526.5,
-      "rightMostCornerX": 384,
-      "rightMostCornerY": -559.5,
-      "topCornerX": 368,
-      "topCornerY": -559.5,
-      "botCornerX": 384,
-      "botCornerY": -526.5,
+      "leftMostCornerX": 362,
+      "leftMostCornerY": -1671.5,
+      "rightMostCornerX": 378,
+      "rightMostCornerY": -1704.5,
+      "topCornerX": 362,
+      "topCornerY": -1704.5,
+      "botCornerX": 378,
+      "botCornerY": -1671.5,
       "occludes": [
         13
       ]
     },
     {
-      "x": 393,
-      "y": -468,
+      "x": 386,
+      "y": -1614,
       "width": 18,
       "height": 114,
       "angle": -15,
@@ -937,14 +956,14 @@
           52.72840069255421
         ]
       ],
-      "leftMostCornerX": 369.5539819925547,
-      "leftMostCornerY": -520.7284006925543,
-      "rightMostCornerX": 416.4460180074453,
-      "rightMostCornerY": -415.2715993074458,
-      "topCornerX": 386.9406468657579,
-      "topCornerY": -525.3871435043995,
-      "botCornerX": 399.0593531342421,
-      "botCornerY": -410.6128564956004,
+      "leftMostCornerX": 362.5539819925547,
+      "leftMostCornerY": -1666.7284006925543,
+      "rightMostCornerX": 409.4460180074453,
+      "rightMostCornerY": -1561.2715993074457,
+      "topCornerX": 379.9406468657579,
+      "topCornerY": -1671.3871435043995,
+      "botCornerX": 392.0593531342421,
+      "botCornerY": -1556.6128564956005,
       "occludes": [
         10,
         11,
@@ -952,8 +971,8 @@
       ]
     },
     {
-      "x": 451,
-      "y": -492,
+      "x": 444,
+      "y": -1638,
       "width": 18,
       "height": 74,
       "angle": 31,
@@ -997,22 +1016,22 @@
           -27.07984745178767
         ]
       ],
-      "leftMostCornerX": 424.229085522009,
-      "leftMostCornerY": -464.92015254821234,
-      "rightMostCornerX": 477.770914477991,
-      "rightMostCornerY": -519.0798474517877,
-      "topCornerX": 462.341903065353,
-      "topCornerY": -528.3505328001686,
-      "botCornerX": 439.658096934647,
-      "botCornerY": -455.64946719983135,
+      "leftMostCornerX": 417.229085522009,
+      "leftMostCornerY": -1610.9201525482124,
+      "rightMostCornerX": 470.770914477991,
+      "rightMostCornerY": -1665.0798474517876,
+      "topCornerX": 455.341903065353,
+      "topCornerY": -1674.3505328001686,
+      "botCornerX": 432.658096934647,
+      "botCornerY": -1601.6494671998314,
       "occludes": [
         10,
         11
       ]
     },
     {
-      "x": 408,
-      "y": -390,
+      "x": 402,
+      "y": -1536,
       "width": 17,
       "height": 35,
       "angle": 6,
@@ -1056,21 +1075,21 @@
           -16.515641231169727
         ]
       ],
-      "leftMostCornerX": 397.7173157821857,
-      "leftMostCornerY": -373.48435876883025,
-      "rightMostCornerX": 418.2826842178143,
-      "rightMostCornerY": -406.51564123116975,
-      "topCornerX": 401.37581199655364,
-      "topCornerY": -408.2926251067198,
-      "botCornerX": 414.62418800344636,
-      "botCornerY": -371.7073748932802,
+      "leftMostCornerX": 391.7173157821857,
+      "leftMostCornerY": -1519.4843587688304,
+      "rightMostCornerX": 412.2826842178143,
+      "rightMostCornerY": -1552.5156412311696,
+      "topCornerX": 395.37581199655364,
+      "topCornerY": -1554.29262510672,
+      "botCornerX": 408.62418800344636,
+      "botCornerY": -1517.70737489328,
       "occludes": [
         15
       ]
     },
     {
-      "x": 408,
-      "y": -359,
+      "x": 402,
+      "y": -1504,
       "width": 10,
       "height": 24,
       "angle": 9,
@@ -1114,21 +1133,21 @@
           -11.0700877619405
         ]
       ],
-      "leftMostCornerX": 401.18434471654155,
-      "leftMostCornerY": -347.9299122380595,
-      "rightMostCornerX": 414.81565528345845,
-      "rightMostCornerY": -370.0700877619405,
-      "topCornerX": 404.93877187750707,
-      "topCornerY": -371.6344324123428,
-      "botCornerX": 411.06122812249293,
-      "botCornerY": -346.3655675876572,
+      "leftMostCornerX": 395.18434471654155,
+      "leftMostCornerY": -1492.9299122380594,
+      "rightMostCornerX": 408.81565528345845,
+      "rightMostCornerY": -1515.0700877619406,
+      "topCornerX": 398.93877187750707,
+      "topCornerY": -1516.634432412343,
+      "botCornerX": 405.06122812249293,
+      "botCornerY": -1491.365567587657,
       "occludes": [
         17
       ]
     },
     {
-      "x": 421.47352803698755,
-      "y": -314.14698253241875,
+      "x": 416,
+      "y": -1460,
       "width": 30,
       "height": 240,
       "angle": 11,
@@ -1172,14 +1191,14 @@
           -114.93312708307151
         ]
       ],
-      "leftMostCornerX": 383.8520408400872,
-      "leftMostCornerY": -199.21385544934725,
-      "rightMostCornerX": 459.09501523388786,
-      "rightMostCornerY": -429.08010961549024,
-      "topCornerX": 429.64619973045797,
-      "topCornerY": -434.8043794767866,
-      "botCornerX": 413.3008563435171,
-      "botCornerY": -193.4895855880509,
+      "leftMostCornerX": 378.3785128030997,
+      "leftMostCornerY": -1345.0668729169286,
+      "rightMostCornerX": 453.6214871969003,
+      "rightMostCornerY": -1574.9331270830714,
+      "topCornerX": 424.1726716934704,
+      "topCornerY": -1580.6573969443677,
+      "botCornerX": 407.8273283065296,
+      "botCornerY": -1339.3426030556323,
       "occludes": [
         15,
         16,
@@ -1188,8 +1207,8 @@
       ]
     },
     {
-      "x": 384.8342021388455,
-      "y": -78.50144689601427,
+      "x": 378,
+      "y": -1224,
       "width": 40,
       "height": 225,
       "angle": 1,
@@ -1233,22 +1252,22 @@
           -112.13381757634835
         ]
       ],
-      "leftMostCornerX": 362.8738525115233,
-      "leftMostCornerY": 33.63237068033408,
-      "rightMostCornerX": 406.79455176616773,
-      "rightMostCornerY": -190.63526447236262,
-      "topCornerX": 366.80064395991207,
-      "topCornerY": -191.33336072985395,
-      "botCornerX": 402.86776031777896,
-      "botCornerY": 34.330466937825406,
+      "leftMostCornerX": 356.0396503726778,
+      "leftMostCornerY": -1111.8661824236517,
+      "rightMostCornerX": 399.9603496273222,
+      "rightMostCornerY": -1336.1338175763483,
+      "topCornerX": 359.96644182106655,
+      "topCornerY": -1336.8319138338397,
+      "botCornerX": 396.03355817893345,
+      "botCornerY": -1111.1680861661603,
       "occludes": [
         7,
         19
       ]
     },
     {
-      "x": 381,
-      "y": 116,
+      "x": 374,
+      "y": -1030,
       "width": 62,
       "height": 148,
       "angle": 16,
@@ -1292,22 +1311,22 @@
           -62.588607469108624
         ]
       ],
-      "leftMostCornerX": 330.8037230954542,
-      "leftMostCornerY": 178.58860746910864,
-      "rightMostCornerX": 431.1962769045458,
-      "rightMostCornerY": 53.411392530891376,
-      "topCornerX": 371.59805175637007,
-      "topCornerY": 36.32187647023743,
-      "botCornerX": 390.40194824362993,
-      "botCornerY": 195.67812352976256,
+      "leftMostCornerX": 323.8037230954542,
+      "leftMostCornerY": -967.4113925308914,
+      "rightMostCornerX": 424.1962769045458,
+      "rightMostCornerY": -1092.5886074691086,
+      "topCornerX": 364.59805175637007,
+      "topCornerY": -1109.6781235297626,
+      "botCornerX": 383.40194824362993,
+      "botCornerY": -950.3218764702374,
       "occludes": [
         6,
         20
       ]
     },
     {
-      "x": 374,
-      "y": 211,
+      "x": 368,
+      "y": -934,
       "width": 37,
       "height": 14,
       "angle": 45,
@@ -1351,21 +1370,21 @@
           8.131727983645295
         ]
       ],
-      "leftMostCornerX": 355.96877707974306,
-      "leftMostCornerY": 202.8682720163547,
-      "rightMostCornerX": 392.03122292025694,
-      "rightMostCornerY": 219.1317279836453,
-      "topCornerX": 365.8682720163547,
-      "topCornerY": 192.96877707974303,
-      "botCornerX": 382.1317279836453,
-      "botCornerY": 229.03122292025697,
+      "leftMostCornerX": 349.96877707974306,
+      "leftMostCornerY": -942.1317279836453,
+      "rightMostCornerX": 386.03122292025694,
+      "rightMostCornerY": -925.8682720163547,
+      "topCornerX": 359.8682720163547,
+      "topCornerY": -952.0312229202569,
+      "botCornerX": 376.1317279836453,
+      "botCornerY": -915.9687770797431,
       "occludes": [
         21
       ]
     },
     {
-      "x": 476.40009507938066,
-      "y": 200.35152151181669,
+      "x": 470,
+      "y": -946,
       "width": 179,
       "height": 45,
       "angle": -31,
@@ -1409,14 +1428,14 @@
           -26.809643438652323
         ]
       ],
-      "leftMostCornerX": 388.0952649810654,
-      "leftMostCornerY": 227.16116495046901,
-      "rightMostCornerX": 564.7049251776959,
-      "rightMostCornerY": 173.54187807316436,
-      "topCornerX": 541.5282118067435,
-      "topCornerY": 134.9693495415693,
-      "botCornerX": 411.2719783520178,
-      "botCornerY": 265.73369348206404,
+      "leftMostCornerX": 381.6951699016847,
+      "leftMostCornerY": -919.1903565613477,
+      "rightMostCornerX": 558.3048300983153,
+      "rightMostCornerY": -972.8096434386523,
+      "topCornerX": 535.1281167273628,
+      "topCornerY": -1011.3821719702473,
+      "botCornerX": 404.87188327263715,
+      "botCornerY": -880.6178280297527,
       "occludes": [
         5,
         21,
@@ -1424,8 +1443,8 @@
       ]
     },
     {
-      "x": 171.43708024794938,
-      "y": 45.10589656938646,
+      "x": 166,
+      "y": -1100,
       "width": 27,
       "height": 89,
       "angle": -23,
@@ -1469,19 +1488,19 @@
           35.6875957440284
         ]
       ],
-      "leftMostCornerX": 141.62272950856874,
-      "leftMostCornerY": 9.41830082535806,
-      "rightMostCornerX": 201.25143098733002,
-      "rightMostCornerY": 80.79349231341486,
-      "topCornerX": 166.47636055178464,
-      "topCornerY": -1.1314396438523318,
-      "botCornerX": 176.39779994411413,
-      "botCornerY": 91.34323278262525,
+      "leftMostCornerX": 136.18564926061936,
+      "leftMostCornerY": -1135.6875957440284,
+      "rightMostCornerX": 195.81435073938064,
+      "rightMostCornerY": -1064.3124042559716,
+      "topCornerX": 161.03928030383526,
+      "topCornerY": -1146.237336213239,
+      "botCornerX": 170.96071969616474,
+      "botCornerY": -1053.762663786761,
       "occludes": []
     },
     {
-      "x": 32,
-      "y": -22,
+      "x": 26,
+      "y": -1168,
       "width": 18,
       "height": 61,
       "angle": -16,
@@ -1525,19 +1544,19 @@
           26.837745523765733
         ]
       ],
-      "leftMostCornerX": 14.941705384136654,
-      "leftMostCornerY": -48.83774552376573,
-      "rightMostCornerX": 49.058294615863346,
-      "rightMostCornerY": 4.837745523765733,
-      "topCornerX": 32.244415911026394,
-      "topCornerY": -53.79921792847172,
-      "botCornerX": 31.755584088973606,
-      "botCornerY": 9.79921792847172,
+      "leftMostCornerX": 8.941705384136654,
+      "leftMostCornerY": -1194.8377455237658,
+      "rightMostCornerX": 43.058294615863346,
+      "rightMostCornerY": -1141.1622544762342,
+      "topCornerX": 26.244415911026394,
+      "topCornerY": -1199.7992179284718,
+      "botCornerX": 25.755584088973606,
+      "botCornerY": -1136.2007820715282,
       "occludes": []
     },
     {
-      "x": 134.5123126250168,
-      "y": 84.44447521751583,
+      "x": 128,
+      "y": -1062,
       "width": 195,
       "height": 28,
       "angle": 32,
@@ -1581,22 +1600,22 @@
           39.794454916547515
         ]
       ],
-      "leftMostCornerX": 44.40875355050038,
-      "leftMostCornerY": 44.650020300968315,
-      "rightMostCornerX": 224.61587169953322,
-      "rightMostCornerY": 124.23893013406334,
-      "topCornerX": 59.24649294903013,
-      "topCornerY": 20.90467360858839,
-      "botCornerX": 209.77813230100344,
-      "botCornerY": 147.98427682644328,
+      "leftMostCornerX": 37.89644092548359,
+      "leftMostCornerY": -1101.7944549165475,
+      "rightMostCornerX": 218.1035590745164,
+      "rightMostCornerY": -1022.2055450834525,
+      "topCornerX": 52.73418032401334,
+      "topCornerY": -1125.5398016089275,
+      "botCornerX": 203.26581967598668,
+      "botCornerY": -998.4601983910726,
       "occludes": [
         24,
         25
       ]
     },
     {
-      "x": 267.717225444533,
-      "y": 168.38115882420766,
+      "x": 262,
+      "y": -978,
       "width": 59,
       "height": 106,
       "angle": -42,
@@ -1640,72 +1659,72 @@
           19.64732286271558
         ]
       ],
-      "leftMostCornerX": 210.3305309559304,
-      "leftMostCornerY": 148.73383596149208,
-      "rightMostCornerX": 325.10391993313567,
-      "rightMostCornerY": 188.02848168692324,
-      "topCornerX": 254.17607565909668,
-      "topCornerY": 109.25513018631945,
-      "botCornerX": 281.2583752299694,
-      "botCornerY": 227.50718746209589,
+      "leftMostCornerX": 204.61330551139739,
+      "leftMostCornerY": -997.6473228627156,
+      "rightMostCornerX": 319.38669448860264,
+      "rightMostCornerY": -958.3526771372844,
+      "topCornerX": 248.45885021456365,
+      "topCornerY": -1037.126028637888,
+      "botCornerX": 275.54114978543635,
+      "botCornerY": -918.8739713621118,
       "occludes": [
         26
       ]
     },
     {
-      "x": 332,
-      "y": 256,
-      "width": 100,
-      "height": 100,
+      "x": 336.6066017177983,
+      "y": -898.1213203435597,
+      "width": 78,
+      "height": 74,
       "angle": 45,
       "angleRad": 0.7853981633974483,
       "endzone": 0,
       "wall": 0,
-      "hypotenuse": 70.71067811865476,
+      "hypotenuse": 53.75872022286245,
       "corners": [
         [
-          -70.71067811865476,
-          7.105427357601002e-15
+          -53.74011537017761,
+          -1.4142135623730923
         ],
         [
-          7.105427357601002e-15,
-          70.71067811865476
+          1.4142135623730994,
+          53.74011537017761
         ],
         [
-          70.71067811865476,
-          -7.105427357601002e-15
+          53.74011537017761,
+          1.4142135623730923
         ],
         [
-          -7.105427357601002e-15,
-          -70.71067811865476
+          -1.4142135623730994,
+          -53.74011537017761
         ]
       ],
       "cornersSorted": [
         [
-          -70.71067811865476,
-          7.105427357601002e-15
+          -53.74011537017761,
+          -1.4142135623730923
         ],
         [
-          -7.105427357601002e-15,
-          -70.71067811865476
+          -1.4142135623730994,
+          -53.74011537017761
         ],
         [
-          7.105427357601002e-15,
-          70.71067811865476
+          1.4142135623730994,
+          53.74011537017761
         ],
         [
-          70.71067811865476,
-          -7.105427357601002e-15
+          53.74011537017761,
+          1.4142135623730923
         ]
       ],
-      "leftMostCornerX": 261.28932188134524,
-      "leftMostCornerY": 256,
-      "rightMostCornerX": 402.71067811865476,
-      "rightMostCornerY": 256,
-      "topCornerX": 332,
-      "topCornerY": 185.28932188134524,
-      "botCornerX": 332,
-      "botCornerY": 326.71067811865476,
+      "leftMostCornerX": 282.8664863476207,
+      "leftMostCornerY": -899.5355339059328,
+      "rightMostCornerX": 390.3467170879759,
+      "rightMostCornerY": -896.7071067811866,
+      "topCornerX": 335.1923881554252,
+      "topCornerY": -951.8614357137373,
+      "botCornerX": 338.0208152801714,
+      "botCornerY": -844.3812049733821,
       "occludes": [
         21,
         22,
@@ -1714,8 +1733,8 @@
       ]
     },
     {
-      "x": 947,
-      "y": 27,
+      "x": 940,
+      "y": -1118,
       "width": 28,
       "height": 67,
       "angle": 24,
@@ -1759,19 +1778,19 @@
           -24.909459827965925
         ]
       ],
-      "leftMostCornerX": 920.5846860499643,
-      "leftMostCornerY": 51.909459827965925,
-      "rightMostCornerX": 973.4153139500357,
-      "rightMostCornerY": 2.090540172034075,
-      "topCornerX": 947.8360411360429,
-      "topCornerY": -9.298085834088333,
-      "botCornerX": 946.1639588639571,
-      "botCornerY": 63.29808583408833,
+      "leftMostCornerX": 913.5846860499643,
+      "leftMostCornerY": -1093.090540172034,
+      "rightMostCornerX": 966.4153139500357,
+      "rightMostCornerY": -1142.909459827966,
+      "topCornerX": 940.8360411360429,
+      "topCornerY": -1154.2980858340884,
+      "botCornerX": 939.1639588639571,
+      "botCornerY": -1081.7019141659116,
       "occludes": []
     },
     {
-      "x": 170,
-      "y": 161,
+      "x": 164,
+      "y": -984,
       "width": 30,
       "height": 30,
       "angle": 50,
@@ -1815,22 +1834,22 @@
           1.8488525014865793
         ]
       ],
-      "leftMostCornerX": 148.86751920791724,
-      "leftMostCornerY": 159.1511474985134,
-      "rightMostCornerX": 191.13248079208276,
-      "rightMostCornerY": 162.8488525014866,
-      "topCornerX": 171.8488525014866,
-      "topCornerY": 139.86751920791724,
-      "botCornerX": 168.1511474985134,
-      "botCornerY": 182.13248079208276,
+      "leftMostCornerX": 142.86751920791724,
+      "leftMostCornerY": -985.8488525014866,
+      "rightMostCornerX": 185.13248079208276,
+      "rightMostCornerY": -982.1511474985134,
+      "topCornerX": 165.8488525014866,
+      "topCornerY": -1005.1324807920828,
+      "botCornerX": 162.1511474985134,
+      "botCornerY": -962.8675192079172,
       "occludes": [
         24,
         26
       ]
     },
     {
-      "x": 329,
-      "y": -117,
+      "x": 322,
+      "y": -1262,
       "width": 24,
       "height": 48,
       "angle": -14,
@@ -1874,21 +1893,21 @@
           20.384034683427902
         ]
       ],
-      "leftMostCornerX": 311.55032579029603,
-      "leftMostCornerY": -137.3840346834279,
-      "rightMostCornerX": 346.44967420970397,
-      "rightMostCornerY": -96.6159653165721,
-      "topCornerX": 334.83742322091996,
-      "topCornerY": -143.19016017781993,
-      "botCornerX": 323.16257677908004,
-      "botCornerY": -90.80983982218007,
+      "leftMostCornerX": 304.55032579029603,
+      "leftMostCornerY": -1282.384034683428,
+      "rightMostCornerX": 339.44967420970397,
+      "rightMostCornerY": -1241.615965316572,
+      "topCornerX": 327.83742322091996,
+      "topCornerY": -1288.19016017782,
+      "botCornerX": 316.16257677908004,
+      "botCornerY": -1235.80983982218,
       "occludes": [
         7
       ]
     },
     {
-      "x": 482,
-      "y": -351,
+      "x": 476,
+      "y": -1496,
       "width": 26,
       "height": 38,
       "angle": 10,
@@ -1932,664 +1951,652 @@
           -16.45392099756186
         ]
       ],
-      "leftMostCornerX": 465.8981838351696,
-      "leftMostCornerY": -334.54607900243815,
-      "rightMostCornerX": 498.1018161648304,
-      "rightMostCornerY": -367.45392099756185,
-      "topCornerX": 472.496814586513,
-      "topCornerY": -371.96877361690207,
-      "botCornerX": 491.503185413487,
-      "botCornerY": -330.03122638309793,
+      "leftMostCornerX": 459.8981838351696,
+      "leftMostCornerY": -1479.546079002438,
+      "rightMostCornerX": 492.1018161648304,
+      "rightMostCornerY": -1512.453920997562,
+      "topCornerX": 466.496814586513,
+      "topCornerY": -1516.9687736169021,
+      "botCornerX": 485.503185413487,
+      "botCornerY": -1475.0312263830979,
       "occludes": [
         16
       ]
     },
     {
-      "x": 401,
-      "y": 343,
-      "width": 30,
-      "height": 74,
-      "angle": -15,
-      "angleRad": -0.2617993877991494,
+      "x": 440,
+      "y": 344,
+      "width": 18,
+      "height": 70,
+      "angle": -18,
+      "angleRad": -0.3141592653589793,
       "endzone": 0,
       "wall": 1,
-      "hypotenuse": 39.92492955535426,
+      "hypotenuse": 36.138621999185304,
       "corners": [
         [
-          -4.912582725542759,
-          39.62154124923334
+          2.256086156466777,
+          36.0681310197049
         ],
         [
-          24.06519206312929,
-          31.856969896157715
+          19.375103449779537,
+          30.505825120955844
         ],
         [
-          4.912582725542759,
-          -39.62154124923334
+          -2.256086156466777,
+          -36.0681310197049
         ],
         [
-          -24.06519206312929,
-          -31.856969896157715
+          -19.375103449779537,
+          -30.505825120955844
         ]
       ],
       "cornersSorted": [
         [
-          -24.06519206312929,
-          -31.856969896157715
+          -19.375103449779537,
+          -30.505825120955844
         ],
         [
-          -4.912582725542759,
-          39.62154124923334
+          -2.256086156466777,
+          -36.0681310197049
         ],
         [
-          4.912582725542759,
-          -39.62154124923334
+          2.256086156466777,
+          36.0681310197049
         ],
         [
-          24.06519206312929,
-          31.856969896157715
+          19.375103449779537,
+          30.505825120955844
         ]
       ],
-      "leftMostCornerX": 376.9348079368707,
-      "leftMostCornerY": 311.1430301038423,
-      "rightMostCornerX": 425.0651920631293,
-      "rightMostCornerY": 374.8569698961577,
-      "topCornerX": 405.91258272554273,
-      "topCornerY": 303.37845875076664,
-      "botCornerX": 396.08741727445727,
-      "botCornerY": 382.62154124923336,
-      "occludes": [
-        21,
-        22,
-        23,
-        28
-      ]
+      "leftMostCornerX": 420.62489655022046,
+      "leftMostCornerY": 313.4941748790442,
+      "rightMostCornerX": 459.37510344977954,
+      "rightMostCornerY": 374.5058251209558,
+      "topCornerX": 437.7439138435332,
+      "topCornerY": 307.9318689802951,
+      "botCornerX": 442.2560861564668,
+      "botCornerY": 380.0681310197049,
+      "occludes": []
     },
     {
-      "x": 239,
-      "y": 304,
-      "width": 16,
-      "height": 40,
+      "x": 236.8533248115948,
+      "y": 309.503118149009,
+      "width": 8,
+      "height": 46,
       "angle": 20,
       "angleRad": 0.3490658503988659,
       "endzone": 0,
       "wall": 0,
-      "hypotenuse": 21.540659228538015,
+      "hypotenuse": 23.345235059857504,
       "corners": [
         [
-          -14.357943832800641,
-          16.05769126911282
+          -11.625233779634014,
+          20.24484970477322
         ],
         [
-          0.6771380997738934,
-          21.53001356232352
+          -4.1076928133467465,
+          22.981010851378567
         ],
         [
-          14.357943832800641,
-          -16.05769126911282
+          11.625233779634014,
+          -20.24484970477322
         ],
         [
-          -0.6771380997738934,
-          -21.53001356232352
+          4.1076928133467465,
+          -22.981010851378567
         ]
       ],
       "cornersSorted": [
         [
-          -14.357943832800641,
-          16.05769126911282
+          -11.625233779634014,
+          20.24484970477322
         ],
         [
-          -0.6771380997738934,
-          -21.53001356232352
+          -4.1076928133467465,
+          22.981010851378567
         ],
         [
-          0.6771380997738934,
-          21.53001356232352
+          4.1076928133467465,
+          -22.981010851378567
         ],
         [
-          14.357943832800641,
-          -16.05769126911282
+          11.625233779634014,
+          -20.24484970477322
         ]
       ],
-      "leftMostCornerX": 224.64205616719937,
-      "leftMostCornerY": 320.0576912691128,
-      "rightMostCornerX": 253.35794383280063,
-      "rightMostCornerY": 287.9423087308872,
-      "topCornerX": 238.32286190022612,
-      "topCornerY": 282.4699864376765,
-      "botCornerX": 239.67713809977388,
-      "botCornerY": 325.5300135623235,
+      "leftMostCornerX": 225.2280910319608,
+      "leftMostCornerY": 329.74796785378226,
+      "rightMostCornerX": 248.47855859122882,
+      "rightMostCornerY": 289.2582684442358,
+      "topCornerX": 240.96101762494155,
+      "topCornerY": 286.52210729763044,
+      "botCornerX": 232.74563199824806,
+      "botCornerY": 332.4841290003876,
       "occludes": []
     },
     {
-      "x": 257,
-      "y": 350,
-      "width": 18,
-      "height": 94,
+      "x": 256.8278066145322,
+      "y": 344.7615145603573,
+      "width": 14,
+      "height": 80,
       "angle": 23,
       "angleRad": 0.4014257279586958,
       "endzone": 0,
       "wall": 0,
-      "hypotenuse": 47.853944456021594,
+      "hypotenuse": 40.607881008493905,
       "corners": [
         [
-          -26.64890672006783,
-          39.74714795586124
+          -22.072779113738033,
+          34.0850762386727
         ],
         [
-          -10.079819357923906,
-          46.780308268668165
+          -9.18571116540387,
+          39.555312037522526
         ],
         [
-          26.64890672006783,
-          -39.74714795586124
+          22.072779113738033,
+          -34.0850762386727
         ],
         [
-          10.079819357923906,
-          -46.780308268668165
+          9.18571116540387,
+          -39.555312037522526
         ]
       ],
       "cornersSorted": [
         [
-          -26.64890672006783,
-          39.74714795586124
+          -22.072779113738033,
+          34.0850762386727
         ],
         [
-          -10.079819357923906,
-          46.780308268668165
+          -9.18571116540387,
+          39.555312037522526
         ],
         [
-          10.079819357923906,
-          -46.780308268668165
+          9.18571116540387,
+          -39.555312037522526
         ],
         [
-          26.64890672006783,
-          -39.74714795586124
+          22.072779113738033,
+          -34.0850762386727
         ]
       ],
-      "leftMostCornerX": 230.35109327993217,
-      "leftMostCornerY": 389.74714795586124,
-      "rightMostCornerX": 283.6489067200678,
-      "rightMostCornerY": 310.25285204413876,
-      "topCornerX": 267.0798193579239,
-      "topCornerY": 303.21969173133186,
-      "botCornerX": 246.9201806420761,
-      "botCornerY": 396.78030826866814,
+      "leftMostCornerX": 234.7550275007942,
+      "leftMostCornerY": 378.84659079902997,
+      "rightMostCornerX": 278.90058572827024,
+      "rightMostCornerY": 310.6764383216846,
+      "topCornerX": 266.0135177799361,
+      "topCornerY": 305.20620252283476,
+      "botCornerX": 247.64209544912836,
+      "botCornerY": 384.3168265978798,
       "occludes": [
-        28,
         34
       ]
     },
     {
-      "x": 293,
-      "y": 356,
-      "width": 24,
-      "height": 52,
+      "x": 292,
+      "y": 358,
+      "width": 22,
+      "height": 56,
       "angle": 16,
       "angleRad": 0.2792526803190927,
       "endzone": 0,
       "wall": 0,
-      "hypotenuse": 28.635642126552707,
+      "hypotenuse": 30.083217912982647,
       "corners": [
         [
-          -18.701711602501806,
-          21.6851558245923
+          -18.291724618197485,
+          23.88331657228594
         ],
         [
-          4.368569100017848,
-          28.300452364200282
+          2.856032692445531,
+          29.94733840025992
         ],
         [
-          18.701711602501806,
-          -21.6851558245923
+          18.291724618197485,
+          -23.88331657228594
         ],
         [
-          -4.368569100017848,
-          -28.300452364200282
+          -2.856032692445531,
+          -29.94733840025992
         ]
       ],
       "cornersSorted": [
         [
-          -18.701711602501806,
-          21.6851558245923
+          -18.291724618197485,
+          23.88331657228594
         ],
         [
-          -4.368569100017848,
-          -28.300452364200282
+          -2.856032692445531,
+          -29.94733840025992
         ],
         [
-          4.368569100017848,
-          28.300452364200282
+          2.856032692445531,
+          29.94733840025992
         ],
         [
-          18.701711602501806,
-          -21.6851558245923
+          18.291724618197485,
+          -23.88331657228594
         ]
       ],
-      "leftMostCornerX": 274.2982883974982,
-      "leftMostCornerY": 377.6851558245923,
-      "rightMostCornerX": 311.7017116025018,
-      "rightMostCornerY": 334.3148441754077,
-      "topCornerX": 288.63143089998215,
-      "topCornerY": 327.6995476357997,
-      "botCornerX": 297.36856910001785,
-      "botCornerY": 384.3004523642003,
+      "leftMostCornerX": 273.70827538180254,
+      "leftMostCornerY": 381.88331657228593,
+      "rightMostCornerX": 310.29172461819746,
+      "rightMostCornerY": 334.11668342771407,
+      "topCornerX": 289.1439673075545,
+      "topCornerY": 328.0526615997401,
+      "botCornerX": 294.8560326924455,
+      "botCornerY": 387.9473384002599,
       "occludes": [
-        28,
         35
       ]
     },
     {
-      "x": 361,
-      "y": 355,
-      "width": 24,
-      "height": 56,
+      "x": 375.0151922469878,
+      "y": 354.1736481776669,
+      "width": 22,
+      "height": 60,
       "angle": -10,
       "angleRad": -0.17453292519943295,
       "endzone": 0,
       "wall": 0,
-      "hypotenuse": 30.463092423455635,
+      "hypotenuse": 31.953090617340916,
       "corners": [
         [
-          -6.955544061472446,
-          29.65839521634499
+          -5.623439953126379,
+          31.454362544702477
         ],
         [
-          16.679842010820543,
-          25.49083895233866
+          16.042330613142198,
+          27.634102636030008
         ],
         [
-          6.955544061472446,
-          -29.65839521634499
+          5.623439953126379,
+          -31.454362544702477
         ],
         [
-          -16.679842010820543,
-          -25.49083895233866
+          -16.042330613142198,
+          -27.634102636030008
         ]
       ],
       "cornersSorted": [
         [
-          -16.679842010820543,
-          -25.49083895233866
+          -16.042330613142198,
+          -27.634102636030008
         ],
         [
-          -6.955544061472446,
-          29.65839521634499
+          -5.623439953126379,
+          31.454362544702477
         ],
         [
-          6.955544061472446,
-          -29.65839521634499
+          5.623439953126379,
+          -31.454362544702477
         ],
         [
-          16.679842010820543,
-          25.49083895233866
+          16.042330613142198,
+          27.634102636030008
         ]
       ],
-      "leftMostCornerX": 344.32015798917945,
-      "leftMostCornerY": 329.50916104766134,
-      "rightMostCornerX": 377.67984201082055,
-      "rightMostCornerY": 380.49083895233866,
-      "topCornerX": 367.95554406147244,
-      "topCornerY": 325.341604783655,
-      "botCornerX": 354.04445593852756,
-      "botCornerY": 384.658395216345,
-      "occludes": [
-        28,
-        33
-      ]
+      "leftMostCornerX": 358.9728616338456,
+      "leftMostCornerY": 326.5395455416369,
+      "rightMostCornerX": 391.05752286013,
+      "rightMostCornerY": 381.8077508136969,
+      "topCornerX": 380.63863220011416,
+      "topCornerY": 322.71928563296444,
+      "botCornerX": 369.39175229386143,
+      "botCornerY": 385.62801072236937,
+      "occludes": []
     },
     {
-      "x": 327,
-      "y": 358.5,
-      "width": 18,
-      "height": 31,
+      "x": 332,
+      "y": 359,
+      "width": 32,
+      "height": 32,
       "angle": 0,
       "angleRad": 0,
       "endzone": 0,
       "wall": 0,
-      "hypotenuse": 17.92344832893492,
+      "hypotenuse": 22.627416997969522,
       "corners": [
         [
-          -9,
-          15.5
+          -16,
+          16
         ],
         [
-          9,
-          15.5
+          16,
+          16
         ],
         [
-          9,
-          -15.5
+          16,
+          -16
         ],
         [
-          -9,
-          -15.5
+          -16,
+          -16
         ]
       ],
       "cornersSorted": [
         [
-          -9,
-          15.5
+          -16,
+          16
         ],
         [
-          -9,
-          -15.5
+          -16,
+          -16
         ],
         [
-          9,
-          15.5
+          16,
+          16
         ],
         [
-          9,
-          -15.5
+          16,
+          -16
         ]
       ],
-      "leftMostCornerX": 318,
-      "leftMostCornerY": 374,
-      "rightMostCornerX": 336,
+      "leftMostCornerX": 316,
+      "leftMostCornerY": 375,
+      "rightMostCornerX": 348,
       "rightMostCornerY": 343,
-      "topCornerX": 318,
+      "topCornerX": 316,
       "topCornerY": 343,
-      "botCornerX": 336,
-      "botCornerY": 374,
-      "occludes": [
-        28
-      ]
+      "botCornerX": 348,
+      "botCornerY": 375,
+      "occludes": []
     },
     {
-      "x": 287.4544288607393,
-      "y": 421.62385912141804,
-      "width": 64,
-      "height": 16,
-      "angle": -29,
-      "angleRad": -0.5061454830783556,
-      "endzone": 0,
-      "wall": 0,
-      "hypotenuse": 32.984845004941285,
-      "corners": [
-        [
-          -24.109353666489966,
-          22.510865504997952
-        ],
-        [
-          31.86630759043136,
-          -8.51695019076762
-        ],
-        [
-          24.109353666489966,
-          -22.510865504997952
-        ],
-        [
-          -31.86630759043136,
-          8.51695019076762
-        ]
-      ],
-      "cornersSorted": [
-        [
-          -31.86630759043136,
-          8.51695019076762
-        ],
-        [
-          -24.109353666489966,
-          22.510865504997952
-        ],
-        [
-          24.109353666489966,
-          -22.510865504997952
-        ],
-        [
-          31.86630759043136,
-          -8.51695019076762
-        ]
-      ],
-      "leftMostCornerX": 255.58812127030797,
-      "leftMostCornerY": 430.14080931218564,
-      "rightMostCornerX": 319.32073645117066,
-      "rightMostCornerY": 413.10690893065043,
-      "topCornerX": 311.56378252722925,
-      "topCornerY": 399.1129936164201,
-      "botCornerX": 263.3450751942494,
-      "botCornerY": 444.13472462641596,
-      "occludes": [
-        35,
-        36
-      ]
-    },
-    {
-      "x": 374.0372829237049,
-      "y": 419.0612156567424,
-      "width": 111,
-      "height": 16,
+      "x": 382,
+      "y": 424,
+      "width": 114,
+      "height": 24,
       "angle": 13,
       "angleRad": 0.22689280275926285,
       "endzone": 0,
       "wall": 0,
-      "hypotenuse": 56.073612332361826,
+      "hypotenuse": 58.249463516842795,
       "corners": [
         [
-          -55.87714703033148,
-          -4.689822997802625
+          -58.23850634488478,
+          -1.1297693201774823
         ],
         [
-          52.277930160829634,
-          20.279744034366388
+          52.83968104063203,
+          24.51465087502313
         ],
         [
-          55.87714703033148,
-          4.689822997802625
+          58.23850634488478,
+          1.1297693201774823
         ],
         [
-          -52.277930160829634,
-          -20.279744034366388
+          -52.83968104063203,
+          -24.51465087502313
         ]
       ],
       "cornersSorted": [
         [
-          -55.87714703033148,
-          -4.689822997802625
+          -58.23850634488478,
+          -1.1297693201774823
         ],
         [
-          -52.277930160829634,
-          -20.279744034366388
+          -52.83968104063203,
+          -24.51465087502313
         ],
         [
-          52.277930160829634,
-          20.279744034366388
+          52.83968104063203,
+          24.51465087502313
         ],
         [
-          55.87714703033148,
-          4.689822997802625
+          58.23850634488478,
+          1.1297693201774823
         ]
       ],
-      "leftMostCornerX": 318.1601358933734,
-      "leftMostCornerY": 414.3713926589397,
-      "rightMostCornerX": 429.91442995403634,
-      "rightMostCornerY": 423.751038654545,
-      "topCornerX": 321.75935276287527,
-      "topCornerY": 398.781471622376,
-      "botCornerX": 426.3152130845345,
-      "botCornerY": 439.34095969110876,
+      "leftMostCornerX": 323.7614936551152,
+      "leftMostCornerY": 422.8702306798225,
+      "rightMostCornerX": 440.2385063448848,
+      "rightMostCornerY": 425.1297693201775,
+      "topCornerX": 329.16031895936794,
+      "topCornerY": 399.4853491249769,
+      "botCornerX": 434.83968104063206,
+      "botCornerY": 448.5146508750231,
       "occludes": [
         33,
-        37,
-        41
+        37
       ]
     },
     {
-      "x": 338,
-      "y": 496,
-      "width": 42,
-      "height": 16,
-      "angle": 1,
-      "angleRad": 0.017453292519943295,
+      "x": 293.2711681284317,
+      "y": 423.92946149071895,
+      "width": 84,
+      "height": 24,
+      "angle": -16,
+      "angleRad": -0.2792526803190927,
       "endzone": 0,
       "wall": 0,
-      "hypotenuse": 22.47220505424423,
+      "hypotenuse": 43.68065933568311,
       "corners": [
         [
-          -21.136420849782485,
-          7.632281026068177
+          -37.0653429596054,
+          23.111909295573792
         ],
         [
-          20.85718234678595,
-          8.365282096434084
+          43.680639499213385,
+          -0.04162859305413846
         ],
         [
-          21.136420849782485,
-          -7.632281026068177
+          37.0653429596054,
+          -23.111909295573792
         ],
         [
-          -20.85718234678595,
-          -8.365282096434084
+          -43.680639499213385,
+          0.04162859305413846
         ]
       ],
       "cornersSorted": [
         [
-          -21.136420849782485,
-          7.632281026068177
+          -43.680639499213385,
+          0.04162859305413846
         ],
         [
-          -20.85718234678595,
-          -8.365282096434084
+          -37.0653429596054,
+          23.111909295573792
         ],
         [
-          20.85718234678595,
-          8.365282096434084
+          37.0653429596054,
+          -23.111909295573792
         ],
         [
-          21.136420849782485,
-          -7.632281026068177
+          43.680639499213385,
+          -0.04162859305413846
         ]
       ],
-      "leftMostCornerX": 316.8635791502175,
-      "leftMostCornerY": 503.6322810260682,
-      "rightMostCornerX": 359.1364208497825,
-      "rightMostCornerY": 488.3677189739318,
-      "topCornerX": 317.142817653214,
-      "topCornerY": 487.6347179035659,
-      "botCornerX": 358.857182346786,
-      "botCornerY": 504.3652820964341,
-      "occludes": []
+      "leftMostCornerX": 249.59052862921834,
+      "leftMostCornerY": 423.9710900837731,
+      "rightMostCornerX": 336.9518076276451,
+      "rightMostCornerY": 423.8878328976648,
+      "topCornerX": 330.3365110880371,
+      "topCornerY": 400.81755219514514,
+      "botCornerX": 256.2058251688263,
+      "botCornerY": 447.04137078629276,
+      "occludes": [
+        35,
+        36,
+        40
+      ]
     },
     {
-      "x": 294.80431229128055,
-      "y": 510.89817853167057,
-      "width": 45,
+      "x": 296.8009010663988,
+      "y": 509.3936409737904,
+      "width": 50,
       "height": 16,
       "angle": -37,
       "angleRad": -0.6457718232379019,
       "endzone": 0,
       "wall": 0,
-      "hypotenuse": 23.879907872519105,
+      "hypotenuse": 26.248809496813376,
       "corners": [
         [
-          -13.154778790847702,
-          19.92992210129943
+          -15.151367565965936,
+          21.43445965917955
         ],
         [
-          22.783819161280476,
-          -7.1517539405427435
+          24.78040793639871,
+          -8.656291498422863
         ],
         [
-          13.154778790847702,
-          -19.92992210129943
+          15.151367565965936,
+          -21.43445965917955
         ],
         [
-          -22.783819161280476,
-          7.1517539405427435
+          -24.78040793639871,
+          8.656291498422863
         ]
       ],
       "cornersSorted": [
         [
-          -22.783819161280476,
-          7.1517539405427435
+          -24.78040793639871,
+          8.656291498422863
         ],
         [
-          -13.154778790847702,
-          19.92992210129943
+          -15.151367565965936,
+          21.43445965917955
         ],
         [
-          13.154778790847702,
-          -19.92992210129943
+          15.151367565965936,
+          -21.43445965917955
         ],
         [
-          22.783819161280476,
-          -7.1517539405427435
+          24.78040793639871,
+          -8.656291498422863
         ]
       ],
       "leftMostCornerX": 272.0204931300001,
       "leftMostCornerY": 518.0499324722133,
-      "rightMostCornerX": 317.588131452561,
-      "rightMostCornerY": 503.74642459112783,
-      "topCornerX": 307.9590910821283,
-      "topCornerY": 490.9682564303711,
-      "botCornerX": 281.6495335004328,
+      "rightMostCornerX": 321.5813090027975,
+      "rightMostCornerY": 500.7373494753675,
+      "topCornerX": 311.95226863236473,
+      "topCornerY": 487.9591813146109,
+      "botCornerX": 281.6495335004329,
       "botCornerY": 530.82810063297,
-      "occludes": [
-        40
-      ]
+      "occludes": []
     },
     {
-      "x": 326.965925826289,
-      "y": 538.7411809548976,
-      "width": 29,
-      "height": 9,
-      "angle": -15,
-      "angleRad": -0.2617993877991494,
+      "x": 339.9825475935627,
+      "y": 494.9998476951563,
+      "width": 50,
+      "height": 18,
+      "angle": 1,
+      "angleRad": 0.017453292519943295,
       "endzone": 0,
       "wall": 0,
-      "hypotenuse": 15.182226450688976,
+      "hypotenuse": 26.570660511172846,
       "corners": [
         [
-          -12.841238778230148,
-          8.099542372287358
+          -25.153264036845336,
+          8.562319095475434
         ],
         [
-          15.170610184152833,
-          0.5937900643142568
+          24.83912072097423,
+          9.43493941733961
         ],
         [
-          12.841238778230148,
-          -8.099542372287358
+          25.153264036845336,
+          -8.562319095475434
         ],
         [
-          -15.170610184152833,
-          -0.5937900643142568
+          -24.83912072097423,
+          -9.43493941733961
         ]
       ],
       "cornersSorted": [
         [
-          -15.170610184152833,
-          -0.5937900643142568
+          -25.153264036845336,
+          8.562319095475434
         ],
         [
-          -12.841238778230148,
-          8.099542372287358
+          -24.83912072097423,
+          -9.43493941733961
         ],
         [
-          12.841238778230148,
-          -8.099542372287358
+          24.83912072097423,
+          9.43493941733961
         ],
         [
-          15.170610184152833,
-          0.5937900643142568
+          25.153264036845336,
+          -8.562319095475434
         ]
       ],
-      "leftMostCornerX": 311.79531564213613,
-      "leftMostCornerY": 538.1473908905833,
-      "rightMostCornerX": 342.13653601044183,
-      "rightMostCornerY": 539.3349710192118,
-      "topCornerX": 339.80716460451913,
-      "topCornerY": 530.6416385826102,
-      "botCornerX": 314.12468704805883,
-      "botCornerY": 546.840723327185,
+      "leftMostCornerX": 314.82928355671737,
+      "leftMostCornerY": 503.56216679063175,
+      "rightMostCornerX": 365.135811630408,
+      "rightMostCornerY": 486.43752859968083,
+      "topCornerX": 315.14342687258846,
+      "topCornerY": 485.5649082778167,
+      "botCornerX": 364.8216683145369,
+      "botCornerY": 504.4347871124959,
       "occludes": [
         42
       ]
     },
     {
-      "x": 379.6685825965441,
-      "y": 505.769788550245,
+      "x": 326.3535533905932,
+      "y": 538.3876275643042,
+      "width": 30,
+      "height": 8,
+      "angle": -24,
+      "angleRad": -0.4188790204786391,
+      "endzone": 0,
+      "wall": 0,
+      "hypotenuse": 15.524174696260024,
+      "corners": [
+        [
+          -12.076235292335813,
+          9.755231476707406
+        ],
+        [
+          15.330128436942214,
+          -2.4468678155665997
+        ],
+        [
+          12.076235292335813,
+          -9.755231476707406
+        ],
+        [
+          -15.330128436942214,
+          2.4468678155665997
+        ]
+      ],
+      "cornersSorted": [
+        [
+          -15.330128436942214,
+          2.4468678155665997
+        ],
+        [
+          -12.076235292335813,
+          9.755231476707406
+        ],
+        [
+          12.076235292335813,
+          -9.755231476707406
+        ],
+        [
+          15.330128436942214,
+          -2.4468678155665997
+        ]
+      ],
+      "leftMostCornerX": 311.023424953651,
+      "leftMostCornerY": 540.8344953798709,
+      "rightMostCornerX": 341.68368182753545,
+      "rightMostCornerY": 535.9407597487376,
+      "topCornerX": 338.42978868292903,
+      "topCornerY": 528.6323960875968,
+      "botCornerX": 314.2773180982574,
+      "botCornerY": 548.1428590410117,
+      "occludes": [
+        42
+      ]
+    },
+    {
+      "x": 380,
+      "y": 502,
       "width": 40,
       "height": 15,
       "angle": 26,
@@ -2633,489 +2640,488 @@
           2.0264675885377974
         ]
       ],
-      "leftMostCornerX": 358.4049180696427,
-      "leftMostCornerY": 503.7433209617072,
-      "rightMostCornerX": 400.93224712344556,
-      "rightMostCornerY": 507.7962561387828,
-      "topCornerX": 364.98048527147887,
-      "topCornerY": 490.2614102672197,
-      "botCornerX": 394.3566799216094,
-      "botCornerY": 521.2781668332702,
+      "leftMostCornerX": 358.73633547309856,
+      "leftMostCornerY": 499.9735324114622,
+      "rightMostCornerX": 401.26366452690144,
+      "rightMostCornerY": 504.0264675885378,
+      "topCornerX": 365.31190267493474,
+      "topCornerY": 486.4916217169747,
+      "botCornerX": 394.68809732506526,
+      "botCornerY": 517.5083782830253,
+      "occludes": [
+        41
+      ]
+    },
+    {
+      "x": 354,
+      "y": 538,
+      "width": 26,
+      "height": 8,
+      "angle": 26,
+      "angleRad": 0.4537856055185257,
+      "endzone": 0,
+      "wall": 0,
+      "hypotenuse": 13.601470508735444,
+      "corners": [
+        [
+          -13.43780718904548,
+          -2.1036487230613385
+        ],
+        [
+          9.930838014732862,
+          9.294001093454675
+        ],
+        [
+          13.43780718904548,
+          2.1036487230613385
+        ],
+        [
+          -9.930838014732862,
+          -9.294001093454675
+        ]
+      ],
+      "cornersSorted": [
+        [
+          -13.43780718904548,
+          -2.1036487230613385
+        ],
+        [
+          -9.930838014732862,
+          -9.294001093454675
+        ],
+        [
+          9.930838014732862,
+          9.294001093454675
+        ],
+        [
+          13.43780718904548,
+          2.1036487230613385
+        ]
+      ],
+      "leftMostCornerX": 340.5621928109545,
+      "leftMostCornerY": 535.8963512769386,
+      "rightMostCornerX": 367.4378071890455,
+      "rightMostCornerY": 540.1036487230614,
+      "topCornerX": 344.06916198526716,
+      "topCornerY": 528.7059989065453,
+      "botCornerX": 363.93083801473284,
+      "botCornerY": 547.2940010934547,
+      "occludes": [
+        44
+      ]
+    },
+    {
+      "x": 456.93923848098535,
+      "y": 472.4984788285576,
+      "width": 24,
+      "height": 82,
+      "angle": -29,
+      "angleRad": -0.5061454830783556,
+      "endzone": 0,
+      "wall": 0,
+      "hypotenuse": 42.720018726587654,
+      "corners": [
+        [
+          9.381757944427072,
+          41.67712343567127
+        ],
+        [
+          30.372630915772568,
+          30.041692549759183
+        ],
+        [
+          -9.381757944427072,
+          -41.67712343567127
+        ],
+        [
+          -30.372630915772568,
+          -30.041692549759183
+        ]
+      ],
+      "cornersSorted": [
+        [
+          -30.372630915772568,
+          -30.041692549759183
+        ],
+        [
+          -9.381757944427072,
+          -41.67712343567127
+        ],
+        [
+          9.381757944427072,
+          41.67712343567127
+        ],
+        [
+          30.372630915772568,
+          30.041692549759183
+        ]
+      ],
+      "leftMostCornerX": 426.5666075652128,
+      "leftMostCornerY": 442.4567862787984,
+      "rightMostCornerX": 487.3118693967579,
+      "rightMostCornerY": 502.5401713783168,
+      "topCornerX": 447.5574805365583,
+      "topCornerY": 430.82135539288635,
+      "botCornerX": 466.32099642541243,
+      "botCornerY": 514.1756022642289,
       "occludes": [
         40
       ]
     },
     {
-      "x": 355,
-      "y": 540,
-      "width": 25,
-      "height": 9,
-      "angle": 21,
-      "angleRad": 0.3665191429188092,
-      "endzone": 0,
-      "wall": 0,
-      "hypotenuse": 13.285330255586423,
-      "corners": [
-        [
-          -13.282411104168872,
-          -0.27848745007884546
-        ],
-        [
-          10.057099558261172,
-          8.680711288553661
-        ],
-        [
-          13.282411104168872,
-          0.27848745007884546
-        ],
-        [
-          -10.057099558261172,
-          -8.680711288553661
-        ]
-      ],
-      "cornersSorted": [
-        [
-          -13.282411104168872,
-          -0.27848745007884546
-        ],
-        [
-          -10.057099558261172,
-          -8.680711288553661
-        ],
-        [
-          10.057099558261172,
-          8.680711288553661
-        ],
-        [
-          13.282411104168872,
-          0.27848745007884546
-        ]
-      ],
-      "leftMostCornerX": 341.7175888958311,
-      "leftMostCornerY": 539.7215125499212,
-      "rightMostCornerX": 368.2824111041689,
-      "rightMostCornerY": 540.2784874500788,
-      "topCornerX": 344.94290044173886,
-      "topCornerY": 531.3192887114463,
-      "botCornerX": 365.05709955826114,
-      "botCornerY": 548.6807112885537,
-      "occludes": [
-        43,
-        44
-      ]
-    },
-    {
-      "x": 455,
-      "y": 469,
-      "width": 24,
-      "height": 74,
-      "angle": -29,
-      "angleRad": -0.5061454830783556,
-      "endzone": 0,
-      "wall": 0,
-      "hypotenuse": 38.897300677553446,
-      "corners": [
-        [
-          7.442519463441723,
-          38.17864460711368
-        ],
-        [
-          28.43339243478722,
-          26.543213721201596
-        ],
-        [
-          -7.442519463441723,
-          -38.17864460711368
-        ],
-        [
-          -28.43339243478722,
-          -26.543213721201596
-        ]
-      ],
-      "cornersSorted": [
-        [
-          -28.43339243478722,
-          -26.543213721201596
-        ],
-        [
-          -7.442519463441723,
-          -38.17864460711368
-        ],
-        [
-          7.442519463441723,
-          38.17864460711368
-        ],
-        [
-          28.43339243478722,
-          26.543213721201596
-        ]
-      ],
-      "leftMostCornerX": 426.5666075652128,
-      "leftMostCornerY": 442.4567862787984,
-      "rightMostCornerX": 483.4333924347872,
-      "rightMostCornerY": 495.5432137212016,
-      "topCornerX": 447.5574805365583,
-      "topCornerY": 430.8213553928863,
-      "botCornerX": 462.4425194634417,
-      "botCornerY": 507.1786446071137,
-      "occludes": [
-        39
-      ]
-    },
-    {
-      "x": 408,
-      "y": 548,
-      "width": 14,
-      "height": 60,
+      "x": 406,
+      "y": 542,
+      "width": 16,
+      "height": 62,
       "angle": -12,
       "angleRad": -0.20943951023931956,
       "endzone": 0,
       "wall": 0,
-      "hypotenuse": 30.805843601498726,
+      "hypotenuse": 32.01562118716424,
       "corners": [
         [
-          -0.6096824806038592,
-          30.799809857738484
+          -1.3799183905199062,
+          31.98586914929005
         ],
         [
-          13.084383929669421,
-          27.889046186289857
+          14.270443221220985,
+          28.659282096205903
         ],
         [
-          0.6096824806038592,
-          -30.799809857738484
+          1.3799183905199062,
+          -31.98586914929005
         ],
         [
-          -13.084383929669421,
-          -27.889046186289857
+          -14.270443221220985,
+          -28.659282096205903
         ]
       ],
       "cornersSorted": [
         [
-          -13.084383929669421,
-          -27.889046186289857
+          -14.270443221220985,
+          -28.659282096205903
         ],
         [
-          -0.6096824806038592,
-          30.799809857738484
+          -1.3799183905199062,
+          31.98586914929005
         ],
         [
-          0.6096824806038592,
-          -30.799809857738484
+          1.3799183905199062,
+          -31.98586914929005
         ],
         [
-          13.084383929669421,
-          27.889046186289857
+          14.270443221220985,
+          28.659282096205903
         ]
       ],
-      "leftMostCornerX": 394.9156160703306,
-      "leftMostCornerY": 520.1109538137101,
-      "rightMostCornerX": 421.0843839296694,
-      "rightMostCornerY": 575.8890461862899,
-      "topCornerX": 408.60968248060385,
-      "topCornerY": 517.2001901422615,
-      "botCornerX": 407.39031751939615,
-      "botCornerY": 578.7998098577385,
+      "leftMostCornerX": 391.729556778779,
+      "leftMostCornerY": 513.3407179037941,
+      "rightMostCornerX": 420.270443221221,
+      "rightMostCornerY": 570.6592820962059,
+      "topCornerX": 407.3799183905199,
+      "topCornerY": 510.01413085070993,
+      "botCornerX": 404.6200816094801,
+      "botCornerY": 573.98586914929,
       "occludes": [
         44
       ]
     },
     {
-      "x": 399,
-      "y": 608,
+      "x": 398,
+      "y": 602,
       "width": 16,
-      "height": 63,
+      "height": 64,
       "angle": 30,
       "angleRad": 0.5235987755982988,
       "endzone": 0,
       "wall": 0,
-      "hypotenuse": 32.5,
+      "hypotenuse": 32.984845004941285,
       "corners": [
         [
-          -22.678203230275507,
-          23.279800219209818
+          -22.928203230275507,
+          23.71281292110204
         ],
         [
-          -8.82179676972449,
-          31.279800219209818
+          -9.07179676972449,
+          31.71281292110204
         ],
         [
-          22.678203230275507,
-          -23.279800219209818
+          22.928203230275507,
+          -23.71281292110204
         ],
         [
-          8.82179676972449,
-          -31.279800219209818
+          9.07179676972449,
+          -31.71281292110204
         ]
       ],
       "cornersSorted": [
         [
-          -22.678203230275507,
-          23.279800219209818
+          -22.928203230275507,
+          23.71281292110204
         ],
         [
-          -8.82179676972449,
-          31.279800219209818
+          -9.07179676972449,
+          31.71281292110204
         ],
         [
-          8.82179676972449,
-          -31.279800219209818
+          9.07179676972449,
+          -31.71281292110204
         ],
         [
-          22.678203230275507,
-          -23.279800219209818
+          22.928203230275507,
+          -23.71281292110204
         ]
       ],
-      "leftMostCornerX": 376.3217967697245,
-      "leftMostCornerY": 631.2798002192098,
-      "rightMostCornerX": 421.6782032302755,
-      "rightMostCornerY": 584.7201997807902,
-      "topCornerX": 407.8217967697245,
-      "topCornerY": 576.7201997807902,
-      "botCornerX": 390.1782032302755,
-      "botCornerY": 639.2798002192098,
+      "leftMostCornerX": 375.0717967697245,
+      "leftMostCornerY": 625.712812921102,
+      "rightMostCornerX": 420.9282032302755,
+      "rightMostCornerY": 578.287187078898,
+      "topCornerX": 407.0717967697245,
+      "topCornerY": 570.287187078898,
+      "botCornerX": 388.9282032302755,
+      "botCornerY": 633.712812921102,
       "occludes": [
         47
       ]
     },
     {
-      "x": 218,
-      "y": 429,
-      "width": 20,
-      "height": 38,
-      "angle": 32,
-      "angleRad": 0.5585053606381855,
+      "x": 219.0988822416394,
+      "y": 417.9474233794965,
+      "width": 16,
+      "height": 40,
+      "angle": 34,
+      "angleRad": 0.5934119456780721,
       "endzone": 0,
       "wall": 0,
-      "hypotenuse": 21.470910553583888,
+      "hypotenuse": 21.540659228538015,
       "corners": [
         [
-          -18.54894698199515,
-          10.813721184640045
+          -17.81615864985527,
+          12.107208223334858
         ],
         [
-          -1.587985058866634,
-          21.412106469304142
+          -4.551557488974605,
+          21.05429467886681
         ],
         [
-          18.54894698199515,
-          -10.813721184640045
+          17.81615864985527,
+          -12.107208223334858
         ],
         [
-          1.587985058866634,
-          -21.412106469304142
+          4.551557488974605,
+          -21.05429467886681
         ]
       ],
       "cornersSorted": [
         [
-          -18.54894698199515,
-          10.813721184640045
+          -17.81615864985527,
+          12.107208223334858
         ],
         [
-          -1.587985058866634,
-          21.412106469304142
+          -4.551557488974605,
+          21.05429467886681
         ],
         [
-          1.587985058866634,
-          -21.412106469304142
+          4.551557488974605,
+          -21.05429467886681
         ],
         [
-          18.54894698199515,
-          -10.813721184640045
+          17.81615864985527,
+          -12.107208223334858
         ]
       ],
-      "leftMostCornerX": 199.45105301800484,
-      "leftMostCornerY": 439.81372118464003,
-      "rightMostCornerX": 236.54894698199516,
-      "rightMostCornerY": 418.18627881535997,
-      "topCornerX": 219.58798505886662,
-      "topCornerY": 407.58789353069585,
-      "botCornerX": 216.41201494113338,
-      "botCornerY": 450.41210646930415,
+      "leftMostCornerX": 201.2827235917841,
+      "leftMostCornerY": 430.05463160283136,
+      "rightMostCornerX": 236.91504089149467,
+      "rightMostCornerY": 405.84021515616166,
+      "topCornerX": 223.65043973061398,
+      "topCornerY": 396.8931287006297,
+      "botCornerX": 214.5473247526648,
+      "botCornerY": 439.00171805836334,
       "occludes": [
         35
       ]
     },
     {
-      "x": 198,
-      "y": 472,
-      "width": 22,
-      "height": 12,
+      "x": 196,
+      "y": 464,
+      "width": 14,
+      "height": 20,
       "angle": 26,
       "angleRad": 0.4537856055185257,
       "endzone": 0,
       "wall": 0,
-      "hypotenuse": 12.529964086141668,
+      "hypotenuse": 12.206555615733702,
       "corners": [
         [
-          -12.516961390025303,
-          0.5706816631151508
+          -10.675269791984945,
+          5.919342435468128
         ],
         [
-          7.256507628556372,
-          10.214846892474855
+          1.9078468562033946,
+          12.056538490515212
         ],
         [
-          12.516961390025303,
-          -0.5706816631151508
+          10.675269791984945,
+          -5.919342435468128
         ],
         [
-          -7.256507628556372,
-          -10.214846892474855
+          -1.9078468562033946,
+          -12.056538490515212
         ]
       ],
       "cornersSorted": [
         [
-          -12.516961390025303,
-          0.5706816631151508
+          -10.675269791984945,
+          5.919342435468128
         ],
         [
-          -7.256507628556372,
-          -10.214846892474855
+          -1.9078468562033946,
+          -12.056538490515212
         ],
         [
-          7.256507628556372,
-          10.214846892474855
+          1.9078468562033946,
+          12.056538490515212
         ],
         [
-          12.516961390025303,
-          -0.5706816631151508
+          10.675269791984945,
+          -5.919342435468128
         ]
       ],
-      "leftMostCornerX": 185.4830386099747,
-      "leftMostCornerY": 472.5706816631151,
-      "rightMostCornerX": 210.5169613900253,
-      "rightMostCornerY": 471.4293183368849,
-      "topCornerX": 190.74349237144364,
-      "topCornerY": 461.78515310752516,
-      "botCornerX": 205.25650762855636,
-      "botCornerY": 482.21484689247484,
+      "leftMostCornerX": 185.32473020801507,
+      "leftMostCornerY": 469.91934243546814,
+      "rightMostCornerX": 206.67526979198493,
+      "rightMostCornerY": 458.08065756453186,
+      "topCornerX": 194.0921531437966,
+      "topCornerY": 451.9434615094848,
+      "botCornerX": 197.9078468562034,
+      "botCornerY": 476.0565384905152,
       "occludes": [
         49
       ]
     },
     {
-      "x": 231,
-      "y": 483,
-      "width": 18,
-      "height": 100,
+      "x": 232,
+      "y": 474,
+      "width": 24,
+      "height": 102,
       "angle": 29,
       "angleRad": 0.5061454830783556,
       "endzone": 0,
       "wall": 0,
-      "hypotenuse": 50.80354318352215,
+      "hypotenuse": 52.392747589718944,
       "corners": [
         [
-          -32.11205837657141,
-          39.36769877475275
+          -35.22072711823594,
+          38.78788962115314
         ],
         [
-          -16.36890364806229,
-          48.094271939186825
+          -14.229854146890442,
+          50.42332050706523
         ],
         [
-          32.11205837657141,
-          -39.36769877475275
+          35.22072711823594,
+          -38.78788962115314
         ],
         [
-          16.36890364806229,
-          -48.094271939186825
+          14.229854146890442,
+          -50.42332050706523
         ]
       ],
       "cornersSorted": [
         [
-          -32.11205837657141,
-          39.36769877475275
+          -35.22072711823594,
+          38.78788962115314
         ],
         [
-          -16.36890364806229,
-          48.094271939186825
+          -14.229854146890442,
+          50.42332050706523
         ],
         [
-          16.36890364806229,
-          -48.094271939186825
+          14.229854146890442,
+          -50.42332050706523
         ],
         [
-          32.11205837657141,
-          -39.36769877475275
+          35.22072711823594,
+          -38.78788962115314
         ]
       ],
-      "leftMostCornerX": 198.8879416234286,
-      "leftMostCornerY": 522.3676987747527,
-      "rightMostCornerX": 263.11205837657144,
-      "rightMostCornerY": 443.63230122524726,
-      "topCornerX": 247.3689036480623,
-      "topCornerY": 434.9057280608132,
-      "botCornerX": 214.6310963519377,
-      "botCornerY": 531.0942719391868,
+      "leftMostCornerX": 196.77927288176406,
+      "leftMostCornerY": 512.7878896211531,
+      "rightMostCornerX": 267.2207271182359,
+      "rightMostCornerY": 435.2121103788469,
+      "topCornerX": 246.22985414689043,
+      "topCornerY": 423.5766794929348,
+      "botCornerX": 217.77014585310957,
+      "botCornerY": 524.4233205070652,
       "occludes": [
-        41,
+        39,
         49,
         50
       ]
     },
     {
-      "x": 271.5287721769381,
-      "y": 557.8794345414282,
-      "width": 14,
-      "height": 58,
+      "x": 273.6343919697846,
+      "y": 558.9776384549241,
+      "width": 16,
+      "height": 70,
       "angle": 7,
       "angleRad": 0.12217304763960307,
       "endzone": 0,
       "wall": 0,
-      "hypotenuse": 29.832867780352597,
+      "hypotenuse": 35.90264614203248,
       "corners": [
         [
-          -10.482034020238531,
-          27.930752993762304
+          -12.205796232310737,
+          33.76416056020509
         ],
         [
-          3.4136121027399775,
-          29.63692380143437
+          3.6749421939504145,
+          35.71407005468745
         ],
         [
-          10.482034020238531,
-          -27.930752993762304
+          12.205796232310737,
+          -33.76416056020509
         ],
         [
-          -3.4136121027399775,
-          -29.63692380143437
+          -3.6749421939504145,
+          -35.71407005468745
         ]
       ],
       "cornersSorted": [
         [
-          -10.482034020238531,
-          27.930752993762304
+          -12.205796232310737,
+          33.76416056020509
         ],
         [
-          -3.4136121027399775,
-          -29.63692380143437
+          -3.6749421939504145,
+          -35.71407005468745
         ],
         [
-          3.4136121027399775,
-          29.63692380143437
+          3.6749421939504145,
+          35.71407005468745
         ],
         [
-          10.482034020238531,
-          -27.930752993762304
+          12.205796232310737,
+          -33.76416056020509
         ]
       ],
-      "leftMostCornerX": 261.0467381566996,
-      "leftMostCornerY": 585.8101875351905,
-      "rightMostCornerX": 282.01080619717663,
-      "rightMostCornerY": 529.9486815476658,
-      "topCornerX": 268.1151600741981,
-      "topCornerY": 528.2425107399938,
-      "botCornerX": 274.9423842796781,
-      "botCornerY": 587.5163583428625,
+      "leftMostCornerX": 261.42859573747387,
+      "leftMostCornerY": 592.7417990151292,
+      "rightMostCornerX": 285.8401882020953,
+      "rightMostCornerY": 525.213477894719,
+      "topCornerX": 269.9594497758342,
+      "topCornerY": 523.2635684002366,
+      "botCornerX": 277.309334163735,
+      "botCornerY": 594.6917085096115,
       "occludes": [
         42,
         51
       ]
     },
     {
-      "x": 308,
-      "y": 555,
+      "x": 310,
+      "y": 556,
       "width": 8,
       "height": 20,
       "angle": 11,
@@ -3159,132 +3165,132 @@
           -9.05303585297046
         ]
       ],
-      "leftMostCornerX": 302.1654013124439,
-      "leftMostCornerY": 564.0530358529704,
-      "rightMostCornerX": 313.8345986875561,
-      "rightMostCornerY": 545.9469641470296,
-      "topCornerX": 305.98158121997477,
-      "topCornerY": 544.4204921840172,
-      "botCornerX": 310.01841878002523,
-      "botCornerY": 565.5795078159828,
+      "leftMostCornerX": 304.1654013124439,
+      "leftMostCornerY": 565.0530358529704,
+      "rightMostCornerX": 315.8345986875561,
+      "rightMostCornerY": 546.9469641470296,
+      "topCornerX": 307.98158121997477,
+      "topCornerY": 545.4204921840172,
+      "botCornerX": 312.01841878002523,
+      "botCornerY": 566.5795078159828,
       "occludes": [
         42,
         43
       ]
     },
     {
-      "x": 338.74199414808186,
-      "y": 561.8169585525225,
-      "width": 24,
-      "height": 21,
+      "x": 340,
+      "y": 562,
+      "width": 16,
+      "height": 16,
       "angle": -33,
       "angleRad": -0.5759586531581288,
       "endzone": 0,
       "wall": 0,
-      "hypotenuse": 15.945218719101975,
+      "hypotenuse": 11.313708498984761,
       "corners": [
         [
-          -4.345336947687304,
-          15.341709383607277
+          -2.3522522634431757,
+          11.066476823683608
         ],
         [
-          15.782756683002873,
-          2.2703725432466264
+          11.066476823683608,
+          2.3522522634431757
         ],
         [
-          4.345336947687304,
-          -15.341709383607277
+          2.3522522634431757,
+          -11.066476823683608
         ],
         [
-          -15.782756683002873,
-          -2.2703725432466264
+          -11.066476823683608,
+          -2.3522522634431757
         ]
       ],
       "cornersSorted": [
         [
-          -15.782756683002873,
-          -2.2703725432466264
+          -11.066476823683608,
+          -2.3522522634431757
         ],
         [
-          -4.345336947687304,
-          15.341709383607277
+          -2.3522522634431757,
+          11.066476823683608
         ],
         [
-          4.345336947687304,
-          -15.341709383607277
+          2.3522522634431757,
+          -11.066476823683608
         ],
         [
-          15.782756683002873,
-          2.2703725432466264
+          11.066476823683608,
+          2.3522522634431757
         ]
       ],
-      "leftMostCornerX": 322.959237465079,
-      "leftMostCornerY": 559.5465860092759,
-      "rightMostCornerX": 354.5247508310847,
-      "rightMostCornerY": 564.0873310957691,
-      "topCornerX": 343.0873310957692,
-      "topCornerY": 546.4752491689152,
-      "botCornerX": 334.39665720039454,
-      "botCornerY": 577.1586679361297,
+      "leftMostCornerX": 328.9335231763164,
+      "leftMostCornerY": 559.6477477365569,
+      "rightMostCornerX": 351.0664768236836,
+      "rightMostCornerY": 564.3522522634431,
+      "topCornerX": 342.3522522634432,
+      "topCornerY": 550.9335231763164,
+      "botCornerX": 337.6477477365568,
+      "botCornerY": 573.0664768236836,
       "occludes": [
         43,
         45
       ]
     },
     {
-      "x": 315,
+      "x": 318,
       "y": 578,
-      "width": 27,
-      "height": 10,
-      "angle": 38,
-      "angleRad": 0.6632251157578453,
+      "width": 28,
+      "height": 8,
+      "angle": 45,
+      "angleRad": 0.7853981633974483,
       "endzone": 0,
       "wall": 0,
-      "hypotenuse": 14.396180048887969,
+      "hypotenuse": 14.560219778561036,
       "corners": [
         [
-          -13.716452550319037,
-          -4.371376148862778
+          -12.727922061357855,
+          -7.071067811865474
         ],
         [
-          7.559837797062453,
-          12.251483684929996
+          7.0710678118654755,
+          12.727922061357853
         ],
         [
-          13.716452550319037,
-          4.371376148862778
+          12.727922061357855,
+          7.071067811865474
         ],
         [
-          -7.559837797062453,
-          -12.251483684929996
+          -7.0710678118654755,
+          -12.727922061357853
         ]
       ],
       "cornersSorted": [
         [
-          -13.716452550319037,
-          -4.371376148862778
+          -12.727922061357855,
+          -7.071067811865474
         ],
         [
-          -7.559837797062453,
-          -12.251483684929996
+          -7.0710678118654755,
+          -12.727922061357853
         ],
         [
-          7.559837797062453,
-          12.251483684929996
+          7.0710678118654755,
+          12.727922061357853
         ],
         [
-          13.716452550319037,
-          4.371376148862778
+          12.727922061357855,
+          7.071067811865474
         ]
       ],
-      "leftMostCornerX": 301.28354744968095,
-      "leftMostCornerY": 573.6286238511373,
-      "rightMostCornerX": 328.71645255031905,
-      "rightMostCornerY": 582.3713761488627,
-      "topCornerX": 307.44016220293753,
-      "topCornerY": 565.74851631507,
-      "botCornerX": 322.55983779706247,
-      "botCornerY": 590.25148368493,
+      "leftMostCornerX": 305.27207793864216,
+      "leftMostCornerY": 570.9289321881346,
+      "rightMostCornerX": 330.72792206135784,
+      "rightMostCornerY": 585.0710678118654,
+      "topCornerX": 310.9289321881345,
+      "topCornerY": 565.2720779386422,
+      "botCornerX": 325.0710678118655,
+      "botCornerY": 590.7279220613578,
       "occludes": [
         43,
         53,
@@ -3292,117 +3298,59 @@
       ]
     },
     {
-      "x": 342,
-      "y": 640,
-      "width": 70,
-      "height": 16,
-      "angle": -2,
-      "angleRad": -0.03490658503988659,
+      "x": 292,
+      "y": 612,
+      "width": 16,
+      "height": 58,
+      "angle": -45,
+      "angleRad": -0.7853981633974483,
       "endzone": 0,
       "wall": 0,
-      "hypotenuse": 35.90264614203248,
+      "hypotenuse": 30.083217912982647,
       "corners": [
         [
-          -34.699482972048344,
-          9.2166090007403
+          14.849242404917497,
+          26.16295090390226
         ],
         [
-          35.257874919288355,
-          6.773644231565232
+          26.162950903902257,
+          14.8492424049175
         ],
         [
-          34.699482972048344,
-          -9.2166090007403
+          -14.849242404917497,
+          -26.16295090390226
         ],
         [
-          -35.257874919288355,
-          -6.773644231565232
+          -26.162950903902257,
+          -14.8492424049175
         ]
       ],
       "cornersSorted": [
         [
-          -35.257874919288355,
-          -6.773644231565232
+          -26.162950903902257,
+          -14.8492424049175
         ],
         [
-          -34.699482972048344,
-          9.2166090007403
+          -14.849242404917497,
+          -26.16295090390226
         ],
         [
-          34.699482972048344,
-          -9.2166090007403
+          14.849242404917497,
+          26.16295090390226
         ],
         [
-          35.257874919288355,
-          6.773644231565232
+          26.162950903902257,
+          14.8492424049175
         ]
       ],
-      "leftMostCornerX": 306.7421250807116,
-      "leftMostCornerY": 633.2263557684348,
-      "rightMostCornerX": 377.2578749192884,
-      "rightMostCornerY": 646.7736442315652,
-      "topCornerX": 376.6994829720484,
-      "topCornerY": 630.7833909992597,
-      "botCornerX": 307.3005170279516,
-      "botCornerY": 649.2166090007403,
-      "occludes": [
-        48
-      ]
-    },
-    {
-      "x": 285.71139929477727,
-      "y": 613.8568521139914,
-      "width": 13,
-      "height": 57,
-      "angle": -34,
-      "angleRad": -0.5934119456780721,
-      "endzone": 0,
-      "wall": 0,
-      "hypotenuse": 29.231831964486933,
-      "corners": [
-        [
-          10.548253527308516,
-          27.262324690378545
-        ],
-        [
-          21.325741970524057,
-          19.992816945258834
-        ],
-        [
-          -10.548253527308516,
-          -27.262324690378545
-        ],
-        [
-          -21.325741970524057,
-          -19.992816945258834
-        ]
-      ],
-      "cornersSorted": [
-        [
-          -21.325741970524057,
-          -19.992816945258834
-        ],
-        [
-          -10.548253527308516,
-          -27.262324690378545
-        ],
-        [
-          10.548253527308516,
-          27.262324690378545
-        ],
-        [
-          21.325741970524057,
-          19.992816945258834
-        ]
-      ],
-      "leftMostCornerX": 264.3856573242532,
-      "leftMostCornerY": 593.8640351687326,
-      "rightMostCornerX": 307.03714126530133,
-      "rightMostCornerY": 633.8496690592502,
-      "topCornerX": 275.16314576746873,
-      "topCornerY": 586.5945274236128,
-      "botCornerX": 296.2596528220858,
-      "botCornerY": 641.11917680437,
+      "leftMostCornerX": 265.83704909609776,
+      "leftMostCornerY": 597.1507575950825,
+      "rightMostCornerX": 318.16295090390224,
+      "rightMostCornerY": 626.8492424049175,
+      "topCornerX": 277.1507575950825,
+      "topCornerY": 585.8370490960978,
+      "botCornerX": 306.8492424049175,
+      "botCornerY": 638.1629509039022,
       "occludes": [
         52,
         53,
@@ -3411,117 +3359,176 @@
       ]
     },
     {
-      "x": 370,
-      "y": 558,
-      "width": 8,
-      "height": 20,
-      "angle": -5,
-      "angleRad": -0.08726646259971647,
+      "x": 346.00243669192366,
+      "y": 628.1395979868099,
+      "width": 76,
+      "height": 16,
+      "angle": -2,
+      "angleRad": -0.03490658503988659,
       "endzone": 0,
       "wall": 0,
-      "hypotenuse": 10.770329614269007,
+      "hypotenuse": 38.8329756778952,
       "corners": [
         [
-          -3.113221364890401,
-          10.310569951908088
+          -37.69765545310563,
+          9.321307490847802
         ],
         [
-          4.856336219843564,
-          9.613324009926822
+          38.25604740034564,
+          6.66894574145773
         ],
         [
-          3.113221364890401,
-          -10.310569951908088
+          37.69765545310563,
+          -9.321307490847802
         ],
         [
-          -4.856336219843564,
-          -9.613324009926822
+          -38.25604740034564,
+          -6.66894574145773
         ]
       ],
       "cornersSorted": [
         [
-          -4.856336219843564,
-          -9.613324009926822
+          -38.25604740034564,
+          -6.66894574145773
         ],
         [
-          -3.113221364890401,
-          10.310569951908088
+          -37.69765545310563,
+          9.321307490847802
         ],
         [
-          3.113221364890401,
-          -10.310569951908088
+          37.69765545310563,
+          -9.321307490847802
         ],
         [
-          4.856336219843564,
-          9.613324009926822
+          38.25604740034564,
+          6.66894574145773
         ]
       ],
-      "leftMostCornerX": 365.14366378015643,
-      "leftMostCornerY": 548.3866759900732,
-      "rightMostCornerX": 374.85633621984357,
-      "rightMostCornerY": 567.6133240099268,
-      "topCornerX": 373.1132213648904,
-      "topCornerY": 547.6894300480919,
-      "botCornerX": 366.8867786351096,
-      "botCornerY": 568.3105699519081,
+      "leftMostCornerX": 307.746389291578,
+      "leftMostCornerY": 621.4706522453522,
+      "rightMostCornerX": 384.2584840922693,
+      "rightMostCornerY": 634.8085437282676,
+      "topCornerX": 383.7000921450293,
+      "topCornerY": 618.8182904959621,
+      "botCornerX": 308.304781238818,
+      "botCornerY": 637.4609054776578,
+      "occludes": [
+        48,
+        57
+      ]
+    },
+    {
+      "x": 368.1743114854953,
+      "y": 557.9923893961836,
+      "width": 8,
+      "height": 24,
+      "angle": -5,
+      "angleRad": -0.08726646259971647,
+      "endzone": 0,
+      "wall": 0,
+      "hypotenuse": 12.649110640673518,
+      "corners": [
+        [
+          -2.938909879395084,
+          12.30295934809158
+        ],
+        [
+          5.030647705338881,
+          11.605713406110315
+        ],
+        [
+          2.938909879395084,
+          -12.30295934809158
+        ],
+        [
+          -5.030647705338881,
+          -11.605713406110315
+        ]
+      ],
+      "cornersSorted": [
+        [
+          -5.030647705338881,
+          -11.605713406110315
+        ],
+        [
+          -2.938909879395084,
+          12.30295934809158
+        ],
+        [
+          2.938909879395084,
+          -12.30295934809158
+        ],
+        [
+          5.030647705338881,
+          11.605713406110315
+        ]
+      ],
+      "leftMostCornerX": 363.14366378015643,
+      "leftMostCornerY": 546.3866759900733,
+      "rightMostCornerX": 373.2049591908342,
+      "rightMostCornerY": 569.598102802294,
+      "topCornerX": 371.1132213648904,
+      "topCornerY": 545.689430048092,
+      "botCornerX": 365.2354016061002,
+      "botCornerY": 570.2953487442752,
       "occludes": [
         45
       ]
     },
     {
-      "x": 362.06442780764974,
-      "y": 577.9703847095169,
-      "width": 20,
+      "x": 361.48628965095486,
+      "y": 578.6617387872823,
+      "width": 24,
       "height": 8,
       "angle": -42,
       "angleRad": -0.7330382858376184,
       "endzone": 0,
       "wall": 0,
-      "hypotenuse": 10.770329614269007,
+      "hypotenuse": 12.649110640673518,
       "corners": [
         [
-          -4.754925829338509,
-          9.66388536549816
+          -6.241215480293299,
+          11.002146578215875
         ],
         [
-          10.107970680209375,
-          -3.7187267616790054
+          11.594260331164165,
+          -5.056987974396722
         ],
         [
-          4.754925829338509,
-          -9.66388536549816
+          6.241215480293299,
+          -11.002146578215875
         ],
         [
-          -10.107970680209375,
-          3.7187267616790054
+          -11.594260331164165,
+          5.056987974396722
         ]
       ],
       "cornersSorted": [
         [
-          -10.107970680209375,
-          3.7187267616790054
+          -11.594260331164165,
+          5.056987974396722
         ],
         [
-          -4.754925829338509,
-          9.66388536549816
+          -6.241215480293299,
+          11.002146578215875
         ],
         [
-          4.754925829338509,
-          -9.66388536549816
+          6.241215480293299,
+          -11.002146578215875
         ],
         [
-          10.107970680209375,
-          -3.7187267616790054
+          11.594260331164165,
+          -5.056987974396722
         ]
       ],
-      "leftMostCornerX": 351.9564571274404,
-      "leftMostCornerY": 581.6891114711959,
-      "rightMostCornerX": 372.1723984878591,
-      "rightMostCornerY": 574.2516579478379,
-      "topCornerX": 366.81935363698824,
-      "topCornerY": 568.3064993440188,
-      "botCornerX": 357.30950197831123,
-      "botCornerY": 587.634270075015,
+      "leftMostCornerX": 349.8920293197907,
+      "leftMostCornerY": 583.718726761679,
+      "rightMostCornerX": 373.080549982119,
+      "rightMostCornerY": 573.6047508128855,
+      "topCornerX": 367.72750513124817,
+      "topCornerY": 567.6595922090664,
+      "botCornerX": 355.24507417066155,
+      "botCornerY": 589.6638853654981,
       "occludes": [
         45,
         54,
@@ -3529,8 +3536,8 @@
       ]
     },
     {
-      "x": 340.5176808637027,
-      "y": 585.9739736951876,
+      "x": 340,
+      "y": 588,
       "width": 24,
       "height": 8,
       "angle": 1,
@@ -3574,14 +3581,14 @@
           -3.789961903378163
         ]
       ],
-      "leftMostCornerX": 328.4496988960769,
-      "leftMostCornerY": 589.7639355985658,
-      "rightMostCornerX": 352.58566283132853,
-      "rightMostCornerY": 582.1840117918094,
-      "topCornerX": 328.58931814757517,
-      "topCornerY": 581.7651540373147,
-      "botCornerX": 352.44604357983025,
-      "botCornerY": 590.1827933530606,
+      "leftMostCornerX": 327.9320180323742,
+      "leftMostCornerY": 591.7899619033782,
+      "rightMostCornerX": 352.0679819676258,
+      "rightMostCornerY": 584.2100380966218,
+      "topCornerX": 328.07163728387246,
+      "topCornerY": 583.7911803421271,
+      "botCornerX": 351.92836271612754,
+      "botCornerY": 592.2088196578729,
       "occludes": [
         54,
         55,
@@ -3589,235 +3596,175 @@
       ]
     },
     {
-      "x": 467,
-      "y": 570,
-      "width": 22,
+      "x": 472,
+      "y": 566,
+      "width": 24,
       "height": 124,
-      "angle": 7,
-      "angleRad": 0.12217304763960307,
+      "angle": 4,
+      "angleRad": 0.06981317007977318,
       "endzone": 0,
       "wall": 0,
-      "hypotenuse": 62.96824596572466,
+      "hypotenuse": 63.150613615387776,
       "corners": [
         [
-          -18.473906959173686,
-          60.19729862430534
+          -16.29566997525366,
+          61.011893431179594
         ],
         [
-          3.3621083769353994,
-          62.87842417921859
+          7.6458672309821205,
+          62.6860488010386
         ],
         [
-          18.473906959173686,
-          -60.19729862430534
+          16.29566997525366,
+          -61.011893431179594
         ],
         [
-          -3.3621083769353994,
-          -62.87842417921859
+          -7.6458672309821205,
+          -62.6860488010386
         ]
       ],
       "cornersSorted": [
         [
-          -18.473906959173686,
-          60.19729862430534
+          -16.29566997525366,
+          61.011893431179594
         ],
         [
-          -3.3621083769353994,
-          -62.87842417921859
+          -7.6458672309821205,
+          -62.6860488010386
         ],
         [
-          3.3621083769353994,
-          62.87842417921859
+          7.6458672309821205,
+          62.6860488010386
         ],
         [
-          18.473906959173686,
-          -60.19729862430534
+          16.29566997525366,
+          -61.011893431179594
         ]
       ],
-      "leftMostCornerX": 448.5260930408263,
-      "leftMostCornerY": 630.1972986243053,
-      "rightMostCornerX": 485.4739069591737,
-      "rightMostCornerY": 509.80270137569465,
-      "topCornerX": 463.6378916230646,
-      "topCornerY": 507.1215758207814,
-      "botCornerX": 470.3621083769354,
-      "botCornerY": 632.8784241792185,
+      "leftMostCornerX": 455.70433002474635,
+      "leftMostCornerY": 627.0118934311796,
+      "rightMostCornerX": 488.29566997525365,
+      "rightMostCornerY": 504.9881065688204,
+      "topCornerX": 464.3541327690179,
+      "topCornerY": 503.3139511989614,
+      "botCornerX": 479.6458672309821,
+      "botCornerY": 628.6860488010386,
       "occludes": [
         46
       ]
     },
     {
-      "x": 417,
-      "y": 671,
-      "width": 102,
-      "height": 16,
-      "angle": -42,
-      "angleRad": -0.7330382858376184,
-      "endzone": 0,
-      "wall": 0,
-      "hypotenuse": 51.62363799656123,
-      "corners": [
-        [
-          -32.54734124847624,
-          40.07081952812092
-        ],
-        [
-          43.253430950217975,
-          -28.180502320482617
-        ],
-        [
-          32.54734124847624,
-          -40.07081952812092
-        ],
-        [
-          -43.253430950217975,
-          28.180502320482617
-        ]
-      ],
-      "cornersSorted": [
-        [
-          -43.253430950217975,
-          28.180502320482617
-        ],
-        [
-          -32.54734124847624,
-          40.07081952812092
-        ],
-        [
-          32.54734124847624,
-          -40.07081952812092
-        ],
-        [
-          43.253430950217975,
-          -28.180502320482617
-        ]
-      ],
-      "leftMostCornerX": 373.746569049782,
-      "leftMostCornerY": 699.1805023204827,
-      "rightMostCornerX": 460.253430950218,
-      "rightMostCornerY": 642.8194976795173,
-      "topCornerX": 449.54734124847624,
-      "topCornerY": 630.9291804718791,
-      "botCornerX": 384.45265875152376,
-      "botCornerY": 711.0708195281209,
-      "occludes": [
-        48,
-        56,
-        61
-      ]
-    },
-    {
-      "x": 209,
-      "y": 585,
-      "width": 18,
-      "height": 100,
+      "x": 214,
+      "y": 574,
+      "width": 26,
+      "height": 110,
       "angle": -7,
       "angleRad": -0.12217304763960307,
       "endzone": 0,
       "wall": 0,
-      "hypotenuse": 50.80354318352215,
+      "hypotenuse": 56.515484603779164,
       "corners": [
         [
-          -2.8394481945145236,
-          50.72413167271243
+          -6.200286084054075,
+          56.17433980453962
         ],
         [
-          15.02638253502927,
-          48.53048349141977
+          19.605913858620298,
+          53.00573687600579
         ],
         [
-          2.8394481945145236,
-          -50.72413167271243
+          6.200286084054075,
+          -56.17433980453962
         ],
         [
-          -15.02638253502927,
-          -48.53048349141977
+          -19.605913858620298,
+          -53.00573687600579
         ]
       ],
       "cornersSorted": [
         [
-          -15.02638253502927,
-          -48.53048349141977
+          -19.605913858620298,
+          -53.00573687600579
         ],
         [
-          -2.8394481945145236,
-          50.72413167271243
+          -6.200286084054075,
+          56.17433980453962
         ],
         [
-          2.8394481945145236,
-          -50.72413167271243
+          6.200286084054075,
+          -56.17433980453962
         ],
         [
-          15.02638253502927,
-          48.53048349141977
+          19.605913858620298,
+          53.00573687600579
         ]
       ],
-      "leftMostCornerX": 193.97361746497074,
-      "leftMostCornerY": 536.4695165085802,
-      "rightMostCornerX": 224.02638253502926,
-      "rightMostCornerY": 633.5304834914198,
-      "topCornerX": 211.83944819451452,
-      "topCornerY": 534.2758683272875,
-      "botCornerX": 206.16055180548548,
-      "botCornerY": 635.7241316727125,
+      "leftMostCornerX": 194.39408614137972,
+      "leftMostCornerY": 520.9942631239942,
+      "rightMostCornerX": 233.60591385862028,
+      "rightMostCornerY": 627.0057368760058,
+      "topCornerX": 220.20028608405408,
+      "topCornerY": 517.8256601954604,
+      "botCornerX": 207.79971391594592,
+      "botCornerY": 630.1743398045396,
       "occludes": [
         51
       ]
     },
     {
-      "x": 267,
-      "y": 674,
-      "width": 112,
-      "height": 18,
-      "angle": 34,
-      "angleRad": 0.5934119456780721,
+      "x": 262.24141495534553,
+      "y": 663.0841952809244,
+      "width": 106,
+      "height": 24,
+      "angle": 40,
+      "angleRad": 0.6981317007977318,
       "endzone": 0,
       "wall": 0,
-      "hypotenuse": 56.71860364994893,
+      "hypotenuse": 54.3415126767741,
       "corners": [
         [
-          -51.45884019431906,
-          -23.853464441366448
+          -48.3138068015443,
+          -24.87520999595884
         ],
         [
-          41.39336793184561,
-          38.7761407473572
+          32.886904169067364,
+          43.26027663081432
         ],
         [
-          51.45884019431906,
-          23.853464441366448
+          48.3138068015443,
+          24.87520999595884
         ],
         [
-          -41.39336793184561,
-          -38.7761407473572
+          -32.886904169067364,
+          -43.26027663081432
         ]
       ],
       "cornersSorted": [
         [
-          -51.45884019431906,
-          -23.853464441366448
+          -48.3138068015443,
+          -24.87520999595884
         ],
         [
-          -41.39336793184561,
-          -38.7761407473572
+          -32.886904169067364,
+          -43.26027663081432
         ],
         [
-          41.39336793184561,
-          38.7761407473572
+          32.886904169067364,
+          43.26027663081432
         ],
         [
-          51.45884019431906,
-          23.853464441366448
+          48.3138068015443,
+          24.87520999595884
         ]
       ],
-      "leftMostCornerX": 215.54115980568093,
-      "leftMostCornerY": 650.1465355586336,
-      "rightMostCornerX": 318.45884019431907,
-      "rightMostCornerY": 697.8534644413664,
-      "topCornerX": 225.6066320681544,
-      "topCornerY": 635.2238592526428,
-      "botCornerX": 308.3933679318456,
-      "botCornerY": 712.7761407473572,
+      "leftMostCornerX": 213.92760815380123,
+      "leftMostCornerY": 638.2089852849656,
+      "rightMostCornerX": 310.55522175688986,
+      "rightMostCornerY": 687.9594052768832,
+      "topCornerX": 229.35451078627818,
+      "topCornerY": 619.82391865011,
+      "botCornerX": 295.1283191244129,
+      "botCornerY": 706.3444719117388,
       "occludes": [
         56,
         57,
@@ -3825,242 +3772,301 @@
       ]
     },
     {
-      "x": 345,
-      "y": 706,
-      "width": 54,
-      "height": 18,
+      "x": 343.823805617835,
+      "y": 699.7285919916646,
+      "width": 82,
+      "height": 24,
       "angle": 3,
       "angleRad": 0.05235987755982989,
       "endzone": 0,
       "wall": 0,
-      "hypotenuse": 28.460498941515414,
+      "hypotenuse": 42.720018726587654,
       "corners": [
         [
-          -27.434021044559987,
-          7.57459499423168
+          -41.571842399852855,
+          9.83778021109419
         ],
         [
-          26.491973832186996,
-          10.400736631350647
+          40.315779450022205,
+          14.129328623015583
         ],
         [
-          27.434021044559987,
-          -7.57459499423168
+          41.571842399852855,
+          -9.83778021109419
         ],
         [
-          -26.491973832186996,
-          -10.400736631350647
+          -40.315779450022205,
+          -14.129328623015583
         ]
       ],
       "cornersSorted": [
         [
-          -27.434021044559987,
-          7.57459499423168
+          -41.571842399852855,
+          9.83778021109419
         ],
         [
-          -26.491973832186996,
-          -10.400736631350647
+          -40.315779450022205,
+          -14.129328623015583
         ],
         [
-          26.491973832186996,
-          10.400736631350647
+          40.315779450022205,
+          14.129328623015583
         ],
         [
-          27.434021044559987,
-          -7.57459499423168
+          41.571842399852855,
+          -9.83778021109419
         ]
       ],
-      "leftMostCornerX": 317.56597895544,
-      "leftMostCornerY": 713.5745949942317,
-      "rightMostCornerX": 372.43402104456,
-      "rightMostCornerY": 698.4254050057683,
-      "topCornerX": 318.508026167813,
-      "topCornerY": 695.5992633686493,
-      "botCornerX": 371.491973832187,
-      "botCornerY": 716.4007366313507,
+      "leftMostCornerX": 302.2519632179821,
+      "leftMostCornerY": 709.5663722027589,
+      "rightMostCornerX": 385.39564801768785,
+      "rightMostCornerY": 689.8908117805704,
+      "topCornerX": 303.5080261678128,
+      "topCornerY": 685.5992633686491,
+      "botCornerX": 384.1395850678572,
+      "botCornerY": 713.8579206146802,
       "occludes": [
+        62,
         64
       ]
     },
     {
-      "x": 161,
-      "y": 601,
-      "width": 24,
-      "height": 54,
+      "x": 425.94515860381915,
+      "y": 664.6469551491293,
+      "width": 122,
+      "height": 24,
+      "angle": -42,
+      "angleRad": -0.7330382858376184,
+      "endzone": 0,
+      "wall": 0,
+      "hypotenuse": 62.16912416947821,
+      "corners": [
+        [
+          -37.30226707781475,
+          49.73470489361908
+        ],
+        [
+          53.36140163042735,
+          -31.89922908216162
+        ],
+        [
+          37.30226707781475,
+          -49.73470489361908
+        ],
+        [
+          -53.36140163042735,
+          31.89922908216162
+        ]
+      ],
+      "cornersSorted": [
+        [
+          -53.36140163042735,
+          31.89922908216162
+        ],
+        [
+          -37.30226707781475,
+          49.73470489361908
+        ],
+        [
+          37.30226707781475,
+          -49.73470489361908
+        ],
+        [
+          53.36140163042735,
+          -31.89922908216162
+        ]
+      ],
+      "leftMostCornerX": 372.5837569733918,
+      "leftMostCornerY": 696.5461842312909,
+      "rightMostCornerX": 479.3065602342465,
+      "rightMostCornerY": 632.7477260669677,
+      "topCornerX": 463.2474256816339,
+      "topCornerY": 614.9122502555102,
+      "botCornerX": 388.6428915260044,
+      "botCornerY": 714.3816600427484,
+      "occludes": [
+        48,
+        56,
+        61,
+        65
+      ]
+    },
+    {
+      "x": 120,
+      "y": 632,
+      "width": 16,
+      "height": 58,
       "angle": -5,
       "angleRad": -0.08726646259971647,
       "endzone": 0,
       "wall": 1,
-      "hypotenuse": 29.546573405388315,
+      "hypotenuse": 30.083217912982647,
       "corners": [
         [
-          -9.601131322914178,
-          27.94312576144903
+          -5.4420410450518775,
+          29.586892186641887
         ],
         [
-          14.307541431287717,
-          25.851387935505233
+          10.497074124416052,
+          28.192400302679356
         ],
         [
-          9.601131322914178,
-          -27.94312576144903
+          5.4420410450518775,
+          -29.586892186641887
         ],
         [
-          -14.307541431287717,
-          -25.851387935505233
+          -10.497074124416052,
+          -28.192400302679356
         ]
       ],
       "cornersSorted": [
         [
-          -14.307541431287717,
-          -25.851387935505233
+          -10.497074124416052,
+          -28.192400302679356
         ],
         [
-          -9.601131322914178,
-          27.94312576144903
+          -5.4420410450518775,
+          29.586892186641887
         ],
         [
-          9.601131322914178,
-          -27.94312576144903
+          5.4420410450518775,
+          -29.586892186641887
         ],
         [
-          14.307541431287717,
-          25.851387935505233
+          10.497074124416052,
+          28.192400302679356
         ]
       ],
-      "leftMostCornerX": 146.69245856871228,
-      "leftMostCornerY": 575.1486120644947,
-      "rightMostCornerX": 175.30754143128772,
-      "rightMostCornerY": 626.8513879355053,
-      "topCornerX": 170.60113132291417,
-      "topCornerY": 573.056874238551,
-      "botCornerX": 151.39886867708583,
-      "botCornerY": 628.943125761449,
+      "leftMostCornerX": 109.50292587558394,
+      "leftMostCornerY": 603.8075996973206,
+      "rightMostCornerX": 130.49707412441606,
+      "rightMostCornerY": 660.1924003026794,
+      "topCornerX": 125.44204104505188,
+      "topCornerY": 602.4131078133581,
+      "botCornerX": 114.55795895494812,
+      "botCornerY": 661.5868921866419,
       "occludes": []
     },
     {
-      "x": 185,
-      "y": 670,
-      "width": 24,
-      "height": 76,
+      "x": 146,
+      "y": 690,
+      "width": 16,
+      "height": 80,
       "angle": -34,
       "angleRad": -0.5934119456780721,
       "endzone": 0,
       "wall": 1,
-      "hypotenuse": 39.84971769034255,
+      "hypotenuse": 40.792156108742276,
       "corners": [
         [
-          11.300879461227883,
-          38.21374259874055
+          15.735415558389544,
+          37.63504612996764
         ],
         [
-          31.197781202548885,
-          24.793112915442624
+          29.00001671927021,
+          28.687959674435692
         ],
         [
-          -11.300879461227883,
-          -38.21374259874055
+          -15.735415558389544,
+          -37.63504612996764
         ],
         [
-          -31.197781202548885,
-          -24.793112915442624
+          -29.00001671927021,
+          -28.687959674435692
         ]
       ],
       "cornersSorted": [
         [
-          -31.197781202548885,
-          -24.793112915442624
+          -29.00001671927021,
+          -28.687959674435692
         ],
         [
-          -11.300879461227883,
-          -38.21374259874055
+          -15.735415558389544,
+          -37.63504612996764
         ],
         [
-          11.300879461227883,
-          38.21374259874055
+          15.735415558389544,
+          37.63504612996764
         ],
         [
-          31.197781202548885,
-          24.793112915442624
+          29.00001671927021,
+          28.687959674435692
         ]
       ],
-      "leftMostCornerX": 153.8022187974511,
-      "leftMostCornerY": 645.2068870845574,
-      "rightMostCornerX": 216.1977812025489,
-      "rightMostCornerY": 694.7931129154426,
-      "topCornerX": 173.69912053877212,
-      "topCornerY": 631.7862574012595,
-      "botCornerX": 196.30087946122788,
-      "botCornerY": 708.2137425987405,
+      "leftMostCornerX": 116.9999832807298,
+      "leftMostCornerY": 661.3120403255643,
+      "rightMostCornerX": 175.0000167192702,
+      "rightMostCornerY": 718.6879596744357,
+      "topCornerX": 130.26458444161045,
+      "topCornerY": 652.3649538700323,
+      "botCornerX": 161.73541555838955,
+      "botCornerY": 727.6350461299677,
       "occludes": [
-        51,
-        63,
-        64,
         66
       ]
     },
     {
-      "x": 239,
-      "y": 723,
+      "x": 198,
+      "y": 740,
       "width": 60,
-      "height": 22,
+      "height": 16,
       "angle": 33,
       "angleRad": 0.5759586531581288,
       "endzone": 0,
       "wall": 0,
-      "hypotenuse": 31.953090617340916,
+      "hypotenuse": 31.04834939252005,
       "corners": [
         [
-          -31.15114642352802,
-          -7.113794803051148
+          -29.517229318482936,
+          -9.62980650688742
         ],
         [
-          19.169087653197423,
-          25.564547297850474
+          20.803004758242505,
+          23.048535594014204
         ],
         [
-          31.15114642352802,
-          7.113794803051148
+          29.517229318482936,
+          9.62980650688742
         ],
         [
-          -19.169087653197423,
-          -25.564547297850474
+          -20.803004758242505,
+          -23.048535594014204
         ]
       ],
       "cornersSorted": [
         [
-          -31.15114642352802,
-          -7.113794803051148
+          -29.517229318482936,
+          -9.62980650688742
         ],
         [
-          -19.169087653197423,
-          -25.564547297850474
+          -20.803004758242505,
+          -23.048535594014204
         ],
         [
-          19.169087653197423,
-          25.564547297850474
+          20.803004758242505,
+          23.048535594014204
         ],
         [
-          31.15114642352802,
-          7.113794803051148
+          29.517229318482936,
+          9.62980650688742
         ]
       ],
-      "leftMostCornerX": 207.84885357647198,
-      "leftMostCornerY": 715.8862051969488,
-      "rightMostCornerX": 270.151146423528,
-      "rightMostCornerY": 730.1137948030512,
-      "topCornerX": 219.83091234680256,
-      "topCornerY": 697.4354527021495,
-      "botCornerX": 258.16908765319744,
-      "botCornerY": 748.5645472978505,
+      "leftMostCornerX": 168.48277068151705,
+      "leftMostCornerY": 730.3701934931125,
+      "rightMostCornerX": 227.51722931848295,
+      "rightMostCornerY": 749.6298065068875,
+      "topCornerX": 177.1969952417575,
+      "topCornerY": 716.9514644059858,
+      "botCornerX": 218.8030047582425,
+      "botCornerY": 763.0485355940142,
       "occludes": [
         64,
         67
       ]
     },
     {
-      "x": 993.827579652608,
-      "y": 16.84496857465159,
+      "x": 988,
+      "y": -1128,
       "width": 31,
       "height": 84,
       "angle": 24,
@@ -4104,21 +4110,21 @@
           -32.06449125331434
         ]
       ],
-      "leftMostCornerX": 962.5846860499641,
-      "leftMostCornerY": 48.909459827965925,
-      "rightMostCornerX": 1025.070473255252,
-      "rightMostCornerY": -15.219522678662749,
-      "topCornerX": 996.7505640683313,
-      "topCornerY": -27.82835861401255,
-      "botCornerX": 990.9045952368848,
-      "botCornerY": 61.51829576331573,
+      "leftMostCornerX": 956.7571063973561,
+      "leftMostCornerY": -1095.9355087466856,
+      "rightMostCornerX": 1019.2428936026439,
+      "rightMostCornerY": -1160.0644912533144,
+      "topCornerX": 990.9229844157232,
+      "topCornerY": -1172.6733271886642,
+      "botCornerX": 985.0770155842768,
+      "botCornerY": -1083.3266728113358,
       "occludes": [
         29
       ]
     },
     {
-      "x": 1036,
-      "y": 31,
+      "x": 1030,
+      "y": -1114,
       "width": 18,
       "height": 61,
       "angle": 31,
@@ -4162,21 +4168,21 @@
           -21.50825999722394
         ]
       ],
-      "leftMostCornerX": 1012.5768330089244,
-      "leftMostCornerY": 52.508259997223945,
-      "rightMostCornerX": 1059.4231669910757,
-      "rightMostCornerY": 9.491740002776059,
-      "topCornerX": 1043.9941555784376,
-      "topCornerY": 0.2210546543950862,
-      "botCornerX": 1028.0058444215624,
-      "botCornerY": 61.77894534560491,
+      "leftMostCornerX": 1006.5768330089244,
+      "leftMostCornerY": -1092.4917400027762,
+      "rightMostCornerX": 1053.4231669910757,
+      "rightMostCornerY": -1135.5082599972238,
+      "topCornerX": 1037.9941555784376,
+      "topCornerY": -1144.7789453456048,
+      "botCornerX": 1022.0058444215624,
+      "botCornerY": -1083.2210546543952,
       "occludes": [
         69
       ]
     },
     {
-      "x": 1083,
-      "y": 58,
+      "x": 1076,
+      "y": -1088,
       "width": 45,
       "height": 47,
       "angle": 39,
@@ -4220,21 +4226,21 @@
           -4.103221295617473
         ]
       ],
-      "leftMostCornerX": 1050.725186677547,
-      "leftMostCornerY": 62.10322129561747,
-      "rightMostCornerX": 1115.274813322453,
-      "rightMostCornerY": 53.89677870438253,
-      "topCornerX": 1080.3032450568894,
-      "topCornerY": 25.577361107139843,
-      "botCornerX": 1085.6967549431106,
-      "botCornerY": 90.42263889286016,
+      "leftMostCornerX": 1043.725186677547,
+      "leftMostCornerY": -1083.8967787043825,
+      "rightMostCornerX": 1108.274813322453,
+      "rightMostCornerY": -1092.1032212956175,
+      "topCornerX": 1073.3032450568894,
+      "topCornerY": -1120.42263889286,
+      "botCornerX": 1078.6967549431106,
+      "botCornerY": -1055.57736110714,
       "occludes": [
         70
       ]
     },
     {
-      "x": 1039.668670047854,
-      "y": 90.85674509354781,
+      "x": 1034,
+      "y": -1054,
       "width": 19,
       "height": 53,
       "angle": -42,
@@ -4278,14 +4284,14 @@
           13.336597114741796
         ]
       ],
-      "leftMostCornerX": 1014.876833137309,
-      "leftMostCornerY": 77.52014797880602,
-      "rightMostCornerX": 1064.460506958399,
-      "rightMostCornerY": 104.19334220828961,
-      "topCornerX": 1028.9965848213794,
-      "topCornerY": 64.80666645798772,
-      "botCornerX": 1050.3407552743286,
-      "botCornerY": 116.90682372910791,
+      "leftMostCornerX": 1009.208163089455,
+      "leftMostCornerY": -1067.3365971147418,
+      "rightMostCornerX": 1058.791836910545,
+      "rightMostCornerY": -1040.6634028852582,
+      "topCornerX": 1023.3279147735255,
+      "topCornerY": -1080.05007863556,
+      "botCornerX": 1044.6720852264746,
+      "botCornerY": -1027.94992136444,
       "occludes": [
         69,
         70,
@@ -4293,8 +4299,8 @@
       ]
     },
     {
-      "x": 998,
-      "y": 103,
+      "x": 992,
+      "y": -1042,
       "width": 31,
       "height": 84,
       "angle": -35,
@@ -4338,14 +4344,14 @@
           25.513951096696445
         ]
       ],
-      "leftMostCornerX": 961.2129329867767,
-      "leftMostCornerY": 77.48604890330355,
-      "rightMostCornerX": 1034.7870670132233,
-      "rightMostCornerY": 128.51395109669645,
-      "topCornerX": 986.6066463597355,
-      "topCornerY": 59.70517937642113,
-      "botCornerX": 1009.3933536402645,
-      "botCornerY": 146.29482062357886,
+      "leftMostCornerX": 955.2129329867767,
+      "leftMostCornerY": -1067.5139510966965,
+      "rightMostCornerX": 1028.7870670132233,
+      "rightMostCornerY": -1016.4860489033035,
+      "topCornerX": 980.6066463597355,
+      "topCornerY": -1085.294820623579,
+      "botCornerX": 1003.3933536402645,
+      "botCornerY": -998.7051793764211,
       "occludes": [
         29,
         69,
@@ -4354,8 +4360,8 @@
       ]
     },
     {
-      "x": 952,
-      "y": 105,
+      "x": 946,
+      "y": -1040,
       "width": 28,
       "height": 67,
       "angle": -35,
@@ -4399,14 +4405,14 @@
           19.41152337476658
         ]
       ],
-      "leftMostCornerX": 921.317060762194,
-      "leftMostCornerY": 85.58847662523343,
-      "rightMostCornerX": 982.682939237806,
-      "rightMostCornerY": 124.41152337476657,
-      "topCornerX": 944.2533180022858,
-      "topCornerY": 69.52833640740414,
-      "botCornerX": 959.7466819977142,
-      "botCornerY": 140.47166359259586,
+      "leftMostCornerX": 915.317060762194,
+      "leftMostCornerY": -1059.4115233747666,
+      "rightMostCornerX": 976.682939237806,
+      "rightMostCornerY": -1020.5884766252334,
+      "topCornerX": 938.2533180022858,
+      "topCornerY": -1075.4716635925959,
+      "botCornerX": 953.7466819977142,
+      "botCornerY": -1004.5283364074041,
       "occludes": [
         29,
         69,
@@ -4414,8 +4420,8 @@
       ]
     },
     {
-      "x": -13,
-      "y": -48,
+      "x": -20,
+      "y": -1194,
       "width": 31,
       "height": 84,
       "angle": -26,
@@ -4459,21 +4465,21 @@
           30.954597169334317
         ]
       ],
-      "leftMostCornerX": -45.34289588277834,
-      "leftMostCornerY": -78.95459716933432,
-      "rightMostCornerX": 19.342895882778343,
-      "rightMostCornerY": -17.045402830665683,
-      "topCornerX": -17.480280447504164,
-      "topCornerY": -92.54410271979572,
-      "botCornerX": -8.519719552495836,
-      "botCornerY": -3.455897280204283,
+      "leftMostCornerX": -52.34289588277834,
+      "leftMostCornerY": -1224.9545971693344,
+      "rightMostCornerX": 12.342895882778343,
+      "rightMostCornerY": -1163.0454028306656,
+      "topCornerX": -24.480280447504164,
+      "topCornerY": -1238.5441027197958,
+      "botCornerX": -15.519719552495836,
+      "botCornerY": -1149.4558972802042,
       "occludes": [
         25
       ]
     },
     {
-      "x": -63.643211225414454,
-      "y": -34.793434256043795,
+      "x": -70,
+      "y": -1180,
       "width": 29,
       "height": 55,
       "angle": -42,
@@ -4517,21 +4523,21 @@
           10.734088908424898
         ]
       ],
-      "leftMostCornerX": -92.81990286970527,
-      "leftMostCornerY": -45.52752316446869,
-      "rightMostCornerX": -34.466519581123634,
-      "rightMostCornerY": -24.059345347618898,
-      "topCornerX": -71.26870293086084,
-      "topCornerY": -64.93231074887558,
-      "botCornerX": -56.01771951996807,
-      "botCornerY": -4.654557763212008,
+      "leftMostCornerX": -99.17669164429083,
+      "leftMostCornerY": -1190.7340889084248,
+      "rightMostCornerX": -40.82330835570918,
+      "rightMostCornerY": -1169.2659110915752,
+      "topCornerX": -77.6254917054464,
+      "topCornerY": -1210.1388764928317,
+      "botCornerX": -62.374508294553614,
+      "botCornerY": -1149.8611235071683,
       "occludes": [
         75
       ]
     },
     {
-      "x": -112,
-      "y": -10,
+      "x": -118,
+      "y": -1156,
       "width": 38,
       "height": 36,
       "angle": 45,
@@ -4575,21 +4581,21 @@
           0.7071067811865444
         ]
       ],
-      "leftMostCornerX": -138.16295090390224,
-      "leftMostCornerY": -10.707106781186544,
-      "rightMostCornerX": -85.83704909609774,
-      "rightMostCornerY": -9.292893218813456,
-      "topCornerX": -112.70710678118655,
-      "topCornerY": -36.16295090390226,
-      "botCornerX": -111.29289321881345,
-      "botCornerY": 16.162950903902257,
+      "leftMostCornerX": -144.16295090390224,
+      "leftMostCornerY": -1156.7071067811864,
+      "rightMostCornerX": -91.83704909609774,
+      "rightMostCornerY": -1155.2928932188136,
+      "topCornerX": -118.70710678118655,
+      "topCornerY": -1182.1629509039024,
+      "botCornerX": -117.29289321881345,
+      "botCornerY": -1129.8370490960976,
       "occludes": [
         76
       ]
     },
     {
-      "x": -69.19171967741532,
-      "y": 31.33663201273861,
+      "x": -76,
+      "y": -1114,
       "width": 29,
       "height": 55,
       "angle": 44,
@@ -4633,14 +4639,14 @@
           -9.709298137657449
         ]
       ],
-      "leftMostCornerX": -98.72525196994819,
-      "leftMostCornerY": 41.04593015039606,
-      "rightMostCornerX": -39.65818738488245,
-      "rightMostCornerY": 21.627333875081163,
-      "topCornerX": -60.51904159470334,
-      "topCornerY": 1.4822411317702446,
-      "botCornerX": -77.8643977601273,
-      "botCornerY": 61.19102289370698,
+      "leftMostCornerX": -105.53353229253287,
+      "leftMostCornerY": -1104.2907018623425,
+      "rightMostCornerX": -46.46646770746713,
+      "rightMostCornerY": -1123.7092981376575,
+      "topCornerX": -67.32732191728802,
+      "topCornerY": -1143.8543908809684,
+      "botCornerX": -84.67267808271198,
+      "botCornerY": -1084.1456091190316,
       "occludes": [
         75,
         76,
@@ -4648,8 +4654,8 @@
       ]
     },
     {
-      "x": -29,
-      "y": 48,
+      "x": -36,
+      "y": -1098,
       "width": 31,
       "height": 84,
       "angle": 41,
@@ -4693,14 +4699,14 @@
           -21.528887420003564
         ]
       ],
-      "leftMostCornerX": -68.25247771105427,
-      "leftMostCornerY": 69.52888742000357,
-      "rightMostCornerX": 10.252477711054269,
-      "rightMostCornerY": 26.471112579996436,
-      "topCornerX": -13.143519275851661,
-      "topCornerY": 6.133282681290716,
-      "botCornerX": -44.85648072414834,
-      "botCornerY": 89.86671731870928,
+      "leftMostCornerX": -75.25247771105427,
+      "leftMostCornerY": -1076.4711125799965,
+      "rightMostCornerX": 3.2524777110542686,
+      "rightMostCornerY": -1119.5288874200035,
+      "topCornerX": -20.14351927585166,
+      "topCornerY": -1139.8667173187093,
+      "botCornerX": -51.85648072414834,
+      "botCornerY": -1056.1332826812907,
       "occludes": [
         75,
         76,
@@ -4708,8 +4714,8 @@
       ]
     },
     {
-      "x": 12,
-      "y": 53,
+      "x": 6,
+      "y": -1092,
       "width": 19,
       "height": 53,
       "angle": 41,
@@ -4753,22 +4759,22 @@
           -13.76724310049364
         ]
       ],
-      "leftMostCornerX": -12.555305280364777,
-      "leftMostCornerY": 66.76724310049364,
-      "rightMostCornerX": 36.55530528036478,
-      "rightMostCornerY": 39.232756899506356,
-      "topCornerX": 22.21582325613211,
-      "topCornerY": 26.76763534868672,
-      "botCornerX": 1.7841767438678886,
-      "botCornerY": 79.23236465131328,
+      "leftMostCornerX": -18.555305280364777,
+      "leftMostCornerY": -1078.2327568995063,
+      "rightMostCornerX": 30.555305280364777,
+      "rightMostCornerY": -1105.7672431004937,
+      "topCornerX": 16.21582325613211,
+      "topCornerY": -1118.2323646513132,
+      "botCornerX": -4.215823256132111,
+      "botCornerY": -1065.7676353486868,
       "occludes": [
         25,
         79
       ]
     },
     {
-      "x": 324,
-      "y": -545,
+      "x": 318,
+      "y": -1690,
       "width": 28,
       "height": 67,
       "angle": -45,
@@ -4812,17 +4818,1515 @@
           13.788582233137681
         ]
       ],
-      "leftMostCornerX": 290.412427893639,
-      "leftMostCornerY": -558.7885822331377,
-      "rightMostCornerX": 357.587572106361,
-      "rightMostCornerY": -531.2114177668623,
-      "topCornerX": 310.2114177668623,
-      "topCornerY": -578.587572106361,
-      "botCornerX": 337.7885822331377,
-      "botCornerY": -511.412427893639,
+      "leftMostCornerX": 284.412427893639,
+      "leftMostCornerY": -1703.7885822331377,
+      "rightMostCornerX": 351.587572106361,
+      "rightMostCornerY": -1676.2114177668623,
+      "topCornerX": 304.2114177668623,
+      "topCornerY": -1723.587572106361,
+      "botCornerX": 331.7885822331377,
+      "botCornerY": -1656.412427893639,
       "occludes": [
         12,
         13
+      ]
+    },
+    {
+      "x": 307.1295187141577,
+      "y": 225.24751637334973,
+      "width": 12,
+      "height": 144,
+      "angle": 12,
+      "angleRad": 0.20943951023931956,
+      "endzone": 0,
+      "wall": 0,
+      "hypotenuse": 72.24956747275377,
+      "corners": [
+        [
+          -20.838527343281505,
+          69.17915710792745
+        ],
+        [
+          -9.100756134475839,
+          71.67409739774057
+        ],
+        [
+          20.838527343281505,
+          -69.17915710792745
+        ],
+        [
+          9.100756134475839,
+          -71.67409739774057
+        ]
+      ],
+      "cornersSorted": [
+        [
+          -20.838527343281505,
+          69.17915710792745
+        ],
+        [
+          -9.100756134475839,
+          71.67409739774057
+        ],
+        [
+          9.100756134475839,
+          -71.67409739774057
+        ],
+        [
+          20.838527343281505,
+          -69.17915710792745
+        ]
+      ],
+      "leftMostCornerX": 286.2909913708762,
+      "leftMostCornerY": 294.4266734812772,
+      "rightMostCornerX": 327.9680460574392,
+      "rightMostCornerY": 156.06835926542226,
+      "topCornerX": 316.23027484863354,
+      "topCornerY": 153.57341897560917,
+      "botCornerX": 298.0287625796819,
+      "botCornerY": 296.9216137710903,
+      "occludes": []
+    },
+    {
+      "x": 336,
+      "y": 272,
+      "width": 22,
+      "height": 74,
+      "angle": 6,
+      "angleRad": 0.10471975511965978,
+      "endzone": 0,
+      "wall": 0,
+      "hypotenuse": 38.600518131237564,
+      "corners": [
+        [
+          -14.807293989954184,
+          35.64749703268192
+        ],
+        [
+          7.072187708147828,
+          37.9471232245703
+        ],
+        [
+          14.807293989954184,
+          -35.64749703268192
+        ],
+        [
+          -7.072187708147828,
+          -37.9471232245703
+        ]
+      ],
+      "cornersSorted": [
+        [
+          -14.807293989954184,
+          35.64749703268192
+        ],
+        [
+          -7.072187708147828,
+          -37.9471232245703
+        ],
+        [
+          7.072187708147828,
+          37.9471232245703
+        ],
+        [
+          14.807293989954184,
+          -35.64749703268192
+        ]
+      ],
+      "leftMostCornerX": 321.1927060100458,
+      "leftMostCornerY": 307.64749703268194,
+      "rightMostCornerX": 350.8072939899542,
+      "rightMostCornerY": 236.3525029673181,
+      "topCornerX": 328.92781229185215,
+      "topCornerY": 234.0528767754297,
+      "botCornerX": 343.07218770814785,
+      "botCornerY": 309.9471232245703,
+      "occludes": [
+        82
+      ]
+    },
+    {
+      "x": 349.2822599550411,
+      "y": 179.8575692795751,
+      "width": 16,
+      "height": 56,
+      "angle": 6,
+      "angleRad": 0.10471975511965978,
+      "endzone": 0,
+      "wall": 0,
+      "hypotenuse": 29.120439557122072,
+      "corners": [
+        [
+          -10.882972134440482,
+          27.010385364170425
+        ],
+        [
+          5.029378191451889,
+          28.682840776452878
+        ],
+        [
+          10.882972134440482,
+          -27.010385364170425
+        ],
+        [
+          -5.029378191451889,
+          -28.682840776452878
+        ]
+      ],
+      "cornersSorted": [
+        [
+          -10.882972134440482,
+          27.010385364170425
+        ],
+        [
+          -5.029378191451889,
+          -28.682840776452878
+        ],
+        [
+          5.029378191451889,
+          28.682840776452878
+        ],
+        [
+          10.882972134440482,
+          -27.010385364170425
+        ]
+      ],
+      "leftMostCornerX": 338.39928782060065,
+      "leftMostCornerY": 206.86795464374552,
+      "rightMostCornerX": 360.1652320894816,
+      "rightMostCornerY": 152.84718391540468,
+      "topCornerX": 344.25288176358924,
+      "topCornerY": 151.17472850312222,
+      "botCornerX": 354.311638146493,
+      "botCornerY": 208.54041005602798,
+      "occludes": []
+    },
+    {
+      "x": 377.07706432296465,
+      "y": 153.2068334714922,
+      "width": 10,
+      "height": 28,
+      "angle": -4,
+      "angleRad": -0.06981317007977318,
+      "endzone": 0,
+      "wall": 0,
+      "hypotenuse": 14.866068747318506,
+      "corners": [
+        [
+          -4.011229618881367,
+          14.314679072358166
+        ],
+        [
+          5.964410883716876,
+          13.617114334916911
+        ],
+        [
+          4.011229618881367,
+          -14.314679072358166
+        ],
+        [
+          -5.964410883716876,
+          -13.617114334916911
+        ]
+      ],
+      "cornersSorted": [
+        [
+          -5.964410883716876,
+          -13.617114334916911
+        ],
+        [
+          -4.011229618881367,
+          14.314679072358166
+        ],
+        [
+          4.011229618881367,
+          -14.314679072358166
+        ],
+        [
+          5.964410883716876,
+          13.617114334916911
+        ]
+      ],
+      "leftMostCornerX": 371.11265343924777,
+      "leftMostCornerY": 139.58971913657527,
+      "rightMostCornerX": 383.0414752066815,
+      "rightMostCornerY": 166.8239478064091,
+      "topCornerX": 381.088293941846,
+      "topCornerY": 138.89215439913403,
+      "botCornerX": 373.0658347040833,
+      "botCornerY": 167.52151254385035,
+      "occludes": []
+    },
+    {
+      "x": 380,
+      "y": 240,
+      "width": 20,
+      "height": 106,
+      "angle": 0,
+      "angleRad": 0,
+      "endzone": 0,
+      "wall": 0,
+      "hypotenuse": 53.9351462406472,
+      "corners": [
+        [
+          -10,
+          53
+        ],
+        [
+          10,
+          53
+        ],
+        [
+          10,
+          -53
+        ],
+        [
+          -10,
+          -53
+        ]
+      ],
+      "cornersSorted": [
+        [
+          -10,
+          53
+        ],
+        [
+          -10,
+          -53
+        ],
+        [
+          10,
+          53
+        ],
+        [
+          10,
+          -53
+        ]
+      ],
+      "leftMostCornerX": 370,
+      "leftMostCornerY": 293,
+      "rightMostCornerX": 390,
+      "rightMostCornerY": 187,
+      "topCornerX": 370,
+      "topCornerY": 187,
+      "botCornerX": 390,
+      "botCornerY": 293,
+      "occludes": [
+        87
+      ]
+    },
+    {
+      "x": 354,
+      "y": 88,
+      "width": 10,
+      "height": 56,
+      "angle": 2,
+      "angleRad": 0.03490658503988659,
+      "endzone": 0,
+      "wall": 0,
+      "hypotenuse": 28.442925306655784,
+      "corners": [
+        [
+          -5.974140042765505,
+          27.808445673022177
+        ],
+        [
+          4.019768227425452,
+          28.157440640047184
+        ],
+        [
+          5.974140042765505,
+          -27.808445673022177
+        ],
+        [
+          -4.019768227425452,
+          -28.157440640047184
+        ]
+      ],
+      "cornersSorted": [
+        [
+          -5.974140042765505,
+          27.808445673022177
+        ],
+        [
+          -4.019768227425452,
+          -28.157440640047184
+        ],
+        [
+          4.019768227425452,
+          28.157440640047184
+        ],
+        [
+          5.974140042765505,
+          -27.808445673022177
+        ]
+      ],
+      "leftMostCornerX": 348.0258599572345,
+      "leftMostCornerY": 115.80844567302218,
+      "rightMostCornerX": 359.9741400427655,
+      "rightMostCornerY": 60.19155432697782,
+      "topCornerX": 349.98023177257454,
+      "topCornerY": 59.842559359952816,
+      "botCornerX": 358.01976822742546,
+      "botCornerY": 116.15744064004718,
+      "occludes": []
+    },
+    {
+      "x": 458,
+      "y": 384,
+      "width": 18,
+      "height": 28,
+      "angle": -40,
+      "angleRad": -0.6981317007977318,
+      "endzone": 0,
+      "wall": 1,
+      "hypotenuse": 16.64331697709324,
+      "corners": [
+        [
+          2.1046265475407466,
+          16.509710690844546
+        ],
+        [
+          15.89342652368235,
+          4.939533716486839
+        ],
+        [
+          -2.1046265475407466,
+          -16.509710690844546
+        ],
+        [
+          -15.89342652368235,
+          -4.939533716486839
+        ]
+      ],
+      "cornersSorted": [
+        [
+          -15.89342652368235,
+          -4.939533716486839
+        ],
+        [
+          -2.1046265475407466,
+          -16.509710690844546
+        ],
+        [
+          2.1046265475407466,
+          16.509710690844546
+        ],
+        [
+          15.89342652368235,
+          4.939533716486839
+        ]
+      ],
+      "leftMostCornerX": 442.10657347631764,
+      "leftMostCornerY": 379.06046628351316,
+      "rightMostCornerX": 473.89342652368236,
+      "rightMostCornerY": 388.93953371648684,
+      "topCornerX": 455.89537345245924,
+      "topCornerY": 367.49028930915546,
+      "botCornerX": 460.10462654754076,
+      "botCornerY": 400.50971069084454,
+      "occludes": [
+        33
+      ]
+    },
+    {
+      "x": 404,
+      "y": -130,
+      "width": 10,
+      "height": 100,
+      "angle": 14,
+      "angleRad": 0.24434609527920614,
+      "endzone": 0,
+      "wall": 0,
+      "hypotenuse": 50.24937810560445,
+      "corners": [
+        [
+          -16.94757341136337,
+          47.30517683580148
+        ],
+        [
+          -7.244616148603405,
+          49.724395791798166
+        ],
+        [
+          16.94757341136337,
+          -47.30517683580148
+        ],
+        [
+          7.244616148603405,
+          -49.724395791798166
+        ]
+      ],
+      "cornersSorted": [
+        [
+          -16.94757341136337,
+          47.30517683580148
+        ],
+        [
+          -7.244616148603405,
+          49.724395791798166
+        ],
+        [
+          7.244616148603405,
+          -49.724395791798166
+        ],
+        [
+          16.94757341136337,
+          -47.30517683580148
+        ]
+      ],
+      "leftMostCornerX": 387.05242658863665,
+      "leftMostCornerY": -82.69482316419851,
+      "rightMostCornerX": 420.94757341136335,
+      "rightMostCornerY": -177.3051768358015,
+      "topCornerX": 411.2446161486034,
+      "topCornerY": -179.72439579179817,
+      "botCornerX": 396.7553838513966,
+      "botCornerY": -80.27560420820183,
+      "occludes": [
+        91
+      ]
+    },
+    {
+      "x": 376,
+      "y": -104,
+      "width": 10,
+      "height": 56,
+      "angle": -28,
+      "angleRad": -0.4886921905584123,
+      "endzone": 0,
+      "wall": 0,
+      "hypotenuse": 28.442925306655784,
+      "corners": [
+        [
+          8.730465793710309,
+          27.069890413979408
+        ],
+        [
+          17.559941722299577,
+          22.375174786120503
+        ],
+        [
+          -8.730465793710309,
+          -27.069890413979408
+        ],
+        [
+          -17.559941722299577,
+          -22.375174786120503
+        ]
+      ],
+      "cornersSorted": [
+        [
+          -17.559941722299577,
+          -22.375174786120503
+        ],
+        [
+          -8.730465793710309,
+          -27.069890413979408
+        ],
+        [
+          8.730465793710309,
+          27.069890413979408
+        ],
+        [
+          17.559941722299577,
+          22.375174786120503
+        ]
+      ],
+      "leftMostCornerX": 358.4400582777004,
+      "leftMostCornerY": -126.37517478612051,
+      "rightMostCornerX": 393.5599417222996,
+      "rightMostCornerY": -81.62482521387949,
+      "topCornerX": 367.2695342062897,
+      "topCornerY": -131.0698904139794,
+      "botCornerX": 384.7304657937103,
+      "botCornerY": -76.93010958602059,
+      "occludes": [
+        92
+      ]
+    },
+    {
+      "x": 386,
+      "y": -54,
+      "width": 10,
+      "height": 56,
+      "angle": 6,
+      "angleRad": 0.10471975511965978,
+      "endzone": 0,
+      "wall": 0,
+      "hypotenuse": 28.442925306655784,
+      "corners": [
+        [
+          -7.899406448335664,
+          27.323970753973384
+        ],
+        [
+          2.0458125053470697,
+          28.369255386649918
+        ],
+        [
+          7.899406448335664,
+          -27.323970753973384
+        ],
+        [
+          -2.0458125053470697,
+          -28.369255386649918
+        ]
+      ],
+      "cornersSorted": [
+        [
+          -7.899406448335664,
+          27.323970753973384
+        ],
+        [
+          -2.0458125053470697,
+          -28.369255386649918
+        ],
+        [
+          2.0458125053470697,
+          28.369255386649918
+        ],
+        [
+          7.899406448335664,
+          -27.323970753973384
+        ]
+      ],
+      "leftMostCornerX": 378.10059355166436,
+      "leftMostCornerY": -26.676029246026616,
+      "rightMostCornerX": 393.89940644833564,
+      "rightMostCornerY": -81.32397075397338,
+      "topCornerX": 383.95418749465296,
+      "topCornerY": -82.36925538664991,
+      "botCornerX": 388.04581250534704,
+      "botCornerY": -25.630744613350082,
+      "occludes": [
+        91,
+        92
+      ]
+    },
+    {
+      "x": 372,
+      "y": -4,
+      "width": 10,
+      "height": 56,
+      "angle": 26,
+      "angleRad": 0.4537856055185257,
+      "endzone": 0,
+      "wall": 0,
+      "hypotenuse": 28.442925306655784,
+      "corners": [
+        [
+          -16.768362341590006,
+          22.97437756243129
+        ],
+        [
+          -7.780421878598334,
+          27.358089030322066
+        ],
+        [
+          16.768362341590006,
+          -22.97437756243129
+        ],
+        [
+          7.780421878598334,
+          -27.358089030322066
+        ]
+      ],
+      "cornersSorted": [
+        [
+          -16.768362341590006,
+          22.97437756243129
+        ],
+        [
+          -7.780421878598334,
+          27.358089030322066
+        ],
+        [
+          7.780421878598334,
+          -27.358089030322066
+        ],
+        [
+          16.768362341590006,
+          -22.97437756243129
+        ]
+      ],
+      "leftMostCornerX": 355.23163765841,
+      "leftMostCornerY": 18.97437756243129,
+      "rightMostCornerX": 388.76836234159,
+      "rightMostCornerY": -26.97437756243129,
+      "topCornerX": 379.78042187859836,
+      "topCornerY": -31.358089030322066,
+      "botCornerX": 364.21957812140164,
+      "botCornerY": 23.358089030322066,
+      "occludes": [
+        90
+      ]
+    },
+    {
+      "x": 338.10467157370556,
+      "y": -256.90788726634753,
+      "width": 10,
+      "height": 68,
+      "angle": -18,
+      "angleRad": -0.3141592653589793,
+      "endzone": 0,
+      "wall": 0,
+      "hypotenuse": 34.36568055487916,
+      "corners": [
+        [
+          5.751295227272444,
+          33.88100652590995
+        ],
+        [
+          15.26186039022398,
+          30.79083658216048
+        ],
+        [
+          -5.751295227272444,
+          -33.88100652590995
+        ],
+        [
+          -15.26186039022398,
+          -30.79083658216048
+        ]
+      ],
+      "cornersSorted": [
+        [
+          -15.26186039022398,
+          -30.79083658216048
+        ],
+        [
+          -5.751295227272444,
+          -33.88100652590995
+        ],
+        [
+          5.751295227272444,
+          33.88100652590995
+        ],
+        [
+          15.26186039022398,
+          30.79083658216048
+        ]
+      ],
+      "leftMostCornerX": 322.84281118348156,
+      "leftMostCornerY": -287.698723848508,
+      "rightMostCornerX": 353.36653196392956,
+      "rightMostCornerY": -226.11705068418706,
+      "topCornerX": 332.3533763464331,
+      "topCornerY": -290.78889379225745,
+      "botCornerX": 343.855966800978,
+      "botCornerY": -223.02688074043758,
+      "occludes": []
+    },
+    {
+      "x": 322,
+      "y": -342,
+      "width": 8,
+      "height": 40,
+      "angle": -28,
+      "angleRad": -0.4886921905584123,
+      "endzone": 0,
+      "wall": 0,
+      "hypotenuse": 20.396078054371138,
+      "corners": [
+        [
+          5.857640884282109,
+          19.536838108322105
+        ],
+        [
+          12.921221627153525,
+          15.781065606034977
+        ],
+        [
+          -5.857640884282109,
+          -19.536838108322105
+        ],
+        [
+          -12.921221627153525,
+          -15.781065606034977
+        ]
+      ],
+      "cornersSorted": [
+        [
+          -12.921221627153525,
+          -15.781065606034977
+        ],
+        [
+          -5.857640884282109,
+          -19.536838108322105
+        ],
+        [
+          5.857640884282109,
+          19.536838108322105
+        ],
+        [
+          12.921221627153525,
+          15.781065606034977
+        ]
+      ],
+      "leftMostCornerX": 309.0787783728465,
+      "leftMostCornerY": -357.781065606035,
+      "rightMostCornerX": 334.9212216271535,
+      "rightMostCornerY": -326.218934393965,
+      "topCornerX": 316.1423591157179,
+      "topCornerY": -361.5368381083221,
+      "botCornerX": 327.8576408842821,
+      "botCornerY": -322.4631618916779,
+      "occludes": []
+    },
+    {
+      "x": 330,
+      "y": -306,
+      "width": 8,
+      "height": 40,
+      "angle": 6,
+      "angleRad": 0.10471975511965978,
+      "endzone": 0,
+      "wall": 0,
+      "hypotenuse": 20.396078054371138,
+      "corners": [
+        [
+          -6.068656846826163,
+          19.47232405429485
+        ],
+        [
+          1.8875183161200235,
+          20.30855176043608
+        ],
+        [
+          6.068656846826163,
+          -19.47232405429485
+        ],
+        [
+          -1.8875183161200235,
+          -20.30855176043608
+        ]
+      ],
+      "cornersSorted": [
+        [
+          -6.068656846826163,
+          19.47232405429485
+        ],
+        [
+          -1.8875183161200235,
+          -20.30855176043608
+        ],
+        [
+          1.8875183161200235,
+          20.30855176043608
+        ],
+        [
+          6.068656846826163,
+          -19.47232405429485
+        ]
+      ],
+      "leftMostCornerX": 323.9313431531738,
+      "leftMostCornerY": -286.52767594570514,
+      "rightMostCornerX": 336.0686568468262,
+      "rightMostCornerY": -325.47232405429486,
+      "topCornerX": 328.11248168388,
+      "topCornerY": -326.3085517604361,
+      "botCornerX": 331.88751831612,
+      "botCornerY": -285.6914482395639,
+      "occludes": [
+        95
+      ]
+    },
+    {
+      "x": 421.99999999999994,
+      "y": -342,
+      "width": 10,
+      "height": 68,
+      "angle": 10,
+      "angleRad": 0.17453292519943295,
+      "endzone": 0,
+      "wall": 0,
+      "hypotenuse": 34.36568055487916,
+      "corners": [
+        [
+          -10.828076805736671,
+          32.61522271408042
+        ],
+        [
+          -0.9799992756145919,
+          34.351704490749725
+        ],
+        [
+          10.828076805736671,
+          -32.61522271408042
+        ],
+        [
+          0.9799992756145919,
+          -34.351704490749725
+        ]
+      ],
+      "cornersSorted": [
+        [
+          -10.828076805736671,
+          32.61522271408042
+        ],
+        [
+          -0.9799992756145919,
+          34.351704490749725
+        ],
+        [
+          0.9799992756145919,
+          -34.351704490749725
+        ],
+        [
+          10.828076805736671,
+          -32.61522271408042
+        ]
+      ],
+      "leftMostCornerX": 411.1719231942633,
+      "leftMostCornerY": -309.3847772859196,
+      "rightMostCornerX": 432.8280768057366,
+      "rightMostCornerY": -374.6152227140804,
+      "topCornerX": 422.97999927561455,
+      "topCornerY": -376.35170449074974,
+      "botCornerX": 421.02000072438534,
+      "botCornerY": -307.64829550925026,
+      "occludes": []
+    },
+    {
+      "x": 432,
+      "y": -444,
+      "width": 6,
+      "height": 34,
+      "angle": 34,
+      "angleRad": 0.5934119456780721,
+      "endzone": 0,
+      "wall": 0,
+      "hypotenuse": 17.26267650163207,
+      "corners": [
+        [
+          -11.993392076667822,
+          12.41606002302347
+        ],
+        [
+          -7.019166641337572,
+          15.771217443847949
+        ],
+        [
+          11.993392076667822,
+          -12.41606002302347
+        ],
+        [
+          7.019166641337572,
+          -15.771217443847949
+        ]
+      ],
+      "cornersSorted": [
+        [
+          -11.993392076667822,
+          12.41606002302347
+        ],
+        [
+          -7.019166641337572,
+          15.771217443847949
+        ],
+        [
+          7.019166641337572,
+          -15.771217443847949
+        ],
+        [
+          11.993392076667822,
+          -12.41606002302347
+        ]
+      ],
+      "leftMostCornerX": 420.0066079233322,
+      "leftMostCornerY": -431.5839399769765,
+      "rightMostCornerX": 443.9933920766678,
+      "rightMostCornerY": -456.4160600230235,
+      "topCornerX": 439.01916664133756,
+      "topCornerY": -459.77121744384795,
+      "botCornerX": 424.98083335866244,
+      "botCornerY": -428.22878255615205,
+      "occludes": [
+        97
+      ]
+    },
+    {
+      "x": 422,
+      "y": -428,
+      "width": 8,
+      "height": 118,
+      "angle": -4,
+      "angleRad": -0.06981317007977318,
+      "endzone": 0,
+      "wall": 0,
+      "hypotenuse": 59.135437767890075,
+      "corners": [
+        [
+          0.12537574986409616,
+          59.13530486030613
+        ],
+        [
+          8.10588815194269,
+          58.57725307035313
+        ],
+        [
+          -0.12537574986409616,
+          -59.13530486030613
+        ],
+        [
+          -8.10588815194269,
+          -58.57725307035313
+        ]
+      ],
+      "cornersSorted": [
+        [
+          -8.10588815194269,
+          -58.57725307035313
+        ],
+        [
+          -0.12537574986409616,
+          -59.13530486030613
+        ],
+        [
+          0.12537574986409616,
+          59.13530486030613
+        ],
+        [
+          8.10588815194269,
+          58.57725307035313
+        ]
+      ],
+      "leftMostCornerX": 413.8941118480573,
+      "leftMostCornerY": -486.57725307035315,
+      "rightMostCornerX": 430.1058881519427,
+      "rightMostCornerY": -369.42274692964685,
+      "topCornerX": 421.8746242501359,
+      "topCornerY": -487.1353048603061,
+      "botCornerX": 422.1253757498641,
+      "botCornerY": -368.8646951396939,
+      "occludes": [
+        98
+      ]
+    },
+    {
+      "x": 324,
+      "y": -610,
+      "width": 6,
+      "height": 32,
+      "angle": 32,
+      "angleRad": 0.5585053606381855,
+      "endzone": 0,
+      "wall": 0,
+      "hypotenuse": 16.278820596099706,
+      "corners": [
+        [
+          -11.022852516200556,
+          11.9790117458032
+        ],
+        [
+          -5.934563939262,
+          15.15852733120243
+        ],
+        [
+          11.022852516200556,
+          -11.9790117458032
+        ],
+        [
+          5.934563939262,
+          -15.15852733120243
+        ]
+      ],
+      "cornersSorted": [
+        [
+          -11.022852516200556,
+          11.9790117458032
+        ],
+        [
+          -5.934563939262,
+          15.15852733120243
+        ],
+        [
+          5.934563939262,
+          -15.15852733120243
+        ],
+        [
+          11.022852516200556,
+          -11.9790117458032
+        ]
+      ],
+      "leftMostCornerX": 312.97714748379946,
+      "leftMostCornerY": -598.0209882541968,
+      "rightMostCornerX": 335.02285251620054,
+      "rightMostCornerY": -621.9790117458032,
+      "topCornerX": 329.934563939262,
+      "topCornerY": -625.1585273312024,
+      "botCornerX": 318.065436060738,
+      "botCornerY": -594.8414726687976,
+      "occludes": []
+    },
+    {
+      "x": 322,
+      "y": -565,
+      "width": 8,
+      "height": 70,
+      "angle": -14,
+      "angleRad": -0.24434609527920614,
+      "endzone": 0,
+      "wall": 0,
+      "hypotenuse": 35.22782990761707,
+      "corners": [
+        [
+          4.586083440884385,
+          34.92803800205854
+        ],
+        [
+          12.348449251092356,
+          32.99266283726121
+        ],
+        [
+          -4.586083440884385,
+          -34.92803800205854
+        ],
+        [
+          -12.348449251092356,
+          -32.99266283726121
+        ]
+      ],
+      "cornersSorted": [
+        [
+          -12.348449251092356,
+          -32.99266283726121
+        ],
+        [
+          -4.586083440884385,
+          -34.92803800205854
+        ],
+        [
+          4.586083440884385,
+          34.92803800205854
+        ],
+        [
+          12.348449251092356,
+          32.99266283726121
+        ]
+      ],
+      "leftMostCornerX": 309.65155074890765,
+      "leftMostCornerY": -597.9926628372612,
+      "rightMostCornerX": 334.34844925109235,
+      "rightMostCornerY": -532.0073371627388,
+      "topCornerX": 317.4139165591156,
+      "topCornerY": -599.9280380020585,
+      "botCornerX": 326.5860834408844,
+      "botCornerY": -530.0719619979415,
+      "occludes": [
+        102
+      ]
+    },
+    {
+      "x": 330,
+      "y": -508,
+      "width": 10,
+      "height": 46,
+      "angle": -2,
+      "angleRad": -0.03490658503988659,
+      "endzone": 0,
+      "wall": 0,
+      "hypotenuse": 23.53720459187964,
+      "corners": [
+        [
+          -4.194265710937956,
+          23.160486504951706
+        ],
+        [
+          5.799642559253001,
+          22.8114915379267
+        ],
+        [
+          4.194265710937956,
+          -23.160486504951706
+        ],
+        [
+          -5.799642559253001,
+          -22.8114915379267
+        ]
+      ],
+      "cornersSorted": [
+        [
+          -5.799642559253001,
+          -22.8114915379267
+        ],
+        [
+          -4.194265710937956,
+          23.160486504951706
+        ],
+        [
+          4.194265710937956,
+          -23.160486504951706
+        ],
+        [
+          5.799642559253001,
+          22.8114915379267
+        ]
+      ],
+      "leftMostCornerX": 324.200357440747,
+      "leftMostCornerY": -530.8114915379267,
+      "rightMostCornerX": 335.799642559253,
+      "rightMostCornerY": -485.1885084620733,
+      "topCornerX": 334.19426571093794,
+      "topCornerY": -531.1604865049517,
+      "botCornerX": 325.80573428906206,
+      "botCornerY": -484.8395134950483,
+      "occludes": [
+        99
+      ]
+    },
+    {
+      "x": 310,
+      "y": -500,
+      "width": 6,
+      "height": 70,
+      "angle": -22,
+      "angleRad": -0.3839724354387525,
+      "endzone": 0,
+      "wall": 0,
+      "hypotenuse": 35.12833614050059,
+      "corners": [
+        [
+          10.329679205856557,
+          33.575254690085295
+        ],
+        [
+          15.892782333257284,
+          31.327615129589823
+        ],
+        [
+          -10.329679205856557,
+          -33.575254690085295
+        ],
+        [
+          -15.892782333257284,
+          -31.327615129589823
+        ]
+      ],
+      "cornersSorted": [
+        [
+          -15.892782333257284,
+          -31.327615129589823
+        ],
+        [
+          -10.329679205856557,
+          -33.575254690085295
+        ],
+        [
+          10.329679205856557,
+          33.575254690085295
+        ],
+        [
+          15.892782333257284,
+          31.327615129589823
+        ]
+      ],
+      "leftMostCornerX": 294.1072176667427,
+      "leftMostCornerY": -531.3276151295898,
+      "rightMostCornerX": 325.8927823332573,
+      "rightMostCornerY": -468.67238487041016,
+      "topCornerX": 299.67032079414344,
+      "topCornerY": -533.5752546900853,
+      "botCornerX": 320.32967920585656,
+      "botCornerY": -466.4247453099147,
+      "occludes": [
+        99,
+        100
+      ]
+    },
+    {
+      "x": 326.6945927106677,
+      "y": -465.9392310120488,
+      "width": 12,
+      "height": 38,
+      "angle": 10,
+      "angleRad": 0.17453292519943295,
+      "endzone": 0,
+      "wall": 0,
+      "hypotenuse": 19.924858845171276,
+      "corners": [
+        [
+          -9.208161893744924,
+          17.669458241230373
+        ],
+        [
+          2.6095311424015715,
+          19.753236373233534
+        ],
+        [
+          9.208161893744924,
+          -17.669458241230373
+        ],
+        [
+          -2.6095311424015715,
+          -19.753236373233534
+        ]
+      ],
+      "cornersSorted": [
+        [
+          -9.208161893744924,
+          17.669458241230373
+        ],
+        [
+          -2.6095311424015715,
+          -19.753236373233534
+        ],
+        [
+          2.6095311424015715,
+          19.753236373233534
+        ],
+        [
+          9.208161893744924,
+          -17.669458241230373
+        ]
+      ],
+      "leftMostCornerX": 317.48643081692273,
+      "leftMostCornerY": -448.26977277081846,
+      "rightMostCornerX": 335.9027546044126,
+      "rightMostCornerY": -483.6086892532792,
+      "topCornerX": 324.0850615682661,
+      "topCornerY": -485.6924673852824,
+      "botCornerX": 329.30412385306926,
+      "botCornerY": -446.18599463881526,
+      "occludes": [
+        100,
+        103
+      ]
+    },
+    {
+      "x": 392,
+      "y": -788,
+      "width": 6,
+      "height": 84,
+      "angle": -4,
+      "angleRad": -0.06981317007977318,
+      "endzone": 0,
+      "wall": 0,
+      "hypotenuse": 42.1070065428546,
+      "corners": [
+        [
+          -0.06292025352620989,
+          42.10695953214499
+        ],
+        [
+          5.922464048032735,
+          41.688420689680235
+        ],
+        [
+          0.06292025352620989,
+          -42.10695953214499
+        ],
+        [
+          -5.922464048032735,
+          -41.688420689680235
+        ]
+      ],
+      "cornersSorted": [
+        [
+          -5.922464048032735,
+          -41.688420689680235
+        ],
+        [
+          -0.06292025352620989,
+          42.10695953214499
+        ],
+        [
+          0.06292025352620989,
+          -42.10695953214499
+        ],
+        [
+          5.922464048032735,
+          41.688420689680235
+        ]
+      ],
+      "leftMostCornerX": 386.07753595196726,
+      "leftMostCornerY": -829.6884206896802,
+      "rightMostCornerX": 397.92246404803274,
+      "rightMostCornerY": -746.3115793103198,
+      "topCornerX": 392.0629202535262,
+      "topCornerY": -830.106959532145,
+      "botCornerX": 391.9370797464738,
+      "botCornerY": -745.893040467855,
+      "occludes": [
+        28
+      ]
+    },
+    {
+      "x": 410,
+      "y": -704,
+      "width": 6,
+      "height": 20,
+      "angle": 26,
+      "angleRad": 0.4537856055185257,
+      "endzone": 0,
+      "wall": 0,
+      "hypotenuse": 10.44030650891055,
+      "corners": [
+        [
+          -7.080093606788276,
+          7.672827022624437
+        ],
+        [
+          -1.6873293289932736,
+          10.303053903358903
+        ],
+        [
+          7.080093606788276,
+          -7.672827022624437
+        ],
+        [
+          1.6873293289932736,
+          -10.303053903358903
+        ]
+      ],
+      "cornersSorted": [
+        [
+          -7.080093606788276,
+          7.672827022624437
+        ],
+        [
+          -1.6873293289932736,
+          10.303053903358903
+        ],
+        [
+          1.6873293289932736,
+          -10.303053903358903
+        ],
+        [
+          7.080093606788276,
+          -7.672827022624437
+        ]
+      ],
+      "leftMostCornerX": 402.9199063932117,
+      "leftMostCornerY": -696.3271729773755,
+      "rightMostCornerX": 417.0800936067883,
+      "rightMostCornerY": -711.6728270226245,
+      "topCornerX": 411.68732932899326,
+      "topCornerY": -714.3030539033589,
+      "botCornerX": 408.31267067100674,
+      "botCornerY": -693.6969460966411,
+      "occludes": [
+        105
+      ]
+    },
+    {
+      "x": 400,
+      "y": -722,
+      "width": 6,
+      "height": 58,
+      "angle": -12,
+      "angleRad": -0.20943951023931956,
+      "endzone": 0,
+      "wall": 0,
+      "hypotenuse": 29.154759474226502,
+      "corners": [
+        [
+          3.094996231513604,
+          28.990015493733644
+        ],
+        [
+          8.963881835916439,
+          27.742545348827086
+        ],
+        [
+          -3.094996231513604,
+          -28.990015493733644
+        ],
+        [
+          -8.963881835916439,
+          -27.742545348827086
+        ]
+      ],
+      "cornersSorted": [
+        [
+          -8.963881835916439,
+          -27.742545348827086
+        ],
+        [
+          -3.094996231513604,
+          -28.990015493733644
+        ],
+        [
+          3.094996231513604,
+          28.990015493733644
+        ],
+        [
+          8.963881835916439,
+          27.742545348827086
+        ]
+      ],
+      "leftMostCornerX": 391.0361181640836,
+      "leftMostCornerY": -749.7425453488271,
+      "rightMostCornerX": 408.9638818359164,
+      "rightMostCornerY": -694.2574546511729,
+      "topCornerX": 396.9050037684864,
+      "topCornerY": -750.9900154937336,
+      "botCornerX": 403.0949962315136,
+      "botCornerY": -693.0099845062664,
+      "occludes": [
+        104,
+        106,
+        107
+      ]
+    },
+    {
+      "x": 401.2267696153609,
+      "y": -667.8442890998647,
+      "width": 6,
+      "height": 58,
+      "angle": 8,
+      "angleRad": 0.13962634015954636,
+      "endzone": 0,
+      "wall": 0,
+      "hypotenuse": 29.154759474226502,
+      "corners": [
+        [
+          -7.006824134066609,
+          28.300254690625344
+        ],
+        [
+          -1.0652157216171867,
+          29.13529329638574
+        ],
+        [
+          7.006824134066609,
+          -28.300254690625344
+        ],
+        [
+          1.0652157216171867,
+          -29.13529329638574
+        ]
+      ],
+      "cornersSorted": [
+        [
+          -7.006824134066609,
+          28.300254690625344
+        ],
+        [
+          -1.0652157216171867,
+          29.13529329638574
+        ],
+        [
+          1.0652157216171867,
+          -29.13529329638574
+        ],
+        [
+          7.006824134066609,
+          -28.300254690625344
+        ]
+      ],
+      "leftMostCornerX": 394.2199454812943,
+      "leftMostCornerY": -639.5440344092393,
+      "rightMostCornerX": 408.23359374942754,
+      "rightMostCornerY": -696.14454379049,
+      "topCornerX": 402.2919853369781,
+      "topCornerY": -696.9795823962504,
+      "botCornerX": 400.16155389374376,
+      "botCornerY": -638.708995803479,
+      "occludes": [
+        105,
+        107
       ]
     }
   ]
