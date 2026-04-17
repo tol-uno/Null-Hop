@@ -284,8 +284,6 @@ class Renderer {
                 // all uniforms covered by globalScope
             },
 
-            framebuffer: this.#fbo,
-
             vert: `
             precision mediump float;
 
@@ -333,7 +331,7 @@ class Renderer {
             precision mediump float;
             varying vec3 vPosition;
             void main () {
-                gl_FragColor = vec4(vec3(vPosition.z), 1.0);
+                gl_FragColor = vec4(vPosition.z, 0.0, 0.0, 1.0);
             }
             `,
 
@@ -509,7 +507,7 @@ class Renderer {
 
             // Compare depth map point to projected point
             float shadowSample(vec2 uv, float fragDepth, float bias) {
-                float shadowMapDepth = texture2D(shadowMap, uv).z;  // Depth from the shadow map
+                float shadowMapDepth = texture2D(shadowMap, uv).r;  // Depth from the shadow map
                 return step(fragDepth - bias, shadowMapDepth);      // Returns 1.0 if not in shadow, 0.0 if in shadow
             }
 
@@ -629,11 +627,12 @@ class Renderer {
         return [x, y, z];
     }
 
+    
     drawFrame() {
         this.#globalScope(() => {
             // Shadow pass (to shadow map)
             this.#fbo.use(() => {
-                this.#regl.clear({ color: [1, 1, 1, 1], depth: 1 }); // Optional
+                this.#regl.clear({ color: [1, 1, 1, 1], depth: 1 });
                 this.#drawInstancedBoxesDepth();
             });
 
