@@ -16,7 +16,7 @@ let midX = null; // middle of device DPI scaled canvas
 let midY = null;
 let midX_UI = null; // middle of standard CSS canvas since UI is position on unscaled canvas
 let midY_UI = null;
-
+let renderer = null;
 
 function onDeviceReady() {
     // Called on page load in HMTL
@@ -25,6 +25,10 @@ function onDeviceReady() {
     AudioHandler.init();
 
     CanvasArea.start();
+    
+    renderer = new Renderer(document.getElementById("webgl-canvas"));
+    renderer.init();
+
     PlayerCanvas.start();
 
     UserInterface.start();
@@ -62,11 +66,20 @@ function updateGameArea() {
         MapEditor.update();
     }
 
-    CanvasArea.clear();
+    // CanvasArea.clear();
+
+    // if (UserInterface.gamestate == 6) {
+    //     Map.render(); // draws Player lower shadow too
+    //     Player.render();
+    // }
 
     if (UserInterface.gamestate == 6) {
-        Map.render(); // draws Player lower shadow too
-        Player.render();
+        
+        const cam = Player.speedCameraOffset
+
+        renderer.setCameraPos(Player.x, 10, Player.y, 500 / cam.zoom)
+        
+        renderer.drawFrame();
     }
 
     if (UserInterface.gamestate == 7 && MapEditor.editorState !== 5) {
