@@ -618,6 +618,8 @@ const UserInterface = {
                                 (file) => {
                                     alert("Map Deleted");
 
+                                    UserInterface.removeRecord(MapBrowser.selectedMapIndex)
+
                                     // reload map editor map browser by pressing btn_mapEditor again
                                     btn_mapEditor.func();
                                 },
@@ -1671,6 +1673,11 @@ const UserInterface = {
             };
             this.writeRecords(); // Write the default empty records to file
         }
+    },
+
+    removeRecord: async function (mapName) {
+        delete this.records[mapName];
+        this.writeRecords();
     },
 
     writeRecords: function () {
