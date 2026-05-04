@@ -1176,7 +1176,7 @@ const MapEditor = {
         async function writeCustomMap(exportObj, exportName) {
             const mapBlob = new Blob([JSON.stringify(exportObj, null, 2)], { type: "application/json" });
             await writeFile(exportName + ".json", mapBlob, "maps");
-            console.log("Successfully saved map:" + exportName);
+            console.log("Successfully saved map: " + exportName);
         }
     },
 
@@ -1209,6 +1209,8 @@ const MapEditor = {
         btn_checkpointAngleSlider.dataset.step = 2;
 
         CanvasArea.canvas.classList.add("hidden");
+
+        UserInterface.updateUiColorMode("light")
 
         btn_mapEditor.func(); // press the main menu's Map Editor button to set up Map Editor Browser
     },

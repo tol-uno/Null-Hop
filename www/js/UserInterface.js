@@ -23,7 +23,7 @@ const UserInterface = {
     records: {}, // users records (personal bests) for each level theyve completed
     previousRecord: 0,
 
-    speedAverager: new Averager(30), // for adjusting how speedometer looks
+    speedAverager: new Averager(30), // for adjusting how speedometer looks. Not Used
 
     showVerticalWarning: false,
     showOverstrafeWarning: false,
@@ -371,6 +371,8 @@ const UserInterface = {
                 UserInterface.showOverstrafeWarning = false;
 
                 CanvasArea.canvas.classList.add("hidden");
+
+                UserInterface.updateUiColorMode("light")
 
                 if (MapBrowser.state == 1) {
                     UserInterface.switchToUiGroup(UserInterface.uiGroup_standardMapBrowser);
@@ -1995,9 +1997,9 @@ const UserInterface = {
 
         const luminance = (0.299 * bgColor[0] + 0.587 * bgColor[1] + 0.114 * bgColor[2]) / 255;
         // luminance = (0.299 * R + 0.587 * G + 0.114 * B)/255
-        // console.log("luminance: " + luminance)
+        // estimates the "brightness" of the color based on human eye perception 
 
-        this.darkMode = luminance > 0.77 ? true : false; // can kill once darkMode is not used by any of the old UI system (map editor highlighting etc.)
+        this.darkMode = luminance < 0.4 ? true : false; // can KILL once darkMode is not used by any of the old UI system (map editor highlighting etc.)
 
         const modeString = this.darkMode ? "dark" : "light";
         this.updateUiColorMode(modeString);
@@ -2005,6 +2007,10 @@ const UserInterface = {
 
     updateUiColorMode: function (mode) {
         // mode = "light" or "dark'
+        // use dark mode on dark backgrounds
+        // use light mode on light backgrounds
+        // dark: button-bg-dark, button-border-light text-light(forground)
+        // light: button-bg-light, button-border-dark text-dark(forground)
 
         if (mode == "dark") {
             const root = document.documentElement.style;

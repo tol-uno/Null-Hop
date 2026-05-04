@@ -82,6 +82,7 @@
     transform: translateX(-50%);
     font-family: "DINish", monospace;
     font-variant-numeric: tabular-nums;
+    color: var(--uiForegroundColor);
 }
 
 #ui_jumpStats {
@@ -93,6 +94,7 @@
     font-variant-numeric: tabular-nums;
     opacity: 0;
     transform: translateY(0);
+    color: var(--uiForegroundColor);
 }
 
 #ui_strafeHelper {
@@ -104,14 +106,14 @@
     width: 33vw;
     height: 1.6vw;
     border-radius: 10vw;
-    outline: 0.5vw solid var(--uiBackgroundColor);
+    outline: 0.5vw solid var(--uiForegroundColor);
 }
 
 #strafeHandle {
     position: absolute;
     width: 1.6vw;
     height: 1.6vw;
-    background-color: var(--uiBackgroundColor);
+    background-color: var(--uiForegroundColor);
     border-radius: 50%;
     transform: translateX(-50%);
 }
@@ -197,7 +199,7 @@
         bottom: 22%;
         width: 75vw;
         height: 3.4vw;
-        outline: 1vw solid var(--uiBackgroundColor);
+        outline: 1vw solid var(--uiForegroundColor);
     }
 
     #strafeHandle {

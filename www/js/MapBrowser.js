@@ -48,12 +48,13 @@ const MapBrowser = {
                     const mapName = String(mapEntry.name.split(".")[0]);
                     this.customMapNamesCache.push(mapName);
 
-                    const generateColorsFromString = (s) => {
-                        const hash = s.split("").reduce((h, c) => ((h << 5) - h + c.charCodeAt(0)) | 0, 0);
+                    const generateColorsFromString = (string) => {
+                        const hash = Math.abs(string.split("").reduce((h, c) => ((h << 5) - h + c.charCodeAt(0)) | 0, 0));
                         return [...Array(4)].map((_, i) => {
-                            const baseHue = (hash + i * 137) % 360;
-                            const lightness = 40 + (hash % 20);
-                            return `hsl(${baseHue}, 70%, ${lightness}%)`;
+                            const baseHue = (hash + i * 5) % 360;
+                            const saturation = 50 + ((hash + i * 5) % 40);
+                            const lightness = 30 + ((hash + i * 5) % 50);
+                            return `hsl(${baseHue}, ${saturation}%, ${lightness}%)`;
                         });
                     };
 
