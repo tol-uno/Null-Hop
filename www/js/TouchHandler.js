@@ -22,12 +22,12 @@ const TouchHandler = {
 
                 const touch = {
                     identifier: e.changedTouches[i].identifier,
-                    x: e.changedTouches[i].pageX,
-                    y: e.changedTouches[i].pageY,
-                    startX: e.changedTouches[i].pageX,
-                    startY: e.changedTouches[i].pageY,
-                    previousX: e.changedTouches[i].pageX,
-                    previousY: e.changedTouches[i].pageY,
+                    x: e.changedTouches[i].clientX,
+                    y: e.changedTouches[i].clientY,
+                    startX: e.changedTouches[i].clientX,
+                    startY: e.changedTouches[i].clientY,
+                    previousX: e.changedTouches[i].clientX,
+                    previousY: e.changedTouches[i].clientY,
                 };
 
                 if (this.dragging == false) {
@@ -55,8 +55,8 @@ const TouchHandler = {
 
                 const touch = {
                     identifier: e.changedTouches[i].identifier,
-                    x: e.changedTouches[i].pageX,
-                    y: e.changedTouches[i].pageY,
+                    x: e.changedTouches[i].clientX,
+                    y: e.changedTouches[i].clientY,
                 };
 
                 // updating this touch within this.touches
@@ -87,8 +87,8 @@ const TouchHandler = {
 
                 const touch = {
                     identifier: e.changedTouches[i].identifier,
-                    x: e.changedTouches[i].pageX,
-                    y: e.changedTouches[i].pageY,
+                    x: e.changedTouches[i].clientX,
+                    y: e.changedTouches[i].clientY,
                 };
 
                 const touchIndex = this.touches.findIndex((t) => t.identifier == touch.identifier);

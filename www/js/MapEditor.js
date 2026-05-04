@@ -5,8 +5,10 @@ const MapEditor = {
     // 2 = platform edit menu
     // 3 = map color page
     // 4 = map settings page
+    // 5 = paused for exit dialogs
 
     loadedMap: null,
+    mapNameBeingEdited: null,
     scrollAmountX: null,
     scrollAmountY: null,
     scrollVelX: 0, // for smooth scrolling
@@ -57,6 +59,8 @@ const MapEditor = {
     initMap: async function (name) {
         if (name === -1) {
             // generate new map
+            this.mapNameBeingEdited = null;
+
             this.loadedMap = {
                 playerStart: {
                     x: 350,
@@ -106,6 +110,7 @@ const MapEditor = {
             this.loadedMap.platforms.forEach((platform) => this.updatePlatformCorners(platform));
         } else if (name === -2) {
             // import map from users file system
+            this.mapNameBeingEdited = null;
 
             // UPDATE THIS FUNCTION TO INCLUDE FUNCTIONALITY OF OLD btn_importMap_text BUTTON:
             // let mapPaste = prompt("Paste Map Data:");
@@ -163,6 +168,7 @@ const MapEditor = {
             }
         } else {
             // load existing map
+            this.mapNameBeingEdited = name;
             const mapDataRaw = await readFile("device", "maps", name + ".json", "text");
             this.loadedMap = JSON.parse(mapDataRaw);
         }
@@ -985,56 +991,51 @@ const MapEditor = {
         ];
     },
 
-    saveCustomMap: async function () {
-        const savemap = confirm("Save Map?");
-        if (savemap) {
-            const map = this.loadedMap;
+    saveCustomMap: async function (mapName) { 
+        const map = this.loadedMap;
 
-            downloadMap = {};
-            ((downloadMap.playerStart = {
-                x: map.playerStart.x,
-                y: map.playerStart.y,
-                angle: map.playerStart.angle,
-            }),
-                (downloadMap.checkpoints = map.checkpoints));
-            downloadMap.style = {
-                platformTopColor: map.style.platformTopColor,
-                platformSideColor: map.style.platformSideColor,
-                wallTopColor: map.style.wallTopColor,
-                wallSideColor: map.style.wallSideColor,
-                endZoneTopColor: map.style.endZoneTopColor,
-                endZoneSideColor: map.style.endZoneSideColor,
-                backgroundColor: map.style.backgroundColor,
-                playerColor: map.style.playerColor,
-                directLight: map.style.directLight ?? "rba(255,255,255)",
-                ambientLight: map.style.ambientLight ?? "rba(140,184,198)",
-                platformHeight: map.style.platformHeight,
-                wallHeight: map.style.wallHeight,
-                lightDirection: map.style.lightDirection,
-                lightPitch: map.style.lightPitch,
-            };
-            downloadMap.platforms = [];
-            map.platforms.forEach((platform) => {
-                downloadMap.platforms.push({
-                    x: platform.x,
-                    y: platform.y,
-                    width: platform.width,
-                    height: platform.height,
-                    angle: platform.angle,
-                    angleRad: platform.angleRad,
-                    endzone: platform.endzone,
-                    wall: platform.wall,
-                    hypotenuse: platform.hypotenuse,
-                    corners: platform.corners, // relative to platform origin. ordered BL BR TR TL. Blubber Turtle
-                });
+        downloadMap = {};
+        downloadMap.playerStart = {
+            x: map.playerStart.x,
+            y: map.playerStart.y,
+            angle: map.playerStart.angle,
+        };
+        downloadMap.checkpoints = map.checkpoints;
+        downloadMap.style = {
+            platformTopColor: map.style.platformTopColor,
+            platformSideColor: map.style.platformSideColor,
+            wallTopColor: map.style.wallTopColor,
+            wallSideColor: map.style.wallSideColor,
+            endZoneTopColor: map.style.endZoneTopColor,
+            endZoneSideColor: map.style.endZoneSideColor,
+            backgroundColor: map.style.backgroundColor,
+            playerColor: map.style.playerColor,
+            directLight: map.style.directLight ?? "rba(255,255,255)",
+            ambientLight: map.style.ambientLight ?? "rba(140,184,198)",
+            platformHeight: map.style.platformHeight,
+            wallHeight: map.style.wallHeight,
+            lightDirection: map.style.lightDirection,
+            lightPitch: map.style.lightPitch,
+        };
+        downloadMap.platforms = [];
+        map.platforms.forEach((platform) => {
+            downloadMap.platforms.push({
+                x: platform.x,
+                y: platform.y,
+                width: platform.width,
+                height: platform.height,
+                angle: platform.angle,
+                angleRad: platform.angleRad,
+                endzone: platform.endzone,
+                wall: platform.wall,
+                hypotenuse: platform.hypotenuse,
+                corners: platform.corners, // relative to platform origin. ordered BL BR TR TL. Blubber Turtle
             });
+        });
 
-            downloadMap.platforms = sortPlatforms(downloadMap.platforms);
+        downloadMap.platforms = sortPlatforms(downloadMap.platforms);
 
-            writeCustomMap(downloadMap, "custom_map");
-        } else {
-            exitEdit();
-        }
+        await writeCustomMap(downloadMap, mapName);
 
         function sortPlatforms(platforms) {
             // returns array of sorted platforms
@@ -1173,46 +1174,43 @@ const MapEditor = {
         }
 
         async function writeCustomMap(exportObj, exportName) {
-            console.log("WRITING MAP NOW!");
-            exportName = prompt("Enter Map Name");
-
             const mapBlob = new Blob([JSON.stringify(exportObj, null, 2)], { type: "application/json" });
             await writeFile(exportName + ".json", mapBlob, "maps");
-            console.log("Successful Map Save");
-            exitEdit();
+            console.log("Successfully saved map:" + exportName);
         }
+    },
 
-        function exitEdit() {
-            // reset everything and go back to MapBrowser
+    leaveMapEditor: function () {
+        // reset everything and go back to MapBrowser
 
-            MapEditor.loadedMap = null;
-            MapEditor.zoom = 1;
-            MapEditor.screen.x = 0;
-            MapEditor.screen.y = 0;
-            MapEditor.screen.width = screenWidth;
-            MapEditor.screen.height = screenHeight;
-            MapEditor.scrollVelX = 0;
-            MapEditor.scrollVelY = 0;
+        MapEditor.loadedMap = null;
+        MapEditor.zoom = 1;
+        MapEditor.screen.x = 0;
+        MapEditor.screen.y = 0;
+        MapEditor.screen.width = screenWidth;
+        MapEditor.screen.height = screenHeight;
+        MapEditor.scrollVelX = 0;
+        MapEditor.scrollVelY = 0;
+        MapEditor.mapNameBeingEdited = null;
 
-            MapEditor.renderedPlatforms = [];
-            MapEditor.selectedElements = [];
+        MapEditor.renderedPlatforms = [];
+        MapEditor.selectedElements = [];
 
-            MapEditor.dragSelect = false;
-            UserInterface.setToggleState(btn_dragSelect, false);
-            MapEditor.multiSelect = false;
-            UserInterface.setToggleState(btn_multiSelect, false);
+        MapEditor.dragSelect = false;
+        UserInterface.setToggleState(btn_dragSelect, false);
+        MapEditor.multiSelect = false;
+        UserInterface.setToggleState(btn_multiSelect, false);
 
-            MapEditor.snapAmount = 2;
-            UserInterface.setSliderValue(btn_snappingSlider, 2);
+        MapEditor.snapAmount = 2;
+        UserInterface.setSliderValue(btn_snappingSlider, 2);
 
-            btn_platformAngleSlider.dataset.step = 2;
-            btn_playerAngleSlider.dataset.step = 2;
-            btn_checkpointAngleSlider.dataset.step = 2;
+        btn_platformAngleSlider.dataset.step = 2;
+        btn_playerAngleSlider.dataset.step = 2;
+        btn_checkpointAngleSlider.dataset.step = 2;
 
-            CanvasArea.canvas.classList.add("hidden");
+        CanvasArea.canvas.classList.add("hidden");
 
-            btn_mapEditor.func(); // press the main menu's Map Editor button to set up Map Editor Browser
-        }
+        btn_mapEditor.func(); // press the main menu's Map Editor button to set up Map Editor Browser
     },
 
     convertToMapCord: function (screenX, screenY) {

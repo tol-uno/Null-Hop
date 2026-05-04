@@ -69,7 +69,7 @@ function updateGameArea() {
         Player.render();
     }
 
-    if (UserInterface.gamestate == 7) {
+    if (UserInterface.gamestate == 7 && MapEditor.editorState !== 5) {
         MapEditor.render();
     }
 

@@ -114,11 +114,33 @@ const UserInterface = {
 
         screen.orientation.addEventListener("change", function (event) {
             UserInterface.orientation = event.target.type.startsWith("landscape") ? "landscape" : "portrait";
+
             CanvasArea.setSize();
             PlayerCanvas.setSize();
+
             if (UserInterface.gamestate == 2) {
                 MapBrowser.setMaxScroll();
                 // FIX should multiply the scrollPos by the ratio of the Map Buttons dimensions to stay in the same position
+                return;
+            }
+
+            // rotating the screen while the keyboard is up resets the visualViewport.offsetTop
+            // offsetTop is what makes sure the text field is in view. It is set by browser when the keyboard is opened
+            // when offsetTop gets reset it can cause the text field to go out of frame behind the keyboard. This is a solution to that:
+            if (MapEditor.editorState == 5 && document.activeElement == ui_inputMapName) {
+                // scroll the screen up to center the input within the remaining visualViewport (area left over after keyboard covers screen)
+
+                window.scrollTo(0, 0); // reset so that positioning readings are accurate
+                // wait intil visualViewport is ready to be measured
+                visualViewport.addEventListener(
+                    "resize",
+                    function () {
+                        const textBox = ui_inputMapName.getBoundingClientRect();
+                        window.scrollTo(0, textBox.top + textBox.height / 2 - window.visualViewport.height / 2);
+                        // vertical distance between the center of the textbox and the middle point of available screen height
+                    },
+                    { once: true },
+                );
             }
         });
 
@@ -618,7 +640,7 @@ const UserInterface = {
                                 (file) => {
                                     alert("Map Deleted");
 
-                                    UserInterface.removeRecord(MapBrowser.selectedMapIndex)
+                                    UserInterface.removeRecord(MapBrowser.selectedMapIndex);
 
                                     // reload map editor map browser by pressing btn_mapEditor again
                                     btn_mapEditor.func();
@@ -642,7 +664,16 @@ const UserInterface = {
 
         const btn_exitMapEditor = getByID("btn_exitMapEditor");
         btn_exitMapEditor.func = () => {
-            MapEditor.saveCustomMap();
+            if (MapEditor.mapNameBeingEdited !== null) {
+                UserInterface.switchToUiGroup(UserInterface.uiGroup_saveExistingMap);
+                ui_mapEditorSaveText.textContent = `Save changes to map: ${MapEditor.mapNameBeingEdited}?`;
+            } else {
+                UserInterface.switchToUiGroup(UserInterface.uiGroup_saveNewMap);
+                ui_mapEditorSaveText.textContent = "Save Map?";
+            }
+            MapEditor.editorState = 5; // pause map editor
+            CanvasArea.clear();
+            CanvasArea.ctx.fillRect(0, 0, 1, 1); // weird fix to update the canvas after a clear. Look into why this is happening
         };
 
         const btn_addPlatform = getByID("btn_addPlatform");
@@ -1469,6 +1500,139 @@ const UserInterface = {
         const ui_saturationGradient = getByID("ui_saturationGradient");
         const ui_lightnessGradient = getByID("ui_lightnessGradient");
 
+        // ======================================
+        //  MAP EDITOR SAVE CONFIRMATION PROMPTS
+        // ======================================
+
+        const btn_cancel = getByID("btn_cancel");
+        btn_cancel.func = () => {
+            if (UserInterface.activeUiGroup.has(btn_save)) {
+                MapEditor.selectedElements = [];
+                MapEditor.editorState = 1; // unpause map editor
+                UserInterface.switchToUiGroup(UserInterface.uiGroup_mapEditorInterface);
+            } else if (UserInterface.activeUiGroup.has(ui_inputMapName) || UserInterface.activeUiGroup.has(btn_confirmDeleteEdits)) {
+                // clear text field
+                ui_inputMapName.value = "";
+
+                if (MapEditor.mapNameBeingEdited !== null) {
+                    // if inputing name for a copy - go back to saveExistingMap
+                    UserInterface.switchToUiGroup(UserInterface.uiGroup_saveExistingMap);
+                    ui_mapEditorSaveText.textContent = `Save changes to map: ${MapEditor.mapNameBeingEdited}?`;
+                } else {
+                    // if inputing name for a new map - go back to saveNewMap
+                    UserInterface.switchToUiGroup(UserInterface.uiGroup_saveNewMap);
+                    ui_mapEditorSaveText.textContent = "Save Map?";
+                }
+            }
+        };
+
+        const ui_saveMapContainer = getByID("ui_saveMapContainer");
+
+        const btn_save = getByID("btn_save");
+        btn_save.func = () => {
+            if (MapEditor.mapNameBeingEdited) {
+                // if saving an existing map (map name is not null), save map using existing name
+                MapEditor.saveCustomMap(MapEditor.mapNameBeingEdited);
+
+                if (MapEditor.mapNameBeingEdited in UserInterface.records) {
+                    // if a record for this map exists already, prompt wether to delete existing record
+                    UserInterface.switchToUiGroup(UserInterface.uiGroup_deleteRecord);
+                    ui_mapEditorSaveText.textContent = `Delete the record for your fastest time on map: ${MapEditor.mapNameBeingEdited}? Your time: ${UserInterface.secondsToMinutes(UserInterface.records[MapEditor.mapNameBeingEdited])}`;
+                } else {
+                    MapEditor.leaveMapEditor();
+                }
+            } else {
+                // new map -- name it
+                UserInterface.switchToUiGroup(UserInterface.uiGroup_inputMapName);
+                ui_mapEditorSaveText.textContent = "Name your map";
+            }
+        };
+
+        const btn_saveAsCopy = getByID("btn_saveAsCopy");
+        btn_saveAsCopy.func = () => {
+            UserInterface.switchToUiGroup(UserInterface.uiGroup_inputMapName);
+            ui_mapEditorSaveText.textContent = "Name your map";
+        };
+
+        const btn_discard = getByID("btn_discard");
+        btn_discard.func = () => {
+            UserInterface.switchToUiGroup(UserInterface.uiGroup_confirmDiscard);
+            ui_mapEditorSaveText.textContent = "Are you sure you don't want to save your changes?";
+        };
+
+        const btn_resetRecord = getByID("btn_resetRecord");
+        btn_resetRecord.func = () => {
+            UserInterface.removeRecord(MapEditor.mapNameBeingEdited);
+            MapEditor.leaveMapEditor();
+        };
+
+        const btn_keepRecord = getByID("btn_keepRecord");
+        btn_keepRecord.func = () => {
+            MapEditor.leaveMapEditor();
+        };
+
+        const btn_confirmDeleteEdits = getByID("btn_confirmDeleteEdits");
+        btn_confirmDeleteEdits.func = () => {
+            MapEditor.leaveMapEditor();
+        };
+
+        const ui_mapEditorSaveText = getByID("ui_mapEditorSaveText");
+        const ui_inputMapName = getByID("ui_inputMapName");
+        const ui_mapNameErrorText = getByID("ui_mapNameErrorText");
+
+        const btn_submitMapName = getByID("btn_submitMapName");
+        btn_submitMapName.func = async function () {
+            const mapName = ui_inputMapName.value.trim();
+            const isValid = validateMapName(mapName);
+
+            if (!isValid.valid) {
+                // update ui_mapNameErrorTex
+                // Hide this if X button pressed or name is accepted (might not need too) kill
+                UserInterface.addUiElement(ui_mapNameErrorText);
+                ui_mapNameErrorText.textContent = isValid.reason;
+            } else {
+                // clear text field
+                ui_inputMapName.value = "";
+                try {
+                    await MapEditor.saveCustomMap(mapName);
+                } catch (error) {
+                    console.log(error);
+                } finally {
+                    MapEditor.leaveMapEditor();
+                }
+            }
+
+            function validateMapName(input) {
+                const banned = [
+                    "unlocked",
+                    "null",
+                    "awakening",
+                    "pitfall",
+                    "cavern abyss",
+                    "crystals",
+                    "surfacing",
+                    "wheat fields",
+                    "trespass",
+                    "turmoil",
+                    "tangled forest",
+                    "pinnacle",
+                    "moonlight",
+                    "rapture",
+                    "forever",
+                ];
+
+                const existingMaps = MapBrowser.customMapNamesCache;
+
+                if (input.length === 0) return { valid: false, reason: "Name cannot be blank" };
+                if (input.length > 25) return { valid: false, reason: "Name is too long (over 25 characters)" };
+                if (!/^[a-zA-Z0-9_ ]+$/.test(input)) return { valid: false, reason: "Name can only contain letters, numbers, underscores, & spaces" };
+                if (banned.includes(input.toLowerCase())) return { valid: false, reason: "That name is restricted and cannot be used" };
+                if (existingMaps.includes(input)) return { valid: false, reason: "That name is already being used by another map" };
+                existingMaps;
+                return { valid: true, reason: null };
+            }
+        };
+
         // ===========
         //  UI GROUPS
         // ===========
@@ -1616,6 +1780,12 @@ const UserInterface = {
             btn_lightDirectionSlider,
             btn_lightPitchSlider,
         ]);
+
+        this.uiGroup_saveExistingMap = new Set([btn_cancel, ui_mapEditorSaveText, ui_saveMapContainer, btn_save, btn_saveAsCopy, btn_discard]);
+        this.uiGroup_saveNewMap = new Set([btn_cancel, ui_mapEditorSaveText, ui_saveMapContainer, btn_save, btn_discard]);
+        this.uiGroup_deleteRecord = new Set([btn_resetRecord, ui_mapEditorSaveText, btn_keepRecord]);
+        this.uiGroup_inputMapName = new Set([btn_cancel, ui_mapEditorSaveText, ui_inputMapName, btn_submitMapName]); // ui_mapNameErrorText
+        this.uiGroup_confirmDiscard = new Set([btn_cancel, ui_mapEditorSaveText, btn_confirmDeleteEdits]);
 
         this.activeUiGroup = new Set();
         this.switchToUiGroup(UserInterface.uiGroup_mainMenu);

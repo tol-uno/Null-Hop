@@ -1,12 +1,3 @@
-#main-menu-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    height: 100%;
-    justify-content: center;
-    gap: 4%;
-}
-
 #menu-background {
     position: fixed;
     bottom: 0px;
@@ -16,55 +7,73 @@
 }
 
 #main-title {
+    position: fixed;
+    width: 100%;
     line-height: 0.7;
     margin: 0;
-    margin-bottom: 1%;
     text-align: center;
     color: var(--lightColor_1);
     font-size: 11vw;
     font-weight: 400;
     text-shadow: 0 0.4vw 0 var(--lightColor_2);
+    top: 10%;
+    left: 50%;
+    transform: translateX(-50%);
 }
 
 #btn_play {
+    position: fixed;
+    top: 35%;
+    left: 50%;
+    transform: translateX(-50%);
     width: 12.3vw;
     height: 7.1vw;
     font-size: 3.6vw;
 }
 
 #btn_settings {
+    position: fixed;
+    top: 55%;
+    left: 50%;
+    transform: translateX(-50%);
     width: 18.5vw;
     height: 7.1vw;
     font-size: 3.6vw;
 }
 
 #btn_mapEditor {
+    position: fixed;
+    top: 75%;
+    left: 50%;
+    transform: translateX(-50%);
     width: 24.8vw;
     height: 7.1vw;
     font-size: 3.6vw;
 }
 
 @media (orientation: portrait) {
-    #main-menu-container {
-        height: 95%;
-        gap: 3%;
-    }
     #main-title {
+        top: 20%;
         font-size: 20vw;
         text-shadow: 0 1vw 0 var(--lightColor_2);
     }
+
     #btn_play {
+        top: 40%;
         width: 26.6vw;
         height: 15.5vw;
         font-size: 7.7vw;
     }
 
     #btn_settings {
+        top: 50%;
         width: 40.1vw;
         height: 15.5vw;
         font-size: 7.7vw;
     }
+    
     #btn_mapEditor {
+        top: 60%;
         width: 53.6vw;
         height: 15.5vw;
         font-size: 7.7vw;

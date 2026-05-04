@@ -22,6 +22,7 @@
         <link rel="stylesheet" type="text/css" href="css/EndScreen.css" />
         <link rel="stylesheet" type="text/css" href="css/MapEditor.css" />
         <link rel="stylesheet" type="text/css" href="css/ColorPicker.css" />
+        <link rel="stylesheet" type="text/css" href="css/SaveMapScreen.css" />
 
         <!-- <meta name="apple-mobile-web-app-capable" content="yes" /> -->
         <meta name="mobile-web-app-capable" content="yes" />
@@ -51,12 +52,10 @@
         <div id="ui-container">
             <!-- MAIN MENU -->
             <img id="menu-background" src="assets/images/menu_background.svg" />
-            <div id="main-menu-container">
-                <h1 id="main-title">Null Hop</h1>
-                <button id="btn_play" class="hidden"><div>Play</div></button>
-                <button id="btn_settings" class="hidden"><div>Settings</div></button>
-                <button id="btn_mapEditor" class="hidden"><div>Map Editor</div></button>
-            </div>
+            <h1 id="main-title">Null Hop</h1>
+            <button id="btn_play" class="hidden"><div>Play</div></button>
+            <button id="btn_settings" class="hidden"><div>Settings</div></button>
+            <button id="btn_mapEditor" class="hidden"><div>Map Editor</div></button>
 
             <!-- SETTINGS -->
             <div id="btn_sensitivitySlider" class="slider hidden" data-min="0.1" data-max="3" data-step="0.1" data-value="0.5" data-touchid="">
@@ -1061,6 +1060,36 @@
 
                 <div id="ui_lightnessGradient"></div>
             </div>
+
+            <!-- Map Editor Save Confirmation Prompts -->
+
+            <button id="btn_cancel" class="hidden">
+                <div>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 62 62">
+                        <path stroke="var(--myForegroundColor)" stroke-linecap="round" stroke-width="8" d="m19 43 24-24m-24 0 24 24" />
+                    </svg>
+                </div>
+            </button>
+            <div id="ui_saveMapContainer" class="hidden">
+                <button id="btn_save" class="hidden"><div>Save</div></button>
+                <button id="btn_saveAsCopy" class="hidden"><div>Save As Copy</div></button>
+                <button id="btn_discard" class="hidden"><div>Discard</div></button>
+            </div>
+            <button id="btn_resetRecord" class="hidden"><div>Reset Record</div></button>
+            <button id="btn_keepRecord" class="hidden"><div>Keep Record</div></button>
+            <button id="btn_confirmDeleteEdits" class="hidden"><div>Yes, Delete Edits</div></button>
+            <button id="btn_submitMapName" class="hidden"><div>Save</div></button>
+
+            <div id="ui_mapEditorSaveText" class="hidden">Save Map?</div>
+            <div id="ui_mapNameErrorText" class="hidden">Map Name Error</div>
+
+            <input
+                type="text"
+                class="allow-native-touch hidden"
+                id="ui_inputMapName"
+                maxlength="25"
+                autocomplete="off"
+            />
 
             <!-- END OF ui-container -->
         </div>

@@ -17,6 +17,7 @@ const MapBrowser = {
         height: 162, // set dynamically
     },
     container: null,
+    customMapNamesCache: [], // used for validating new map names
 
     init: async function () {
         this.scrollPos = 0;
@@ -28,6 +29,7 @@ const MapBrowser = {
         // if in one of the two Map Browsers that use custom maps
         if (this.state >= 2) {
             this.container.innerHTML = ""; // clear all previous custom buttons
+            this.customMapNamesCache = [];
 
             // fetch custom maps from cordova file system and map to buttons
             try {
@@ -44,6 +46,7 @@ const MapBrowser = {
 
                 for (const mapEntry of entries) {
                     const mapName = String(mapEntry.name.split(".")[0]);
+                    this.customMapNamesCache.push(mapName);
 
                     const generateColorsFromString = (s) => {
                         const hash = s.split("").reduce((h, c) => ((h << 5) - h + c.charCodeAt(0)) | 0, 0);
