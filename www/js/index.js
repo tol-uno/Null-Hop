@@ -27,9 +27,7 @@ function onDeviceReady() {
     CanvasArea.start();
 
     renderer = new Renderer(document.getElementById("webgl-canvas"));
-    renderer.init();
-
-    PlayerCanvas.start();
+    renderer.init(screenWidth, screenHeight);
 
     UserInterface.start();
 
@@ -65,23 +63,35 @@ function updateGameArea() {
         MapEditor.update();
     }
 
-    // CanvasArea.clear();
-
-    // if (UserInterface.gamestate == 6) {
-    //     Map.render(); // draws Player lower shadow too
-    //     Player.render();
-    // }
-
     if (UserInterface.gamestate == 6) {
-        const cam = Player.speedCameraOffset;
+        const camera = Player.speedCameraOffset;
 
-        renderer.setCameraPos(Player.x, 10, Player.y, 500 / cam.zoom);
+        const PlayerProxy = {
+            // Update actual player to produce this
+            x: Player.x,
+            y: Player.jumpValue,
+            z: Player.y,
+            angleRad: Player.angleRad,
+        };
 
-        renderer.drawFrame();
+        // add camera offset to these
+        renderer.setCameraPos(PlayerProxy.x, 10, PlayerProxy.z, 500 / camera.zoom);
+        renderer.drawFrame(PlayerProxy);
     }
 
     if (UserInterface.gamestate == 7 && MapEditor.editorState !== 5) {
-        MapEditor.render();
+        const PlayerProxy = {
+            x: MapEditor.loadedMap.playerStart.x,
+            y: 0,
+            z: MapEditor.loadedMap.playerStart.y,
+            angleRad: (MapEditor.loadedMap.playerStart.angle * Math.PI) / 180,
+        };
+
+        // this has to read screen.y as the z dimension -- should fix
+        renderer.setCameraPos(MapEditor.screen.x, 10, MapEditor.screen.y, 250 / MapEditor.zoom);
+
+        renderer.drawFrame(PlayerProxy);
+        // MapEditor.render();
     }
 
     requestAnimationFrame(updateGameArea);
