@@ -175,8 +175,9 @@ const MapEditor = {
 
         // switch to main MapEditor screen
 
-        CanvasArea.canvas.style.backgroundColor = this.loadedMap.style.backgroundColor;
-        CanvasArea.canvas.classList.remove("hidden");
+        // CanvasArea.canvas.style.backgroundColor = this.loadedMap.style.backgroundColor;
+        // CanvasArea.canvas.classList.remove("hidden"); 
+        document.getElementById("webgl-canvas").classList.remove("hidden");
 
         UserInterface.switchToUiGroup(UserInterface.uiGroup_mapEditorInterface);
         UserInterface.determineButtonColor();
@@ -202,8 +203,9 @@ const MapEditor = {
         this.screen.cornerX = this.screen.x - this.screen.width / 2;
         this.screen.cornerY = this.screen.y - this.screen.height / 2;
 
+        renderer.setMapData(this.loadedMap);
+        
         this.editorState = 1;
-
         UserInterface.gamestate = 7; // start updating MapEditor
     },
 

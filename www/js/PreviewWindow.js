@@ -51,7 +51,7 @@ const PreviewWindow = {
             platform.hull = CanvasArea.convexHull(allHullPoints);
         });
 
-        Map.setMapLighting(this);
+        // Map.setMapLighting(this);
     },
 
     // called in MapEditor.render()
@@ -82,14 +82,14 @@ const PreviewWindow = {
 
 
         // DRAW ALL PLATFORMS IN this.platforms
-        for (const platform of this.platforms) {
-            Map.renderPlatform(CanvasArea.ctx, MapEditor.loadedMap, platform);
-        }
+        // for (const platform of this.platforms) {
+        //     Map.renderPlatform(CanvasArea.ctx, MapEditor.loadedMap, platform);
+        // }
 
         // RENDER PLAYER
         Player.initPlayer(this.player.x, this.player.y, this.player.angle);
         Player.jumpValue = this.player.jumpValue;
-        Player.render();
+        // Player.render();
 
         CanvasArea.ctx.restore();
     },

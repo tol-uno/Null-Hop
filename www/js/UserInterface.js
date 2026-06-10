@@ -116,7 +116,6 @@ const UserInterface = {
             UserInterface.orientation = event.target.type.startsWith("landscape") ? "landscape" : "portrait";
 
             CanvasArea.setSize();
-            PlayerCanvas.setSize();
 
             if (UserInterface.gamestate == 2) {
                 MapBrowser.setMaxScroll();
@@ -370,7 +369,8 @@ const UserInterface = {
                 UserInterface.ui_verticalWarning = false;
                 UserInterface.showOverstrafeWarning = false;
 
-                CanvasArea.canvas.classList.add("hidden");
+                document.getElementById("webgl-canvas").classList.add("hidden")
+                // FIX could destroy all renderer buffers here so they arent just sitting on the GPU
 
                 UserInterface.updateUiColorMode("light")
 
@@ -1991,6 +1991,7 @@ const UserInterface = {
     },
 
     determineButtonColor: function () {
+        // FIX - will need to get actual color of bakground (shaded if possible)
         let bgColor = CanvasArea.canvas.style.backgroundColor; // returns rgba string
 
         bgColor = bgColor.replace(/[^\d,.]/g, "").split(",");

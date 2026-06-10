@@ -14,19 +14,10 @@ const Player = {
         dirAveragerY: new Averager(180),
     },
 
-    topColor: null,
-    botSideColor: null,
-    rightSideColor: null,
-    topSideColor: null,
-    leftSideColor: null,
-
     loopedAngle: null,
     angleRad: null,
 
     playerPoligon: null, // similar to shadow corners but used for collision checks with platforms and walls (32x32)
-
-    shadowCorners: null, // need to expose here so that this.drawPlayerShadow() can use. (30x30)
-    // set in Player.update because Map needs it before Player in the rendering pipeline.
 
     debugTurn: 2, // intialized here so it can be accesed in console
 
@@ -42,15 +33,6 @@ const Player = {
 
         // set here so that PreviewWindow can render player without calling Player.update()
         this.playerPoligon = CanvasArea.createPoligon(this.x, this.y, 32, 32, this.angleRad);
-        this.shadowCorners = CanvasArea.createPoligon(this.x, this.y, 30, 30, this.angleRad); // 30x30 instead of 32x32
-
-        this.topNormal = new Vector2D3D(0, 0, -1);
-        this.botSideNormal = new Vector2D3D(0, 1, 0).rotate(angle);
-        this.rightSideNormal = new Vector2D3D(1, 0, 0).rotate(angle);
-        this.topSideNormal = new Vector2D3D(0, -1, 0).rotate(angle);
-        this.leftSideNormal = new Vector2D3D(-1, 0, 0).rotate(angle);
-
-        this.topColor = null; // top shaded color wont be calculated if topColor already exists so need to reset
 
         this.speedCameraOffset.zoom = 1.5;
         this.speedCameraOffset.zoomAverager.frames.fill(1.5, 0);
@@ -63,9 +45,6 @@ const Player = {
         this.jumpVelocity = 200;
         this.endSlow = 1;
         this.checkpointIndex = -1;
-
-        // set up this.mapData -- where to pull platforms and styles from
-        this.mapData = UserInterface.gamestate == 7 ? PreviewWindow : Map;
     },
 
     update: function () {
@@ -511,10 +490,6 @@ const Player = {
         // apply averager offset direction to actual offset direction
         this.speedCameraOffset.direction.x = this.speedCameraOffset.dirAveragerX.getAverage();
         this.speedCameraOffset.direction.y = this.speedCameraOffset.dirAveragerY.getAverage();
-
-        // Update shadowCorners here for use by Map to render Player lower shadow
-        // FIX this should use a single shadowPolygon instance of Polygon and just update it every frame as opposed to creating new ones
-        this.shadowCorners = CanvasArea.createPoligon(this.x, this.y, 30, 30, this.angleRad); // 30x30 instead of 32x32
     },
 
     startLevel: function () {
@@ -554,272 +529,5 @@ const Player = {
         this.speedCameraOffset.zoom = 1.5;
         this.speedCameraOffset.dirAveragerX.frames.fill(0, 0);
         this.speedCameraOffset.dirAveragerY.frames.fill(0, 0);
-    },
-
-    setPlayerLighting: function () {
-        // Update Normals
-        this.botSideNormal.set(0, 1, 0).rotate(this.loopedAngle);
-        this.rightSideNormal.set(1, 0, 0).rotate(this.loopedAngle);
-        this.topSideNormal.set(0, -1, 0).rotate(this.loopedAngle);
-        this.leftSideNormal.set(-1, 0, 0).rotate(this.loopedAngle);
-
-        // angleDifference result will be between 0 and PI radians
-        // if angleDifference is > PI/2 (90 deg) then side is at least partially in direct light.
-        // if angleDifference is < PI/2 (90 deg) then side is in shadow & litPercent = 0. No direct light hitting it.
-
-        let litPercentTop = Math.cos(Math.PI - this.topNormal.angleDifference(this.mapData.directLightVector)); // known as geometry term
-        if (litPercentTop < 0) {
-            litPercentTop = 0;
-        } // clamp from 0 -> 1
-
-        let litPercentBotSide = Math.cos(Math.PI - this.botSideNormal.angleDifference(this.mapData.directLightVector));
-        if (litPercentBotSide < 0) {
-            litPercentBotSide = 0;
-        }
-
-        let litPercentRightSide = Math.cos(Math.PI - this.rightSideNormal.angleDifference(this.mapData.directLightVector));
-        if (litPercentRightSide < 0) {
-            litPercentRightSide = 0;
-        }
-
-        let litPercentTopSide = Math.cos(Math.PI - this.topSideNormal.angleDifference(this.mapData.directLightVector));
-        if (litPercentTopSide < 0) {
-            litPercentTopSide = 0;
-        }
-
-        let litPercentLeftSide = Math.cos(Math.PI - this.leftSideNormal.angleDifference(this.mapData.directLightVector));
-        if (litPercentLeftSide < 0) {
-            litPercentLeftSide = 0;
-        }
-
-        if (!this.topColor) {
-            // Only calculate once
-            this.topColor = CanvasArea.getShadedColor(this.mapData.style.playerColor, litPercentTop, this.mapData.style);
-        }
-        this.botSideColor = CanvasArea.getShadedColor(this.mapData.style.playerColor, litPercentBotSide, this.mapData.style);
-        this.rightSideColor = CanvasArea.getShadedColor(this.mapData.style.playerColor, litPercentRightSide, this.mapData.style);
-        this.topSideColor = CanvasArea.getShadedColor(this.mapData.style.playerColor, litPercentTopSide, this.mapData.style);
-        this.leftSideColor = CanvasArea.getShadedColor(this.mapData.style.playerColor, litPercentLeftSide, this.mapData.style);
-    },
-
-    drawPlayerShadow: function (ctx = PlayerCanvas.ctx, yOffset = 0) {
-        // winding order is reversed so that player's lower shadow combines with platform shadows
-        ctx.beginPath();
-        ctx.moveTo(this.shadowCorners[3].x, this.shadowCorners[3].y + yOffset);
-        ctx.lineTo(this.shadowCorners[2].x, this.shadowCorners[2].y + yOffset);
-        ctx.lineTo(this.shadowCorners[1].x, this.shadowCorners[1].y + yOffset);
-        ctx.lineTo(this.shadowCorners[0].x, this.shadowCorners[0].y + yOffset);
-        ctx.closePath();
-    },
-
-    render: function () {
-        // Player is drawn on a seperate PlayerCanvas.
-        // On PlayerCanvas, parts of the player that are behind walls are erased using Map.playerClip
-        // PlayerCanvas is then pasted onto the main CanvasArea
-
-        this.setPlayerLighting();
-
-        const ctx = PlayerCanvas.ctx;
-        PlayerCanvas.clear();
-
-        // Generate all player vertices
-        // creates array of point objects: [ {x:1,y:1}, {x:2,y:2} ]
-        // topLeft, topRight, bottomRight, bottomLeft -- when Player.angle == 0 (looking right)
-        // shadowCorners is set in Player.update because Map needs it to render player lower shadow before Player is rendered
-        const lowerCorners = this.playerPoligon.map((point) => ({ x: point.x, y: point.y - this.jumpValue }));
-        const upperCorners = lowerCorners.map((point) => ({ x: point.x, y: point.y - 32 }));
-
-        if (this.mapData == PreviewWindow) {
-            // Map sets these otherwise
-        } else {
-            // in actual level with Map
-            const camera = this.speedCameraOffset;
-            const cameraTargetX = this.x - camera.direction.x;
-            const cameraTargetY = this.y - camera.direction.y;
-
-            const translateX = midX - cameraTargetX * camera.zoom;
-            const translateY = midY - cameraTargetY * camera.zoom;
-
-            ctx.setTransform(camera.zoom, 0, 0, camera.zoom, translateX, translateY);
-        }
-
-        // LOWER Player SHADOW IS DRAWN BY MAP
-        // DRAWING UPPER SHADOW HERE
-        // drawn twice, first using platform's shadedColor with platform clip applied
-        // and second using endzone's shadedColor with endzone clip applied
-
-        // SHADOW OVER PLATFORM
-        ctx.save(); // #1 Necessary for clearing upperShadowClip
-
-        if (this.mapData == Map) {
-            // only set upper shadow clip if in Map not PreviewWindow
-
-            // Draw standard shadowClip DEBUG
-            // ctx.lineWidth = 4
-            // ctx.strokeStyle = "#00ff00"
-            // ctx.stroke(Map.upperShadowClip)
-
-            ctx.clip(Map.upperShadowClip);
-        }
-
-        ctx.fillStyle = this.mapData.style.shadow_platformColor;
-        this.drawPlayerShadow();
-        ctx.fill();
-
-        ctx.restore(); // #1 Necessary for clearing upperShadowClip
-
-        // SHADOW OVER ENDZONE
-        if (this.mapData == Map && Map.endZonesToCheck.length > 0) {
-            // only applicable in Map not PreviewWindow
-            ctx.save(); // #2 Necessary for clearing endZoneShadowClip
-
-            // Draw endZoneShadowClip DEBUG
-            // ctx.lineWidth = 3
-            // ctx.strokeStyle = "#0000ff"
-            // ctx.stroke(Map.endZoneShadowClip)
-
-            ctx.clip(Map.endZoneShadowClip);
-
-            ctx.fillStyle = Map.style.shadow_endzoneColor;
-            this.drawPlayerShadow();
-            ctx.fill();
-
-            ctx.restore(); // #2 Necessary for clearing endZoneShadowClip
-        }
-
-        const allHullPoints = lowerCorners.concat(upperCorners);
-        this.hull = CanvasArea.convexHull(allHullPoints);
-
-        // DRAW BACKGROUND HULL
-        ctx.fillStyle = this.topColor;
-
-        ctx.beginPath();
-        ctx.moveTo(this.hull[0].x, this.hull[0].y);
-        for (let i = this.hull.length - 1; i > 0; i--) {
-            ctx.lineTo(this.hull[i].x, this.hull[i].y);
-        }
-        ctx.closePath();
-        ctx.fill();
-
-        // Draw Player TOP ARROW
-        ctx.strokeStyle = "#00000030";
-        ctx.lineWidth = 2;
-
-        const trianglePoints = [
-            { x: 8, y: 0 },
-            { x: -5, y: -7 },
-            { x: -5, y: 7 },
-        ];
-
-        const cos = Math.cos(this.angleRad);
-        const sin = Math.sin(this.angleRad);
-
-        const rotatedPoints = trianglePoints.map(({ x, y }) => {
-            return {
-                x: x * cos - y * sin,
-                y: x * sin + y * cos,
-            };
-        });
-
-        ctx.beginPath();
-        ctx.moveTo(this.x + rotatedPoints[0].x, this.y + rotatedPoints[0].y - this.jumpValue - 32);
-        ctx.lineTo(this.x + rotatedPoints[1].x, this.y + rotatedPoints[1].y - this.jumpValue - 32);
-        ctx.lineTo(this.x + rotatedPoints[2].x, this.y + rotatedPoints[2].y - this.jumpValue - 32);
-        ctx.closePath();
-        ctx.stroke();
-
-        // SIDES OF PLAYER
-
-        // at lookAngle == 0 the player is facing to the right. BOT WALL refers to the bottom wall when lookAngle == 0
-        // lowerCorners & upperCorners order: topLeft, topRight, bottomRight, bottomLeft
-
-        if (this.loopedAngle > 270 || this.loopedAngle < 90) {
-            // BOT WALL
-            // looking to the right + or - 90 deg
-            ctx.fillStyle = this.botSideColor;
-
-            ctx.beginPath();
-            ctx.moveTo(upperCorners[2].x, upperCorners[2].y);
-            ctx.lineTo(upperCorners[3].x, upperCorners[3].y);
-            ctx.lineTo(lowerCorners[3].x, lowerCorners[3].y);
-            ctx.lineTo(lowerCorners[2].x, lowerCorners[2].y);
-            ctx.closePath();
-            ctx.fill();
-        }
-
-        if (this.loopedAngle > 0 && this.loopedAngle < 180) {
-            // RIGHT WALL
-            // looking downwards + or - 90 deg
-            ctx.fillStyle = this.rightSideColor;
-
-            ctx.beginPath();
-            ctx.moveTo(upperCorners[1].x, upperCorners[1].y);
-            ctx.lineTo(upperCorners[2].x, upperCorners[2].y);
-            ctx.lineTo(lowerCorners[2].x, lowerCorners[2].y);
-            ctx.lineTo(lowerCorners[1].x, lowerCorners[1].y);
-            ctx.closePath();
-            ctx.fill();
-        }
-
-        if (this.loopedAngle > 90 && this.loopedAngle < 270) {
-            // TOP WALL
-            // looking to the left + or - 90 deg
-            ctx.fillStyle = this.topSideColor;
-
-            ctx.beginPath();
-            ctx.moveTo(upperCorners[0].x, upperCorners[0].y);
-            ctx.lineTo(upperCorners[1].x, upperCorners[1].y);
-            ctx.lineTo(lowerCorners[1].x, lowerCorners[1].y);
-            ctx.lineTo(lowerCorners[0].x, lowerCorners[0].y);
-            ctx.closePath();
-            ctx.fill();
-        }
-
-        if (this.loopedAngle > 180 && this.loopedAngle < 360) {
-            // LEFT WALL
-            // looking upwards + or - 90 deg
-            ctx.fillStyle = this.leftSideColor;
-
-            ctx.beginPath();
-            ctx.moveTo(upperCorners[3].x, upperCorners[3].y);
-            ctx.lineTo(upperCorners[0].x, upperCorners[0].y);
-            ctx.lineTo(lowerCorners[0].x, lowerCorners[0].y);
-            ctx.lineTo(lowerCorners[3].x, lowerCorners[3].y);
-            ctx.closePath();
-            ctx.fill();
-        }
-
-        // ERASE PARTS OF PLAYER THAT ARE BEHIND WALL AND DRAW PLAYER XRAY (if in Map not PreviewWindow)
-        if (this.mapData == Map && Map.wallsToCheck.length != 0) {
-            //  OPTIMIZE: Could use more precice check here like checking if there's data in Map.playerClip
-            // if theres no data in playerClip path then this doesnt have to be run
-
-            // Draw playerClip DEBUG on PlayerCanvas
-            // ctx.lineWidth = 4;
-            // ctx.strokeStyle = "#ff0000";
-            // ctx.stroke(Map.playerClip);
-
-            ctx.save(); // #3 Necessary for clearing playerClip
-            // ADD CLIP of area behind walls
-            ctx.clip(Map.playerClip);
-
-            // ERASE PARTS OF PLAYER THAT ARE BEHIND WALLS
-            PlayerCanvas.clear(this.x - midX, this.y - midY); // clear canvas at the players position - half screen width
-
-            // DRAW PLAYER XRAY
-            ctx.strokeStyle = this.topColor;
-            ctx.lineWidth = 2;
-            this.drawPlayerShadow();
-            ctx.stroke();
-
-            ctx.restore(); // #3 Necessary for clearing playerClip
-        }
-
-        // COPY PLAYER TO MAIN CANVAS AFTER ERASE
-        CanvasArea.ctx.drawImage(PlayerCanvas.canvas, 0, 0);
-
-        if (this.mapData == Map) {
-            ctx.setTransform();
-        }
     },
 };
