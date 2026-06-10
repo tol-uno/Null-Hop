@@ -120,7 +120,6 @@ const UserInterface = {
             UserInterface.orientation = event.target.type.startsWith("landscape") ? "landscape" : "portrait";
 
             CanvasArea.setSize();
-            PlayerCanvas.setSize();
 
             if (UserInterface.gamestate == 2) {
                 MapBrowser.setMaxScroll();
@@ -515,6 +514,7 @@ const UserInterface = {
     },
 
     determineButtonColor: function () {
+        // FIX - will need to get actual color of bakground (shaded if possible)
         let bgColor = CanvasArea.canvas.style.backgroundColor; // returns rgba string
 
         bgColor = bgColor.replace(/[^\d,.]/g, "").split(",");
