@@ -120,7 +120,6 @@ const UserInterface = {
             UserInterface.orientation = event.target.type.startsWith("landscape") ? "landscape" : "portrait";
 
             CanvasArea.setSize();
-            PlayerCanvas.setSize();
 
             if (UserInterface.gamestate == 2) {
                 MapBrowser.setMaxScroll();
@@ -131,7 +130,11 @@ const UserInterface = {
             // rotating the screen while the keyboard is up resets the visualViewport.offsetTop
             // offsetTop is what makes sure the text field is in view. It is set by browser when the keyboard is opened
             // when offsetTop gets reset it can cause the text field to go out of frame behind the keyboard. This is a solution to that:
-            if (MapEditor.editorState == 5 && UserInterface.activeUiGroup.has(ui_inputMapName) && document.activeElement == ui_inputMapName.domReference) {
+            if (
+                MapEditor.editorState == 5 &&
+                UserInterface.activeUiGroup.has(ui_inputMapName) &&
+                document.activeElement == ui_inputMapName.domReference
+            ) {
                 // scroll the screen up to center the input within the remaining visualViewport (area left over after keyboard covers screen)
 
                 window.scrollTo(0, 0); // reset so that positioning readings are accurate
@@ -147,7 +150,6 @@ const UserInterface = {
                 );
             }
         });
-
 
         // ===========
         //  UI GROUPS
@@ -512,6 +514,7 @@ const UserInterface = {
     },
 
     determineButtonColor: function () {
+        // FIX - will need to get actual color of bakground (shaded if possible)
         let bgColor = CanvasArea.canvas.style.backgroundColor; // returns rgba string
 
         bgColor = bgColor.replace(/[^\d,.]/g, "").split(",");
