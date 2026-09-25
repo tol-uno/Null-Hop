@@ -13,6 +13,7 @@
   "author": "Toluno",
   "license": "GPL-3.0-or-later",
   "devDependencies": {
+    "cordova": "^13.0.0",
     "cordova-android": "^14.0.1",
     "cordova-browser": "^7.0.0",
     "cordova-ios": "^8.0.0",
