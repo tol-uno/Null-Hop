@@ -46,15 +46,15 @@
     font-size: 2.5vw;
 }
 
-#btn_hueSlider,
-#btn_saturationSlider,
-#btn_lightnessSlider {
+#slider_hue,
+#slider_saturation,
+#slider_lightness {
     width: 100%;
 }
 
-#btn_hueSlider>.label,
-#btn_saturationSlider>.label,
-#btn_lightnessSlider>.label {
+#slider_hue>.label,
+#slider_saturation>.label,
+#slider_lightness>.label {
     margin-bottom: 1.6vw;
     font-size: 1.8vw;
 }
@@ -266,30 +266,30 @@
     top: 5%;
 }
 
-#btn_syncWallColors {
+#toggle_syncWallColors {
     position: fixed;
     right: 40%;
     top: 56%;
     width: 12.9vw;
 }
 
-#btn_syncPlatformColors {
+#toggle_syncPlatformColors {
     position: fixed;
     right: 22.5%;
     top: 56%;
     width: 12.9vw;
 }
 
-#btn_syncEndZoneColors {
+#toggle_syncEndZoneColors {
     position: fixed;
     right: 5%;
     top: 56%;
     width: 12.9vw;
 }
 
-#btn_syncWallColors>.label,
-#btn_syncPlatformColors>.label,
-#btn_syncEndZoneColors>.label {
+#toggle_syncWallColors>.label,
+#toggle_syncPlatformColors>.label,
+#toggle_syncEndZoneColors>.label {
     font-size: 1.8vw;
     text-align: center;
 }
@@ -325,9 +325,9 @@
         font-size: 5.3vw;
     }
 
-    #btn_hueSlider>.label,
-    #btn_saturationSlider>.label,
-    #btn_lightnessSlider>.label {
+    #slider_hue>.label,
+    #slider_saturation>.label,
+    #slider_lightness>.label {
         margin-bottom: 3.4vw;
         font-size: 3.9vw;
     }
@@ -460,28 +460,28 @@
         top: 40%;
     }
 
-    #btn_syncWallColors {
+    #toggle_syncWallColors {
         left: 5%;
         top: 63%;
         width: 28vw;
     }
 
-    #btn_syncPlatformColors {
+    #toggle_syncPlatformColors {
         right: 50%;
         transform: translateX(50%);
         top: 63%;
         width: 28vw;
     }
 
-    #btn_syncEndZoneColors {
+    #toggle_syncEndZoneColors {
         right: 5%;
         top: 63%;
         width: 28vw;
     }
 
-    #btn_syncWallColors>.label,
-    #btn_syncPlatformColors>.label,
-    #btn_syncEndZoneColors>.label {
+    #toggle_syncWallColors>.label,
+    #toggle_syncPlatformColors>.label,
+    #toggle_syncEndZoneColors>.label {
         font-size: 3.9vw;
     }
 }

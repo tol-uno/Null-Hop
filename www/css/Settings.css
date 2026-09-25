@@ -1,25 +1,25 @@
-#btn_sensitivitySlider {
+#slider_sensitivity {
     position: absolute;
     top: 12%;
     left: 18%;
     width: 40%;
 }
 
-#btn_volumeSlider {
+#slider_volume {
     position: absolute;
     top: 32%;
     left: 18%;
     width: 40%;
 }
 
-#btn_debugText {
+#toggle_debugText {
     position: absolute;
     top: 56%;
     left: 18%;
     width: 40%;
 }
 
-#btn_strafeHUD {
+#toggle_strafeHUD {
     position: absolute;
     top: 72%;
     left: 18%;
@@ -37,25 +37,25 @@
 }
 
 @media (orientation: portrait) {
-    #btn_sensitivitySlider {
+    #slider_sensitivity {
         top: 25%;
         left: 10%;
         width: 80%;
     }
 
-    #btn_volumeSlider {
+    #slider_volume {
         top: 35%;
         left: 10%;
         width: 80%;
     }
 
-    #btn_debugText {
+    #toggle_debugText {
         top: 50%;
         left: 10%;
         width: 80%;
     }
 
-    #btn_strafeHUD {
+    #toggle_strafeHUD {
         top: 60%;
         left: 10%;
         width: 80%;

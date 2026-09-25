@@ -18,7 +18,7 @@
     font-size: 3.6vw;
 }
 
-#btn_playTutorial {
+#toggle_playTutorial {
     position: absolute;
     width: 14vw;
     right: 20%;
@@ -26,7 +26,7 @@
     flex-direction: column;
 }
 
-#btn_playTutorial > .label {
+#toggle_playTutorial > .label {
     font-size: 2.2vw;
     margin-bottom: 1.1vw;
 }
@@ -76,7 +76,7 @@
 }
 
 /* INFO ON WHERE TO CREATE AND IMPORT MAPS (Rename this) */
-#custom-map-browser-info {
+#ui_createCustomMapInfo {
     position: fixed;
     top: 5%;
     right: 5%;
@@ -246,14 +246,14 @@
         font-size: 7.7vw;
     }
 
-    #btn_playTutorial {
+    #toggle_playTutorial {
         width: 30vw;
         right: 50%;
         transform: translateX(50%);
         bottom: 6%;
     }
 
-    #btn_playTutorial > .label {
+    #toggle_playTutorial > .label {
         font-size: 4.8vw;
         margin-bottom: 2.4vw;
     }
@@ -293,7 +293,7 @@
         height: 15.5vw;
     }
 
-    #custom-map-browser-info {
+    #ui_createCustomMapInfo {
         top: 8%;
         padding: 0 8vw;
         box-shadow: 0 1.9vw var(--uiBackgroundColor_pressed);

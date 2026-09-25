@@ -32,38 +32,38 @@ const ColorPicker = {
 
     syncGradients: function () {
         // change name to updateColorsCSS
-        ui_colorPicker.style.setProperty("--h", `${this.h}`);
-        ui_colorPicker.style.setProperty("--s", `${this.s}%`);
-        ui_colorPicker.style.setProperty("--l", `${this.l}%`);
+        ui_colorPicker.domReference.style.setProperty("--h", `${this.h}`);
+        ui_colorPicker.domReference.style.setProperty("--s", `${this.s}%`);
+        ui_colorPicker.domReference.style.setProperty("--l", `${this.l}%`);
     },
 
     update: function () {
         if (
             // a slider is being pressed
-            !btn_hueSlider.handle.classList.contains("pressed") ||
-            !btn_saturationSlider.handle.classList.contains("pressed") ||
-            !btn_lightnessSlider.handle.classList.contains("pressed")
+            !slider_hue.handle.classList.contains("pressed") ||
+            !slider_saturation.handle.classList.contains("pressed") ||
+            !slider_lightness.handle.classList.contains("pressed")
         ) {
             // update every color every frame
-            ColorPicker.h = UserInterface.getSliderValue(btn_hueSlider);
-            ColorPicker.s = UserInterface.getSliderValue(btn_saturationSlider);
-            ColorPicker.l = UserInterface.getSliderValue(btn_lightnessSlider);
+            ColorPicker.h = UserInterface.getSliderValue(slider_hue);
+            ColorPicker.s = UserInterface.getSliderValue(slider_saturation);
+            ColorPicker.l = UserInterface.getSliderValue(slider_lightness);
             ColorPicker.updateElementColor();
             ColorPicker.syncGradients();
         }
     },
 
     updateButtonColors: function () {
-        btn_backgroundColor.style.setProperty("--myMapColor", `${MapEditor.loadedMap.style.backgroundColor}`);
-        btn_playerColor.style.setProperty("--myMapColor", `${MapEditor.loadedMap.style.playerColor}`);
-        btn_wallTopColor.style.setProperty("--myMapColor", `${MapEditor.loadedMap.style.wallTopColor}`);
-        btn_wallSideColor.style.setProperty("--myMapColor", `${MapEditor.loadedMap.style.wallSideColor}`);
-        btn_platformTopColor.style.setProperty("--myMapColor", `${MapEditor.loadedMap.style.platformTopColor}`);
-        btn_platformSideColor.style.setProperty("--myMapColor", `${MapEditor.loadedMap.style.platformSideColor}`);
-        btn_endZoneTopColor.style.setProperty("--myMapColor", `${MapEditor.loadedMap.style.endZoneTopColor}`);
-        btn_endZoneSideColor.style.setProperty("--myMapColor", `${MapEditor.loadedMap.style.endZoneSideColor}`);
-        btn_directLightColor.style.setProperty("--myMapColor", `${MapEditor.loadedMap.style.directLight}`);
-        btn_ambientLightColor.style.setProperty("--myMapColor", `${MapEditor.loadedMap.style.ambientLight}`);
+        btn_backgroundColor.domReference.style.setProperty("--myMapColor", `${MapEditor.loadedMap.style.backgroundColor}`);
+        btn_playerColor.domReference.style.setProperty("--myMapColor", `${MapEditor.loadedMap.style.playerColor}`);
+        btn_wallTopColor.domReference.style.setProperty("--myMapColor", `${MapEditor.loadedMap.style.wallTopColor}`);
+        btn_wallSideColor.domReference.style.setProperty("--myMapColor", `${MapEditor.loadedMap.style.wallSideColor}`);
+        btn_platformTopColor.domReference.style.setProperty("--myMapColor", `${MapEditor.loadedMap.style.platformTopColor}`);
+        btn_platformSideColor.domReference.style.setProperty("--myMapColor", `${MapEditor.loadedMap.style.platformSideColor}`);
+        btn_endZoneTopColor.domReference.style.setProperty("--myMapColor", `${MapEditor.loadedMap.style.endZoneTopColor}`);
+        btn_endZoneSideColor.domReference.style.setProperty("--myMapColor", `${MapEditor.loadedMap.style.endZoneSideColor}`);
+        btn_directLightColor.domReference.style.setProperty("--myMapColor", `${MapEditor.loadedMap.style.directLight}`);
+        btn_ambientLightColor.domReference.style.setProperty("--myMapColor", `${MapEditor.loadedMap.style.ambientLight}`);
     },
 
     getColor: function () {
@@ -106,9 +106,9 @@ const ColorPicker = {
     },
 
     updateSliders: function () {
-        UserInterface.setSliderValue(btn_hueSlider, this.h);
-        UserInterface.setSliderValue(btn_saturationSlider, this.s);
-        UserInterface.setSliderValue(btn_lightnessSlider, this.l);
+        slider_hue.func(true);
+        slider_saturation.func(true);
+        slider_lightness.func(true);
     },
 
     updateElementColor: function () {

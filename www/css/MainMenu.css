@@ -1,4 +1,4 @@
-#menu-background {
+#ui_menuBackground {
     position: fixed;
     bottom: 0px;
     width: 100%;
@@ -6,7 +6,7 @@
     z-index: -2;
 }
 
-#main-title {
+#ui_mainTitle {
     position: fixed;
     width: 100%;
     line-height: 0.7;
@@ -52,7 +52,7 @@
 }
 
 @media (orientation: portrait) {
-    #main-title {
+    #ui_mainTitle {
         top: 20%;
         font-size: 20vw;
         text-shadow: 0 1vw 0 var(--lightColor_2);

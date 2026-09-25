@@ -150,6 +150,7 @@ const TouchHandler = {
         // this blocks the default behavior of the second touch in a double tap. 
         // document.body.addEventListener("touchstart", createDoubleTapPreventer(700), { passive: false });
 
+        // kill
         // this just disables the default DOM touch behavior all the time. Could use except btn_shareMap needs it
         // document.body.addEventListener("touchstart", (e) => { e.preventDefault() }, { passive: false });
 

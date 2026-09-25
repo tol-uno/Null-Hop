@@ -37,7 +37,7 @@ const Map = {
         UserInterface.determineButtonColor();
 
         // set record text in timer box
-        ui_timerBox.children[1].textContent = `Record: ${UserInterface.secondsToMinutes(
+        ui_timerBox.domReference.children[1].textContent = `Record: ${UserInterface.secondsToMinutes(
             UserInterface.records[name] == null ? 0 : UserInterface.records[name],
         )}`;
 

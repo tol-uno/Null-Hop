@@ -24,7 +24,7 @@ const MapBrowser = {
         this.scrollVel = 0;
         this.selectedMapIndex = -1;
 
-        this.container = document.querySelector(".map-list-container:not(.hidden)"); // there are two containers only one should be visible/used at a time. Set by uiGroups
+        this.container = document.querySelector(".map-list-container:not(.hidden)"); // there are two containers (standard and custom) only one should be visible/used at a time. Set by uiGroups
 
         // if in one of the two Map Browsers that use custom maps
         if (this.state >= 2) {
@@ -170,7 +170,7 @@ const MapBrowser = {
     updateMapBrowserUI: function () {
         // updates the MapInfoBox and adds/ removes the nessesary buttons when map buttons are clicked
 
-        // ENABLING and DISABLING btn_playMap, btn_playTutorial, btn_editMap, btn_shareMap, btn_deleteMap
+        // ENABLING and DISABLING btn_playMap, toggle_playTutorial, btn_editMap, btn_shareMap, btn_deleteMap
 
         if (this.state != 3) {
             // In standard or custom MapBrowser
@@ -183,18 +183,20 @@ const MapBrowser = {
                 UserInterface.removeUiElement(btn_playMap);
             }
 
-            // ADDING btn_playTutorial toggle
+            // ADDING toggle_playTutorial toggle
             if (this.state == 1 && this.selectedMapIndex == "Awakening") {
-                UserInterface.addUiElement(btn_playTutorial);
+                UserInterface.addUiElement(toggle_playTutorial);
+                UserInterface.setToggleState(toggle_playTutorial, UserInterface.settings.playTutorial);
             }
 
-            // REMOVING btn_playTutorial toggle
+            // REMOVING toggle_playTutorial toggle
             if (this.state == 1 && this.selectedMapIndex != "Awakening") {
-                UserInterface.removeUiElement(btn_playTutorial);
+                UserInterface.removeUiElement(toggle_playTutorial);
             }
         } else {
             // In MapEditor's browser
             // ADD & REMOVE: btn_editMap, btn_shareMap, btn_deleteMap
+            // these might want to be a visability toggle instead of adding and removing FIX?
             if (this.selectedMapIndex != -1) {
                 UserInterface.addUiElement(btn_editMap);
                 UserInterface.addUiElement(btn_shareMap);
@@ -208,26 +210,26 @@ const MapBrowser = {
 
         // SET UP MAP INFO BOX
         if (this.selectedMapIndex == -1) {
-            ui_mapInfoBox.querySelector(".mapName").textContent = "Select A Map";
-            ui_mapInfoBox.querySelector(".yourTime").textContent = ``;
-            ui_mapInfoBox.querySelector(".medalList").classList.add("hidden");
+            ui_mapInfoBox.domReference.querySelector(".mapName").textContent = "Select A Map";
+            ui_mapInfoBox.domReference.querySelector(".yourTime").textContent = ``;
+            ui_mapInfoBox.domReference.querySelector(".medalList").classList.add("hidden");
             return;
         }
 
-        ui_mapInfoBox.querySelector(".mapName").textContent = this.selectedMapIndex;
+        ui_mapInfoBox.domReference.querySelector(".mapName").textContent = this.selectedMapIndex;
 
         const personalBest = UserInterface.records[this.selectedMapIndex];
         const yourTimeInSeconds = UserInterface.secondsToMinutes(personalBest == undefined ? 0 : personalBest);
-        ui_mapInfoBox.querySelector(".yourTime").textContent = `Your Time: ${yourTimeInSeconds}`;
+        ui_mapInfoBox.domReference.querySelector(".yourTime").textContent = `Your Time: ${yourTimeInSeconds}`;
 
         // update medal times and active medal OR hide medal list
         const mapMedals = UserInterface.medals[this.selectedMapIndex];
         if (mapMedals !== undefined) {
-            ui_mapInfoBox.querySelector(".medalList").classList.remove("hidden");
+            ui_mapInfoBox.domReference.querySelector(".medalList").classList.remove("hidden");
 
-            const goldMedal = ui_mapInfoBox.querySelector(".gold");
-            const silverMedal = ui_mapInfoBox.querySelector(".silver");
-            const bronzeMedal = ui_mapInfoBox.querySelector(".bronze");
+            const goldMedal = ui_mapInfoBox.domReference.querySelector(".gold");
+            const silverMedal = ui_mapInfoBox.domReference.querySelector(".silver");
+            const bronzeMedal = ui_mapInfoBox.domReference.querySelector(".bronze");
 
             // update times
             goldMedal.textContent = UserInterface.secondsToMinutes(mapMedals.gold);
@@ -249,7 +251,7 @@ const MapBrowser = {
             }
         } else {
             // No medals -> hide medal list
-            ui_mapInfoBox.querySelector(".medalList").classList.add("hidden");
+            ui_mapInfoBox.domReference.querySelector(".medalList").classList.add("hidden");
         }
     },
 };

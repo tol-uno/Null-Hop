@@ -38,8 +38,8 @@
     width: 17.9vw;
 }
 
-#btn_dragSelect,
-#btn_multiSelect {
+#toggle_dragSelect,
+#toggle_multiSelect {
     position: fixed;
     height: 6.7vw;
     left: 5%;
@@ -47,21 +47,21 @@
     align-items: start;
 }
 
-#btn_dragSelect {
+#toggle_dragSelect {
     top: 32%;
 }
 
-#btn_multiSelect {
+#toggle_multiSelect {
     top: 54%;
 }
 
-#btn_dragSelect > .label,
-#btn_multiSelect > .label,
-#btn_snappingSlider > .label {
+#toggle_dragSelect > .label,
+#toggle_multiSelect > .label,
+#slider_snapping > .label {
     font-size: 1.8vw;
 }
 
-#btn_snappingSlider {
+#slider_snapping {
     position: fixed;
     bottom: 12%;
     left: 5%;
@@ -78,7 +78,7 @@
     height: 4.2vw;
 }
 
-#ui_editorSidePanel {
+.ui_editorSidePanel {
     position: fixed;
     display: flex;
     flex-direction: column;
@@ -112,32 +112,32 @@
     height: 4.9vw;
 }
 
-#btn_platformAngleSlider,
-#btn_playerAngleSlider,
-#btn_checkpointAngleSlider {
+#slider_platformAngle,
+#slider_playerAngle,
+#slider_checkpointAngle {
     width: 100%;
     margin-bottom: 1.6vw;
 }
 
-#btn_platformAngleSlider > .label,
-#btn_playerAngleSlider > .label,
-#btn_checkpointAngleSlider > .label {
+#slider_platformAngle > .label,
+#slider_playerAngle > .label,
+#slider_checkpointAngle > .label {
     font-size: 1.8vw;
     margin-bottom: 1.6vw;
 }
 
-#btn_wall {
+#toggle_wall {
     width: 100%;
     margin-bottom: 1.6vw;
 }
 
-#btn_endzone {
+#toggle_endzone {
     width: 100%;
     margin-bottom: 0.8vw;
 }
 
-#btn_wall > .label,
-#btn_endzone > .label {
+#toggle_wall > .label,
+#toggle_endzone > .label {
     font-size: 1.8vw;
 }
 
@@ -165,28 +165,28 @@
 
 /* Map Settings Sliders */
 
-#btn_platformHeightSlider,
-#btn_wallHeightSlider,
-#btn_lightDirectionSlider,
-#btn_lightPitchSlider {
+#slider_platformHeight,
+#slider_wallHeight,
+#slider_lightDirection,
+#slider_lightPitch {
     position: fixed;
     right: 5%;
     width: 40%;
 }
 
-#btn_platformHeightSlider {
+#slider_platformHeight {
     top: 10%;
 }
 
-#btn_wallHeightSlider {
+#slider_wallHeight {
     top: 30%;
 }
 
-#btn_lightDirectionSlider {
+#slider_lightDirection {
     top: 50%;
 }
 
-#btn_lightPitchSlider {
+#slider_lightPitch {
     top: 70%;
 }
 
@@ -230,23 +230,23 @@
         width: 38.6vw;
     }
 
-    #btn_dragSelect {
+    #toggle_dragSelect {
         height: 14.5vw;
         top: 20%;
     }
 
-    #btn_multiSelect {
+    #toggle_multiSelect {
         height: 14.4vw;
         top: 32%;
     }
 
-    #btn_dragSelect > .label,
-    #btn_multiSelect > .label,
-    #btn_snappingSlider > .label {
+    #toggle_dragSelect > .label,
+    #toggle_multiSelect > .label,
+    #slider_snapping > .label {
         font-size: 3.9vw;
     }
 
-    #btn_snappingSlider {
+    #slider_snapping {
         bottom: unset;
         left: unset;
         top: 8%;
@@ -263,7 +263,7 @@
         height: 9.2vw;
     }
 
-    #ui_editorSidePanel {
+    .ui_editorSidePanel {
         right: 5%;
         left: 5%;
         top: unset;
@@ -276,7 +276,7 @@
         box-shadow: 0 1.9vw 0 var(--uiBackgroundColor_pressed);
     }
 
-    #ui_editorSidePanel .splitSection {
+    .ui_editorSidePanel .splitSection {
         width: 50%;
     }
 
@@ -294,26 +294,26 @@
         height: 10.6vw;
     }
 
-    #btn_platformAngleSlider,
-    #btn_playerAngleSlider,
-    #btn_checkpointAngleSlider {
+    #slider_platformAngle,
+    #slider_playerAngle,
+    #slider_checkpointAngle {
         width: 100%;
         margin-bottom: 4vw;
     }
 
-    #btn_platformAngleSlider > .label,
-    #btn_playerAngleSlider > .label,
-    #btn_checkpointAngleSlider > .label {
+    #slider_platformAngle > .label,
+    #slider_playerAngle > .label,
+    #slider_checkpointAngle > .label {
         font-size: 3.9vw;
         margin-bottom: 3.4vw;
     }
 
-    #btn_wall {
+    #toggle_wall {
         margin-bottom: 4vw;
     }
 
-    #btn_wall > .label,
-    #btn_endzone > .label {
+    #toggle_wall > .label,
+    #toggle_endzone > .label {
         font-size: 3.9vw;
     }
 
@@ -338,28 +338,28 @@
 
     /* Map Settings Sliders */
 
-    #btn_platformHeightSlider,
-    #btn_wallHeightSlider,
-    #btn_lightDirectionSlider,
-    #btn_lightPitchSlider {
+    #slider_platformHeight,
+    #slider_wallHeight,
+    #slider_lightDirection,
+    #slider_lightPitch {
         left: 5%;
         width: auto;
         top: unset;
     }
 
-    #btn_platformHeightSlider {
+    #slider_platformHeight {
         bottom: 40%;
     }
 
-    #btn_wallHeightSlider {
+    #slider_wallHeight {
         bottom: 30%;
     }
 
-    #btn_lightDirectionSlider {
+    #slider_lightDirection {
         bottom: 20%;
     }
 
-    #btn_lightPitchSlider {
+    #slider_lightPitch {
         bottom: 10%;
     }
 }

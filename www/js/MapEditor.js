@@ -181,19 +181,6 @@ const MapEditor = {
         UserInterface.switchToUiGroup(UserInterface.uiGroup_mapEditorInterface);
         UserInterface.determineButtonColor();
 
-        // Sync ColorPicker wall and side toggles
-        const endZoneColorsMatch = this.loadedMap.style.endZoneSideColor == this.loadedMap.style.endZoneTopColor;
-        UserInterface.setToggleState(btn_syncEndZoneColors, endZoneColorsMatch);
-        ColorPicker.lockEndzoneColors = endZoneColorsMatch;
-
-        const wallColorsMatch = this.loadedMap.style.wallSideColor == this.loadedMap.style.wallTopColor;
-        UserInterface.setToggleState(btn_syncWallColors, wallColorsMatch);
-        ColorPicker.lockWallColors = wallColorsMatch;
-
-        const platformColorsMatch = this.loadedMap.style.platformSideColor == this.loadedMap.style.platformTopColor;
-        UserInterface.setToggleState(btn_syncPlatformColors, platformColorsMatch);
-        ColorPicker.lockPlatformColors = platformColorsMatch;
-
         // Set up screen
         this.screen.x = this.loadedMap.playerStart.x;
         this.screen.y = this.loadedMap.playerStart.y;
@@ -217,15 +204,15 @@ const MapEditor = {
             if (
                 TouchHandler.dragging == 1 &&
                 !this.dragSelect &&
-                !btn_translate.classList.contains("pressed") &&
-                !btn_resize_BL.classList.contains("pressed") &&
-                !btn_resize_BR.classList.contains("pressed") &&
-                !btn_resize_TR.classList.contains("pressed") &&
-                !btn_resize_TL.classList.contains("pressed") &&
-                !btn_platformAngleSlider.handle.classList.contains("pressed") &&
-                !btn_playerAngleSlider.handle.classList.contains("pressed") &&
-                !btn_checkpointAngleSlider.handle.classList.contains("pressed") &&
-                !btn_snappingSlider.handle.classList.contains("pressed")
+                !btn_translate.domReference?.classList.contains("pressed") &&
+                !btn_resize_BL.domReference?.classList.contains("pressed") &&
+                !btn_resize_BR.domReference?.classList.contains("pressed") &&
+                !btn_resize_TR.domReference?.classList.contains("pressed") &&
+                !btn_resize_TL.domReference?.classList.contains("pressed") &&
+                !slider_platformAngle.handle?.classList.contains("pressed") &&
+                !slider_playerAngle.handle?.classList.contains("pressed") &&
+                !slider_checkpointAngle.handle?.classList.contains("pressed") &&
+                !slider_snapping.handle?.classList.contains("pressed")
             ) {
                 // SCROLLING AROUND SCREEN
 
@@ -300,14 +287,14 @@ const MapEditor = {
                 }
 
                 // UPDATE THE ANGLE OF OBJECTS WHEN THEIR ANGLE SLIDER IS PRESSED
-                if (btn_platformAngleSlider.handle.classList.contains("pressed")) {
-                    btn_platformAngleSlider.func();
+                if (slider_platformAngle.handle?.classList.contains("pressed")) {
+                    slider_platformAngle.func();
                 }
-                if (btn_playerAngleSlider.handle.classList.contains("pressed")) {
-                    btn_playerAngleSlider.func();
+                if (slider_playerAngle.handle?.classList.contains("pressed")) {
+                    slider_playerAngle.func();
                 }
-                if (btn_checkpointAngleSlider.handle.classList.contains("pressed")) {
-                    btn_checkpointAngleSlider.func();
+                if (slider_checkpointAngle.handle?.classList.contains("pressed")) {
+                    slider_checkpointAngle.func();
                 }
             }
 
@@ -344,10 +331,10 @@ const MapEditor = {
                 this.dragSelectMarquee.height = Math.max(touch.startY, touch.y) - this.dragSelectMarquee.y;
 
                 // updating the DOM element pos and size
-                ui_dragSelectMarquee.style.left = `${this.dragSelectMarquee.x}px`;
-                ui_dragSelectMarquee.style.top = `${this.dragSelectMarquee.y}px`;
-                ui_dragSelectMarquee.style.width = `${this.dragSelectMarquee.width}px`;
-                ui_dragSelectMarquee.style.height = `${this.dragSelectMarquee.height}px`;
+                ui_dragSelectMarquee.domReference.style.left = `${this.dragSelectMarquee.x}px`;
+                ui_dragSelectMarquee.domReference.style.top = `${this.dragSelectMarquee.y}px`;
+                ui_dragSelectMarquee.domReference.style.width = `${this.dragSelectMarquee.width}px`;
+                ui_dragSelectMarquee.domReference.style.height = `${this.dragSelectMarquee.height}px`;
 
                 // marquee rectangle (screen coords) will need to be translated to global map cordinates to compare with platform positions
                 const globalMarqueeCornerTL = this.convertToMapCord(this.dragSelectMarquee.x, this.dragSelectMarquee.y);
@@ -444,31 +431,31 @@ const MapEditor = {
             }
         }
 
-        if (this.editorState == 3) {
-            // in map color screen
+        if (this.editorState == 3 && ColorPicker.editingElement != 0) {
+            // in map color picker 2nd screen
             ColorPicker.update();
             // ColorPicker.render called in MapEditor.render()
         }
 
         if (this.editorState == 4) {
             // in map settings screen
-            if (btn_platformHeightSlider.handle.classList.contains("pressed")) {
-                this.loadedMap.style.platformHeight = UserInterface.getSliderValue(btn_platformHeightSlider);
+            if (slider_platformHeight.handle.classList.contains("pressed")) {
+                this.loadedMap.style.platformHeight = UserInterface.getSliderValue(slider_platformHeight.domReference);
                 PreviewWindow.update();
             }
 
-            if (btn_wallHeightSlider.handle.classList.contains("pressed")) {
-                this.loadedMap.style.wallHeight = UserInterface.getSliderValue(btn_wallHeightSlider);
+            if (slider_wallHeight.handle.classList.contains("pressed")) {
+                this.loadedMap.style.wallHeight = UserInterface.getSliderValue(slider_wallHeight.domReference);
                 PreviewWindow.update();
             }
 
-            if (btn_lightDirectionSlider.handle.classList.contains("pressed")) {
-                this.loadedMap.style.lightDirection = UserInterface.getSliderValue(btn_lightDirectionSlider);
+            if (slider_lightDirection.handle.classList.contains("pressed")) {
+                this.loadedMap.style.lightDirection = UserInterface.getSliderValue(slider_lightDirection.domReference);
                 PreviewWindow.update();
             }
 
-            if (btn_lightPitchSlider.handle.classList.contains("pressed")) {
-                this.loadedMap.style.lightPitch = UserInterface.getSliderValue(btn_lightPitchSlider);
+            if (slider_lightPitch.handle.classList.contains("pressed")) {
+                this.loadedMap.style.lightPitch = UserInterface.getSliderValue(slider_lightPitch.domReference);
                 PreviewWindow.update();
             }
         }
@@ -761,7 +748,7 @@ const MapEditor = {
         if (
             this.editorState == 2 && // something is selected
             !this.dragSelect && // dragSelect hides side panel
-            UserInterface.isPointInsideElement(x, y, ui_editorSidePanel)
+            UserInterface.isPointInsideElement(x, y, UserInterface.uiContainer.querySelector(".ui_editorSidePanel"))
         ) {
             return;
         }
@@ -772,12 +759,12 @@ const MapEditor = {
         if (this.dragSelect) {
             // release from dragSelect
             this.dragSelect = false;
-            UserInterface.setToggleState(btn_dragSelect, false); // sync toggle button
-            // Move marquee offscreen (reset it)
-            ui_dragSelectMarquee.style.left = "-10px";
-            ui_dragSelectMarquee.style.top = "-10px";
-            ui_dragSelectMarquee.style.width = "0px";
-            ui_dragSelectMarquee.style.height = "0px";
+            UserInterface.setToggleState(toggle_dragSelect, false); // reset toggle button
+            // Move marquee offscreen (reset it) UNNEEDED WITH NEW SYSTEM KILL
+            ui_dragSelectMarquee.domReference.style.left = "-10px";
+            ui_dragSelectMarquee.domReference.style.top = "-10px";
+            ui_dragSelectMarquee.domReference.style.width = "0px";
+            ui_dragSelectMarquee.domReference.style.height = "0px";
 
             // add marqueeSelectedElements to selectedElements
             // need to make sure each platform, checkpoint, and playerStart isnt already selected before adding
@@ -800,6 +787,7 @@ const MapEditor = {
             this.marqueeSelectedElements = [];
 
             this.setButtonGroup();
+
             UserInterface.updateMapEditorSidePanel();
 
             return;
@@ -952,7 +940,14 @@ const MapEditor = {
                 }
 
                 this.setButtonGroup();
-                UserInterface.updateMapEditorSidePanel();
+                if (
+                    UserInterface.activeUiGroup.has(ui_editorSidePanel_platform) ||
+                    UserInterface.activeUiGroup.has(ui_editorSidePanel_multi) ||
+                    UserInterface.activeUiGroup.has(ui_editorSidePanel_player) ||
+                    UserInterface.activeUiGroup.has(ui_editorSidePanel_checkpoint)
+                ) {
+                    UserInterface.updateMapEditorSidePanel();
+                }
 
                 return;
             }
@@ -991,7 +986,7 @@ const MapEditor = {
         ];
     },
 
-    saveCustomMap: async function (mapName) { 
+    saveCustomMap: async function (mapName) {
         const map = this.loadedMap;
 
         downloadMap = {};
@@ -1197,20 +1192,13 @@ const MapEditor = {
         MapEditor.selectedElements = [];
 
         MapEditor.dragSelect = false;
-        UserInterface.setToggleState(btn_dragSelect, false);
         MapEditor.multiSelect = false;
-        UserInterface.setToggleState(btn_multiSelect, false);
 
         MapEditor.snapAmount = 2;
-        UserInterface.setSliderValue(btn_snappingSlider, 2);
-
-        btn_platformAngleSlider.dataset.step = 2;
-        btn_playerAngleSlider.dataset.step = 2;
-        btn_checkpointAngleSlider.dataset.step = 2;
 
         CanvasArea.canvas.classList.add("hidden");
 
-        UserInterface.updateUiColorMode("light")
+        UserInterface.updateUiColorMode("light");
 
         btn_mapEditor.func(); // press the main menu's Map Editor button to set up Map Editor Browser
     },
@@ -1238,27 +1226,19 @@ const MapEditor = {
             // one element is selected
             if (MapEditor.selectedElements.includes("playerStart")) {
                 UserInterface.switchToUiGroup(UserInterface.uiGroup_editPlayerStart);
-                UserInterface.setSliderValue(btn_playerAngleSlider, MapEditor.loadedMap.playerStart.angle, true); // sync
+                slider_playerAngle.func(true); // sync
             } else if (Array.isArray(MapEditor.selectedElements[0])) {
                 // checkpoint part is selected
                 UserInterface.switchToUiGroup(UserInterface.uiGroup_editCheckpoint);
-                UserInterface.setSliderValue(
-                    btn_checkpointAngleSlider,
-                    MapEditor.loadedMap.checkpoints[MapEditor.selectedElements[0][0]].angle,
-                    true,
-                ); // sync
+                slider_checkpointAngle.func(true); // sync
             } else {
                 // platform is selected
                 UserInterface.switchToUiGroup(UserInterface.uiGroup_editPlatform);
-                UserInterface.setSliderValue(btn_platformAngleSlider, MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].angle, true); // sync
+                slider_platformAngle.func(true); // sync
 
-                const isWall = this.loadedMap.platforms[this.selectedElements[0]].wall;
-                UserInterface.setToggleState(btn_wall, isWall);
-                btn_wall.label.textContent = isWall ? "Wall: Yes" : "Wall: No";
+                toggle_wall.func(true);
 
-                const isEndZone = this.loadedMap.platforms[this.selectedElements[0]].endzone;
-                UserInterface.setToggleState(btn_endzone, isEndZone);
-                btn_endzone.label.textContent = isEndZone ? "End Zone: Yes" : "End Zone: No";
+                toggle_endzone.func(true);
             }
         }
     },
@@ -1306,5 +1286,117 @@ const MapEditor = {
 
         info.checkpoints = checkpointIds.size;
         return info;
+    },
+
+    resizeBtnFuncLogic: function (btn, cornerIndex, pinnedIndex, offsetX, offsetY, widthSign, heightSign) {
+        // FIX - remove the offsetX and offsetY and just calculate it on the fly:
+        // widthSign * buttonRect.width/2
+        // heightSign * buttonRect.height/2
+        // update function calls when params are removed
+
+        const platform = MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]];
+
+        if (!btn.classList.contains("pressed")) {
+            // position button at corner of element
+            const corner = platform.corners[cornerIndex];
+            const cornerMappedX = mapToRange(
+                platform.x + corner[0],
+                MapEditor.screen.cornerX,
+                MapEditor.screen.cornerX + MapEditor.screen.width,
+                0,
+                screenWidthUI,
+            );
+            const cornerMappedY = mapToRange(
+                platform.y + corner[1],
+                MapEditor.screen.cornerY,
+                MapEditor.screen.cornerY + MapEditor.screen.height,
+                0,
+                screenHeightUI,
+            );
+            UserInterface.setGizmoBtnPos(btn, cornerMappedX + offsetX, cornerMappedY + offsetY);
+            return;
+        }
+
+        // move button according to drag
+        let btnPos = UserInterface.getGizmoBtnPos(btn);
+        btnPos.x += TouchHandler.dragAmountX;
+        btnPos.y += TouchHandler.dragAmountY;
+        UserInterface.setGizmoBtnPos(btn, btnPos.x, btnPos.y);
+
+        // panning when drag near edges of screen
+        const panSpeed = (400 / MapEditor.zoom) * dt;
+        if (btnPos.x > screenWidthUI - 64) {
+            MapEditor.screen.x += panSpeed;
+        }
+        if (btnPos.x < 64) {
+            MapEditor.screen.x -= panSpeed;
+        }
+        if (btnPos.y > screenHeightUI - 64) {
+            MapEditor.screen.y += panSpeed;
+        }
+        if (btnPos.y < 48) {
+            MapEditor.screen.y -= panSpeed;
+        }
+
+        // pinned corner map + screen coords
+        const pinned = platform.corners[pinnedIndex];
+        const pinnedX_map = platform.x + pinned[0];
+        const pinnedY_map = platform.y + pinned[1];
+        const pinnedX_screen = mapToRange(pinnedX_map, MapEditor.screen.cornerX, MapEditor.screen.cornerX + MapEditor.screen.width, 0, screenWidthUI);
+        const pinnedY_screen = mapToRange(
+            pinnedY_map,
+            MapEditor.screen.cornerY,
+            MapEditor.screen.cornerY + MapEditor.screen.height,
+            0,
+            screenHeightUI,
+        );
+
+        // get drag vector (from pinnedCorner -> buttonPos) (unscaled by zoom)
+        // dividing by zoom brings it back to real map scale
+        const drag = new Vector2D3D((btnPos.x - offsetX - pinnedX_screen) / MapEditor.zoom, (btnPos.y - offsetY - pinnedY_screen) / MapEditor.zoom);
+        const rotated = drag.clone().rotate(-platform.angle);
+
+        // set width and height using rotatedDragFromPinned
+        platform.width = Math.round(widthSign * rotated.x * CanvasArea.scale);
+        platform.height = Math.round(heightSign * rotated.y * CanvasArea.scale);
+
+        // snapping and restricting size
+        if (MapEditor.snapAmount > 0) {
+            platform.width = Math.round(platform.width / MapEditor.snapAmount) * MapEditor.snapAmount;
+            platform.height = Math.round(platform.height / MapEditor.snapAmount) * MapEditor.snapAmount;
+        }
+
+        platform.width = Math.max(platform.width, 6);
+        platform.height = Math.max(platform.height, 6);
+
+        // recompute new dragged corner offset
+        const angleRad = platform.angleRad;
+        const c = Math.cos(angleRad);
+        const s = Math.sin(angleRad);
+
+        // Offsets of all 4 corners relative to center (only one used per button)
+        const cornerOffsets = [
+            [(-platform.width / 2) * c - (platform.height / 2) * s, (-platform.width / 2) * s + (platform.height / 2) * c], // BL
+            [(platform.width / 2) * c - (platform.height / 2) * s, (platform.width / 2) * s + (platform.height / 2) * c], // BR
+            [(platform.width / 2) * c + (platform.height / 2) * s, (platform.width / 2) * s - (platform.height / 2) * c], // TR
+            [(-platform.width / 2) * c + (platform.height / 2) * s, (-platform.width / 2) * s - (platform.height / 2) * c], // TL
+        ];
+
+        // The dragged corner (in map-space offset)
+        const draggedCorner = cornerOffsets[cornerIndex];
+
+        // Find the dragged corner’s new map position
+        const draggedX_map = pinnedX_map + draggedCorner[0] * 2;
+        const draggedY_map = pinnedY_map + draggedCorner[1] * 2;
+
+        // Recenter platform between pinned and dragged corners
+        platform.x = (pinnedX_map + draggedX_map) / 2;
+        platform.y = (pinnedY_map + draggedY_map) / 2;
+
+        // update platform center
+        MapEditor.updatePlatformCorners(platform);
+
+        // update size and position text
+        UserInterface.updateMapEditorSidePanel();
     },
 };

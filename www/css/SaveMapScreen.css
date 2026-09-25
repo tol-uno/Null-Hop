@@ -18,7 +18,8 @@
     top: 12%;
 }
 
-#ui_saveMapContainer {
+#ui_saveExistingMapBtnContainer,
+#ui_saveNewMapBtnContainer {
     position: fixed;
     top: 25%;
     left: 50%;
@@ -130,7 +131,8 @@
         top: 25%;
     }
 
-    #ui_saveMapContainer {
+    #ui_saveExistingMapBtnContainer,
+    #ui_saveNewMapBtnContainer {
         top: 36%;
         gap: 4vh;
     }

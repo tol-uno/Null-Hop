@@ -57,7 +57,7 @@
     transition: none !important;
 }
 
-#tutorial_swipe {
+#ui_swipeHorizontal {
     animation: swipeX 4s infinite cubic-bezier(0.3, 0, 0.7, 1);
     position: fixed;
     right: 42%;
@@ -68,7 +68,7 @@
     z-index: 1;
 }
 
-#tutorial_swipeVertical {
+#ui_swipeVertical {
     animation: swipeY 2.5s infinite cubic-bezier(0.3, 0, 0.7, 1);
     position: fixed;
     left: 26%;
@@ -78,7 +78,7 @@
     transition: opacity 500ms ease-in-out;
 }
 
-#tutorial_arrow {
+#ui_arrow {
     animation: arrowPoint 2s infinite ease-in-out;
     position: fixed;
     left: 20%;
@@ -128,7 +128,7 @@
     }
 }
 
-#target-center {
+#ui_targetCenter {
     --angle: 0deg;
 
     position: fixed;
@@ -186,17 +186,17 @@
         top: 19%;
     }
 
-    #tutorial_swipe {
+    #ui_swipeHorizontal {
         right: 35%;
         animation: swipeX 4s infinite cubic-bezier(0.3, 0, 0.7, 1);
         width: 29vw;
     }
 
-    #tutorial_swipeVertical {
+    #ui_swipeVertical {
         width: 26.6vw;
     }
 
-    #tutorial_arrow {
+    #ui_arrow {
         left: 35%;
         width: 18.1vw;
     }

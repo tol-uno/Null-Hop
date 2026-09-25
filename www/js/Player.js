@@ -170,10 +170,10 @@ const Player = {
                 // not the right way to do this
                 // 11:04 in zweeks bhopping video he shows why u lose speed
                 if (UserInterface.showOverstrafeWarning == false) {
-                    UserInterface.addUiElement(ui_overstrafeWarning);
+                    ui_overstrafeWarning.domReference.classList.remove("hidden");
                     UserInterface.showOverstrafeWarning = true;
                     setTimeout(() => {
-                        UserInterface.removeUiElement(ui_overstrafeWarning);
+                        ui_overstrafeWarning.domReference?.classList.add("hidden");
                         UserInterface.showOverstrafeWarning = false;
                     }, 1500); // wait 1.5 seconds to hide warning
                 }
@@ -237,14 +237,16 @@ const Player = {
                 this.jumpVelocity = 200;
                 this.previousJumpSpeed = 100;
             } else {
+                // Player has NO checkpoints
                 // similar code to btn_restart.func();
                 UserInterface.switchToUiGroup(UserInterface.uiGroup_inLevel);
-                ui_speedometer.textContent = "Speed: 0";
-                ui_jumpStats.textContent = "";
+                ui_speedometer.domReference.textContent = "Speed: 0";
+                ui_jumpStats.domReference.textContent = "";
                 UserInterface.timer = 0;
                 UserInterface.levelState = 1;
                 Player.checkpointIndex = -1;
                 Player.restart();
+                if (Tutorial.isActive) {Tutorial.handleNoCpRestart()} // tutorial needs buttons added back
             }
             updatePlayerPoligon();
         };
@@ -402,15 +404,18 @@ const Player = {
                     // restart level/leave level: reset previousJumpSpeed to 150
                     const deltaSpeed = Math.round(this.velocity.magnitude() - this.previousJumpSpeed);
                     this.previousJumpSpeed = this.velocity.magnitude();
-                    ui_jumpStats.textContent = deltaSpeed != 0 ? `${deltaSpeed > 0 ? "+" : "-"}${Math.abs(deltaSpeed)}` : ""; // ▲▼
-                    ui_jumpStats.style.opacity = "1";
-                    ui_jumpStats.style.transform = "translateY(0px)";
-                    ui_jumpStats.style.animation = `fadeOut 0.65s forwards cubic-bezier(0.7, 0, 1.0, 1.0), ${
+                    ui_jumpStats.domReference.textContent = deltaSpeed != 0 ? `${deltaSpeed > 0 ? "▲" : "▼"}${Math.abs(deltaSpeed)}` : ""; // ▲▼ ⬆⬇↑↓
+                    ui_jumpStats.domReference.style.opacity = "1";
+                    ui_jumpStats.domReference.style.transform = "translateY(0px)";
+                    ui_jumpStats.domReference.style.animation = `fadeOut 0.65s forwards cubic-bezier(0.7, 0, 1.0, 1.0), ${
                         deltaSpeed > 0 ? "moveUp" : "moveDown"
                     } 0.65s forwards linear`;
                     setTimeout(() => {
-                        ui_jumpStats.style.opacity = "0";
-                        ui_jumpStats.style.animation = "";
+                        // check if domReference still exists
+                        if (ui_jumpStats.domReference) {
+                            ui_jumpStats.domReference.style.opacity = "0";
+                            ui_jumpStats.domReference.style.animation = "";
+                        }
                     }, 650);
                 }
             } else {
@@ -476,7 +481,7 @@ const Player = {
                 this.endSlow -= 2 * dt;
             } else {
                 this.endSlow = 0;
-                if (ui_endScreen.classList.contains("hidden")) {
+                if (!ui_endScreen.domReference) {
                     // not a great way of doing this. Maybe add a levelState = 4?
                     UserInterface.activateEndScreen();
                 }

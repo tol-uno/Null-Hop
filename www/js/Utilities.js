@@ -40,16 +40,16 @@ function readFile(baseDirectory = "local", subDirectory = "", fileName, readData
                                         reader.onerror = () => reject("FileReader error: " + reader.error);
                                         reader[readMethod](file); // "readAsArrayBuffer" or "readAsText"
                                     },
-                                    () => reject("Unable to access file: " + fileName)
+                                    () => reject("Unable to access file: " + fileName),
                                 );
                             },
-                            () => reject("File not found: " + fileName)
+                            () => reject("File not found: " + fileName),
                         );
                     },
-                    (err) => reject("Subdirectory not found: " + err.code)
+                    (err) => reject("Subdirectory not found: " + err.code),
                 );
             },
-            (err) => reject("Could not resolve data directory: " + err.code)
+            (err) => reject("Could not resolve data directory: " + err.code),
         );
     });
 }
@@ -87,14 +87,14 @@ function writeFile(fileName, blobData, subDirectory = "") {
                             // Step 3: Proceed to save file in the subdirectory
                             saveFile(subDirEntry);
                         },
-                        (err) => reject("writeFile error: Unable to access/create subdirectory. Code: " + err.code)
+                        (err) => reject("writeFile error: Unable to access/create subdirectory. Code: " + err.code),
                     );
                 } else {
                     // No subdirectory, save directly in the base data directory
                     saveFile(dataDirEntry);
                 }
             },
-            (err) => reject("writeFile error: Unable to resolve data directory. Code: " + err.code)
+            (err) => reject("writeFile error: Unable to resolve data directory. Code: " + err.code),
         );
 
         // Step 4: Create or overwrite the file and write blobData to it
@@ -116,17 +116,58 @@ function writeFile(fileName, blobData, subDirectory = "") {
 
                             fileWriter.write(blobData);
                         },
-                        (err) => reject("writeFile error: Failed to create fileWriter. Code: " + err.code)
+                        (err) => reject("writeFile error: Failed to create fileWriter. Code: " + err.code),
                     );
                 },
-                (err) => reject("writeFile error: Failed to access or create file. Code: " + err.code)
+                (err) => reject("writeFile error: Failed to access or create file. Code: " + err.code),
             );
         }
     });
 }
 
-
 function mapToRange(number, inMin, inMax, outMin, outMax) {
     // MAP TO RANGE: https://stackoverflow.com/questions/10756313/javascript-jquery-map-a-range-of-numbers-to-another-range-of-numbers
     return ((number - inMin) * (outMax - outMin)) / (inMax - inMin) + outMin;
+}
+
+function parseComponentIntoDomElement(strings, ...values) {
+    // each value is a ${} in the string template literal
+    // recursivly expand all nested components to Dom elements
+    const allSubElementsFound = [];
+    const domChildrenArray = values.map((subElement) => {
+        const result = subElement.template(); // uses this parseComponentIntoDomElement to parse template
+
+        subElement.registerDomReferences(result.domElement); // register sub elements domReference
+
+        // collect this child's own discovered sub-elements into the shared top-level array
+        allSubElementsFound.push(...result.allSubElementsFound);
+
+        // also track this child itself, since it's a sub-element of the current template
+        allSubElementsFound.push(subElement);
+        // allSubElementsFound.push(result.domElement); // old way where this array was populated with dom elements. Now that each class instance has its domReference set we can just use the class instance here. ^^ see above
+
+        return result.domElement;
+    });
+
+    // add placeholder divs with the id of child that can be replaced with the actual child dom element
+    // mash all string fragments together but turn ${subElements} into placeholder divs with an id
+    let stringWithSubElementPlaceholders = "";
+    for (let i = 0; i < strings.length; i++) {
+        stringWithSubElementPlaceholders += strings[i];
+        if (i < domChildrenArray.length) {
+            stringWithSubElementPlaceholders += `<div id="${domChildrenArray[i].id}"></div>`;
+        }
+    }
+    // parse and create the actual DOM element
+    const domElement = UserInterface.parseStringToDomElement(stringWithSubElementPlaceholders);
+
+    // slot in actual sub-element dom-elements into the placeholder divs
+    for (const domChild of domChildrenArray) {
+        // get placeholder div in domElement that aligns with this domChild
+        const placeholderDiv = domElement.querySelector(`#${domChild.id}`);
+
+        placeholderDiv.replaceWith(domChild);
+    }
+
+    return { domElement, allSubElementsFound };
 }
