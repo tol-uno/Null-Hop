@@ -32,6 +32,6 @@ const btn_addPlatform = new uiElement(
         toggle_wall.func(true);
         toggle_endzone.func(true);
 
-        UserInterface.updateMapEditorSidePanel();
+        MapEditor.updateSidePanel();
     },
 );

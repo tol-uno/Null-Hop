@@ -131,7 +131,11 @@ const UserInterface = {
             // rotating the screen while the keyboard is up resets the visualViewport.offsetTop
             // offsetTop is what makes sure the text field is in view. It is set by browser when the keyboard is opened
             // when offsetTop gets reset it can cause the text field to go out of frame behind the keyboard. This is a solution to that:
-            if (MapEditor.editorState == 5 && UserInterface.activeUiGroup.has(ui_inputMapName) && document.activeElement == ui_inputMapName.domReference) {
+            if (
+                MapEditor.editorState == 5 &&
+                UserInterface.activeUiGroup.has(ui_inputMapName) &&
+                document.activeElement == ui_inputMapName.domReference
+            ) {
                 // scroll the screen up to center the input within the remaining visualViewport (area left over after keyboard covers screen)
 
                 window.scrollTo(0, 0); // reset so that positioning readings are accurate
@@ -147,7 +151,6 @@ const UserInterface = {
                 );
             }
         });
-
 
         // ===========
         //  UI GROUPS
@@ -564,15 +567,6 @@ const UserInterface = {
         return minutes + ":" + extraSeconds;
     },
 
-    parseStringToDomElement: function (templateString) {
-        try {
-            const parsedDocument = this.DomParser.parseFromString(templateString, "text/html");
-            return parsedDocument.body.firstElementChild;
-        } catch (error) {
-            throw new Error(`Failed to parse DOM element: ${error.message}`);
-        }
-    },
-
     switchToUiGroup: function (newUiGroup) {
         const newUiGroupIncludingSubElements = new Set(newUiGroup);
 
@@ -813,89 +807,6 @@ const UserInterface = {
             // No medals -> hide medal list
             ui_endScreen.domReference.querySelector(".medalList").classList.add("hidden");
         }
-    },
-
-    // FIX this should be in MapEditor not here
-    updateMapEditorSidePanel: function () {
-        // called when:
-        // translate and resize buttons are dragged
-        // platform or checkpoint or playerStart get selected or drag select ends (MapEditor.touchReleased)
-        // items are duplicated, or added platform or added checkpoint
-        // item is unselected
-
-        if (MapEditor.multiSelect && MapEditor.selectedElements.length > 1) {
-            // Multiple elements selected
-
-            ui_elementTitle.domReference.textContent = `Group Selection`;
-
-            const countData = MapEditor.indexSelectedElements();
-            let lines = [];
-            if (countData.platforms > 0) {
-                lines.push(`Platforms: ${countData.platforms}`);
-            }
-            if (countData.walls > 0) {
-                lines.push(`Walls: ${countData.walls}`);
-            }
-            if (countData.endZones > 0) {
-                lines.push(`End Zones: ${countData.endZones}`);
-            }
-            if (countData.checkpoints > 0) {
-                lines.push(`Checkpoints: ${countData.checkpoints}`);
-            }
-            if (countData.playerStart > 0) {
-                lines.push(`Player Start: ${countData.playerStart}`);
-            }
-            ui_elementInfo.domReference.innerHTML = lines.join("<br>");
-
-            return;
-        }
-
-        if (MapEditor.selectedElements[0] == "playerStart") {
-            // playerStart is selected
-            ui_elementTitle.domReference.textContent = `Player Start`;
-            ui_elementInfo.domReference.textContent = `Position: ${MapEditor.loadedMap.playerStart.x}, ${MapEditor.loadedMap.playerStart.y}`;
-
-            return;
-        }
-
-        if (Array.isArray(MapEditor.selectedElements[0])) {
-            // checkpoint is selected
-            ui_elementTitle.domReference.textContent = `Checkpoint`;
-
-            ui_elementInfo.domReference.innerHTML = `
-                Trigger 1: 
-                ${MapEditor.loadedMap.checkpoints[MapEditor.selectedElements[0][0]].triggerX1}, 
-                ${MapEditor.loadedMap.checkpoints[MapEditor.selectedElements[0][0]].triggerY1}
-                <br>
-                Trigger 2: ${MapEditor.loadedMap.checkpoints[MapEditor.selectedElements[0][0]].triggerX2}, 
-                ${MapEditor.loadedMap.checkpoints[MapEditor.selectedElements[0][0]].triggerY2}
-                <br>
-                Respawn: ${MapEditor.loadedMap.checkpoints[MapEditor.selectedElements[0][0]].x}, 
-                ${MapEditor.loadedMap.checkpoints[MapEditor.selectedElements[0][0]].y}
-            `.trim();
-
-            return;
-        }
-
-        if (MapEditor.selectedElements.length > 0) {
-            // platform is selected
-            ui_elementTitle.domReference.textContent = `Platform`;
-
-            const approxSignX = MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].x % 1 == 0 ? "" : "~";
-            const approxSignY = MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].y % 1 == 0 ? "" : "~";
-
-            ui_elementInfo.domReference.innerHTML = `
-            Position: 
-            ${approxSignX}${Math.round(MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].x)}, 
-            ${approxSignY}${Math.round(MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].y)}
-            <br>
-            Size: 
-            ${MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].width}, 
-            ${MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].height}
-        `.trim();
-        }
-
-        // else: last item was unselected - no need to update side panel, it's gone
     },
 
     shareMap: async function () {

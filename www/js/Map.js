@@ -122,7 +122,7 @@ const Map = {
 
             const allHullPoints = platform.corners.concat(upperCorners).concat(lowerCorners);
 
-            platform.hull = CanvasArea.convexHull(allHullPoints);
+            platform.hull = convexHull(allHullPoints);
 
             // add a .clipPoints property to each wall for occluding Player and drawing players xray
             if (platform.wall) {
@@ -136,7 +136,7 @@ const Map = {
 
                 let behindWallClipPoints = platform.corners.concat(upperCorners);
 
-                platform.clipPoints = CanvasArea.convexHull(behindWallClipPoints);
+                platform.clipPoints = convexHull(behindWallClipPoints);
 
                 // USED FOR TESTING WETHER A WALL IS INFRONT OF PLAYER
                 platform.getSplitLineY = function (x) {
@@ -403,7 +403,7 @@ const Map = {
                 ],
             ]; // end of shadowPoints array
 
-            platform.shadowPoints = CanvasArea.convexHull(platform.shadowPoints);
+            platform.shadowPoints = convexHull(platform.shadowPoints);
         } // end of looping thrugh each platform
 
         // calculate all other map colors

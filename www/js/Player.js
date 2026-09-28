@@ -41,8 +41,8 @@ const Player = {
         this.angleRad = (angle * Math.PI) / 180;
 
         // set here so that PreviewWindow can render player without calling Player.update()
-        this.playerPoligon = CanvasArea.createPoligon(this.x, this.y, 32, 32, this.angleRad);
-        this.shadowCorners = CanvasArea.createPoligon(this.x, this.y, 30, 30, this.angleRad); // 30x30 instead of 32x32
+        this.playerPoligon = createPoligon(this.x, this.y, 32, 32, this.angleRad);
+        this.shadowCorners = createPoligon(this.x, this.y, 30, 30, this.angleRad); // 30x30 instead of 32x32
 
         this.topNormal = new Vector2D3D(0, 0, -1);
         this.botSideNormal = new Vector2D3D(0, 1, 0).rotate(angle);
@@ -99,7 +99,7 @@ const Player = {
             // arrow function so that "this" can be used to refer to Player
             // needs to be called at different times depending on levelState
             // FIX this should use a single shadowPolygon instance of Polygon and just update it every frame as opposed to creating new ones
-            this.playerPoligon = CanvasArea.createPoligon(this.x, this.y, 32, 32, this.angleRad);
+            this.playerPoligon = createPoligon(this.x, this.y, 32, 32, this.angleRad);
         };
 
         const updatePlayerVelocity = () => {
@@ -519,7 +519,7 @@ const Player = {
 
         // Update shadowCorners here for use by Map to render Player lower shadow
         // FIX this should use a single shadowPolygon instance of Polygon and just update it every frame as opposed to creating new ones
-        this.shadowCorners = CanvasArea.createPoligon(this.x, this.y, 30, 30, this.angleRad); // 30x30 instead of 32x32
+        this.shadowCorners = createPoligon(this.x, this.y, 30, 30, this.angleRad); // 30x30 instead of 32x32
     },
 
     startLevel: function () {
@@ -535,7 +535,7 @@ const Player = {
                 y: platform.y + y,
             }));
 
-            if (CanvasArea.doPolygonsIntersect(this.playerPoligon, platformPoligon)) {
+            if (doPolygonsIntersect(this.playerPoligon, platformPoligon)) {
                 return true; // breaks out of loop once at least one collision is detected
             }
         }
@@ -693,7 +693,7 @@ const Player = {
         }
 
         const allHullPoints = lowerCorners.concat(upperCorners);
-        this.hull = CanvasArea.convexHull(allHullPoints);
+        this.hull = convexHull(allHullPoints);
 
         // DRAW BACKGROUND HULL
         ctx.fillStyle = this.topColor;

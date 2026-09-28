@@ -182,7 +182,7 @@ const btn_translate = new uiElement(
                     Math.round(conditioningArray[i].element[conditioningArray[i].yKey] / MapEditor.snapAmount) * MapEditor.snapAmount;
             }
 
-            UserInterface.updateMapEditorSidePanel();
+            MapEditor.updateSidePanel();
         }
     },
 );

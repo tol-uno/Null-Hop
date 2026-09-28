@@ -48,7 +48,7 @@ const PreviewWindow = {
 
             const allHullPoints = platform.corners.concat(upperCorners).concat(lowerCorners);
 
-            platform.hull = CanvasArea.convexHull(allHullPoints);
+            platform.hull = convexHull(allHullPoints);
         });
 
         Map.setMapLighting(this);

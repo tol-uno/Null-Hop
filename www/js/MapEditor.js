@@ -344,7 +344,7 @@ const MapEditor = {
                 );
 
                 // takes a rectangle defined by center coordinates (x, y), width, height, and angle in radians
-                const marqueePolygon = CanvasArea.createPoligon(
+                const marqueePolygon = createPoligon(
                     (globalMarqueeCornerTL.x + globalMarqueeCornerBR.x) / 2,
                     (globalMarqueeCornerTL.y + globalMarqueeCornerBR.y) / 2,
                     globalMarqueeCornerBR.x - globalMarqueeCornerTL.x,
@@ -356,7 +356,7 @@ const MapEditor = {
 
                 // Looping PLAFORMS to check if in marquee
                 this.renderedPlatforms.forEach((platform) => {
-                    const platformPoligon = CanvasArea.createPoligon(platform.x, platform.y, platform.width, platform.height, platform.angleRad);
+                    const platformPoligon = createPoligon(platform.x, platform.y, platform.width, platform.height, platform.angleRad);
 
                     if (CanvasArea.doPolygonsIntersect(marqueePolygon, platformPoligon)) {
                         // add platform to marqueeSelectedElements. concat is used for selectedElements array -- i dont remember why
@@ -396,7 +396,7 @@ const MapEditor = {
 
                 // Check if playerStart is in marquee
                 const playerStart = this.loadedMap.playerStart;
-                const playerStartPoligon = CanvasArea.createPoligon(playerStart.x, playerStart.y, 32, 32, (playerStart.angle * Math.PI) / 180);
+                const playerStartPoligon = createPoligon(playerStart.x, playerStart.y, 32, 32, (playerStart.angle * Math.PI) / 180);
 
                 if (CanvasArea.doPolygonsIntersect(marqueePolygon, playerStartPoligon)) {
                     // add playerStart to marqueeSelectedElements
@@ -788,7 +788,7 @@ const MapEditor = {
 
             this.setButtonGroup();
 
-            UserInterface.updateMapEditorSidePanel();
+            this.updateSidePanel();
 
             return;
         }
@@ -839,7 +839,7 @@ const MapEditor = {
             }
 
             this.setButtonGroup();
-            UserInterface.updateMapEditorSidePanel();
+            this.updateSidePanel();
 
             return;
         }
@@ -866,7 +866,7 @@ const MapEditor = {
                 }
 
                 this.setButtonGroup();
-                UserInterface.updateMapEditorSidePanel();
+                this.updateSidePanel();
 
                 clickedCheckpoint = true;
                 return;
@@ -889,7 +889,7 @@ const MapEditor = {
                 }
 
                 this.setButtonGroup();
-                UserInterface.updateMapEditorSidePanel();
+                this.updateSidePanel();
 
                 clickedCheckpoint = true;
                 return;
@@ -912,7 +912,7 @@ const MapEditor = {
                 }
 
                 this.setButtonGroup();
-                UserInterface.updateMapEditorSidePanel();
+                this.updateSidePanel();
 
                 clickedCheckpoint = true;
                 return;
@@ -946,7 +946,7 @@ const MapEditor = {
                     UserInterface.activeUiGroup.has(ui_editorSidePanel_player) ||
                     UserInterface.activeUiGroup.has(ui_editorSidePanel_checkpoint)
                 ) {
-                    UserInterface.updateMapEditorSidePanel();
+                    this.updateSidePanel();
                 }
 
                 return;
@@ -1243,6 +1243,88 @@ const MapEditor = {
         }
     },
 
+    updateSidePanel: function () {
+        // called when:
+        // translate and resize buttons are dragged
+        // platform or checkpoint or playerStart get selected or drag select ends (MapEditor.touchReleased)
+        // items are duplicated, or added platform or added checkpoint
+        // item is unselected
+
+        if (MapEditor.multiSelect && MapEditor.selectedElements.length > 1) {
+            // Multiple elements selected
+
+            ui_elementTitle.domReference.textContent = `Group Selection`;
+
+            const countData = MapEditor.indexSelectedElements();
+            let lines = [];
+            if (countData.platforms > 0) {
+                lines.push(`Platforms: ${countData.platforms}`);
+            }
+            if (countData.walls > 0) {
+                lines.push(`Walls: ${countData.walls}`);
+            }
+            if (countData.endZones > 0) {
+                lines.push(`End Zones: ${countData.endZones}`);
+            }
+            if (countData.checkpoints > 0) {
+                lines.push(`Checkpoints: ${countData.checkpoints}`);
+            }
+            if (countData.playerStart > 0) {
+                lines.push(`Player Start: ${countData.playerStart}`);
+            }
+            ui_elementInfo.domReference.innerHTML = lines.join("<br>");
+
+            return;
+        }
+
+        if (MapEditor.selectedElements[0] == "playerStart") {
+            // playerStart is selected
+            ui_elementTitle.domReference.textContent = `Player Start`;
+            ui_elementInfo.domReference.textContent = `Position: ${MapEditor.loadedMap.playerStart.x}, ${MapEditor.loadedMap.playerStart.y}`;
+
+            return;
+        }
+
+        if (Array.isArray(MapEditor.selectedElements[0])) {
+            // checkpoint is selected
+            ui_elementTitle.domReference.textContent = `Checkpoint`;
+
+            ui_elementInfo.domReference.innerHTML = `
+                Trigger 1: 
+                ${MapEditor.loadedMap.checkpoints[MapEditor.selectedElements[0][0]].triggerX1}, 
+                ${MapEditor.loadedMap.checkpoints[MapEditor.selectedElements[0][0]].triggerY1}
+                <br>
+                Trigger 2: ${MapEditor.loadedMap.checkpoints[MapEditor.selectedElements[0][0]].triggerX2}, 
+                ${MapEditor.loadedMap.checkpoints[MapEditor.selectedElements[0][0]].triggerY2}
+                <br>
+                Respawn: ${MapEditor.loadedMap.checkpoints[MapEditor.selectedElements[0][0]].x}, 
+                ${MapEditor.loadedMap.checkpoints[MapEditor.selectedElements[0][0]].y}
+            `.trim();
+
+            return;
+        }
+
+        if (MapEditor.selectedElements.length > 0) {
+            // platform is selected
+            ui_elementTitle.domReference.textContent = `Platform`;
+
+            const approxSignX = MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].x % 1 == 0 ? "" : "~";
+            const approxSignY = MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].y % 1 == 0 ? "" : "~";
+
+            ui_elementInfo.domReference.innerHTML = `
+            Position: 
+            ${approxSignX}${Math.round(MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].x)}, 
+            ${approxSignY}${Math.round(MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].y)}
+            <br>
+            Size: 
+            ${MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].width}, 
+            ${MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].height}
+        `.trim();
+        }
+
+        // else: last item was unselected - no need to update side panel, it's gone
+    },
+
     arraysAreEqual: function (a, b) {
         // used to test if two arrays == each other
         if (a === b) return true;
@@ -1289,10 +1371,10 @@ const MapEditor = {
     },
 
     resizeBtnFuncLogic: function (btn, cornerIndex, pinnedIndex, offsetX, offsetY, widthSign, heightSign) {
-        // FIX - remove the offsetX and offsetY and just calculate it on the fly:
+        // Could remove the offsetX and offsetY and just calculate it on the fly:
+        // Would need to get the button dom rect though so it's technically less performant
         // widthSign * buttonRect.width/2
         // heightSign * buttonRect.height/2
-        // update function calls when params are removed
 
         const platform = MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]];
 
@@ -1397,6 +1479,6 @@ const MapEditor = {
         MapEditor.updatePlatformCorners(platform);
 
         // update size and position text
-        UserInterface.updateMapEditorSidePanel();
+        this.updateSidePanel();
     },
 };

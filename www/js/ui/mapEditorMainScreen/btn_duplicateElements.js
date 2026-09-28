@@ -47,6 +47,6 @@ const btn_duplicateElements = new uiElement(
             toggle_endzone.func(true);
         }
 
-        UserInterface.updateMapEditorSidePanel();
+        MapEditor.updateSidePanel();
     },
 );
