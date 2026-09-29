@@ -159,7 +159,10 @@
 }
 
 #ui_dragSelectMarquee {
+    /* set to be off frame when initially added to dom */
     position: fixed;
+    left: -20px;
+    top: -20px;
     border: 0.5vw dotted var(--uiForegroundColor);
 }
 

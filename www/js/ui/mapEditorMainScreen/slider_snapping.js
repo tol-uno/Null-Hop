@@ -12,8 +12,8 @@ const slider_snapping = new uiElement(
         `;
     },
 
-    (sync) => {
-        if (sync) {
+    (options) => {
+        if (options?.sync) {
             UserInterface.setSliderValue(slider_snapping, MapEditor.snapAmount)
             return;
         }

@@ -106,9 +106,9 @@ const ColorPicker = {
     },
 
     updateSliders: function () {
-        slider_hue.func(true);
-        slider_saturation.func(true);
-        slider_lightness.func(true);
+        slider_hue.func({sync: true});
+        slider_saturation.func({sync: true});
+        slider_lightness.func({sync: true});
     },
 
     updateElementColor: function () {

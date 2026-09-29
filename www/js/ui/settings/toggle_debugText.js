@@ -10,8 +10,8 @@ const toggle_debugText = new uiElement(
         `;
     },
 
-    (sync) => {
-        if (sync) {
+    (options) => {
+        if (options?.sync) {
             UserInterface.setToggleState(toggle_debugText, UserInterface.settings.debugText);
             return;
         }

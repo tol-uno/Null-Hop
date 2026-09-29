@@ -20,13 +20,13 @@ const slider_checkpointAngle = new uiElement(
         `;
     },
 
-    (sync) => {
-        if (sync) {
+    (options) => {
+        if (options?.sync) {
             UserInterface.setSliderValue(slider_checkpointAngle, MapEditor.loadedMap.checkpoints[MapEditor.selectedElements[0][0]].angle, true);
             slider_checkpointAngle.domReference.dataset.step = MapEditor.snapAmount;
             return;
         }
 
-        MapEditor.loadedMap.checkpoints[MapEditor.selectedElements[0][0]].angle = UserInterface.getSliderValue(slider_checkpointAngle.domReference);
+        MapEditor.loadedMap.checkpoints[MapEditor.selectedElements[0][0]].angle = UserInterface.getSliderValue(slider_checkpointAngle);
     },
 );

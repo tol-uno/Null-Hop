@@ -132,7 +132,7 @@ function mapToRange(number, inMin, inMax, outMin, outMax) {
 
 function parseStringToDomElement(templateString) {
     try {
-        const parsedDocument = this.DomParser.parseFromString(templateString, "text/html");
+        const parsedDocument = UserInterface.DomParser.parseFromString(templateString, "text/html");
         return parsedDocument.body.firstElementChild;
     } catch (error) {
         throw new Error(`Failed to parse DOM element: ${error.message}`);
@@ -323,4 +323,14 @@ function convexHull(points) {
     } else {
         return result;
     }
+}
+
+function generateColorsFromString(string) { // takes in a string and returns a deterministic array of 4 HSL colors
+    const hash = Math.abs(string.split("").reduce((h, c) => ((h << 5) - h + c.charCodeAt(0)) | 0, 0));
+    return [...Array(4)].map((_, i) => {
+        const baseHue = (hash + i * 5) % 360;
+        const saturation = 50 + ((hash + i * 5) % 40);
+        const lightness = 30 + ((hash + i * 5) % 50);
+        return `hsl(${baseHue}, ${saturation}%, ${lightness}%)`;
+    });
 }

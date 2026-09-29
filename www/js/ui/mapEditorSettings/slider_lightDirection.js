@@ -12,13 +12,13 @@ const slider_lightDirection = new uiElement(
         `;
     },
 
-    (sync) => {
-        if (sync) {
+    (options) => {
+        if (options?.sync) {
             UserInterface.setSliderValue(slider_lightDirection, MapEditor.loadedMap.style.lightDirection);
             return;
         }
         
-        MapEditor.loadedMap.style.lightDirection = UserInterface.getSliderValue(slider_lightDirection.domReference);
+        MapEditor.loadedMap.style.lightDirection = UserInterface.getSliderValue(slider_lightDirection);
         PreviewWindow.update();
     },
 );

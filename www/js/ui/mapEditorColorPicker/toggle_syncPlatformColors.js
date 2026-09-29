@@ -10,8 +10,8 @@ const toggle_syncPlatformColors = new uiElement(
         `;
     },
 
-    (sync) => {
-        if (sync) {
+    (options) => {
+        if (options?.sync) {
             const platformColorsMatch = MapEditor.loadedMap.style.platformSideColor == MapEditor.loadedMap.style.platformTopColor;
             UserInterface.setToggleState(toggle_syncPlatformColors, platformColorsMatch);
             ColorPicker.lockPlatformColors = platformColorsMatch;

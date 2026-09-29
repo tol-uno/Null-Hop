@@ -10,8 +10,8 @@ const toggle_endzone = new uiElement(
         `;
     },
 
-    (sync) => {
-        if (sync) {
+    (options) => {
+        if (options?.sync) {
             const isEndZone = MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].endzone;
             UserInterface.setToggleState(toggle_endzone, isEndZone);
             toggle_endzone.label.textContent = isEndZone ? "End Zone: Yes" : "End Zone: No";
@@ -39,8 +39,8 @@ const toggle_endzone = new uiElement(
         // } else {
         //     MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].endzone = 1;
         //     MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].wall = 0;
-        //     toggle_wall.func(true);
+        //     toggle_wall.func({sync: true});
         // }
-        // toggle_endzone.func(true); // sync
+        // toggle_endzone.func({sync: true});
     },
 );

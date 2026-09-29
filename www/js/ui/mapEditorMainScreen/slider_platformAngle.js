@@ -12,14 +12,14 @@ const slider_platformAngle = new uiElement(
         `;
     },
 
-    (sync) => {
-        if (sync) {
+    (options) => {
+        if (options?.sync) {
             UserInterface.setSliderValue(slider_platformAngle, MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].angle, true);
             slider_platformAngle.domReference.dataset.step = MapEditor.snapAmount;
             return;
         }
 
-        MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].angle = UserInterface.getSliderValue(slider_platformAngle.domReference);
+        MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].angle = UserInterface.getSliderValue(slider_platformAngle);
         MapEditor.updatePlatformCorners(MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]]);
     },
 );

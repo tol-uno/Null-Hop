@@ -10,8 +10,8 @@ const toggle_playTutorial = new uiElement(
         `;
     },
 
-    (sync) => {
-        if (sync) {
+    (options) => {
+        if (options?.sync) {
             UserInterface.setToggleState(toggle_playTutorial, UserInterface.settings.playTutorial);
             return;
         }

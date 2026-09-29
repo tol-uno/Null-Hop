@@ -12,13 +12,13 @@ const slider_platformHeight = new uiElement(
         `;
     },
 
-    (sync) => {
-        if (sync) {
+    (options) => {
+        if (options?.sync) {
             UserInterface.setSliderValue(slider_platformHeight, MapEditor.loadedMap.style.platformHeight);
             return;
         }
 
-        MapEditor.loadedMap.style.platformHeight = UserInterface.getSliderValue(slider_platformHeight.domReference);
+        MapEditor.loadedMap.style.platformHeight = UserInterface.getSliderValue(slider_platformHeight);
         PreviewWindow.update();
     },
 );

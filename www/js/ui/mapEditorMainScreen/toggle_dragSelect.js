@@ -10,8 +10,8 @@ const toggle_dragSelect = new uiElement(
         `;
     },
 
-    (sync) => {
-        if (sync) {
+    (options) => {
+        if (options?.sync) {
             // No need to sync this. Should always enter untoggled
             // gets toggled off in MapEditor touchReleased()
             return;

@@ -10,8 +10,8 @@ const toggle_wall = new uiElement(
         `;
     },
 
-    (sync) => {
-        if (sync) {
+    (options) => {
+        if (options?.sync) {
             const isWall = MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].wall;
             UserInterface.setToggleState(toggle_wall, isWall);
             toggle_wall.label.textContent = isWall ? "Wall: Yes" : "Wall: No";

@@ -49,7 +49,7 @@ class uiElement {
 
         const syncIfToggleOrSlider = (element) => {
             if (element.type === "toggle" || element.type === "slider") {
-                element.func(true); // run func() with sync = true. This runs a special version of func() that is set up to sync this ui element with external state
+                element.func({sync: true});
             }
         } 
         

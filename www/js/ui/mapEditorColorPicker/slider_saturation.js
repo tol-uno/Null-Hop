@@ -12,8 +12,8 @@ const slider_saturation = new uiElement(
         `;
     },
 
-    (sync) => {
-        if (sync) {
+    (options) => {
+        if (options?.sync) {
             UserInterface.setSliderValue(slider_saturation, ColorPicker.s);
             return;
         }

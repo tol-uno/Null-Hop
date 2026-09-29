@@ -10,8 +10,8 @@ const toggle_multiSelect = new uiElement(
         `;
     },
 
-    (sync) => {
-        if (sync) {
+    (options) => {
+        if (options?.sync) {
             UserInterface.setToggleState(toggle_multiSelect, MapEditor.multiSelect);
             return;
         }

@@ -12,13 +12,13 @@ const slider_volume = new uiElement(
         `;
     },
 
-    (sync) => {
-        if (sync) {
+    (options) => {
+        if (options?.sync) {
             UserInterface.setSliderValue(slider_volume, UserInterface.settings.volume);
             return;
         }
 
-        UserInterface.settings.volume = UserInterface.getSliderValue(slider_volume.domReference);
+        UserInterface.settings.volume = UserInterface.getSliderValue(slider_volume);
         AudioHandler.setVolume(UserInterface.settings.volume);
         UserInterface.writeSettings();
     },

@@ -12,13 +12,13 @@ const slider_playerAngle = new uiElement(
         `;
     },
 
-    (sync) => {
-        if (sync) {
+    (options) => {
+        if (options?.sync) {
             UserInterface.setSliderValue(slider_playerAngle, MapEditor.loadedMap.playerStart.angle, true);
             slider_playerAngle.domReference.dataset.step = MapEditor.snapAmount;
             return;
         }
 
-        MapEditor.loadedMap.playerStart.angle = UserInterface.getSliderValue(slider_playerAngle.domReference);
+        MapEditor.loadedMap.playerStart.angle = UserInterface.getSliderValue(slider_playerAngle);
     },
 );

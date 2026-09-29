@@ -358,7 +358,7 @@ const MapEditor = {
                 this.renderedPlatforms.forEach((platform) => {
                     const platformPoligon = createPoligon(platform.x, platform.y, platform.width, platform.height, platform.angleRad);
 
-                    if (CanvasArea.doPolygonsIntersect(marqueePolygon, platformPoligon)) {
+                    if (doPolygonsIntersect(marqueePolygon, platformPoligon)) {
                         // add platform to marqueeSelectedElements. concat is used for selectedElements array -- i dont remember why
                         this.marqueeSelectedElements = this.marqueeSelectedElements.concat(MapEditor.loadedMap.platforms.indexOf(platform));
                     }
@@ -386,7 +386,7 @@ const MapEditor = {
 
                     const checkpointPoligon = [trigger1, trigger2, respawn];
 
-                    if (CanvasArea.doPolygonsIntersect(marqueePolygon, checkpointPoligon)) {
+                    if (doPolygonsIntersect(marqueePolygon, checkpointPoligon)) {
                         // add each part of checkpoint to marqueeSelectedElements
                         this.marqueeSelectedElements = this.marqueeSelectedElements.concat([new Array(checkpointIndex, 1)]);
                         this.marqueeSelectedElements = this.marqueeSelectedElements.concat([new Array(checkpointIndex, 2)]);
@@ -398,7 +398,7 @@ const MapEditor = {
                 const playerStart = this.loadedMap.playerStart;
                 const playerStartPoligon = createPoligon(playerStart.x, playerStart.y, 32, 32, (playerStart.angle * Math.PI) / 180);
 
-                if (CanvasArea.doPolygonsIntersect(marqueePolygon, playerStartPoligon)) {
+                if (doPolygonsIntersect(marqueePolygon, playerStartPoligon)) {
                     // add playerStart to marqueeSelectedElements
                     this.marqueeSelectedElements = this.marqueeSelectedElements.concat("playerStart");
                 }
@@ -440,22 +440,22 @@ const MapEditor = {
         if (this.editorState == 4) {
             // in map settings screen
             if (slider_platformHeight.handle.classList.contains("pressed")) {
-                this.loadedMap.style.platformHeight = UserInterface.getSliderValue(slider_platformHeight.domReference);
+                this.loadedMap.style.platformHeight = UserInterface.getSliderValue(slider_platformHeight);
                 PreviewWindow.update();
             }
 
             if (slider_wallHeight.handle.classList.contains("pressed")) {
-                this.loadedMap.style.wallHeight = UserInterface.getSliderValue(slider_wallHeight.domReference);
+                this.loadedMap.style.wallHeight = UserInterface.getSliderValue(slider_wallHeight);
                 PreviewWindow.update();
             }
 
             if (slider_lightDirection.handle.classList.contains("pressed")) {
-                this.loadedMap.style.lightDirection = UserInterface.getSliderValue(slider_lightDirection.domReference);
+                this.loadedMap.style.lightDirection = UserInterface.getSliderValue(slider_lightDirection);
                 PreviewWindow.update();
             }
 
             if (slider_lightPitch.handle.classList.contains("pressed")) {
-                this.loadedMap.style.lightPitch = UserInterface.getSliderValue(slider_lightPitch.domReference);
+                this.loadedMap.style.lightPitch = UserInterface.getSliderValue(slider_lightPitch);
                 PreviewWindow.update();
             }
         }
@@ -760,11 +760,6 @@ const MapEditor = {
             // release from dragSelect
             this.dragSelect = false;
             UserInterface.setToggleState(toggle_dragSelect, false); // reset toggle button
-            // Move marquee offscreen (reset it) UNNEEDED WITH NEW SYSTEM KILL
-            ui_dragSelectMarquee.domReference.style.left = "-10px";
-            ui_dragSelectMarquee.domReference.style.top = "-10px";
-            ui_dragSelectMarquee.domReference.style.width = "0px";
-            ui_dragSelectMarquee.domReference.style.height = "0px";
 
             // add marqueeSelectedElements to selectedElements
             // need to make sure each platform, checkpoint, and playerStart isnt already selected before adding
@@ -1226,19 +1221,19 @@ const MapEditor = {
             // one element is selected
             if (MapEditor.selectedElements.includes("playerStart")) {
                 UserInterface.switchToUiGroup(UserInterface.uiGroup_editPlayerStart);
-                slider_playerAngle.func(true); // sync
+                slider_playerAngle.func({sync: true});
             } else if (Array.isArray(MapEditor.selectedElements[0])) {
                 // checkpoint part is selected
                 UserInterface.switchToUiGroup(UserInterface.uiGroup_editCheckpoint);
-                slider_checkpointAngle.func(true); // sync
+                slider_checkpointAngle.func({sync: true});
             } else {
                 // platform is selected
                 UserInterface.switchToUiGroup(UserInterface.uiGroup_editPlatform);
-                slider_platformAngle.func(true); // sync
+                slider_platformAngle.func({sync: true});
 
-                toggle_wall.func(true);
+                toggle_wall.func({sync: true});
 
-                toggle_endzone.func(true);
+                toggle_endzone.func({sync: true});
             }
         }
     },

@@ -42,9 +42,9 @@ const btn_duplicateElements = new uiElement(
 
         if (MapEditor.selectedElements.length == 1) {
             // only need to sync buttons and sliders in single select
-            slider_platformAngle.func(true);
-            toggle_wall.func(true);
-            toggle_endzone.func(true);
+            slider_platformAngle.func({sync: true});
+            toggle_wall.func({sync: true});
+            toggle_endzone.func({sync: true});
         }
 
         MapEditor.updateSidePanel();

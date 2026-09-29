@@ -264,15 +264,7 @@ const UserInterface = {
             toggle_syncPlatformColors,
             toggle_syncEndZoneColors,
         ]);
-        this.uiGroup_colorPickerState2 = new Set([
-            ui_colorPicker,
-            btn_unselectColor,
-            btn_copyColor,
-            btn_pasteColor,
-            slider_hue,
-            slider_saturation,
-            slider_lightness,
-        ]);
+        this.uiGroup_colorPickerState2 = new Set([ui_colorPicker]);
         this.uiGroup_mapSettings = new Set([btn_mainMenu, slider_platformHeight, slider_wallHeight, slider_lightDirection, slider_lightPitch]);
 
         this.uiGroup_saveExistingMap = new Set([btn_cancel, ui_mapEditorSaveText, ui_saveExistingMapBtnContainer]);
@@ -396,18 +388,10 @@ const UserInterface = {
 
     // Slider Get, Set, & updateDraggedSlider Functions
 
-    setSliderValue: function (rawSlider, value, unsnapped = false) {
-        // slider param ^ was changed to rawSlider to avoid needing to change all mentions of it in the function
-
-        // kill and revert param eventually
-        let slider = rawSlider;
-        if (rawSlider.domReference) {
-            slider = rawSlider.domReference;
-        }
-
-        const min = parseFloat(slider.dataset.min);
-        const max = parseFloat(slider.dataset.max);
-        const step = parseFloat(slider.dataset.step) || 1;
+    setSliderValue: function (slider, value, unsnapped = false) {
+        const min = parseFloat(slider.domReference.dataset.min);
+        const max = parseFloat(slider.domReference.dataset.max);
+        const step = parseFloat(slider.domReference.dataset.step) || 1;
 
         // Clamp input value to [min, max]
         const clamped = Math.min(Math.max(value, min), max);
@@ -424,7 +408,7 @@ const UserInterface = {
         }
 
         // Determine what decimal precision should be used based on step's precision
-        const decimalPointsToUse = slider.dataset.step?.split(".")[1]?.length || 0;
+        const decimalPointsToUse = slider.domReference.dataset.step?.split(".")[1]?.length || 0;
 
         // Round to correct decimal precision (numeric form)
         let stepSnappedRoundedNum = parseFloat(stepSnapped.toFixed(decimalPointsToUse));
@@ -436,66 +420,49 @@ const UserInterface = {
         const stepSnappedRoundedStr = stepSnappedRoundedNum.toFixed(decimalPointsToUse);
 
         // Update dataset and label
-        slider.dataset.value = stepSnappedRoundedNum; // numeric for internal logic
+        slider.domReference.dataset.value = stepSnappedRoundedNum; // numeric for internal logic
 
-        // ===== UPDATE THIS ===== once all sliders are on new system
-        rawSlider.labelValue.textContent = stepSnappedRoundedStr; // formatted for display
+        slider.labelValue.textContent = stepSnappedRoundedStr; // formatted for display
 
         // Convert to % of range for styling
         const percent = ((stepSnappedRoundedNum - min) / (max - min)) * 100;
-        // ===== ALSO UPDATE HERE ======
-        rawSlider.handle.style.setProperty("--pos", `${percent}%`);
+
+        slider.handle.style.setProperty("--pos", `${percent}%`);
     },
 
-    getSliderValue: function (rawSlider) {
-        // slider param ^ was changed to rawSlider to avoid needing to change all mentions of it in the function
-
-        // kill and revert param eventually
-        let slider = rawSlider;
-        if (rawSlider.domReference) {
-            slider = rawSlider.domReference;
-        }
-
-        return parseFloat(slider.dataset.value);
+    getSliderValue: function (slider) {
+        return parseFloat(slider.domReference.dataset.value);
     },
 
     // called every frame on sliders that are pressed (settings screen and in map editor)
-    updateDraggedSlider: function (rawSlider) {
-        // slider param ^ was changed to rawSlider to avoid needing to change all mentions of it in the function
-
-        // kill and revert param eventually
-        let slider = rawSlider;
-        if (rawSlider.domReference) {
-            slider = rawSlider.domReference;
-        }
-
-        const sliderRect = slider.getBoundingClientRect();
-        const slidersTouchID = Number(slider.dataset.touchid);
+    updateDraggedSlider: function (slider) {
+        // FIX, getBoundingClientRect every frame is expensive
+        const sliderRect = slider.domReference.getBoundingClientRect();
+        const slidersTouchID = Number(slider.domReference.dataset.touchid);
         const touch = TouchHandler.touches.find((touch) => touch.identifier === slidersTouchID);
 
-        const value = mapToRange(touch.x, sliderRect.left, sliderRect.right, Number(slider.dataset.min), Number(slider.dataset.max));
+        const value = mapToRange(
+            touch.x,
+            sliderRect.left,
+            sliderRect.right,
+            Number(slider.domReference.dataset.min),
+            Number(slider.domReference.dataset.max),
+        );
 
-        this.setSliderValue(rawSlider, value);
+        this.setSliderValue(slider, value);
     },
 
     // Toggle Button Get and Set Functions
 
     getToggleState: function (toggleButton) {
-        // kill this check once all ui is on new system
-        if (toggleButton.domReference) {
-            return toggleButton.domReference.classList.contains("toggled");
-        } else {
-            return toggleButton.classList.contains("toggled");
-        }
+        return toggleButton.domReference.classList.contains("toggled");
     },
 
     setToggleState: function (toggleButton, state) {
-        toggleButtonProxy = toggleButton.domReference ? toggleButton.domReference : toggleButton;
-
         if (state) {
-            toggleButtonProxy.classList.add("toggled");
+            toggleButton.domReference.classList.add("toggled");
         } else {
-            toggleButtonProxy.classList.remove("toggled");
+            toggleButton.domReference.classList.remove("toggled");
         }
     },
 
@@ -572,11 +539,8 @@ const UserInterface = {
 
         // Populate newUiGroupIncludingSubElements with all missing subElements before switching to it
         for (const element of newUiGroup) {
-            // kill this HTMLElement check once on new ui system
-            if (!(element instanceof HTMLElement)) {
-                for (const subElement of element.subElements) {
-                    newUiGroupIncludingSubElements.add(subElement);
-                }
+            for (const subElement of element.subElements) {
+                newUiGroupIncludingSubElements.add(subElement);
             }
         }
 
@@ -594,14 +558,9 @@ const UserInterface = {
     },
 
     removeUiElement: function (uiElement) {
-        if (uiElement instanceof HTMLElement) {
-            // kill once all ui elements are new system
-            uiElement.classList.add("hidden");
-        }
-
         const wasRemoved = this.activeUiGroup.delete(uiElement);
 
-        if (wasRemoved && uiElement.domReference) {
+        if (wasRemoved) {
             uiElement.domReference.remove();
             uiElement.domReference = null;
 
@@ -613,25 +572,16 @@ const UserInterface = {
         }
     },
 
-    addUiElement: function (uiElement) {
-        if (uiElement instanceof HTMLElement) {
-            // Old UI system
-            // kill this HTMLElement check and else block setup once all ui elements are new version
-            uiElement.classList.remove("hidden");
-            this.activeUiGroup.add(uiElement);
-        } else {
-            // New UI system
+    addUiElement: function (uiElement, container = UserInterface.uiContainer) {
+        if (this.activeUiGroup.has(uiElement)) {
+            return;
+        }
 
-            if (this.activeUiGroup.has(uiElement)) {
-                return;
-            }
+        uiElement.addDomElement(container);
 
-            uiElement.addDomElement(UserInterface.uiContainer);
-
-            this.activeUiGroup.add(uiElement);
-            for (const subElement of uiElement.subElements) {
-                this.activeUiGroup.add(subElement);
-            }
+        this.activeUiGroup.add(uiElement);
+        for (const subElement of uiElement.subElements) {
+            this.activeUiGroup.add(subElement);
         }
     },
 
@@ -660,32 +610,26 @@ const UserInterface = {
         // domReferenceMap.delete(element.domReference);
 
         for (const uiElement of this.activeUiGroup) {
-            // kill proxy and update structure once all ui is migrated
-            let proxyUiElement = uiElement;
-            if (uiElement.domReference) {
-                proxyUiElement = uiElement.domReference;
-            }
-
-            if (!proxyUiElement.contains(hit)) continue; // skip to next uiElement in loop
+            if (!uiElement.domReference.contains(hit)) continue; // skip to next uiElement in loop
 
             // buttons & toggles
-            if (proxyUiElement.nodeName.toLowerCase() === "button" || proxyUiElement.classList.contains("toggle-container")) {
-                proxyUiElement.classList.add("pressed");
+            if (uiElement.type === "button" || uiElement.type === "toggle") {
+                uiElement.domReference.classList.add("pressed");
             }
 
             // sliders
-            if (proxyUiElement.classList.contains("slider")) {
-                // these need to use uiElement instead of proxy because .handle isnt attached to the domReference
+            if (uiElement.type === "slider") {
+                // Note: these dont use UiElement.domReference because .handle is attached
+                // right to uiElement and is a reference to a dom element on its own
                 if (uiElement.handle.contains(hit)) {
                     uiElement.handle.classList.add("pressed");
-                    proxyUiElement.dataset.touchid = id;
+                    uiElement.domReference.dataset.touchid = id;
                 }
             }
         }
 
         // Add strafehelper when any touch starts while in level and not in endzone
         if (this.gamestate == 6 && this.levelState !== 3) {
-            // this.addUiElement(ui_strafeHelper);
             ui_strafeHelper.domReference.classList.remove("hidden");
         }
     },
@@ -700,45 +644,34 @@ const UserInterface = {
         let editorIgnoreRelease = false;
 
         for (const uiElement of this.activeUiGroup) {
-            // kill once proxy is no longer needed
-            let proxyUiElement = uiElement;
-            if (uiElement.domReference) {
-                proxyUiElement = uiElement.domReference;
-            }
-
             // BUTTONS & TOGGLES
-            if (proxyUiElement.nodeName.toLowerCase() === "button" || proxyUiElement.classList.contains("toggle-container")) {
-                const isPressed = proxyUiElement.classList.contains("pressed");
-                const isUnderFinger = hit && proxyUiElement.contains(hit);
+            if (uiElement.type === "button" || uiElement.type === "toggle") {
+                const isPressed = uiElement.domReference.classList.contains("pressed");
+                const isUnderFinger = hit && uiElement.domReference.contains(hit);
 
-                if (isPressed && isUnderFinger && (MapBrowser.scrollVel == 0 || MapBrowser.scrollAmount == null) && MapEditor.dragSelect == false) {
-                    // Kill once new ui is done
-                    if (proxyUiElement != uiElement) {
-                        // new ui system
-                        uiElement.func();
-                    } else {
-                        // old ui system
-                        proxyUiElement.func();
-                    }
+                // this tries to untoggle all buttons even if they weren't released on. This is silly. FIX probably
+                uiElement.domReference.classList.remove("pressed");
+
+                if (isPressed && isUnderFinger && (this.gamestate !== 2 || (this.gamestate === 2 && MapBrowser.scrollVel === 0))) {
+                    // if not scrolling in Map Browser trigger button/toggle like normal
+                    uiElement.func();
                     editorIgnoreRelease = true;
+                    break;
                 }
-                proxyUiElement.classList.remove("pressed");
             }
 
             // SLIDERS (capture-based)
-            else if (proxyUiElement.classList.contains("slider") && proxyUiElement.dataset.touchid && Number(proxyUiElement.dataset.touchid) === id) {
-                // Kill once new ui is done
-                if (proxyUiElement != uiElement) {
-                    // new ui system
-                    uiElement.func();
-                } else {
-                    // old ui system
-                    proxyUiElement.func();
-                }
-                // need to use uiElement instead of proxy because .handle isnt attached to domReference
+            else if (
+                uiElement.domReference.classList.contains("slider") &&
+                uiElement.domReference.dataset.touchid &&
+                Number(uiElement.domReference.dataset.touchid) === id
+            ) {
+                uiElement.func();
+                // need to use uiElement instead of uiElement.domReference because .handle isnt attached to domReference
                 uiElement.handle.classList.remove("pressed");
-                proxyUiElement.dataset.touchid = null;
+                uiElement.domReference.dataset.touchid = null;
                 editorIgnoreRelease = true;
+                break;
             }
         }
 
@@ -855,17 +788,11 @@ const UserInterface = {
         // 7: in map editor
 
         // update dragged Sliders every frame
-        // sliders are only in Settings Page and MapEditor Pages
+        // sliders are currently only in Settings Page and MapEditor Pages
         if (this.gamestate == 3 || MapEditor.loadedMap) {
             // Live update position of handle if slider is being dragged
             for (const uiElement of this.activeUiGroup) {
-                // kill once proxy is no longer needed
-                let proxyUiElement = uiElement;
-                if (uiElement.domReference) {
-                    proxyUiElement = uiElement.domReference;
-                }
-
-                if (proxyUiElement.classList.contains("slider")) {
+                if (uiElement.domReference.classList.contains("slider")) {
                     if (uiElement.handle.classList.contains("pressed")) {
                         this.updateDraggedSlider(uiElement);
                     }

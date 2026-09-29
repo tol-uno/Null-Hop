@@ -65,7 +65,6 @@ body {
 
     /* Padding to avoid the "unsafe" areas behind notches in the screen */
     /* padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px); */
-    /* background-color: #a3d5e1; kill */
     background-image: linear-gradient(#8fceff, #3f92d3);
     width: 100vw;
     height: 100vh;

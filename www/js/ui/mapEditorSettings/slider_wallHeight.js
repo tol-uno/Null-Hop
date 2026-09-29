@@ -12,13 +12,13 @@ const slider_wallHeight = new uiElement(
         `;
     },
 
-    (sync) => {
-        if (sync) {
+    (options) => {
+        if (options?.sync) {
             UserInterface.setSliderValue(slider_wallHeight, MapEditor.loadedMap.style.wallHeight);
             return;
         }
 
-        MapEditor.loadedMap.style.wallHeight = UserInterface.getSliderValue(slider_wallHeight.domReference);
+        MapEditor.loadedMap.style.wallHeight = UserInterface.getSliderValue(slider_wallHeight);
         PreviewWindow.update();
     },
 );

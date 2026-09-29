@@ -10,8 +10,8 @@ const toggle_strafeHUD = new uiElement(
         `;
     },
 
-    (sync) => {
-        if (sync) {
+    (options) => {
+        if (options?.sync) {
             UserInterface.setToggleState(toggle_strafeHUD, UserInterface.settings.strafeHUD);
             return;
         }

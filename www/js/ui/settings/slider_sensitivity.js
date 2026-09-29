@@ -12,13 +12,13 @@ const slider_sensitivity = new uiElement(
         `;
     },
 
-    (sync) => {
-        if (sync) {
+    (options) => {
+        if (options?.sync) {
             UserInterface.setSliderValue(slider_sensitivity, UserInterface.settings.sensitivity);
             return;
         }
 
-        UserInterface.settings.sensitivity = UserInterface.getSliderValue(slider_sensitivity.domReference);
+        UserInterface.settings.sensitivity = UserInterface.getSliderValue(slider_sensitivity);
         UserInterface.writeSettings();
     },
 );

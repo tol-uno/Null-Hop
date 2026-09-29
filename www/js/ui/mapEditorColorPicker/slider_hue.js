@@ -12,8 +12,8 @@ const slider_hue = new uiElement(
         `;
     },
 
-    (sync) => {
-        if (sync) {
+    (options) => {
+        if (options?.sync) {
             UserInterface.setSliderValue(slider_hue, ColorPicker.h);
             return;
         }

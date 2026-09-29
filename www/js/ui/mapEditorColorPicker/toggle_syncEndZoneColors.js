@@ -10,8 +10,8 @@ const toggle_syncEndZoneColors = new uiElement(
         `;
     },
 
-    (sync) => {
-        if (sync) {
+    (options) => {
+        if (options?.sync) {
             const endZoneColorsMatch = MapEditor.loadedMap.style.endZoneSideColor == MapEditor.loadedMap.style.endZoneTopColor;
             UserInterface.setToggleState(toggle_syncEndZoneColors, endZoneColorsMatch);
             ColorPicker.lockEndzoneColors = endZoneColorsMatch;

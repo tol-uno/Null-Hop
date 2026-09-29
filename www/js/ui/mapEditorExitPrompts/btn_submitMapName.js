@@ -17,8 +17,6 @@ const btn_submitMapName = new uiElement(
             UserInterface.addUiElement(ui_mapNameErrorText);
             ui_mapNameErrorText.domReference.textContent = isValid.reason;
         } else {
-            // clear text field
-            ui_inputMapName.domReference.value = ""; // probably not needed with new UI system
             try {
                 await MapEditor.saveCustomMap(mapName);
             } catch (error) {

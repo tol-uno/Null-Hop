@@ -28,9 +28,9 @@ const btn_addPlatform = new uiElement(
         UserInterface.switchToUiGroup(UserInterface.uiGroup_editPlatform);
 
         // SYNC ALL BUTTONS AND SLIDERS
-        slider_platformAngle.func(true);
-        toggle_wall.func(true);
-        toggle_endzone.func(true);
+        slider_platformAngle.func({sync: true});
+        toggle_wall.func({sync: true});
+        toggle_endzone.func({sync: true});
 
         MapEditor.updateSidePanel();
     },

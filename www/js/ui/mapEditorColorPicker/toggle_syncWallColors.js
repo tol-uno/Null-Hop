@@ -10,8 +10,8 @@ const toggle_syncWallColors = new uiElement(
         `;
     },
 
-    (sync) => {
-        if (sync) {
+    (options) => {
+        if (options?.sync) {
             const wallColorsMatch = MapEditor.loadedMap.style.wallSideColor == MapEditor.loadedMap.style.wallTopColor;
             UserInterface.setToggleState(toggle_syncWallColors, wallColorsMatch);
             ColorPicker.lockWallColors = wallColorsMatch;

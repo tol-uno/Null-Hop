@@ -12,13 +12,13 @@ const slider_lightPitch = new uiElement(
         `;
     },
 
-    (sync) => {
-        if (sync) {
+    (options) => {
+        if (options?.sync) {
             UserInterface.setSliderValue(slider_lightPitch, MapEditor.loadedMap.style.lightPitch);
             return;
         }
 
-        MapEditor.loadedMap.style.lightPitch = UserInterface.getSliderValue(slider_lightPitch.domReference);
+        MapEditor.loadedMap.style.lightPitch = UserInterface.getSliderValue(slider_lightPitch);
         PreviewWindow.update();
     },
 );

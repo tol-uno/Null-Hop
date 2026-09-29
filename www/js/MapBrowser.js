@@ -17,7 +17,7 @@ const MapBrowser = {
         height: 162, // set dynamically
     },
     container: null,
-    customMapNamesCache: [], // used for validating new map names
+    customMapNamesCache: [], // used for validating new map names in map editor
 
     init: async function () {
         this.scrollPos = 0;
@@ -31,7 +31,12 @@ const MapBrowser = {
             this.container.innerHTML = ""; // clear all previous custom buttons
             this.customMapNamesCache = [];
 
-            // fetch custom maps from cordova file system and map to buttons
+            // Fetch custom maps file entries from cordova file system
+            // map each map entry to a new uiElement
+            // Add each uiElement to the active map-list-container
+            // Modify the domReference for the button manually with name and colored circles
+            // Can't insert these at ${mapName} anymore because they'd get parsed as subElements
+
             try {
                 const entries = await new Promise((resolve, reject) => {
                     window.resolveLocalFileSystemURL(
@@ -46,42 +51,45 @@ const MapBrowser = {
 
                 for (const mapEntry of entries) {
                     const mapName = String(mapEntry.name.split(".")[0]);
-                    this.customMapNamesCache.push(mapName);
+                    this.customMapNamesCache.push(mapName); // used for validating new map names in map editor
 
-                    const generateColorsFromString = (string) => {
-                        const hash = Math.abs(string.split("").reduce((h, c) => ((h << 5) - h + c.charCodeAt(0)) | 0, 0));
-                        return [...Array(4)].map((_, i) => {
-                            const baseHue = (hash + i * 5) % 360;
-                            const saturation = 50 + ((hash + i * 5) % 40);
-                            const lightness = 30 + ((hash + i * 5) % 50);
-                            return `hsl(${baseHue}, ${saturation}%, ${lightness}%)`;
-                        });
-                    };
+                    const button = new uiElement(
+                        "button",
 
+                        () => {
+                            return /* HTML */ parseComponentIntoDomElement`
+                                <button class="btn_customMap">
+                                    <div>
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 256 128">
+                                            <path fill="var(--uiBackgroundColor)" d="M0 0h256v128H0z" />
+                                            <circle cx="27" cy="27" r="13" stroke="var(--uiForegroundColor)" stroke-width="4" />
+                                            <circle cx="229" cy="27" r="13" stroke="var(--uiForegroundColor)" stroke-width="4" />
+                                            <circle cx="27" cy="101" r="13" stroke="var(--uiForegroundColor)" stroke-width="4" />
+                                            <circle cx="229" cy="101" r="13" stroke="var(--uiForegroundColor)" stroke-width="4" />
+                                        </svg>
+                                        <span></span>
+                                    </div>
+                                </button>
+                            `;
+                        },
+
+                        () => {
+                            MapBrowser.selectedMapIndex = mapName;
+                            MapBrowser.updateMapBrowserUI();
+                        },
+                    );
+
+                    UserInterface.addUiElement(button, this.container);
+
+                    // insert name into button span
+                    button.domReference.querySelector("span").textContent = mapName;
+
+                    // color each of the circles
                     const randomColors = generateColorsFromString(mapName);
-
-                    const buttonHTML = `
-                    <div>
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 256 128">
-                            <path fill="var(--uiBackgroundColor)" d="M0 0h256v128H0z" />
-                            <circle cx="27" cy="27" r="13" stroke="var(--uiForegroundColor)" fill="${randomColors[0]}" stroke-width="4" />
-                            <circle cx="229" cy="27" r="13" stroke="var(--uiForegroundColor)" fill="${randomColors[1]}" stroke-width="4" />
-                            <circle cx="27" cy="101" r="13" stroke="var(--uiForegroundColor)" fill="${randomColors[2]}" stroke-width="4" />
-                            <circle cx="229" cy="101" r="13" stroke="var(--uiForegroundColor)" fill="${randomColors[3]}" stroke-width="4" />
-                        </svg>
-                        <span>${mapName}</span>
-                    </div>
-                `;
-
-                    const button = document.createElement("button");
-                    button.classList.add("btn_customMap");
-                    button.innerHTML = buttonHTML.trim();
-                    button.func = () => {
-                        MapBrowser.selectedMapIndex = mapName;
-                        MapBrowser.updateMapBrowserUI();
-                    };
-                    this.container.appendChild(button);
-                    UserInterface.addUiElement(button);
+                    const circles = button.domReference.querySelectorAll("circle");
+                    for (let i = 0; i < circles.length; i++) {
+                        circles[i].style.fill = randomColors[i];
+                    }
                 }
             } catch (error) {
                 console.error("Failed to load custom maps:", error);
@@ -94,13 +102,7 @@ const MapBrowser = {
     },
 
     setMaxScroll: function () {
-        // Set maxScroll
         this.maxScroll = this.container.scrollHeight - this.container.clientHeight;
-        // this.maxScroll =
-        //     UserInterface.orientation == "landscape"
-        //         ? this.container.scrollHeight - this.container.clientHeight
-        //         : this.container.scrollWidth - this.container.clientWidth;
-
         this.maxScroll *= -1;
     },
 

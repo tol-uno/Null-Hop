@@ -12,8 +12,8 @@ const slider_lightness = new uiElement(
         `;
     },
 
-    (sync) => {
-        if (sync) {
+    (options) => {
+        if (options?.sync) {
             UserInterface.setSliderValue(slider_lightness, ColorPicker.l);
             return;
         }
