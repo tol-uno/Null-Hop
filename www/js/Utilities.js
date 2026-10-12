@@ -7,14 +7,31 @@ Need to use within an asyc function and use await: "data = await readFile()"
 @returns {Promise<void>} Returns a promise that resolves to raw unparsed text or arraybuffer
 */
 function readFile(baseDirectory = "local", subDirectory = "", fileName, readDataAs = "text") {
+    const isBrowser = cordova.platformId === "browser";
+
+    // Local app files in the browser: just fetch them over HTTP
+    if (baseDirectory === "local" && isBrowser) {
+        const url = (subDirectory ? subDirectory.replace(/\/?$/, "/") : "") + fileName;
+        return fetch(url).then((res) => {
+            if (!res.ok) throw new Error("File not found: " + url + " (" + res.status + ")");
+            return readDataAs === "arraybuffer" ? res.arrayBuffer() : res.text();
+        });
+    }
+
     return new Promise((resolve, reject) => {
         let basePath;
 
-        if (baseDirectory == "local") {
+        if (baseDirectory === "local") {
             basePath = cordova.file.applicationDirectory + "www/";
-        } else if (baseDirectory == "device") {
+        } else if (baseDirectory === "device") {
             basePath = cordova.file.dataDirectory;
-        } else throw new Error("baseDirectory parameter is invalid");
+        } else {
+            return reject(new Error("baseDirectory parameter is invalid"));
+        }
+
+        if (!basePath || basePath.includes("undefined")) {
+            return reject(new Error("Base path unavailable on this platform: " + basePath));
+        }
 
         const readMethod = readDataAs === "arraybuffer" ? "readAsArrayBuffer" : "readAsText";
 
@@ -325,7 +342,8 @@ function convexHull(points) {
     }
 }
 
-function generateColorsFromString(string) { // takes in a string and returns a deterministic array of 4 HSL colors
+function generateColorsFromString(string) {
+    // takes in a string and returns a deterministic array of 4 HSL colors
     const hash = Math.abs(string.split("").reduce((h, c) => ((h << 5) - h + c.charCodeAt(0)) | 0, 0));
     return [...Array(4)].map((_, i) => {
         const baseHue = (hash + i * 5) % 360;
