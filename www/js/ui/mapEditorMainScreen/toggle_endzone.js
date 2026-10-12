@@ -33,14 +33,14 @@ const toggle_endzone = new uiElement(
 
         toggle_endzone.domReference.classList.toggle("toggled");
 
-        // COULD BE THIS. NOT AS OPTIMIZED BUT MORE MAINTAINABLE 
+        // COULD BE THIS. NOT AS OPTIMIZED BUT MORE MAINTAINABLE
         // if (toggle_endzone.domReference.classList.contains("toggled")) {
         //     MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].endzone = 0;
         // } else {
         //     MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].endzone = 1;
         //     MapEditor.loadedMap.platforms[MapEditor.selectedElements[0]].wall = 0;
-        //     toggle_wall.func({sync: true});
+        //     toggle_wall.func({ sync: true });
         // }
-        // toggle_endzone.func({sync: true});
+        // toggle_endzone.func({ sync: true });
     },
 );

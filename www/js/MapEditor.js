@@ -16,6 +16,9 @@ const MapEditor = {
 
     zoom: 1, // 10 = zoomed to 10x the scale. 0.1 zoomed out so everything is 10% of its size
     startingZoom: 1,
+    zoomVelocity: 0, // Positive zoomVel means momentum zooming in, negative is momentum zooming out.
+    zoomVelocityAverager: new Averager(6),
+    previousZoom: 1,
 
     screen: {
         // where the view is located realative to the map origin
@@ -200,7 +203,9 @@ const MapEditor = {
         if (this.editorState == 1 || this.editorState == 2) {
             // main map edit screen OR platform select screen
 
-            // SCROLLING THE SCREEN and SETTING OBJECTS TO ANGLE SLIDERS VALUES and SETTING ZOOM TO SLIDER VALUE EVERY FRAME
+            // SCROLLING THE SCREEN
+            // SETTING OBJECTS TO ANGLE SLIDERS VALUES
+            // SETTING ZOOM EVERY FRAME
             if (
                 TouchHandler.dragging == 1 &&
                 !this.dragSelect &&
@@ -231,10 +236,16 @@ const MapEditor = {
                     if (this.zoom < 0.05) {
                         this.zoom = 0.05;
                     }
-                    if (Math.abs(this.zoom - 1) < 0.1) {
-                        // snapping to zoom = 1 if close
-                        this.zoom = 1;
-                    }
+                    // if (Math.abs(this.zoom - 1) < 0.1) {
+                    //     // snapping to zoom = 1 if close
+                    //     this.zoom = 1;
+                    // }
+
+                    // Calculate and track zoom velocity
+                    const instantZoomVelocity = this.zoom - this.previousZoom;
+                    this.zoomVelocityAverager.pushValue(instantZoomVelocity);
+                    this.zoomVelocity = this.zoomVelocityAverager.getAverage();
+                    this.previousZoom = this.zoom;
                 } else {
                     this.startingZoom = this.zoom;
                     // also set outside of if(dragging) loop so that if both touches
@@ -265,10 +276,12 @@ const MapEditor = {
 
                     this.scrollVelAveragerX.clear();
                     this.scrollVelAveragerY.clear();
+                    this.zoomVelocityAverager.clear();
 
                     this.startingZoom = this.zoom; // needs to be set here to avoid double touch zoom reset bug
                 }
 
+                // Apply momentum to scroll
                 this.screen.x += this.scrollVelX;
                 this.screen.y += this.scrollVelY;
 
@@ -284,6 +297,31 @@ const MapEditor = {
                     this.scrollVelY -= this.scrollVelY * 3 * dt;
                 } else {
                     this.scrollVelY = 0;
+                }
+
+                // Apply momentum to zoom
+                if (Math.abs(this.zoomVelocity) > 0.001) {
+                    this.zoom += this.zoomVelocity;
+                    this.previousZoom = this.zoom; // Keep track for next frame's velocity calculation
+
+                    // Clamp zoom
+                    if (this.zoom > 10) {
+                        this.zoom = 10;
+                        this.zoomVelocity = 0;
+                    }
+                    if (this.zoom < 0.05) {
+                        this.zoom = 0.05;
+                        this.zoomVelocity = 0;
+                    }
+
+                    // Update baseline so next pinch gesture is relative to current zoom
+                    this.startingZoom = this.zoom;
+
+                    // apply zoom friction differently depending on if user is zooming in (less friction) or out (more friction)
+                    // positive zoomVelocity is zooming in
+                    this.zoomVelocity -= this.zoomVelocity * (this.zoomVelocity > 0 ? 8 : 20) * dt;
+                } else {
+                    this.zoomVelocity = 0;
                 }
 
                 // UPDATE THE ANGLE OF OBJECTS WHEN THEIR ANGLE SLIDER IS PRESSED
@@ -1221,19 +1259,19 @@ const MapEditor = {
             // one element is selected
             if (MapEditor.selectedElements.includes("playerStart")) {
                 UserInterface.switchToUiGroup(UserInterface.uiGroup_editPlayerStart);
-                slider_playerAngle.func({sync: true});
+                slider_playerAngle.func({ sync: true });
             } else if (Array.isArray(MapEditor.selectedElements[0])) {
                 // checkpoint part is selected
                 UserInterface.switchToUiGroup(UserInterface.uiGroup_editCheckpoint);
-                slider_checkpointAngle.func({sync: true});
+                slider_checkpointAngle.func({ sync: true });
             } else {
                 // platform is selected
                 UserInterface.switchToUiGroup(UserInterface.uiGroup_editPlatform);
-                slider_platformAngle.func({sync: true});
+                slider_platformAngle.func({ sync: true });
 
-                toggle_wall.func({sync: true});
+                toggle_wall.func({ sync: true });
 
-                toggle_endzone.func({sync: true});
+                toggle_endzone.func({ sync: true });
             }
         }
     },

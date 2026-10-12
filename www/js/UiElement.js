@@ -49,14 +49,14 @@ class uiElement {
 
         const syncIfToggleOrSlider = (element) => {
             if (element.type === "toggle" || element.type === "slider") {
-                element.func({sync: true});
+                element.func({ sync: true });
             }
-        } 
-        
-        syncIfToggleOrSlider(this)
+        };
+
+        syncIfToggleOrSlider(this);
 
         for (const subElement of allSubElementsFound) {
-            syncIfToggleOrSlider(subElement)
+            syncIfToggleOrSlider(subElement);
         }
 
         return domElement;

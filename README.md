@@ -15,6 +15,7 @@ The rendering pipeline currently uses a standard 2d HTML canvas but will be movi
 
 ## Launching the game
 In the terminal, run git clone https://github.com/tol-uno/Null-Hop.git to download the game's code
+Navigate into the new repository folder via command: `cd Null-Hop`
 
 ### Browsers (all operating systems)
 - Run the command: `npx cordova run browser` and a webpage in your default browser will open
