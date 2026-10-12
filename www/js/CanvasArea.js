@@ -12,8 +12,8 @@ const CanvasArea = {
 
     setSize: function () {
         // these screen size vars are initialized in index.js for global accesss
-        screenWidthUI = window.innerWidth;
-        screenHeightUI = window.innerHeight;
+        screenWidthUI = window.outerWidth;
+        screenHeightUI = window.outerHeight;
 
         this.canvas.width = screenWidth = screenWidthUI * this.scale;
         this.canvas.height = screenHeight = screenHeightUI * this.scale;

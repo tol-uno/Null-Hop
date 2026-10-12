@@ -17,7 +17,7 @@ The rendering pipeline currently uses a standard 2d HTML canvas but will be movi
 In the terminal, run git clone https://github.com/tol-uno/Null-Hop.git to download the game's code
 
 ### Browsers (all operating systems)
-- Run the command: `cordova run browser` and a webpage in your default browser will open
+- Run the command: `npx cordova run browser` and a webpage in your default browser will open
 - If mouse input does not register, you need to enable "touch simulation" mode in your browser's dev tools
 - Because this game is for mobile devices there are no keyboard controls, all input is done with the mouse
 
@@ -27,11 +27,11 @@ Launching to an ios device will require:
 - Xcode developer certificate to be signed and active
 - Your device must be connected physically
 
-Command to build and install to iOS device: `cordova run ios`
+Command to build and install to iOS device: `npx cordova run ios`
 
 ### Android Devices
 Launching to an android device will require:
 - Android Studio
 - Android device connected over Android Debug Bridge (adb)
 
-Command to build and install to android device: `cordova run android`
+Command to build and install to android device: `npx cordova run android`

@@ -156,6 +156,7 @@
     z-index: 10;
     font-family: "DINish", monospace;
     font-variant-numeric: tabular-nums;
+    pointer-events: none;
 }
 
 @media (orientation: portrait) {

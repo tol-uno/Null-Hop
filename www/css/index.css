@@ -50,8 +50,7 @@
     font-display: swap;
 }
 
-html,
-body {
+html {
     margin: 0;
     overflow: hidden;
     /* padding: env(safe-area-inset); */
@@ -66,8 +65,10 @@ body {
     /* Padding to avoid the "unsafe" areas behind notches in the screen */
     /* padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px); */
     background-image: linear-gradient(#8fceff, #3f92d3);
-    width: 100vw;
-    height: 100vh;
+    margin: 0;
+    width: fit-content;
+    height: fit-content;
+    overflow: hidden;
 }
 
 canvas {
@@ -78,7 +79,7 @@ canvas {
 
 #ui-container {
     font-family: "Alte DIN", sans-serif; /* DINish */
-    position: fixed;
+    position: relative;
     left: 0;
     top: 0;
     width: 100vw;
