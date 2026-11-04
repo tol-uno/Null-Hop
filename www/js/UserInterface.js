@@ -120,6 +120,7 @@ const UserInterface = {
             UserInterface.orientation = event.target.type.startsWith("landscape") ? "landscape" : "portrait";
 
             CanvasArea.setSize();
+            renderer.resize(screenWidth, screenHeight);
 
             if (UserInterface.gamestate == 2) {
                 MapBrowser.setMaxScroll();
