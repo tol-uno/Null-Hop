@@ -127,7 +127,7 @@ const Map = {
                 ],
             ]; // end of shadowPoints array
 
-            platform.shadowPoints = CanvasArea.convexHull(platform.shadowPoints);
+            platform.shadowPoints = convexHull(platform.shadowPoints);
         } // end of looping thrugh each platform
 
         // SETTING BOUNDING POINTS
@@ -172,14 +172,16 @@ const Map = {
 
         for (const platform of this.platforms) {
             // Loop through ALL platforms to get renderedPlatforms
-            let zoomOffsetX = (screenWidth / Player.speedCameraOffset.zoom - screenWidth) / 2;
-            let zoomOffsetY = (screenHeight / Player.speedCameraOffset.zoom - screenHeight) / 2;
+            // FIX all this
+            // let zoomOffsetX = (screenWidth / Player.speedCameraOffset.zoom - screenWidth) / 2;
+            // let zoomOffsetY = (screenHeight / Player.speedCameraOffset.zoom - screenHeight) / 2;
 
             if (
-                platform.minX < Player.x + midX + zoomOffsetX - Player.speedCameraOffset.direction.x && // coming into frame on right side
-                platform.maxX > Player.x - midX - zoomOffsetX - Player.speedCameraOffset.direction.x && // coming into frame on left side
-                platform.maxY > Player.y - midY - zoomOffsetY - Player.speedCameraOffset.direction.y && // top side
-                platform.minY < Player.y + midY + zoomOffsetY - Player.speedCameraOffset.direction.y // bottom side
+                // fix
+                platform.minX < Player.x + midX /* + zoomOffsetX - Player.speedCameraOffset.direction.x*/ && // coming into frame on right side
+                platform.maxX > Player.x - midX /* - zoomOffsetX - Player.speedCameraOffset.direction.x*/ && // coming into frame on left side
+                platform.maxY > Player.y - midY /* - zoomOffsetY - Player.speedCameraOffset.direction.y*/ && // top side
+                platform.minY < Player.y + midY /* + zoomOffsetY - Player.speedCameraOffset.direction.y*/ // bottom side
             ) {
                 this.renderedPlatforms.push(platform); // ADD platform to renderedPlatforms
             }

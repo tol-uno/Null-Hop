@@ -64,8 +64,6 @@ function updateGameArea() {
     }
 
     if (UserInterface.gamestate == 6) {
-        const camera = Player.speedCameraOffset;
-
         const PlayerProxy = {
             // Update actual player to produce this
             x: Player.x,
@@ -75,13 +73,17 @@ function updateGameArea() {
         };
 
         // add camera offset to these
-        renderer.setCameraPos(PlayerProxy.x, 10, PlayerProxy.z, 500 / camera.zoom);
+        renderer.setCameraPos(
+            PlayerProxy.x + Player.speedCameraOffset.direction.x,
+            10,
+            PlayerProxy.z + Player.speedCameraOffset.direction.y,
+            Player.speedCameraOffset.zoom,
+        );
         renderer.drawFrame(PlayerProxy);
     }
 
     if (UserInterface.gamestate == 7 && MapEditor.editorState !== 5) {
-        
-        const PlayerProxy = { 
+        const PlayerProxy = {
             x: MapEditor.loadedMap.playerStart.x,
             y: 0,
             z: MapEditor.loadedMap.playerStart.y,
@@ -89,9 +91,9 @@ function updateGameArea() {
         };
 
         // this has to read screen.y as the z dimension -- should fix
-        renderer.setCameraPos(MapEditor.screen.x, 10, MapEditor.screen.y, 250 / MapEditor.zoom);
+        renderer.setCameraPos(MapEditor.screen.x, 10, MapEditor.screen.y, MapEditor.zoom);
 
-        renderer.drawFrame(PlayerProxy)
+        renderer.drawFrame(PlayerProxy);
         // MapEditor.render();
     }
 
