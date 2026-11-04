@@ -9,24 +9,24 @@ const MapEditor = {
 
     loadedMap: null,
     mapNameBeingEdited: null,
-    scrollAmountX: null,
-    scrollAmountY: null,
     scrollVelX: 0, // for smooth scrolling
     scrollVelY: 0,
 
-    zoom: 1, // 10 = zoomed to 10x the scale. 0.1 zoomed out so everything is 10% of its size
-    startingZoom: 1,
+    // 900 zoom means viewport is 900 map units wide on longest dimension
+    // 5000 = zoomed out. 50 = zoomed in
+    zoom: 900,
+    startingZoom: 900,
     zoomVelocity: 0, // Positive zoomVel means momentum zooming in, negative is momentum zooming out.
     zoomVelocityAverager: new Averager(6),
-    previousZoom: 1,
+    previousZoom: 1, // used for zoom velocity/momentum
 
     screen: {
         // where the view is located realative to the map origin
         x: 0, // x and y are the center of the view (the crosshair)
         y: 0, // if 0,0 the view is centered on the map origin. Origin is in the center of the screen
 
-        width: 0, //screenWidth / MapEditor.zoom,
-        height: 0, //screenHeight / MapEditor.zoom,
+        width: 0, // this.zoom * (screenHeight > screenWidth ? screenWidth / screenHeight : 1)
+        height: 0, // this.zoom * (screenHeight < screenWidth ?  screenHeight / screenWidth : 1)
 
         cornerX: this.x - this.width / 2, // these coords are the top left corner of the view screen
         cornerY: this.y - this.height / 2, // if they are 0,0 the origin of the map is in the top left corner
@@ -179,7 +179,7 @@ const MapEditor = {
         // switch to main MapEditor screen
 
         // CanvasArea.canvas.style.backgroundColor = this.loadedMap.style.backgroundColor;
-        // CanvasArea.canvas.classList.remove("hidden"); 
+        // CanvasArea.canvas.classList.remove("hidden");
         document.getElementById("webgl-canvas").classList.remove("hidden");
 
         UserInterface.switchToUiGroup(UserInterface.uiGroup_mapEditorInterface);
@@ -188,13 +188,15 @@ const MapEditor = {
         // Set up screen
         this.screen.x = this.loadedMap.playerStart.x;
         this.screen.y = this.loadedMap.playerStart.y;
-        this.screen.width = screenWidth / this.zoom;
-        this.screen.height = screenHeight / this.zoom;
+        // because the larger screen dimension is always connected 1 to 1 with zoom,
+        // it changes how MapEditors's camera viewport size is set depending on orientation.
+        this.screen.width = this.zoom * (screenHeight > screenWidth ? screenWidth / screenHeight : 1);
+        this.screen.height = this.zoom * (screenHeight < screenWidth ? screenHeight / screenWidth : 1);
         this.screen.cornerX = this.screen.x - this.screen.width / 2;
         this.screen.cornerY = this.screen.y - this.screen.height / 2;
 
         renderer.setMapData(this.loadedMap);
-        
+
         this.editorState = 1;
         UserInterface.gamestate = 7; // start updating MapEditor
     },
@@ -221,22 +223,14 @@ const MapEditor = {
                 !slider_checkpointAngle.handle?.classList.contains("pressed") &&
                 !slider_snapping.handle?.classList.contains("pressed")
             ) {
-                // SCROLLING AROUND SCREEN
-
-                if (this.scrollAmountX == null && this.scrollAmountY == null) {
-                    // starting scroll
-                    this.scrollAmountX = this.screen.x;
-                    this.scrollAmountY = this.screen.y;
-                }
-
                 // ZOOMING
                 if (TouchHandler.zoom.isZooming) {
-                    this.zoom = TouchHandler.zoom.ratio * this.startingZoom;
-                    if (this.zoom > 10) {
-                        this.zoom = 10;
+                    this.zoom = this.startingZoom / TouchHandler.zoom.ratio;
+                    if (this.zoom > 10000) {
+                        this.zoom = 10000;
                     }
-                    if (this.zoom < 0.05) {
-                        this.zoom = 0.05;
+                    if (this.zoom < 25) {
+                        this.zoom = 25;
                     }
                     // if (Math.abs(this.zoom - 1) < 0.1) {
                     //     // snapping to zoom = 1 if close
@@ -255,37 +249,33 @@ const MapEditor = {
                     // startZoom is still set to be the current zoom
                 }
 
-                // ACTUALLY SCROLLING THE SCREEN
-                this.scrollAmountX -= (TouchHandler.dragAmountX / this.zoom) * CanvasArea.scale;
-                this.scrollAmountY -= (TouchHandler.dragAmountY / this.zoom) * CanvasArea.scale;
+                // SCROLLING THE SCREEN
+                const scrollInMapUnits = {
+                    x: mapToRange(TouchHandler.dragAmountX, 0, screenWidthUI, 0, this.screen.width),
+                    y: mapToRange(TouchHandler.dragAmountY, 0, screenHeightUI, 0, this.screen.height),
+                };
 
                 // sets scrollVel to average drag amount of past 10 frames
-                this.scrollVelAveragerX.pushValue((-TouchHandler.dragAmountX / this.zoom) * CanvasArea.scale);
-                this.scrollVelAveragerY.pushValue((-TouchHandler.dragAmountY / this.zoom) * CanvasArea.scale);
+                this.scrollVelAveragerX.pushValue(scrollInMapUnits.x);
+                this.scrollVelAveragerY.pushValue(scrollInMapUnits.y);
 
                 this.scrollVelX = this.scrollVelAveragerX.getAverage();
                 this.scrollVelY = this.scrollVelAveragerY.getAverage();
 
-                this.screen.x = this.scrollAmountX;
-                this.screen.y = this.scrollAmountY;
+                this.screen.x -= scrollInMapUnits.x; // a positive drag (to the right) moves the screen coords neg (to the left)
+                this.screen.y -= scrollInMapUnits.y;
             } else {
                 // not dragging around screen
 
-                if (this.scrollAmountX != null && this.scrollAmountY != null) {
-                    // just stopped dragging
-                    this.scrollAmountX = null;
-                    this.scrollAmountY = null;
-
-                    this.scrollVelAveragerX.clear();
-                    this.scrollVelAveragerY.clear();
-                    this.zoomVelocityAverager.clear();
-
-                    this.startingZoom = this.zoom; // needs to be set here to avoid double touch zoom reset bug
-                }
+                // FIX These shouldnt be set every frame where user isnt dragging. Only on touch release or something
+                this.scrollVelAveragerX.clear();
+                this.scrollVelAveragerY.clear();
+                this.zoomVelocityAverager.clear();
+                this.startingZoom = this.zoom; // needs to be set here to avoid double touch zoom reset bug
 
                 // Apply momentum to scroll
-                this.screen.x += this.scrollVelX;
-                this.screen.y += this.scrollVelY;
+                this.screen.x -= this.scrollVelX; // a positive drag (to the right) moves the screen coords neg (to the left)
+                this.screen.y -= this.scrollVelY;
 
                 if (Math.abs(this.scrollVelX) > 0.1) {
                     // apply X friction
@@ -307,12 +297,12 @@ const MapEditor = {
                     this.previousZoom = this.zoom; // Keep track for next frame's velocity calculation
 
                     // Clamp zoom
-                    if (this.zoom > 10) {
-                        this.zoom = 10;
+                    if (this.zoom > 10000) {
+                        this.zoom = 10000;
                         this.zoomVelocity = 0;
                     }
-                    if (this.zoom < 0.05) {
-                        this.zoom = 0.05;
+                    if (this.zoom < 25) {
+                        this.zoom = 25;
                         this.zoomVelocity = 0;
                     }
 
@@ -339,8 +329,10 @@ const MapEditor = {
             }
 
             // UPDATING THE other 2 SCREEN Perameters every frame incase zoom changes
-            this.screen.width = screenWidth / this.zoom;
-            this.screen.height = screenHeight / this.zoom;
+            // because the larger screen dimension is always connected 1 to 1 with zoom, it changes how mapeditor's
+            // camera viewport size is set depending on orientation.
+            this.screen.width = this.zoom * (screenHeight > screenWidth ? screenWidth / screenHeight : 1);
+            this.screen.height = this.zoom * (screenHeight < screenWidth ? screenHeight / screenWidth : 1);
             this.screen.cornerX = this.screen.x - this.screen.width / 2;
             this.screen.cornerY = this.screen.y - this.screen.height / 2;
 
@@ -1214,11 +1206,11 @@ const MapEditor = {
         // reset everything and go back to MapBrowser
 
         MapEditor.loadedMap = null;
-        MapEditor.zoom = 1;
+        MapEditor.zoom = 900;
         MapEditor.screen.x = 0;
         MapEditor.screen.y = 0;
-        MapEditor.screen.width = screenWidth;
-        MapEditor.screen.height = screenHeight;
+        MapEditor.screen.width = 900; // this gets updated on init anyway
+        MapEditor.screen.height = 900; // no real reason to "reset" it here
         MapEditor.scrollVelX = 0;
         MapEditor.scrollVelY = 0;
         MapEditor.mapNameBeingEdited = null;
@@ -1441,7 +1433,7 @@ const MapEditor = {
         UserInterface.setGizmoBtnPos(btn, btnPos.x, btnPos.y);
 
         // panning when drag near edges of screen
-        const panSpeed = (400 / MapEditor.zoom) * dt;
+        const panSpeed = (MapEditor.zoom / 3) * dt;
         if (btnPos.x > screenWidthUI - 64) {
             MapEditor.screen.x += panSpeed;
         }
@@ -1468,14 +1460,14 @@ const MapEditor = {
             screenHeightUI,
         );
 
-        // get drag vector (from pinnedCorner -> buttonPos) (unscaled by zoom)
-        // dividing by zoom brings it back to real map scale
-        const drag = new Vector2D3D((btnPos.x - offsetX - pinnedX_screen) / MapEditor.zoom, (btnPos.y - offsetY - pinnedY_screen) / MapEditor.zoom);
+        // get drag vector from pinnedCorner(scren coords) -> buttonPos(screen coords)
+        // that vector then needs to be converted back to map scale
+        const drag = new Vector2D3D(btnPos.x - offsetX - pinnedX_screen, btnPos.y - offsetY - pinnedY_screen);
         const rotated = drag.clone().rotate(-platform.angle);
 
         // set width and height using rotatedDragFromPinned
-        platform.width = Math.round(widthSign * rotated.x * CanvasArea.scale);
-        platform.height = Math.round(heightSign * rotated.y * CanvasArea.scale);
+        platform.width = Math.round(widthSign * rotated.x);
+        platform.height = Math.round(heightSign * rotated.y);
 
         // snapping and restricting size
         if (MapEditor.snapAmount > 0) {

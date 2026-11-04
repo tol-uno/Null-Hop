@@ -7,7 +7,7 @@ const Player = {
     previousJumpSpeed: 0, // for jump stats display
 
     speedCameraOffset: {
-        zoom: 1, // from 1 (default) to 0.5 (zoomed out)
+        zoom: 1000,
         direction: new Vector2D3D(0, 0),
         zoomAverager: new Averager(90),
         dirAveragerX: new Averager(180),
@@ -43,8 +43,8 @@ const Player = {
 
         this.topColor = null; // top shaded color wont be calculated if topColor already exists so need to reset
 
-        this.speedCameraOffset.zoom = 1.5;
-        this.speedCameraOffset.zoomAverager.frames.fill(1.5, 0);
+        this.speedCameraOffset.zoom = 1000;
+        this.speedCameraOffset.zoomAverager.frames.fill(1000, 0);
         this.speedCameraOffset.dirAveragerX.frames.fill(0, 0);
         this.speedCameraOffset.dirAveragerY.frames.fill(0, 0);
 
@@ -492,16 +492,17 @@ const Player = {
             }
         }
 
+        // this stuff always runs no matter what levelState is
         // CHANGING CAMERA ZOOM and OFFSET BASED ON SPEED
         // add current zoom level to averager
-        this.speedCameraOffset.zoomAverager.pushValue(mapToRange(this.velocity.magnitude(), 100, 1100, 1.5, 0.5));
+        this.speedCameraOffset.zoomAverager.pushValue(mapToRange(this.velocity.magnitude(), 0, 1100, 900, 2500)); // between 0 - 1100 speed, zoom between 800 and 2000
 
         // apply averager zoom to actual zoom
         this.speedCameraOffset.zoom = this.speedCameraOffset.zoomAverager.getAverage();
 
         // add current offset direction to averager
-        this.speedCameraOffset.dirAveragerX.pushValue(-this.velocity.x / 5);
-        this.speedCameraOffset.dirAveragerY.pushValue(-this.velocity.y / 5);
+        this.speedCameraOffset.dirAveragerX.pushValue(this.velocity.x / 2.5);
+        this.speedCameraOffset.dirAveragerY.pushValue(this.velocity.y / 2.5);
 
         // apply averager offset direction to actual offset direction
         this.speedCameraOffset.direction.x = this.speedCameraOffset.dirAveragerX.getAverage();
@@ -541,8 +542,8 @@ const Player = {
         this.jumpVelocity = 200;
 
         this.endSlow = 1;
-        this.speedCameraOffset.zoomAverager.frames.fill(1.5, 0);
-        this.speedCameraOffset.zoom = 1.5;
+        this.speedCameraOffset.zoomAverager.frames.fill(1000, 0);
+        this.speedCameraOffset.zoom = 1000;
         this.speedCameraOffset.dirAveragerX.frames.fill(0, 0);
         this.speedCameraOffset.dirAveragerY.frames.fill(0, 0);
     },
