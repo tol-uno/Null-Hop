@@ -491,8 +491,16 @@ const MapEditor = {
                 PreviewWindow.update();
             }
         }
+
+        // Update the map data within the renderer so that it matches with users updates
+        // This should be FIXed. MapEditor should only send specific data about which areas of the map need to be updated
+        // MapEditor should already know this info and can save a lot of comparisons that're currently being done by the renderer
+        if (renderer && this.loadedMap !== null) {
+            renderer.updateMapData(this.loadedMap);
+        }
     },
 
+    // UNUSED Kill once checkpoints and other UI is tranfered over
     render: function () {
         if (this.loadedMap !== null) {
             // IF MAP IS LOADED RENDER IT
@@ -1462,7 +1470,9 @@ const MapEditor = {
 
         // get drag vector from pinnedCorner(scren coords) -> buttonPos(screen coords)
         // that vector then needs to be converted back to map scale
-        const drag = new Vector2D3D(btnPos.x - offsetX - pinnedX_screen, btnPos.y - offsetY - pinnedY_screen);
+        const scaleX = MapEditor.screen.width / screenWidthUI;
+        const scaleY = MapEditor.screen.height / screenHeightUI;
+        const drag = new Vector2D3D((btnPos.x - offsetX - pinnedX_screen) * scaleX, (btnPos.y - offsetY - pinnedY_screen) * scaleY);
         const rotated = drag.clone().rotate(-platform.angle);
 
         // set width and height using rotatedDragFromPinned

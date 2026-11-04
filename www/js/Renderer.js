@@ -1,6 +1,31 @@
 // requires regl and mat4 functions (lookAt and ortho)
 const squareRootOf2 = 1.4142135623730951;
 
+function parseRGB(rgbString) {
+    // FIX should store Map color data in a format so that this function is not needed.
+    // Extract numbers (supports decimals for alpha too)
+    const matches = rgbString.match(/[\d.]+/g);
+
+    if (!matches || matches.length < 3) {
+        console.error("Invalid RGB(A) string");
+    }
+
+    // Return only [r, g, b] normalized
+    return matches.slice(0, 3).map((num) => parseInt(num, 10) / 255);
+}
+
+function getLightVector(lightDirectionDeg, lightAngleDeg) {
+    // FIX Should store light vector as a real vector so we dont need this function.
+    const dir = (lightDirectionDeg * Math.PI) / 180;
+    const ang = (lightAngleDeg * Math.PI) / 180;
+
+    const x = Math.cos(ang) * Math.cos(dir);
+    const y = -Math.sin(ang);
+    const z = Math.cos(ang) * Math.sin(dir);
+
+    return [x, y, z];
+}
+
 class Renderer {
     #canvas = null;
     #aspectRatio = null;
@@ -148,119 +173,273 @@ class Renderer {
         this.#initialized = true;
     }
 
-    setMapData(mapDataObject) {
-        // parses the standard platform and style data from a Map file.
-        // this would be passed to the renderer by Map object
+    #destroyMapDataBuffers() {
+        if (!this.#mapData) return;
 
-        if (this.#mapData) {
-            console.log("there is existing mapData buffers and keys -- destroying");
-            try {
-                this.#mapData.translateBuffer.destroy();
-                this.#mapData.scaleBuffer.destroy();
-                this.#mapData.rotationBuffer.destroy();
-                this.#mapData.instanceTypeBuffer.destroy();
-            } catch {
-                console.log("error deleting mapData buffers");
-            }
-
-            this.#mapData = null; // gets rid of all color properties and lightvector
+        console.log("[Renderer] Destroying existing mapData buffers and keys");
+        try {
+            this.#mapData.translateBuffer.destroy();
+            this.#mapData.scaleBuffer.destroy();
+            this.#mapData.rotationBuffer.destroy();
+            this.#mapData.instanceTypeBuffer.destroy();
+        } catch {
+            console.log("error deleting mapData buffers");
         }
 
-        const instanceCount = mapDataObject.platforms.length + 1; // +1 for ground
-        let translations = [];
-        let scales = [];
-        let rotations = [];
-        let instanceTypes = [];
+        this.#mapData = null; // gets rid of all color properties and lightvector
+    }
 
-        for (let i = 0; i < instanceCount - 1; i++) {
-            // -1 because ground is included in instanceCount
-            const platform = mapDataObject.platforms[i];
+    #writePlatformInstance(index, platform, style) {
+        // Update a single platform within the CPU side instance data
+        // Returns "true" if something actually changed
+        const mapData = this.#mapData;
+        const indexTimes3 = index * 3;
 
-            translations = translations.concat([
-                platform.x,
-                -mapDataObject.style.platformHeight / 2 + (platform.wall ? mapDataObject.style.wallHeight / 2 : 0),
-                platform.y,
-            ]);
+        const translateX = platform.x;
+        const translateY = -style.platformHeight / 2 + (platform.wall ? style.wallHeight / 2 : 0);
+        const translateZ = platform.y;
 
-            scales = scales.concat([
-                platform.width,
-                mapDataObject.style.platformHeight + (platform.wall ? mapDataObject.style.wallHeight : 0),
-                platform.height,
-            ]);
+        const scaleX = platform.width;
+        const scaleY = style.platformHeight + (platform.wall ? style.wallHeight : 0);
+        const scaleZ = platform.height;
 
-            rotations.push((-platform.angle * Math.PI) / 180); // idk why negative really
+        const rotation = (-platform.angle * Math.PI) / 180; // idk why negative really
 
-            let type = 0; // default = platform
-            if (platform.wall) type = 1;
-            else if (platform.endzone) type = 2;
-
-            instanceTypes.push(type);
+        let type = 0; // 0 = platform (default)
+        if (platform.wall) {
+            type = 1;
+        } else if (platform.endzone) {
+            type = 2;
         }
 
+        let changed = false;
+
+        // X index
+        if (mapData.translateData[indexTimes3] !== Math.fround(translateX)) {
+            mapData.translateData[indexTimes3] = translateX;
+            changed = true;
+        }
+        // Y index (up down vertical)
+        if (mapData.translateData[indexTimes3 + 1] !== Math.fround(translateY)) {
+            mapData.translateData[indexTimes3 + 1] = translateY;
+            changed = true;
+        }
+        // Z index
+        if (mapData.translateData[indexTimes3 + 2] !== Math.fround(translateZ)) {
+            mapData.translateData[indexTimes3 + 2] = translateZ;
+            changed = true;
+        }
+
+        // scale X
+        if (mapData.scaleData[indexTimes3] !== Math.fround(scaleX)) {
+            mapData.scaleData[indexTimes3] = scaleX;
+            changed = true;
+        }
+        // scale Y
+        if (mapData.scaleData[indexTimes3 + 1] !== Math.fround(scaleY)) {
+            mapData.scaleData[indexTimes3 + 1] = scaleY;
+            changed = true;
+        }
+        // scale Z
+        if (mapData.scaleData[indexTimes3 + 2] !== Math.fround(scaleZ)) {
+            mapData.scaleData[indexTimes3 + 2] = scaleZ;
+            changed = true;
+        }
+
+        // rotation
+        if (mapData.rotationData[index] !== Math.fround(rotation)) {
+            mapData.rotationData[index] = rotation;
+            changed = true;
+        }
+
+        // platform type
+        if (mapData.instanceTypeData[index] !== type) {
+            mapData.instanceTypeData[index] = type;
+            changed = true;
+        }
+
+        return changed;
+    }
+
+    #writeGroundInstance(style) {
         // Add ground cube
-        // FIX: Figure out if it is more performant to just draw an instanced HUGE ground plane or
-        // to add a seperate draw call for a smaller ground that follows the camera
-        translations = translations.concat([0, -mapDataObject.style.platformHeight - 0.5, 0]); // y = -0.5 since cube is centered
-        scales = scales.concat([10000, 1, 10000]);
-        rotations.push(0);
-        instanceTypes.push(3);
+        // style.platform height is needed to determine how far down below 0 the ground needs to be placed on Y axis
+        const mapData = this.#mapData;
+        const index = mapData.platformCount; // ground is always last
+        const indexTimes3 = index * 3;
 
-        const translateBuffer = this.#regl.buffer(new Float32Array(translations));
-        const scaleBuffer = this.#regl.buffer(new Float32Array(scales));
-        const rotationBuffer = this.#regl.buffer(new Float32Array(rotations));
-        const instanceTypeBuffer = this.#regl.buffer(new Float32Array(instanceTypes));
+        const translateY = -0.5 - style.platformHeight; // y = -0.5 since cubes origin is at its center
 
-        function parseRGB(rgbString) {
-            // FIX should store Map color data in a format so that this function is not needed.
-            // Extract numbers (supports decimals for alpha too)
-            const matches = rgbString.match(/[\d.]+/g);
+        let changed = false;
 
-            if (!matches || matches.length < 3) {
-                console.error("Invalid RGB(A) string");
-            }
-
-            // Return only [r, g, b] normalized
-            return matches.slice(0, 3).map((num) => parseInt(num, 10) / 255);
+        // Ground is always at x = 0, z = 0.
+        // x
+        if (mapData.translateData[indexTimes3] !== 0) {
+            // This is probably uneeded. Ground x and z are never updated KILL
+            mapData.translateData[indexTimes3] = 0;
+            changed = true;
+        }
+        // y
+        if (mapData.translateData[indexTimes3 + 1] !== Math.fround(translateY)) {
+            mapData.translateData[indexTimes3 + 1] = translateY;
+            changed = true;
+        }
+        // z
+        if (mapData.translateData[indexTimes3 + 2] !== 0) {
+            // This is probably uneeded. Ground x and z are never updated KILL
+            mapData.translateData[indexTimes3 + 2] = 0;
+            changed = true;
         }
 
-        function getLightVector(lightDirectionDeg, lightAngleDeg) {
-            // FIX Should store light vector as a real vector so we dont need this function.
-            const dir = (lightDirectionDeg * Math.PI) / 180;
-            const ang = (lightAngleDeg * Math.PI) / 180;
-
-            const x = Math.cos(ang) * Math.cos(dir);
-            const y = -Math.sin(ang);
-            const z = Math.cos(ang) * Math.sin(dir);
-
-            return [x, y, z];
+        // scale x y z
+        if (mapData.scaleData[indexTimes3] !== 10000) {
+            mapData.scaleData[indexTimes3] = 10000;
+            changed = true;
         }
+        if (mapData.scaleData[indexTimes3 + 1] !== 1) {
+            mapData.scaleData[indexTimes3 + 1] = 1;
+            changed = true;
+        }
+        if (mapData.scaleData[indexTimes3 + 2] !== 10000) {
+            mapData.scaleData[indexTimes3 + 2] = 10000;
+            changed = true;
+        }
+
+        // rotation -- always 0 for ground. Can probably kill this
+        if (mapData.rotationData[index] !== 0) {
+            mapData.rotationData[index] = 0;
+            changed = true;
+        }
+
+        // type of platform -- always 3 for ground. Can probably kill this
+        if (mapData.instanceTypeData[index] !== 3) {
+            mapData.instanceTypeData[index] = 3;
+            changed = true;
+        }
+
+        return changed;
+    }
+
+    // combine writePlatformInstance and writeGroundInstance
+    #writeAllInstances(mapDataObject) {
+        const style = mapDataObject.style;
+        const platforms = mapDataObject.platforms;
+
+        for (let i = 0; i < platforms.length; i++) {
+            this.#writePlatformInstance(i, platforms[i], style);
+        }
+
+        this.#writeGroundInstance(style);
+    }
+
+    #updateInstanceBuffersWithinRange(start, end) {
+        // update data in all buffers but only in the specified range
+        // end param is "exclusive"
+        // Offsets passed to subdata are in bytes (4 bytes per float).
+
+        // Translate and scale store 3 floats per instance (x, y, z),
+        // so convert instance indices to float indices.
+        const mapData = this.#mapData;
+        const start3 = start * 3;
+        const end3 = end * 3;
+
+        // Each float is 4 bytes, so the byte offset is the float index * 4.
+        // .subdata(data, byteOffset) copies `data` into the buffer starting at `byteOffset`.
+        mapData.translateBuffer.subdata(mapData.translateData.subarray(start3, end3), start3 * 4);
+        mapData.scaleBuffer.subdata(mapData.scaleData.subarray(start3, end3), start3 * 4);
+        mapData.rotationBuffer.subdata(mapData.rotationData.subarray(start, end), start * 4);
+        mapData.instanceTypeBuffer.subdata(mapData.instanceTypeData.subarray(start, end), start * 4);
+    }
+
+    #updateMapStyle(style) {
+        // Updates colors and lighting WITHOUT recreating buffers. Returns true if a
+        // height changed, since that also changes EVERY platform's transform.
+        const mapData = this.#mapData;
+        const previous = mapData.style;
+
+        const heightsChanged = previous.platformHeight !== style.platformHeight || previous.wallHeight !== style.wallHeight;
+
+        if (previous.ambientLight !== style.ambientLight) mapData.ambientLight = parseRGB(style.ambientLight);
+        if (previous.backgroundColor !== style.backgroundColor) mapData.backgroundColor = parseRGB(style.backgroundColor);
+        if (previous.directLight !== style.directLight) mapData.directLight = parseRGB(style.directLight);
+        if (previous.endZoneSideColor !== style.endZoneSideColor) mapData.endZoneSideColor = parseRGB(style.endZoneSideColor);
+        if (previous.endZoneTopColor !== style.endZoneTopColor) mapData.endZoneTopColor = parseRGB(style.endZoneTopColor);
+        if (previous.platformSideColor !== style.platformSideColor) mapData.platformSideColor = parseRGB(style.platformSideColor);
+        if (previous.platformTopColor !== style.platformTopColor) mapData.platformTopColor = parseRGB(style.platformTopColor);
+        if (previous.playerColor !== style.playerColor) mapData.playerColor = parseRGB(style.playerColor);
+        if (previous.wallSideColor !== style.wallSideColor) mapData.wallSideColor = parseRGB(style.wallSideColor);
+        if (previous.wallTopColor !== style.wallTopColor) mapData.wallTopColor = parseRGB(style.wallTopColor);
+
+        if (previous.lightDirection !== style.lightDirection || previous.lightPitch !== style.lightPitch) {
+            const newLightVector = getLightVector(style.lightDirection, style.lightPitch);
+            // Keep the same array instance: it is registered in the regl context.
+            mapData.lightVector[0] = newLightVector[0];
+            mapData.lightVector[1] = newLightVector[1];
+            mapData.lightVector[2] = newLightVector[2];
+        }
+
+        Object.assign(previous, style);
+
+        return heightsChanged;
+    }
+
+    setMapData(mapDataObject) {
+        // parses platform and style data from mapDataObject in this.#mapData
+        //
+
+        this.#destroyMapDataBuffers();
+
+        const style = mapDataObject.style;
+        const platformCount = mapDataObject.platforms.length;
+        const instanceCount = platformCount + 1; // +1 for ground
 
         this.#mapData = {
             instanceCount,
-            translateBuffer,
-            scaleBuffer,
-            rotationBuffer,
-            instanceTypeBuffer,
+            platformCount,
 
-            lightVector: getLightVector(mapDataObject.style.lightDirection, mapDataObject.style.lightPitch),
+            translateData: new Float32Array(instanceCount * 3),
+            scaleData: new Float32Array(instanceCount * 3),
+            rotationData: new Float32Array(instanceCount),
+            instanceTypeData: new Float32Array(instanceCount),
 
-            ambientLight: parseRGB(mapDataObject.style.ambientLight),
-            backgroundColor: parseRGB(mapDataObject.style.backgroundColor),
-            directLight: parseRGB(mapDataObject.style.directLight),
-            endZoneSideColor: parseRGB(mapDataObject.style.endZoneSideColor),
-            endZoneTopColor: parseRGB(mapDataObject.style.endZoneTopColor),
-            platformSideColor: parseRGB(mapDataObject.style.platformSideColor),
-            platformTopColor: parseRGB(mapDataObject.style.platformTopColor),
-            playerColor: parseRGB(mapDataObject.style.playerColor),
-            wallSideColor: parseRGB(mapDataObject.style.wallSideColor),
-            wallTopColor: parseRGB(mapDataObject.style.wallTopColor),
+            translateBuffer: null,
+            scaleBuffer: null,
+            rotationBuffer: null,
+            instanceTypeBuffer: null,
+
+            lightVector: getLightVector(style.lightDirection, style.lightPitch),
+
+            ambientLight: parseRGB(style.ambientLight),
+            backgroundColor: parseRGB(style.backgroundColor),
+            directLight: parseRGB(style.directLight),
+            endZoneSideColor: parseRGB(style.endZoneSideColor),
+            endZoneTopColor: parseRGB(style.endZoneTopColor),
+            platformSideColor: parseRGB(style.platformSideColor),
+            platformTopColor: parseRGB(style.platformTopColor),
+            playerColor: parseRGB(style.playerColor),
+            wallSideColor: parseRGB(style.wallSideColor),
+            wallTopColor: parseRGB(style.wallTopColor),
+
+            // Snapshot of unparsed style (no parseRBG) used to detect style changes without re-parsing values every frame
+            // Eventually this wont be needed because colors and light vectors will be stored in map data as the correct
+            // format and wont need to be parsed at all. Kill Eventually
+            style: { ...style },
         };
+
+        // write all CPU-side arrays of instanced data
+        this.#writeAllInstances(mapDataObject);
+
+        // assign GPU buffers
+        this.#mapData.translateBuffer = this.#regl.buffer(this.#mapData.translateData);
+        this.#mapData.scaleBuffer = this.#regl.buffer(this.#mapData.scaleData);
+        this.#mapData.rotationBuffer = this.#regl.buffer(this.#mapData.rotationData);
+        this.#mapData.instanceTypeBuffer = this.#regl.buffer(this.#mapData.instanceTypeData);
 
         this.#globalScope = this.#regl({
             context: {
                 // light POSITION is at [0,0,0]
                 // lightVector: [-1.0, -1.0, -0.3], // example
-                lightVector: this.#mapData.lightVector,
+                lightVector: () => this.#mapData.lightVector,
             },
             uniforms: {
                 lightVector: this.#regl.context("lightVector"),
@@ -517,16 +696,16 @@ class Renderer {
                 minBias: 0.001,
                 maxBias: 0.01,
 
-                ambientLight: this.#mapData.ambientLight,
-                backgroundColor: this.#mapData.backgroundColor,
-                directLight: this.#mapData.directLight,
-                endZoneSideColor: this.#mapData.endZoneSideColor,
-                endZoneTopColor: this.#mapData.endZoneTopColor,
-                platformSideColor: this.#mapData.platformSideColor,
-                platformTopColor: this.#mapData.platformTopColor,
-                playerColor: this.#mapData.playerColor,
-                wallSideColor: this.#mapData.wallSideColor,
-                wallTopColor: this.#mapData.wallTopColor,
+                ambientLight: () => this.#mapData.ambientLight,
+                backgroundColor: () => this.#mapData.backgroundColor,
+                directLight: () => this.#mapData.directLight,
+                endZoneSideColor: () => this.#mapData.endZoneSideColor,
+                endZoneTopColor: () => this.#mapData.endZoneTopColor,
+                platformSideColor: () => this.#mapData.platformSideColor,
+                platformTopColor: () => this.#mapData.platformTopColor,
+                playerColor: () => this.#mapData.playerColor,
+                wallSideColor: () => this.#mapData.wallSideColor,
+                wallTopColor: () => this.#mapData.wallTopColor,
             },
 
             elements: this.#boxElements,
@@ -746,9 +925,9 @@ class Renderer {
                 translate: this.#regl.prop("translate"),
                 rotation: this.#regl.prop("rotation"),
 
-                ambientLight: this.#mapData.ambientLight,
-                directLight: this.#mapData.directLight,
-                playerColor: this.#mapData.playerColor,
+                ambientLight: () => this.#mapData.ambientLight,
+                directLight: () => this.#mapData.directLight,
+                playerColor: () => this.#mapData.playerColor,
             },
 
             elements: this.#boxElements,
@@ -892,6 +1071,56 @@ class Renderer {
             }
         `,
         });
+    }
+
+    updateMapData(mapDataObject) {
+        // Syncs the renderer with an updated Map object (usually from MapEditor)
+        // detects changes platforms on the CPU and only changed instances are uploaded/revised in the buffers on the  GPU        
+        if (!this.#initialized) return;
+
+        // No existing map data
+        if (!this.#mapData) {
+            this.setMapData(mapDataObject);
+            return;
+        }
+
+        const platforms = mapDataObject.platforms;
+
+        // Adding or removing platforms changes the instance count which requires buffers to be rebuilt
+        if (platforms.length !== this.#mapData.platformCount) {
+            this.setMapData(mapDataObject);
+            return;
+        }
+
+        const heightsChanged = this.#updateMapStyle(mapDataObject.style);
+
+        let firstChanged = this.#mapData.platformCount; // starts at the end of the array and moves towards the start as changed items are found
+        let lastChanged = -1; // starts at the start of the array and moves towards the end of the array as changed items are found 
+
+        // FIX
+        // Instead of searching through all the platforms to figure out which have changed,
+        // have MapEditor pass the info which ones have changed. It should already know
+
+        for (let i = 0; i < platforms.length; i++) {
+            if (this.#writePlatformInstance(i, platforms[i], mapDataObject.style)) { 
+                // if this platform DOES need to get changed then writePlatformInstance returns true the following runs vvv 
+                if (i < firstChanged) firstChanged = i;
+                lastChanged = i;
+            }
+        }
+
+        if (heightsChanged) {
+            // Changing platform height also moves the ground cubes y position
+            if (this.#writeGroundInstance(mapDataObject.style)) {
+                firstChanged = Math.min(firstChanged, this.#mapData.platformCount);
+                lastChanged = this.#mapData.platformCount; 
+            }
+        }
+
+        if (lastChanged >= firstChanged) {
+            // only update a specific range within the GPU buffers, no need to rewrite them all 
+            this.#updateInstanceBuffersWithinRange(firstChanged, lastChanged + 1);
+        }
     }
 
     setCameraPos(x, y, z, zoom) {
