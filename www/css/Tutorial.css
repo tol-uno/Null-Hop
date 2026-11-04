@@ -143,8 +143,8 @@
     position: fixed;
     margin-left: 3.6vw;
     margin-top: -3.6vw;
-    width: 7.1vw;
-    height: 7.1vw;
+    width: 8.2vw;
+    height: 8.2vw;
     transform: rotate(calc(-1 * var(--angle)));
 }
 
@@ -204,7 +204,7 @@
     #target {
         margin-left: 7.7vw;
         margin-top: -7.7vw;
-        width: 15.5vw;
-        height: 15.5vw;
+        width: 18vw;
+        height: 18vw;
     }
 }

@@ -1,4 +1,5 @@
 // requires regl and mat4 functions (lookAt and ortho)
+const squareRootOf2 = 1.4142135623730951;
 
 class Renderer {
     #canvas = null;
@@ -109,7 +110,6 @@ class Renderer {
     init(width, height) {
         if (this.#initialized) return;
 
-        // dont use globals here -- get them passed or something
         this.resize(width, height);
 
         this.#regl = createREGL({
@@ -198,7 +198,7 @@ class Renderer {
         }
 
         // Add ground cube
-        // Figure out if it is more performant to just draw an instanced HUGE ground plane or
+        // FIX: Figure out if it is more performant to just draw an instanced HUGE ground plane or
         // to add a seperate draw call for a smaller ground that follows the camera
         translations = translations.concat([0, -mapDataObject.style.platformHeight - 0.5, 0]); // y = -0.5 since cube is centered
         scales = scales.concat([10000, 1, 10000]);
@@ -224,7 +224,7 @@ class Renderer {
         }
 
         function getLightVector(lightDirectionDeg, lightAngleDeg) {
-            // Should store light vector as a real vector so we dont need this function.
+            // FIX Should store light vector as a real vector so we dont need this function.
             const dir = (lightDirectionDeg * Math.PI) / 180;
             const ang = (lightAngleDeg * Math.PI) / 180;
 
@@ -274,7 +274,8 @@ class Renderer {
                         new Vector2D3D(0, 1, 0), // Up Vector
                     );
                 },
-                lightProjection: () => mat4_ortho([], -this.#camera.zoom, this.#camera.zoom, -this.#camera.zoom, this.#camera.zoom, -600, 800),
+                lightProjection: () =>
+                    mat4_ortho([], -this.#camera.zoom / 2, this.#camera.zoom / 2, -this.#camera.zoom / 2, this.#camera.zoom / 2, -600, 800),
                 // lightProjection: mat4.ortho([], -200, 200, -200, 200, -600, 800), // near is negative because light position is (0,0,0)
                 // near and far plane distance is small if light is stright down. needs to be larger distance if light is as dramatic angle.
                 // bounds of this light change based on camera's zoom level.
@@ -472,10 +473,32 @@ class Renderer {
                 projection: () =>
                     mat4_ortho(
                         [],
-                        -this.#camera.zoom * this.#aspectRatio * Math.sqrt(2),
-                        this.#camera.zoom * this.#aspectRatio * Math.sqrt(2),
-                        -this.#camera.zoom,
-                        this.#camera.zoom,
+                        // FIX FIX MOVE THIS TO A FUNCTION. or add the view and projection mat4s to the global scope because they
+                        // are used / repeated twice.
+
+                        // Military projection
+                        // Horizontal bounds are stretched by √2
+                        // This "squashes" the view horizontally when it tries to fit into a viewport that is NOT scaled by √2
+                        // the larger dimension of the screen (either width or height) will always be used as the dimension
+                        // that is equal to camera.zoom. The smaller dimmension will vary and be squished for military projection
+
+                        // when in portrait (height is GREATER than width) width needs to HAVE squashing
+                        // in portrait mode: height should be sqashed down to account for the 45deg angle of the camera showing more than we want
+
+                        // WIDTH
+                        -this.#camera.zoom * 0.5 * (screenHeight > screenWidth ? this.#aspectRatio : 1),
+                        this.#camera.zoom * 0.5 * (screenHeight > screenWidth ? this.#aspectRatio : 1),
+
+                        // when in landcape (height is LESS than width) height needs to HAVE squashing
+                        // HEIGHT
+                        (-this.#camera.zoom * 0.5) / (screenHeight < screenWidth ? this.#aspectRatio * squareRootOf2 : 1 * squareRootOf2),
+                        (this.#camera.zoom * 0.5) / (screenHeight < screenWidth ? this.#aspectRatio * squareRootOf2 : 1 * squareRootOf2),
+
+                        // Because the camera isnt looking straight down at the map (despite what military projection might look like)
+                        // The VERTICAL bounds of -camera.zoom to +camera.zoom will not map directly to world coodinates. Horizontal will though.
+                        // So having zoom be equal to how much of the world is visible only works on the horizontal axis unless
+                        // you took into account the 45deg angle of the camera by multipling zoom by sqrt of 2
+
                         -2000,
                         2000,
                     ),
@@ -483,8 +506,9 @@ class Renderer {
                 view: () =>
                     mat4_lookAt(
                         [],
-                        new Vector2D3D(this.#camera.x, 10, this.#camera.z), // eye (camera position)
-                        new Vector2D3D(this.#camera.x, 0, this.#camera.z - 10), // center (look at)
+                        // Camera looks down at 45deg angle
+                        new Vector2D3D(this.#camera.x, 10, this.#camera.z + 10), // eye (camera position)
+                        new Vector2D3D(this.#camera.x, 0, this.#camera.z), // center (look at)
                         new Vector2D3D(0, 1, 0), // Up
                     ),
 
@@ -695,10 +719,10 @@ class Renderer {
                 projection: () =>
                     mat4_ortho(
                         [],
-                        -this.#camera.zoom * this.#aspectRatio * Math.sqrt(2),
-                        this.#camera.zoom * this.#aspectRatio * Math.sqrt(2),
-                        -this.#camera.zoom,
-                        this.#camera.zoom,
+                        -this.#camera.zoom * 0.5 * (screenHeight > screenWidth ? this.#aspectRatio : 1),
+                        this.#camera.zoom * 0.5 * (screenHeight > screenWidth ? this.#aspectRatio : 1),
+                        (-this.#camera.zoom * 0.5) / (screenHeight < screenWidth ? this.#aspectRatio * squareRootOf2 : 1 * squareRootOf2),
+                        (this.#camera.zoom * 0.5) / (screenHeight < screenWidth ? this.#aspectRatio * squareRootOf2 : 1 * squareRootOf2),
                         -2000,
                         2000,
                     ),
@@ -706,8 +730,8 @@ class Renderer {
                 view: () =>
                     mat4_lookAt(
                         [],
-                        new Vector2D3D(this.#camera.x, 10, this.#camera.z), // eye (camera position)
-                        new Vector2D3D(this.#camera.x, 0, this.#camera.z - 10), // center (look at)
+                        new Vector2D3D(this.#camera.x, 10, this.#camera.z + 10), // eye (camera position)
+                        new Vector2D3D(this.#camera.x, 0, this.#camera.z), // center (look at)
                         new Vector2D3D(0, 1, 0), // Up
                     ),
 
