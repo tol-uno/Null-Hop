@@ -599,12 +599,12 @@ const Player = {
 
         if (!this.topColor) {
             // Only calculate once
-            this.topColor = CanvasArea.getShadedColor(this.mapData.style.playerColor, litPercentTop, this.mapData.style);
+            this.topColor = getShadedColor(this.mapData.style.playerColor, litPercentTop, this.mapData.style);
         }
-        this.botSideColor = CanvasArea.getShadedColor(this.mapData.style.playerColor, litPercentBotSide, this.mapData.style);
-        this.rightSideColor = CanvasArea.getShadedColor(this.mapData.style.playerColor, litPercentRightSide, this.mapData.style);
-        this.topSideColor = CanvasArea.getShadedColor(this.mapData.style.playerColor, litPercentTopSide, this.mapData.style);
-        this.leftSideColor = CanvasArea.getShadedColor(this.mapData.style.playerColor, litPercentLeftSide, this.mapData.style);
+        this.botSideColor = getShadedColor(this.mapData.style.playerColor, litPercentBotSide, this.mapData.style);
+        this.rightSideColor = getShadedColor(this.mapData.style.playerColor, litPercentRightSide, this.mapData.style);
+        this.topSideColor = getShadedColor(this.mapData.style.playerColor, litPercentTopSide, this.mapData.style);
+        this.leftSideColor = getShadedColor(this.mapData.style.playerColor, litPercentLeftSide, this.mapData.style);
     },
 
     drawPlayerShadow: function (ctx = PlayerCanvas.ctx, yOffset = 0) {

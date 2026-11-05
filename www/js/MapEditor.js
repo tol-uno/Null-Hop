@@ -526,11 +526,11 @@ const MapEditor = {
                     ctx.translate(platform.x, platform.y);
 
                     if (platform.wall) {
-                        ctx.fillStyle = CanvasArea.getShadedColor(this.loadedMap.style.wallSideColor, 0.3, this.loadedMap.style);
+                        ctx.fillStyle = getShadedColor(this.loadedMap.style.wallSideColor, 0.3, this.loadedMap.style);
                     } else if (platform.endzone) {
-                        ctx.fillStyle = CanvasArea.getShadedColor(this.loadedMap.style.endZoneSideColor, 0.3, this.loadedMap.style);
+                        ctx.fillStyle = getShadedColor(this.loadedMap.style.endZoneSideColor, 0.3, this.loadedMap.style);
                     } else {
-                        ctx.fillStyle = CanvasArea.getShadedColor(this.loadedMap.style.platformSideColor, 0.3, this.loadedMap.style);
+                        ctx.fillStyle = getShadedColor(this.loadedMap.style.platformSideColor, 0.3, this.loadedMap.style);
                     }
 
                     // corners array order: BL BR TR TL
@@ -623,7 +623,7 @@ const MapEditor = {
                         ctx.translate(platform.x, platform.y - MapEditor.loadedMap.style.wallHeight);
                         ctx.rotate((platform.angle * Math.PI) / 180);
 
-                        ctx.strokeStyle = CanvasArea.getShadedColor(this.loadedMap.style.wallTopColor, 0.25, this.loadedMap.style);
+                        ctx.strokeStyle = getShadedColor(this.loadedMap.style.wallTopColor, 0.25, this.loadedMap.style);
                         ctx.lineWidth = 4;
 
                         ctx.strokeRect(-platform.width / 2 + 2, -platform.height / 2 + 2, platform.width - 4, platform.height - 4);

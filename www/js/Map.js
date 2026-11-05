@@ -348,10 +348,10 @@ const Map = {
                 litPercent3 = 0;
             } // clamp to 0 to 1
 
-            platform.shaded_topColor = CanvasArea.getShadedColor(colorToUse1, litPercentTop, mapData.style);
-            platform.shaded_sideColor1 = CanvasArea.getShadedColor(colorToUse2, litPercent1, mapData.style);
-            platform.shaded_sideColor2 = CanvasArea.getShadedColor(colorToUse2, litPercent2, mapData.style);
-            platform.shaded_sideColor3 = CanvasArea.getShadedColor(colorToUse2, litPercent3, mapData.style);
+            platform.shaded_topColor = getShadedColor(colorToUse1, litPercentTop, mapData.style);
+            platform.shaded_sideColor1 = getShadedColor(colorToUse2, litPercent1, mapData.style);
+            platform.shaded_sideColor2 = getShadedColor(colorToUse2, litPercent2, mapData.style);
+            platform.shaded_sideColor3 = getShadedColor(colorToUse2, litPercent3, mapData.style);
 
             // SHADOW POLYGON
 
@@ -408,15 +408,15 @@ const Map = {
 
         // calculate all other map colors
         // THESE ALL NEED TO USE 3D Normal Vectors for calculations
-        mapData.style.shaded_backgroundColor = CanvasArea.getShadedColor(mapData.style.backgroundColor, litPercentTop, mapData.style);
+        mapData.style.shaded_backgroundColor = getShadedColor(mapData.style.backgroundColor, litPercentTop, mapData.style);
 
-        mapData.style.shadow_platformColor = CanvasArea.getShadedColor(
+        mapData.style.shadow_platformColor = getShadedColor(
             mapData.style.platformTopColor,
             Math.max(0, litPercentTop - 0.7),
             mapData.style,
         ); // shadow brightness can be between 0 and 0.3
-        mapData.style.shadow_endzoneColor = CanvasArea.getShadedColor(mapData.style.endZoneTopColor, Math.max(0, litPercentTop - 0.7), mapData.style);
-        mapData.style.shadow_backgroundColor = CanvasArea.getShadedColor(
+        mapData.style.shadow_endzoneColor = getShadedColor(mapData.style.endZoneTopColor, Math.max(0, litPercentTop - 0.7), mapData.style);
+        mapData.style.shadow_backgroundColor = getShadedColor(
             mapData.style.backgroundColor,
             Math.max(0, litPercentTop - 0.7),
             mapData.style,

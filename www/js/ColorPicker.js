@@ -67,7 +67,7 @@ const ColorPicker = {
     },
 
     getColor: function () {
-        return CanvasArea.HSLToRGB(this.h, this.s, this.l); // returns rgb string
+        return HSLToRGB(this.h, this.s, this.l); // returns rgb string
     },
 
     copyColor: function () {
@@ -98,7 +98,7 @@ const ColorPicker = {
         let g = color[1];
         let b = color[2];
 
-        const hslValue = CanvasArea.RGBToHSL(r, g, b);
+        const hslValue = RGBToHSL(r, g, b);
 
         this.h = hslValue[0];
         this.s = hslValue[1];
