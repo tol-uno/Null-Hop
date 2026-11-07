@@ -19,6 +19,5 @@ const slider_lightDirection = new uiElement(
         }
         
         MapEditor.loadedMap.style.lightDirection = UserInterface.getSliderValue(slider_lightDirection);
-        PreviewWindow.update();
     },
 );

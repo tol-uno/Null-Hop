@@ -104,8 +104,6 @@ const btn_mainMenu = new uiElement(
             UserInterface.ui_verticalWarning = false;
             UserInterface.showOverstrafeWarning = false;
 
-            CanvasArea.canvas.classList.add("hidden");
-
             UserInterface.updateUiColorMode("light");
 
             if (MapBrowser.state == 1) {

@@ -10,7 +10,6 @@ const btn_mapSettings = new uiElement(
     () => {
         MapEditor.editorState = 4; // map settings
 
-        PreviewWindow.update();
         UserInterface.switchToUiGroup(UserInterface.uiGroup_mapSettings);    
     },
 );

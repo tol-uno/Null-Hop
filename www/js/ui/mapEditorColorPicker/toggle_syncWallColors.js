@@ -25,7 +25,6 @@ const toggle_syncWallColors = new uiElement(
             // make colors synced
             ColorPicker.lockWallColors = true;
             MapEditor.loadedMap.style.wallSideColor = MapEditor.loadedMap.style.wallTopColor;
-            PreviewWindow.update();
             ColorPicker.updateButtonColors();
         }
         toggle_syncWallColors.domReference.classList.toggle("toggled");

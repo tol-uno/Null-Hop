@@ -19,6 +19,5 @@ const slider_wallHeight = new uiElement(
         }
 
         MapEditor.loadedMap.style.wallHeight = UserInterface.getSliderValue(slider_wallHeight);
-        PreviewWindow.update();
     },
 );

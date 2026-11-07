@@ -119,7 +119,7 @@ const UserInterface = {
         screen.orientation.addEventListener("change", function (event) {
             UserInterface.orientation = event.target.type.startsWith("landscape") ? "landscape" : "portrait";
 
-            CanvasArea.setSize();
+            UserInterface.setSize();
             renderer.resize(screenWidth, screenHeight);
 
             if (UserInterface.gamestate == 2) {
@@ -274,6 +274,22 @@ const UserInterface = {
         this.uiGroup_confirmDiscard = new Set([btn_cancel, ui_mapEditorSaveText, btn_confirmDeleteEdits]);
 
         this.switchToUiGroup(UserInterface.uiGroup_mainMenu);
+    },
+
+    setSize: function () {
+        const scale = window.devicePixelRatio || 1; // dont need to calculate this on every setSize() call
+
+        // these screen size vars are initialized in index.js for global accesss
+        screenWidthUI = window.outerWidth;
+        screenHeightUI = window.outerHeight;
+
+        screenWidth = screenWidthUI * scale;
+        screenHeight = screenHeightUI * scale;
+
+        midX = screenWidth / 2;
+        midY = screenHeight / 2;
+        midX_UI = screenWidthUI / 2;
+        midY_UI = screenHeightUI / 2;
     },
 
     getSettings: async function () {
@@ -481,12 +497,7 @@ const UserInterface = {
         };
     },
 
-    determineButtonColor: function () {
-        // FIX - will need to get actual color of bakground (shaded if possible)
-        let bgColor = CanvasArea.canvas.style.backgroundColor; // returns rgba string
-
-        bgColor = bgColor.replace(/[^\d,.]/g, "").split(",");
-
+    determineButtonColor: function (bgColor = [255, 255, 255]) {
         const luminance = (0.299 * bgColor[0] + 0.587 * bgColor[1] + 0.114 * bgColor[2]) / 255;
         // luminance = (0.299 * R + 0.587 * G + 0.114 * B)/255
         // estimates the "brightness" of the color based on human eye perception

@@ -28,7 +28,5 @@ const btn_exitMapEditor = new uiElement(
             ui_mapEditorSaveText.domReference.textContent = "Save Map?";
         }
         MapEditor.editorState = 5; // pause map editor
-        CanvasArea.clear();
-        CanvasArea.ctx.fillRect(0, 0, 1, 1); // weird fix to update the canvas after a clear. Look into why this is happening
     },
 );
