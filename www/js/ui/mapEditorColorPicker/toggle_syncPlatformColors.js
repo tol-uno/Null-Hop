@@ -25,7 +25,6 @@ const toggle_syncPlatformColors = new uiElement(
             // make colors synced
             ColorPicker.lockPlatformColors = true;
             MapEditor.loadedMap.style.platformSideColor = MapEditor.loadedMap.style.platformTopColor;
-            PreviewWindow.update();
             ColorPicker.updateButtonColors();
         }
         toggle_syncPlatformColors.domReference.classList.toggle("toggled");

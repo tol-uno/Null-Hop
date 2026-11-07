@@ -31,7 +31,8 @@ const Player = {
         this.loopedAngle = angle;
         this.angleRad = (angle * Math.PI) / 180;
 
-        // set here so that PreviewWindow can render player without calling Player.update()
+        // These were set here so that PreviewWindow could render player without calling Player.update()
+        // PreviewWindow has been killed so this no longer needs to be set here
         this.playerPoligon = createPoligon(this.x, this.y, 32, 32, this.angleRad);
         this.shadowCorners = createPoligon(this.x, this.y, 30, 30, this.angleRad); // 30x30 instead of 32x32
 

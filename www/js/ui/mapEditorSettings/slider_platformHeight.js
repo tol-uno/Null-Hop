@@ -19,6 +19,5 @@ const slider_platformHeight = new uiElement(
         }
 
         MapEditor.loadedMap.style.platformHeight = UserInterface.getSliderValue(slider_platformHeight);
-        PreviewWindow.update();
     },
 );

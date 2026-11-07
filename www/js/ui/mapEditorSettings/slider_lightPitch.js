@@ -19,6 +19,5 @@ const slider_lightPitch = new uiElement(
         }
 
         MapEditor.loadedMap.style.lightPitch = UserInterface.getSliderValue(slider_lightPitch);
-        PreviewWindow.update();
     },
 );

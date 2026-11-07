@@ -25,7 +25,6 @@ const toggle_syncEndZoneColors = new uiElement(
             // make colors synced
             ColorPicker.lockEndzoneColors = true;
             MapEditor.loadedMap.style.endZoneSideColor = MapEditor.loadedMap.style.endZoneTopColor;
-            PreviewWindow.update();
             ColorPicker.updateButtonColors();
         }
         toggle_syncEndZoneColors.domReference.classList.toggle("toggled");

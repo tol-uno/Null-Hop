@@ -7,7 +7,7 @@ let gravity = 500;
 let prevDateNow;
 let dt = 1 / 60; // delta time always has a 1 frame delay
 
-// set by CanvasArea
+// set by UserInterface
 let screenWidth = null; // actual pixel resolution of screen
 let screenHeight = null;
 let screenWidthUI = null; // logical CSS pixel resolution of screen
@@ -24,7 +24,7 @@ function onDeviceReady() {
     TouchHandler.init();
     AudioHandler.init();
 
-    CanvasArea.start();
+    UserInterface.setSize();
 
     renderer = new Renderer(document.getElementById("webgl-canvas"));
     renderer.init(screenWidth, screenHeight);

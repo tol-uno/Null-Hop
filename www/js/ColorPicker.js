@@ -158,7 +158,5 @@ const ColorPicker = {
             // ambient light
             MapEditor.loadedMap.style.ambientLight = ColorPicker.getColor();
         }
-
-        PreviewWindow.update();
     },
 };

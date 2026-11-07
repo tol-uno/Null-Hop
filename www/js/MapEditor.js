@@ -178,8 +178,6 @@ const MapEditor = {
 
         // switch to main MapEditor screen
 
-        // CanvasArea.canvas.style.backgroundColor = this.loadedMap.style.backgroundColor;
-        // CanvasArea.canvas.classList.remove("hidden");
         document.getElementById("webgl-canvas").classList.remove("hidden");
 
         UserInterface.switchToUiGroup(UserInterface.uiGroup_mapEditorInterface);
@@ -473,22 +471,18 @@ const MapEditor = {
             // in map settings screen
             if (slider_platformHeight.handle.classList.contains("pressed")) {
                 this.loadedMap.style.platformHeight = UserInterface.getSliderValue(slider_platformHeight);
-                PreviewWindow.update();
             }
 
             if (slider_wallHeight.handle.classList.contains("pressed")) {
                 this.loadedMap.style.wallHeight = UserInterface.getSliderValue(slider_wallHeight);
-                PreviewWindow.update();
             }
 
             if (slider_lightDirection.handle.classList.contains("pressed")) {
                 this.loadedMap.style.lightDirection = UserInterface.getSliderValue(slider_lightDirection);
-                PreviewWindow.update();
             }
 
             if (slider_lightPitch.handle.classList.contains("pressed")) {
                 this.loadedMap.style.lightPitch = UserInterface.getSliderValue(slider_lightPitch);
-                PreviewWindow.update();
             }
         }
 
@@ -505,14 +499,10 @@ const MapEditor = {
         if (this.loadedMap !== null) {
             // IF MAP IS LOADED RENDER IT
 
-            if (this.editorState == 3 || this.editorState == 4) {
-                // IN COLOR SETTINGS OR IN MAP SETTINGS
-
-                PreviewWindow.render();
-            } else {
+            if (!this.editorState == 3 && !this.editorState == 4) {
                 // not in map color or settings screen so RENDER MAP
 
-                const ctx = CanvasArea.ctx;
+                const ctx = null; // this will break
 
                 ctx.save(); // zooming everything to render MAP first
                 ctx.scale(this.zoom, this.zoom);
@@ -1230,8 +1220,6 @@ const MapEditor = {
         MapEditor.multiSelect = false;
 
         MapEditor.snapAmount = 2;
-
-        CanvasArea.canvas.classList.add("hidden");
 
         UserInterface.updateUiColorMode("light");
 
