@@ -43,6 +43,7 @@ const GameMap = {
             gravity = 500;
         }
 
+        renderer.setEditorMode(false); // gameplay maps never change, so their instance matrices stay static
         renderer.setMapData(this);
 
         UserInterface.gamestate = 6; // switch to in level

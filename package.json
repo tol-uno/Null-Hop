@@ -5,7 +5,8 @@
   "description": "A Tribute to Bhop",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build:three": "esbuild scripts/three-entry.js --bundle --minify --format=iife --global-name=THREE --legal-comments=inline --outfile=www/js/three.min.js"
   },
   "keywords": [
     "ecosystem:cordova"
@@ -18,7 +19,9 @@
     "cordova-browser": "^7.0.0",
     "cordova-ios": "^8.0.0",
     "cordova-plugin-device": "^2.1.0",
-    "cordova-plugin-file": "^8.0.1"
+    "cordova-plugin-file": "^8.0.1",
+    "esbuild": "^0.28.2",
+    "three": "^0.187.0"
   },
   "cordova": {
     "platforms": [

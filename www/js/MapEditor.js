@@ -193,6 +193,7 @@ const MapEditor = {
         this.screen.cornerX = this.screen.x - this.screen.width / 2;
         this.screen.cornerY = this.screen.y - this.screen.height / 2;
 
+        renderer.setEditorMode(true); // instance matrices are rewritten on every edit
         renderer.setMapData(this.loadedMap);
 
         this.editorState = 1;

@@ -75,7 +75,6 @@ function updateGameArea() {
         // add camera offset to these
         renderer.setCameraPos(
             PlayerProxy.x + Player.speedCameraOffset.direction.x,
-            10,
             PlayerProxy.z + Player.speedCameraOffset.direction.y,
             Player.speedCameraOffset.zoom,
         );
@@ -91,7 +90,7 @@ function updateGameArea() {
         };
 
         // this has to read screen.y as the z dimension -- should fix
-        renderer.setCameraPos(MapEditor.screen.x, 10, MapEditor.screen.y, MapEditor.zoom);
+        renderer.setCameraPos(MapEditor.screen.x, MapEditor.screen.y, MapEditor.zoom);
 
         renderer.drawFrame(PlayerProxy);
         // MapEditor.render();
