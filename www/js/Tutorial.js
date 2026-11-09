@@ -273,7 +273,7 @@ const Tutorial = {
         }
 
         if (this.state == 1 && btn_next.domReference.classList.contains("hidden")) {
-            if (Math.abs(Player.lookAngle.getAngleInDegrees() - Map.playerStart.angle) > 45) {
+            if (Math.abs(Player.lookAngle.getAngleInDegrees() - GameMap.playerStart.angle) > 45) {
                 btn_next.domReference.classList.remove("hidden");
             }
             return;

@@ -26,7 +26,7 @@ const Player = {
     playerPoligon: null, // similar to shadow corners but used for collision checks with platforms and walls (32x32)
 
     shadowCorners: null, // need to expose here so that this.drawPlayerShadow() can use. (30x30)
-    // set in Player.update because Map needs it before Player in the rendering pipeline.
+    // set in Player.update because GameMap needs it before Player in the rendering pipeline.
 
     debugTurn: 2, // intialized here so it can be accesed in console
 
@@ -65,7 +65,7 @@ const Player = {
         this.checkpointIndex = -1;
 
         // set up this.mapData -- where to pull platforms and styles from
-        this.mapData = UserInterface.gamestate == 7 ? PreviewWindow : Map;
+        this.mapData = UserInterface.gamestate == 7 ? PreviewWindow : GameMap;
     },
 
     update: function () {
@@ -227,9 +227,9 @@ const Player = {
         const teleportPlayer = () => {
             // Called when player hits the water
             if (this.checkpointIndex !== -1) {
-                this.x = Map.checkpoints[this.checkpointIndex].x;
-                this.y = Map.checkpoints[this.checkpointIndex].y;
-                this.lookAngle.set(1, 0).rotate(Map.checkpoints[this.checkpointIndex].angle);
+                this.x = GameMap.checkpoints[this.checkpointIndex].x;
+                this.y = GameMap.checkpoints[this.checkpointIndex].y;
+                this.lookAngle.set(1, 0).rotate(GameMap.checkpoints[this.checkpointIndex].angle);
                 this.loopedAngle = this.lookAngle.getAngleInDegrees();
                 this.angleRad = (this.loopedAngle * Math.PI) / 180;
                 this.velocity.set(100, 0).rotate(this.lookAngle.getAngleInDegrees());
@@ -364,7 +364,7 @@ const Player = {
                 }
             }
 
-            for (const wall of Map.wallsToCheck) {
+            for (const wall of GameMap.wallsToCheck) {
                 const collisionData = getPlayerWallCollision(Player, wall);
                 if (collisionData.collided) {
                     setVelocityAfterCollision(this.velocity, collisionData.normal);
@@ -377,14 +377,14 @@ const Player = {
 
             updatePlayerPosition();
             updatePlayerPoligon(); // update here so that checkCollisions can use it for platforms and endzone.
-            // for use in wall z-depth testing by Map and this.checkCollisions
+            // for use in wall z-depth testing by GameMap and this.checkCollisions
             // updated again if player is hitting water and teleports
 
             // JUMPING check platform collision
             if (this.jumpValue < 0) {
                 this.jumpValue = 0;
 
-                if (!this.checkCollision(Map.renderedPlatforms.filter((platform) => platform.wall == 0))) {
+                if (!this.checkCollision(GameMap.renderedPlatforms.filter((platform) => platform.wall == 0))) {
                     // checkCollision on platforms in renderedPlatforms array with walls removed
                     // Hit water
                     AudioHandler.playAudio(AudioHandler.splashBuffer, { volume: 0.4 });
@@ -456,20 +456,20 @@ const Player = {
                 return Math.sqrt(dx * dx + dy * dy);
             }
 
-            for (const checkpoint of Map.checkpoints) {
+            for (const checkpoint of GameMap.checkpoints) {
                 const distance = pDistance(this.x, this.y, checkpoint.triggerX1, checkpoint.triggerY1, checkpoint.triggerX2, checkpoint.triggerY2);
                 // console.log("distance to " + checkpoint + ": " + distance)
 
                 if (distance <= 16) {
                     // COLLIDING WITH CP TRIGGER
-                    this.checkpointIndex = Map.checkpoints.indexOf(checkpoint); // could do this with a callback index function?
+                    this.checkpointIndex = GameMap.checkpoints.indexOf(checkpoint); // could do this with a callback index function?
                     // console.log(this.checkpointIndex);
                 }
             }
 
             // CHECK IF COLLIDING WITH ANY ENDZONES
-            if (Map.endZonesToCheck.length > 0) {
-                if (this.checkCollision(Map.endZonesToCheck)) {
+            if (GameMap.endZonesToCheck.length > 0) {
+                if (this.checkCollision(GameMap.endZonesToCheck)) {
                     AudioHandler.playAudio(AudioHandler.successBuffer, { volume: 0.6 });
                     UserInterface.handleRecord();
                     UserInterface.levelState = 3;
@@ -517,7 +517,7 @@ const Player = {
         this.speedCameraOffset.direction.x = this.speedCameraOffset.dirAveragerX.getAverage();
         this.speedCameraOffset.direction.y = this.speedCameraOffset.dirAveragerY.getAverage();
 
-        // Update shadowCorners here for use by Map to render Player lower shadow
+        // Update shadowCorners here for use by GameMap to render Player lower shadow
         // FIX this should use a single shadowPolygon instance of Polygon and just update it every frame as opposed to creating new ones
         this.shadowCorners = createPoligon(this.x, this.y, 30, 30, this.angleRad); // 30x30 instead of 32x32
     },
@@ -619,7 +619,7 @@ const Player = {
 
     render: function () {
         // Player is drawn on a seperate PlayerCanvas.
-        // On PlayerCanvas, parts of the player that are behind walls are erased using Map.playerClip
+        // On PlayerCanvas, parts of the player that are behind walls are erased using GameMap.playerClip
         // PlayerCanvas is then pasted onto the main CanvasArea
 
         this.setPlayerLighting();
@@ -630,14 +630,14 @@ const Player = {
         // Generate all player vertices
         // creates array of point objects: [ {x:1,y:1}, {x:2,y:2} ]
         // topLeft, topRight, bottomRight, bottomLeft -- when Player.angle == 0 (looking right)
-        // shadowCorners is set in Player.update because Map needs it to render player lower shadow before Player is rendered
+        // shadowCorners is set in Player.update because GameMap needs it to render player lower shadow before Player is rendered
         const lowerCorners = this.playerPoligon.map((point) => ({ x: point.x, y: point.y - this.jumpValue }));
         const upperCorners = lowerCorners.map((point) => ({ x: point.x, y: point.y - 32 }));
 
         if (this.mapData == PreviewWindow) {
-            // Map sets these otherwise
+            // GameMap sets these otherwise
         } else {
-            // in actual level with Map
+            // in actual level with GameMap
             const camera = this.speedCameraOffset;
             const cameraTargetX = this.x - camera.direction.x;
             const cameraTargetY = this.y - camera.direction.y;
@@ -656,15 +656,15 @@ const Player = {
         // SHADOW OVER PLATFORM
         ctx.save(); // #1 Necessary for clearing upperShadowClip
 
-        if (this.mapData == Map) {
-            // only set upper shadow clip if in Map not PreviewWindow
+        if (this.mapData == GameMap) {
+            // only set upper shadow clip if in GameMap not PreviewWindow
 
             // Draw standard shadowClip DEBUG
             // ctx.lineWidth = 4
             // ctx.strokeStyle = "#00ff00"
-            // ctx.stroke(Map.upperShadowClip)
+            // ctx.stroke(GameMap.upperShadowClip)
 
-            ctx.clip(Map.upperShadowClip);
+            ctx.clip(GameMap.upperShadowClip);
         }
 
         ctx.fillStyle = this.mapData.style.shadow_platformColor;
@@ -674,18 +674,18 @@ const Player = {
         ctx.restore(); // #1 Necessary for clearing upperShadowClip
 
         // SHADOW OVER ENDZONE
-        if (this.mapData == Map && Map.endZonesToCheck.length > 0) {
-            // only applicable in Map not PreviewWindow
+        if (this.mapData == GameMap && GameMap.endZonesToCheck.length > 0) {
+            // only applicable in GameMap not PreviewWindow
             ctx.save(); // #2 Necessary for clearing endZoneShadowClip
 
             // Draw endZoneShadowClip DEBUG
             // ctx.lineWidth = 3
             // ctx.strokeStyle = "#0000ff"
-            // ctx.stroke(Map.endZoneShadowClip)
+            // ctx.stroke(GameMap.endZoneShadowClip)
 
-            ctx.clip(Map.endZoneShadowClip);
+            ctx.clip(GameMap.endZoneShadowClip);
 
-            ctx.fillStyle = Map.style.shadow_endzoneColor;
+            ctx.fillStyle = GameMap.style.shadow_endzoneColor;
             this.drawPlayerShadow();
             ctx.fill();
 
@@ -794,19 +794,19 @@ const Player = {
             ctx.fill();
         }
 
-        // ERASE PARTS OF PLAYER THAT ARE BEHIND WALL AND DRAW PLAYER XRAY (if in Map not PreviewWindow)
-        if (this.mapData == Map && Map.wallsToCheck.length != 0) {
-            //  OPTIMIZE: Could use more precice check here like checking if there's data in Map.playerClip
+        // ERASE PARTS OF PLAYER THAT ARE BEHIND WALL AND DRAW PLAYER XRAY (if in GameMap not PreviewWindow)
+        if (this.mapData == GameMap && GameMap.wallsToCheck.length != 0) {
+            //  OPTIMIZE: Could use more precice check here like checking if there's data in GameMap.playerClip
             // if theres no data in playerClip path then this doesnt have to be run
 
             // Draw playerClip DEBUG on PlayerCanvas
             // ctx.lineWidth = 4;
             // ctx.strokeStyle = "#ff0000";
-            // ctx.stroke(Map.playerClip);
+            // ctx.stroke(GameMap.playerClip);
 
             ctx.save(); // #3 Necessary for clearing playerClip
             // ADD CLIP of area behind walls
-            ctx.clip(Map.playerClip);
+            ctx.clip(GameMap.playerClip);
 
             // ERASE PARTS OF PLAYER THAT ARE BEHIND WALLS
             PlayerCanvas.clear(this.x - midX, this.y - midY); // clear canvas at the players position - half screen width
@@ -823,7 +823,7 @@ const Player = {
         // COPY PLAYER TO MAIN CANVAS AFTER ERASE
         CanvasArea.ctx.drawImage(PlayerCanvas.canvas, 0, 0);
 
-        if (this.mapData == Map) {
+        if (this.mapData == GameMap) {
             ctx.setTransform();
         }
     },

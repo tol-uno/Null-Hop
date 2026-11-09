@@ -52,7 +52,7 @@ function updateGameArea() {
         if (!Tutorial.pausePlayer) {
             Player.update();
         }
-        Map.update();
+        GameMap.update();
         if (Tutorial.isActive) {
             Tutorial.update();
         }
@@ -65,7 +65,7 @@ function updateGameArea() {
     CanvasArea.clear();
 
     if (UserInterface.gamestate == 6) {
-        Map.render(); // draws Player lower shadow too
+        GameMap.render(); // draws Player lower shadow too
         Player.render();
     }
 

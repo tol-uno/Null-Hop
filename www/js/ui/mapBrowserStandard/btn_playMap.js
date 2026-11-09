@@ -18,7 +18,7 @@ const btn_playMap = new uiElement(
 
         if (MapBrowser.state == 1) {
             // in normal maps browser
-            Map.initMap(MapBrowser.selectedMapIndex, false);
+            GameMap.initMap(MapBrowser.selectedMapIndex, false);
 
             // check if Tutorial should be started
             if (MapBrowser.selectedMapIndex == "Awakening" && UserInterface.settings.playTutorial == true) {
@@ -26,7 +26,7 @@ const btn_playMap = new uiElement(
             }
         } else {
             // in custom maps browser
-            Map.initMap(MapBrowser.selectedMapIndex, true);
+            GameMap.initMap(MapBrowser.selectedMapIndex, true);
         }
     },
 );

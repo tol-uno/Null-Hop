@@ -1,4 +1,4 @@
-const Map = {
+const GameMap = {
     walls: [],
     renderedPlatforms: [],
     wallsToCheck: [],
@@ -104,20 +104,20 @@ const Map = {
             const upperCorners = platform.wall
                 ? [
                       // return empty array if not wall
-                      [platform.corners[0][0], platform.corners[0][1] - Map.style.wallHeight],
-                      [platform.corners[1][0], platform.corners[1][1] - Map.style.wallHeight],
-                      [platform.corners[2][0], platform.corners[2][1] - Map.style.wallHeight],
-                      [platform.corners[3][0], platform.corners[3][1] - Map.style.wallHeight],
+                      [platform.corners[0][0], platform.corners[0][1] - GameMap.style.wallHeight],
+                      [platform.corners[1][0], platform.corners[1][1] - GameMap.style.wallHeight],
+                      [platform.corners[2][0], platform.corners[2][1] - GameMap.style.wallHeight],
+                      [platform.corners[3][0], platform.corners[3][1] - GameMap.style.wallHeight],
                   ]
                 : [];
 
             // midCorners == platforms.corners
 
             const lowerCorners = [
-                [platform.corners[0][0], platform.corners[0][1] + Map.style.platformHeight],
-                [platform.corners[1][0], platform.corners[1][1] + Map.style.platformHeight],
-                [platform.corners[2][0], platform.corners[2][1] + Map.style.platformHeight],
-                [platform.corners[3][0], platform.corners[3][1] + Map.style.platformHeight],
+                [platform.corners[0][0], platform.corners[0][1] + GameMap.style.platformHeight],
+                [platform.corners[1][0], platform.corners[1][1] + GameMap.style.platformHeight],
+                [platform.corners[2][0], platform.corners[2][1] + GameMap.style.platformHeight],
+                [platform.corners[3][0], platform.corners[3][1] + GameMap.style.platformHeight],
             ];
 
             const allHullPoints = platform.corners.concat(upperCorners).concat(lowerCorners);
@@ -272,7 +272,7 @@ const Map = {
                             }
                         }
                         clipPolygon.closePath();
-                        Map.playerClip.addPath(clipPolygon);
+                        GameMap.playerClip.addPath(clipPolygon);
                     }
                 }
             }
@@ -530,7 +530,7 @@ const Map = {
 
         // DRAW ALL PLATFORMS IN renderedPlatforms
         for (const platform of this.renderedPlatforms) {
-            Map.renderPlatform(ctx, Map, platform);
+            GameMap.renderPlatform(ctx, GameMap, platform);
         }
 
         // Draw checkpoints if Debugging

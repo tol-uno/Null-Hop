@@ -337,17 +337,17 @@ const UserInterface = {
     },
 
     handleRecord: function () {
-        const record = this.records[Map.name];
+        const record = this.records[GameMap.name];
 
         if (record == null || (record !== null && this.timer < record)) {
-            this.previousRecord = record == null ? 0 : this.records[Map.name]; // save previous record
-            this.records[Map.name] = this.timer;
+            this.previousRecord = record == null ? 0 : this.records[GameMap.name]; // save previous record
+            this.records[GameMap.name] = this.timer;
             this.writeRecords();
 
             // update record text in timer box
             if (ui_timerBox.domReference) {
                 // timerbox doesnt exist in tutorial
-                ui_timerBox.domReference.children[1].textContent = `Record: ${this.secondsToMinutes(this.records[Map.name] == null ? 0 : this.records[Map.name])}`;
+                ui_timerBox.domReference.children[1].textContent = `Record: ${this.secondsToMinutes(this.records[GameMap.name] == null ? 0 : this.records[GameMap.name])}`;
             }
         }
     },
@@ -693,24 +693,24 @@ const UserInterface = {
         this.switchToUiGroup(this.uiGroup_endScreen); // removes strafeHelper and timerBox
 
         // Update Endscreen with all necessary information
-        ui_endScreen.domReference.querySelector(".mapName").textContent = Map.name;
+        ui_endScreen.domReference.querySelector(".mapName").textContent = GameMap.name;
 
         const yourTimeInSeconds = this.secondsToMinutes(this.timer);
         ui_endScreen.domReference.querySelector(".yourTime").textContent = `${yourTimeInSeconds}`;
 
         // map records is set immediately after completion so if timer == map.record it means it was a new record
-        if (this.timer == this.records[Map.name]) {
+        if (this.timer == this.records[GameMap.name]) {
             // new record text
             ui_endScreen.domReference.querySelector(".yourRecord").textContent = `New Record!  -(${this.secondsToMinutes(
-                Math.abs(this.previousRecord - this.records[Map.name]),
+                Math.abs(this.previousRecord - this.records[GameMap.name]),
             )})`;
         } else {
             // display normal record
-            ui_endScreen.domReference.querySelector(".yourRecord").textContent = `Best Time: ${this.secondsToMinutes(this.records[Map.name])}`;
+            ui_endScreen.domReference.querySelector(".yourRecord").textContent = `Best Time: ${this.secondsToMinutes(this.records[GameMap.name])}`;
         }
 
         // update medal times and activeMedal OR hide medal list
-        const mapMedal = this.medals[Map.name];
+        const mapMedal = this.medals[GameMap.name];
         if (mapMedal !== undefined) {
             ui_endScreen.domReference.querySelector(".medalList").classList.remove("hidden");
 
@@ -827,7 +827,7 @@ const UserInterface = {
                 // Update Timer Box's Text
                 if (Tutorial.isActive == false) {
                     ui_timerBox.domReference.children[0].textContent = `Time: ${UserInterface.secondsToMinutes(this.timer)}`;
-                    // record text is set once during Map.initMap()
+                    // record text is set once during GameMap.initMap()
                 }
             }
 
@@ -894,8 +894,8 @@ const UserInterface = {
                 // In Level debug text
                 ui_debugText.domReference.textContent = `fps: ${Math.round(1 / dt)} \r\n`;
                 ui_debugText.domReference.textContent += `dt (rounded): ${Math.round(dt * 1000) / 1000} seconds \r\n`;
-                ui_debugText.domReference.textContent += `renderedPlatforms: ${Map.renderedPlatforms.length} \r\n`;
-                ui_debugText.domReference.textContent += `endZonesToCheck: ${Map.endZonesToCheck.length} \r\n`;
+                ui_debugText.domReference.textContent += `renderedPlatforms: ${GameMap.renderedPlatforms.length} \r\n`;
+                ui_debugText.domReference.textContent += `endZonesToCheck: ${GameMap.endZonesToCheck.length} \r\n`;
                 ui_debugText.domReference.textContent += `cameraZoom: ${Math.round(Player.speedCameraOffset.zoom * 1000) / 1000} \r\n`;
                 ui_debugText.domReference.textContent += `offsetDir: ${Math.round(Player.speedCameraOffset.direction.x)}, ${Math.round(
                     Player.speedCameraOffset.direction.y,

@@ -51,7 +51,7 @@ const PreviewWindow = {
             platform.hull = convexHull(allHullPoints);
         });
 
-        Map.setMapLighting(this);
+        GameMap.setMapLighting(this);
     },
 
     // called in MapEditor.render()
@@ -83,7 +83,7 @@ const PreviewWindow = {
 
         // DRAW ALL PLATFORMS IN this.platforms
         for (const platform of this.platforms) {
-            Map.renderPlatform(CanvasArea.ctx, MapEditor.loadedMap, platform);
+            GameMap.renderPlatform(CanvasArea.ctx, MapEditor.loadedMap, platform);
         }
 
         // RENDER PLAYER
