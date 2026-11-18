@@ -43,6 +43,7 @@ const GameMap = {
             gravity = 500;
         }
 
+        renderer.setEditorMode(false); // let renderer know that GameMap will stay static so it can optimize for that
         renderer.setMapData(this);
 
         UserInterface.gamestate = 6; // switch to in level

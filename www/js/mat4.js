@@ -24,6 +24,8 @@ function mat4_ortho(out, left, right, bottom, top, near, far) {
 }
 
 function mat4_lookAt(out, eye, center, up) {
+    // Fix, this will throw if looking parallel to the up direction provided
+
     // Forward vector (z-axis): eye - center, then normalize
     const zAxis = eye.clone().subtract(center).normalize();
 

@@ -1,5 +1,4 @@
 // requires regl and mat4 functions (lookAt and ortho)
-const squareRootOf2 = 1.4142135623730951;
 
 function parseRGB(rgbString) {
     // FIX should store Map color data in a format so that this function is not needed.
@@ -36,6 +35,12 @@ class Renderer {
         zoom: 300,
     };
 
+    #lightView = new Float32Array(16);
+    #lightProjection = new Float32Array(16);
+    #projection = new Float32Array(16);
+    #view = new Float32Array(16);
+
+    editorMode = false; // optimizes rendering for 'dynamic' vs 'static' mapData TODO
     #initialized = false;
     #regl = null;
 
@@ -123,13 +128,10 @@ class Renderer {
     // This call encapsulates the common state between `drawNormal` and `drawDepth`
     #globalScope = null;
     #drawInstancedBoxesDepth = null;
-    #drawPlayerDepth = null;
     #drawInstancedBoxes = null;
-    #drawPlayer = null;
 
     constructor(targetCanvas) {
         this.#canvas = targetCanvas;
-        // devicePixelRatio
     }
 
     init(width, height) {
@@ -140,13 +142,12 @@ class Renderer {
         this.#regl = createREGL({
             canvas: this.#canvas,
             extensions: ["ANGLE_instanced_arrays", "oes_texture_float", "WEBGL_color_buffer_float"], // "WEBGL_depth_texture"
-            // attributes: {
-            //     antialias: this._antialias,
-            //     alpha: this._alpha,
-            //     premultipliedAlpha: false,
-            //     preserveDrawingBuffer: false,  // better perf on mobile
-            //     powerPreference: 'high-performance',
-            // },
+            attributes: { antialias: true, alpha: false, premultipliedAlpha: false, powerPreference: "high-performance" },
+
+            // powerPreference:
+            // 'high-performance' prioritize fast performance, not battery life
+            // 'default' lets the browser choose
+            // 'low-power' favors energy efficiency
         });
 
         // set up geometry buffers
@@ -265,7 +266,7 @@ class Renderer {
         // Add ground cube
         // style.platform height is needed to determine how far down below 0 the ground needs to be placed on Y axis
         const mapData = this.#mapData;
-        const index = mapData.platformCount; // ground is always last
+        const index = mapData.groundIndex;
         const indexTimes3 = index * 3;
 
         const translateY = -0.5 - style.platformHeight; // y = -0.5 since cubes origin is at its center
@@ -330,6 +331,14 @@ class Renderer {
         }
 
         this.#writeGroundInstance(style);
+
+        // Add static player data (scale and instance type)
+        const playerIndex = this.#mapData.playerIndex;
+        const playerIndexTimes3 = playerIndex * 3;
+        this.#mapData.scaleData[playerIndexTimes3] = 32;
+        this.#mapData.scaleData[playerIndexTimes3 + 1] = 32;
+        this.#mapData.scaleData[playerIndexTimes3 + 2] = 32;
+        this.#mapData.instanceTypeData[playerIndex] = 4;
     }
 
     #updateInstanceBuffersWithinRange(start, end) {
@@ -349,6 +358,21 @@ class Renderer {
         mapData.scaleBuffer.subdata(mapData.scaleData.subarray(start3, end3), start3 * 4);
         mapData.rotationBuffer.subdata(mapData.rotationData.subarray(start, end), start * 4);
         mapData.instanceTypeBuffer.subdata(mapData.instanceTypeData.subarray(start, end), start * 4);
+    }
+
+    #updateAndUploadPlayerInstance(player) {
+        const playerIndex = this.#mapData.playerIndex;
+        const playerIndexTimes3 = playerIndex * 3;
+
+        // Update CPU Side Data
+        this.#mapData.translateData[playerIndexTimes3] = player.x;
+        this.#mapData.translateData[playerIndexTimes3 + 1] = player.y + 16; // 16 is half of player
+        this.#mapData.translateData[playerIndexTimes3 + 2] = player.z;
+        this.#mapData.rotationData[playerIndex] = -player.angleRad;
+
+        // Upload to GPU
+        this.#mapData.translateBuffer.subdata(this.#mapData.translateData.subarray(playerIndexTimes3, playerIndexTimes3 + 3), playerIndexTimes3 * 4); // 4 because each float is 4 bytes
+        this.#mapData.rotationBuffer.subdata(this.#mapData.rotationData.subarray(playerIndex, playerIndex + 1), playerIndex * 4);
     }
 
     #updateMapStyle(style) {
@@ -383,6 +407,12 @@ class Renderer {
         return heightsChanged;
     }
 
+    setEditorMode(enabled) {
+        // In editor mode instance matrices are flagged as frequently updated, and instance buffers get spare capacity.
+        // Takes effect for instance meshes created from now on, so call it before setMapData.
+        this.editorMode = enabled;
+    }
+
     setMapData(mapDataObject) {
         // parses platform and style data from mapDataObject in this.#mapData
         //
@@ -391,11 +421,15 @@ class Renderer {
 
         const style = mapDataObject.style;
         const platformCount = mapDataObject.platforms.length;
-        const instanceCount = platformCount + 1; // +1 for ground
+        const groundIndex = platformCount; // index starts at 0. That's why there's no +1 here
+        const playerIndex = platformCount + 1;
+        const instanceCount = platformCount + 2; // platforms + ground + player
 
         this.#mapData = {
             instanceCount,
             platformCount,
+            groundIndex,
+            playerIndex,
 
             translateData: new Float32Array(instanceCount * 3),
             scaleData: new Float32Array(instanceCount * 3),
@@ -430,34 +464,18 @@ class Renderer {
         this.#writeAllInstances(mapDataObject);
 
         // assign GPU buffers
-        this.#mapData.translateBuffer = this.#regl.buffer(this.#mapData.translateData);
+        this.#mapData.translateBuffer = this.#regl.buffer({ data: this.#mapData.translateData, usage: "dynamic" });
         this.#mapData.scaleBuffer = this.#regl.buffer(this.#mapData.scaleData);
-        this.#mapData.rotationBuffer = this.#regl.buffer(this.#mapData.rotationData);
+        this.#mapData.rotationBuffer = this.#regl.buffer({ data: this.#mapData.rotationData, usage: "dynamic" });
         this.#mapData.instanceTypeBuffer = this.#regl.buffer(this.#mapData.instanceTypeData);
 
         this.#globalScope = this.#regl({
-            context: {
-                // light POSITION is at [0,0,0]
-                // lightVector: [-1.0, -1.0, -0.3], // example
-                lightVector: () => this.#mapData.lightVector,
-            },
             uniforms: {
-                lightVector: this.#regl.context("lightVector"),
-                lightView: (context) => {
-                    return mat4_lookAt(
-                        // giving the camera the "sun's" position and angle
-                        // this light-view-camera follows the cameras position
-                        [], // Output Matrix
-                        new Vector2D3D(this.#camera.x, 0, this.#camera.z), // light POSITION
-                        new Vector2D3D(context.lightVector[0] + this.#camera.x, context.lightVector[1], context.lightVector[2] + this.#camera.z), // light Direction Vector
-                        new Vector2D3D(0, 1, 0), // Up Vector
-                    );
-                },
-                lightProjection: () =>
-                    mat4_ortho([], -this.#camera.zoom / 2, this.#camera.zoom / 2, -this.#camera.zoom / 2, this.#camera.zoom / 2, -600, 800),
-                // lightProjection: mat4.ortho([], -200, 200, -200, 200, -600, 800), // near is negative because light position is (0,0,0)
-                // near and far plane distance is small if light is stright down. needs to be larger distance if light is as dramatic angle.
-                // bounds of this light change based on camera's zoom level.
+                lightVector: () => this.#mapData.lightVector,
+                lightView: () => this.#lightView,
+                lightProjection: () => this.#lightProjection,
+                projection: () => this.#projection,
+                view: () => this.#view,
             },
         });
 
@@ -547,75 +565,6 @@ class Renderer {
             `,
         });
 
-        this.#drawPlayerDepth = this.#regl({
-            attributes: {
-                position: {
-                    buffer: this.#positionBuffer,
-                    size: 3,
-                },
-            },
-
-            uniforms: {
-                // most uniforms covered by globalScope
-                translate: this.#regl.prop("translate"),
-                rotation: this.#regl.prop("rotation"),
-            },
-
-            elements: this.#boxElements,
-
-            cull: { enable: true },
-
-            vert: `
-            precision mediump float;
-
-            attribute vec3 position;
-
-            uniform vec3 translate;
-            uniform float rotation;
-            uniform mat4 lightProjection;
-            uniform mat4 lightView;
-
-            varying vec3 vPosition;
-
-            mat4 getModelMatrix(vec3 t, float r, vec3 s) {
-                mat4 model = mat4(1.0);
-                model[3].xyz = t;
-
-                float c = cos(r);
-                float sin_r = sin(r);
-                mat4 rotY = mat4(
-                vec4(c, 0, -sin_r, 0),
-                vec4(0, 1, 0, 0),
-                vec4(sin_r, 0, c, 0),
-                vec4(0, 0, 0, 1)
-                );
-
-                mat4 scl = mat4(
-                vec4(s.x, 0, 0, 0),
-                vec4(0, s.y, 0, 0),
-                vec4(0, 0, s.z, 0),
-                vec4(0, 0, 0, 1)
-                );
-
-                return model * rotY * scl;
-            }
-
-            void main() {
-                mat4 model = getModelMatrix(translate, rotation, vec3(32, 32, 32));
-                vec4 worldPosition = model * vec4(position, 1.0);
-                gl_Position = lightProjection * lightView * worldPosition;
-                vPosition = gl_Position.xyz;
-            }
-            `,
-            frag: `
-            precision mediump float;
-            varying vec3 vPosition;
-            void main () {
-                gl_FragColor = vec4(vPosition.z, 0.0, 0.0, 1.0);
-            }
-            `,
-        });
-
         this.#drawInstancedBoxes = this.#regl({
             attributes: {
                 position: {
@@ -649,48 +598,6 @@ class Renderer {
             },
 
             uniforms: {
-                projection: () =>
-                    mat4_ortho(
-                        [],
-                        // FIX FIX MOVE THIS TO A FUNCTION. or add the view and projection mat4s to the global scope because they
-                        // are used / repeated twice.
-
-                        // Military projection
-                        // Horizontal bounds are stretched by √2
-                        // This "squashes" the view horizontally when it tries to fit into a viewport that is NOT scaled by √2
-                        // the larger dimension of the screen (either width or height) will always be used as the dimension
-                        // that is equal to camera.zoom. The smaller dimmension will vary and be squished for military projection
-
-                        // when in portrait (height is GREATER than width) width needs to HAVE squashing
-                        // in portrait mode: height should be sqashed down to account for the 45deg angle of the camera showing more than we want
-
-                        // WIDTH
-                        -this.#camera.zoom * 0.5 * (screenHeight > screenWidth ? this.#aspectRatio : 1),
-                        this.#camera.zoom * 0.5 * (screenHeight > screenWidth ? this.#aspectRatio : 1),
-
-                        // when in landcape (height is LESS than width) height needs to HAVE squashing
-                        // HEIGHT
-                        (-this.#camera.zoom * 0.5) / (screenHeight < screenWidth ? this.#aspectRatio * squareRootOf2 : 1 * squareRootOf2),
-                        (this.#camera.zoom * 0.5) / (screenHeight < screenWidth ? this.#aspectRatio * squareRootOf2 : 1 * squareRootOf2),
-
-                        // Because the camera isnt looking straight down at the map (despite what military projection might look like)
-                        // The VERTICAL bounds of -camera.zoom to +camera.zoom will not map directly to world coodinates. Horizontal will though.
-                        // So having zoom be equal to how much of the world is visible only works on the horizontal axis unless
-                        // you took into account the 45deg angle of the camera by multipling zoom by sqrt of 2
-
-                        -2000,
-                        2000,
-                    ),
-
-                view: () =>
-                    mat4_lookAt(
-                        [],
-                        // Camera looks down at 45deg angle
-                        new Vector2D3D(this.#camera.x, 10, this.#camera.z + 10), // eye (camera position)
-                        new Vector2D3D(this.#camera.x, 0, this.#camera.z), // center (look at)
-                        new Vector2D3D(0, 1, 0), // Up
-                    ),
-
                 shadowMap: this.#fbo,
 
                 minBias: 0.001,
@@ -784,7 +691,7 @@ class Renderer {
             varying float vInstanceType;  // Per-instance type data
 
             // Uniforms (global shader inputs)
-            uniform sampler2D shadowMap;       // Shadow map texture (depth values from light’s POV)
+            uniform sampler2D shadowMap;       // Shadow map texture (depth values from light's POV)
             uniform vec3 lightVector;          // Direction of the light (not normalized)
             uniform float minBias;             // Minimum depth bias to avoid shadow artifacts
             uniform float maxBias;             // Maximum depth bias, used at glancing angles
@@ -880,202 +787,11 @@ class Renderer {
             }
         `,
         });
-
-        this.#drawPlayer = this.#regl({
-            attributes: {
-                position: {
-                    buffer: this.#positionBuffer,
-                    size: 3,
-                },
-                normal: {
-                    buffer: this.#normalBuffer,
-                    size: 3,
-                },
-            },
-
-            uniforms: {
-                // extract projection and view into global scope because they are used twice
-                projection: () =>
-                    mat4_ortho(
-                        [],
-                        -this.#camera.zoom * 0.5 * (screenHeight > screenWidth ? this.#aspectRatio : 1),
-                        this.#camera.zoom * 0.5 * (screenHeight > screenWidth ? this.#aspectRatio : 1),
-                        (-this.#camera.zoom * 0.5) / (screenHeight < screenWidth ? this.#aspectRatio * squareRootOf2 : 1 * squareRootOf2),
-                        (this.#camera.zoom * 0.5) / (screenHeight < screenWidth ? this.#aspectRatio * squareRootOf2 : 1 * squareRootOf2),
-                        -2000,
-                        2000,
-                    ),
-
-                view: () =>
-                    mat4_lookAt(
-                        [],
-                        new Vector2D3D(this.#camera.x, 10, this.#camera.z + 10), // eye (camera position)
-                        new Vector2D3D(this.#camera.x, 0, this.#camera.z), // center (look at)
-                        new Vector2D3D(0, 1, 0), // Up
-                    ),
-
-                shadowMap: this.#fbo,
-
-                minBias: 0.001,
-                maxBias: 0.01,
-
-                // translations = translations.concat([mapDataObject.playerStart.x, mapDataObject.style.platformHeight + 16, mapDataObject.playerStart.y]); // +16 becasue player is 32 tall
-                // scales = scales.concat([32, 32, 32]);
-                // rotations.push((-mapDataObject.playerStart.angle * Math.PI) / 180)
-                translate: this.#regl.prop("translate"),
-                rotation: this.#regl.prop("rotation"),
-
-                ambientLight: () => this.#mapData.ambientLight,
-                directLight: () => this.#mapData.directLight,
-                playerColor: () => this.#mapData.playerColor,
-            },
-
-            elements: this.#boxElements,
-
-            cull: { enable: true },
-
-            vert: `
-            precision mediump float;
-
-            attribute vec3 position;
-            attribute vec3 normal;
-
-            uniform vec3 translate;
-            uniform float rotation;
-
-            uniform mat4 projection;
-            uniform mat4 view;
-            uniform mat4 lightProjection;
-            uniform mat4 lightView;
-
-            varying vec3 vNormal;
-            varying vec3 vShadowCoord;
-
-            mat4 getModelMatrix(vec3 t, float r, vec3 s) {
-                mat4 model = mat4(1.0);
-                model[3].xyz = t;
-
-                float c = cos(r);
-                float sin_r = sin(r);
-                mat4 rotY = mat4(
-                vec4(c, 0, -sin_r, 0),
-                vec4(0, 1, 0, 0),
-                vec4(sin_r, 0, c, 0),
-                vec4(0, 0, 0, 1)
-                );
-
-                mat4 scl = mat4(
-                vec4(s.x, 0, 0, 0),
-                vec4(0, s.y, 0, 0),
-                vec4(0, 0, s.z, 0),
-                vec4(0, 0, 0, 1)
-                );
-
-                return model * rotY * scl;
-            }
-
-            void main() {
-                mat4 model = getModelMatrix(translate, rotation, vec3(32, 32, 32));
-
-                vec4 worldPosition = model * vec4(position, 1.0);
-                gl_Position = projection * view * worldPosition;
-
-                vNormal = mat3(model) * normal;
-                vShadowCoord = (lightProjection * lightView * worldPosition).xyz; // just get the vec3 not vec4
-            }
-            `,
-
-            // The shadow coordinate transform is incomplete. In the vertex shader, vShadowCoord is computed but not divided by w.
-            // For orthographic projection this doesn't matter (w=1), but the coordinate is in NDC range [-1, 1] on Z,
-            // yet you compare it directly against the shadow map depth which was stored as vPosition.z (also NDC range).
-            // This works, but the depth pass stores vPosition.z which ranges from -1 to 1 while typical shadow maps store 0 to 1.
-            // The bias values (0.001/0.01) may be tuned to compensate but this is fragile.
-
-            frag: `
-            precision mediump float;
-
-            // Varying inputs from the vertex shader
-            varying vec3 vNormal;         // Interpolated surface normal (world space or view space)
-            varying vec3 vShadowCoord;    // Fragment position in light's projection space (for shadow lookup)
-
-            // Uniforms (global shader inputs)
-            uniform sampler2D shadowMap;       // Shadow map texture (depth values from light’s POV)
-            uniform vec3 lightVector;          // Direction of the light (not normalized)
-            uniform float minBias;             // Minimum depth bias to avoid shadow artifacts
-            uniform float maxBias;             // Maximum depth bias, used at glancing angles
-
-            uniform vec3 ambientLight;
-            uniform vec3 directLight;
-            uniform vec3 playerColor;
-
-            // Constant: size of one texel in the shadow map
-            #define texelSize (1.0 / float(${this.#SHADOW_RES})) // SHADOW_RES replaced by actual resolution at compile time
-
-
-            // Compare depth map point to projected point
-            float shadowSample(vec2 uv, float fragDepth, float bias) {
-                float shadowMapDepth = texture2D(shadowMap, uv).r;  // Depth from the shadow map
-                return step(fragDepth - bias, shadowMapDepth);      // Returns 1.0 if not in shadow, 0.0 if in shadow
-            }
-
-            void main() {
-
-                // determine if pixel should use top or side color
-                bool isTop = (vNormal.y > 0.0);
-
-                vec3 topColor = playerColor;
-                vec3 sideColor = playerColor;
-                
-                // set appropriate base color for pixel
-                vec3 baseColor = isTop ? topColor : sideColor;
-
-                // Lighting: Ambient + Diffuse
-                vec3 ambient = ambientLight * baseColor;
-
-                // Calculate diffuse lighting using Lambert's cosine law
-                float cosTheta = dot(normalize(vNormal), -normalize(lightVector));
-                float diffuseStrength = clamp(cosTheta, 0.0, 1.0);
-                vec3 diffuse = directLight * baseColor * diffuseStrength;
-
-                // Shadow Bias Calculation
-                // Avoids shadow acne by offsetting the fragment's depth
-                float bias = max(maxBias * (1.0 - cosTheta), minBias);
-
-                // Shadow Map Coordinates
-                // Transform shadow coord from NDC space (-1..1) to UV space (0..1)
-                vec2 uv = vShadowCoord.xy * 0.5 + 0.5;
-
-
-                // Shadow Sampling with PCF (2x2 filter)
-                float shadowFactor = 1.0; // Default: fully lit
-
-                // Sample depth at 4 neighboring texels and average
-                float s0 = shadowSample(uv + texelSize * vec2(0.0, 0.0), vShadowCoord.z, bias);
-                float s1 = shadowSample(uv + texelSize * vec2(1.0, 0.0), vShadowCoord.z, bias);
-                float s2 = shadowSample(uv + texelSize * vec2(0.0, 1.0), vShadowCoord.z, bias);
-                float s3 = shadowSample(uv + texelSize * vec2(1.0, 1.0), vShadowCoord.z, bias);
-                shadowFactor = (s0 + s1 + s2 + s3) * 0.25;
-
-
-                // Edge Case: Outside of Shadow Map
-                // If the projected shadow coordinate is outside the light's frustum, assume fully lit
-                if (uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0) {
-                    shadowFactor = 1.0;
-                }
-
-                // Final Color Output: Combine ambient and shadowed diffuse lighting
-                vec3 finalColor = ambient + diffuse * shadowFactor;
-
-                // Output the final color with full opacity
-                gl_FragColor = vec4(finalColor, 1.0);
-            }
-        `,
-        });
     }
 
     updateMapData(mapDataObject) {
         // Syncs the renderer with an updated Map object (usually from MapEditor)
-        // detects changes platforms on the CPU and only changed instances are uploaded/revised in the buffers on the  GPU        
+        // detects changes platforms on the CPU and only changed instances are uploaded/revised in the buffers on the  GPU
         if (!this.#initialized) return;
 
         // No existing map data
@@ -1095,15 +811,15 @@ class Renderer {
         const heightsChanged = this.#updateMapStyle(mapDataObject.style);
 
         let firstChanged = this.#mapData.platformCount; // starts at the end of the array and moves towards the start as changed items are found
-        let lastChanged = -1; // starts at the start of the array and moves towards the end of the array as changed items are found 
+        let lastChanged = -1; // starts at the start of the array and moves towards the end of the array as changed items are found
 
         // FIX
         // Instead of searching through all the platforms to figure out which have changed,
         // have MapEditor pass the info which ones have changed. It should already know
 
         for (let i = 0; i < platforms.length; i++) {
-            if (this.#writePlatformInstance(i, platforms[i], mapDataObject.style)) { 
-                // if this platform DOES need to get changed then writePlatformInstance returns true the following runs vvv 
+            if (this.#writePlatformInstance(i, platforms[i], mapDataObject.style)) {
+                // if this platform DOES need to get changed then writePlatformInstance returns true the following runs vvv
                 if (i < firstChanged) firstChanged = i;
                 lastChanged = i;
             }
@@ -1113,12 +829,12 @@ class Renderer {
             // Changing platform height also moves the ground cubes y position
             if (this.#writeGroundInstance(mapDataObject.style)) {
                 firstChanged = Math.min(firstChanged, this.#mapData.platformCount);
-                lastChanged = this.#mapData.platformCount; 
+                lastChanged = this.#mapData.platformCount;
             }
         }
 
         if (lastChanged >= firstChanged) {
-            // only update a specific range within the GPU buffers, no need to rewrite them all 
+            // only update a specific range within the GPU buffers, no need to rewrite them all
             this.#updateInstanceBuffersWithinRange(firstChanged, lastChanged + 1);
         }
     }
@@ -1142,24 +858,79 @@ class Renderer {
     }
 
     drawFrame(player) {
+        // UPDATE LIGHT VIEW
+        mat4_lookAt(
+            // giving the camera the "sun's" position and angle
+            // this light-view-camera follows the cameras position
+            this.#lightView, // Output Matrix
+            new Vector2D3D(this.#camera.x, 0, this.#camera.z), // light POSITION
+            new Vector2D3D(
+                this.#mapData.lightVector[0] + this.#camera.x,
+                this.#mapData.lightVector[1],
+                this.#mapData.lightVector[2] + this.#camera.z,
+            ), // light Direction Vector
+            Math.abs(this.#mapData.lightVector[1]) > 0.999 ? new Vector2D3D(0, 0, -1) : new Vector2D3D(0, 1, 0), // Up Vector. Swap with alternative up vector when light vector comes close to vertical
+        );
+
+        // UPDATE LIGHT PROJECTION
+        mat4_ortho(this.#lightProjection, -this.#camera.zoom / 2, this.#camera.zoom / 2, -this.#camera.zoom / 2, this.#camera.zoom / 2, -600, 800);
+        // near plane is negative because light position is (0,0,0)
+        // near and far plane distance is small if light is stright down. needs to be larger distance if light is as dramatic angle.
+        // bounds of this light change based on camera's zoom level. FIX
+
+        // UPDATE PROJECTION
+        mat4_ortho(
+            this.#projection, // array to write to / update
+
+            // Military projection
+            // Horizontal bounds are stretched by √2
+            // This "squashes" the view horizontally when it tries to fit into a viewport that is NOT scaled by √2
+            // the larger dimension of the screen (either width or height) will always be used as the dimension
+            // that is equal to camera.zoom. The smaller dimmension will vary and be squished for military projection
+
+            // when in portrait (height is GREATER than width) width needs to HAVE squashing
+            // in portrait mode: height should be sqashed down to account for the 45deg angle of the camera showing more than we want
+
+            // WIDTH
+            -this.#camera.zoom * 0.5 * (screenHeight > screenWidth ? this.#aspectRatio : 1),
+            this.#camera.zoom * 0.5 * (screenHeight > screenWidth ? this.#aspectRatio : 1),
+
+            // when in landcape (height is LESS than width) height needs to HAVE squashing
+            // HEIGHT
+            (-this.#camera.zoom * 0.5) / (screenHeight < screenWidth ? this.#aspectRatio * Math.SQRT2 : 1 * Math.SQRT2),
+            (this.#camera.zoom * 0.5) / (screenHeight < screenWidth ? this.#aspectRatio * Math.SQRT2 : 1 * Math.SQRT2),
+
+            // Because the camera isnt looking straight down at the map (despite what military projection might look like)
+            // The VERTICAL bounds of -camera.zoom to +camera.zoom will not map directly to world coodinates. Horizontal will though.
+            // So having zoom be equal to how much of the world is visible only works on the horizontal axis unless
+            // you took into account the 45deg angle of the camera by multipling zoom by sqrt of 2
+
+            -2000,
+            2000,
+        );
+
+        // UPDATE VIEW
+        mat4_lookAt(
+            this.#view,
+            // Camera looks down at 45deg angle
+            new Vector2D3D(this.#camera.x, 10, this.#camera.z + 10), // eye (camera position)
+            new Vector2D3D(this.#camera.x, 0, this.#camera.z), // center (look at)
+            new Vector2D3D(0, 1, 0), // Up
+        );
+
+        this.#updateAndUploadPlayerInstance(player);
+
         this.#globalScope(() => {
             // Shadow pass (to shadow map)
             this.#fbo.use(() => {
                 this.#regl.clear({ color: [1, 1, 1, 1], depth: 1 });
                 this.#drawInstancedBoxesDepth();
-                this.#drawPlayerDepth({
-                    translate: [player.x, player.y + 16, player.z], // +16 to that players "origin" is at its base
-                    rotation: -player.angleRad,
-                });
             });
 
             // Color pass (main scene with shadows)
-            this.#drawInstancedBoxes();
+            this.#regl.clear({ color: [1, 0, 0, 1], depth: 1 }); // use bg color here. this allocates every frame. fix
 
-            this.#drawPlayer({
-                translate: [player.x, player.y + 16, player.z], // +16 to that players "origin" is at its base
-                rotation: -player.angleRad,
-            });
+            this.#drawInstancedBoxes();
         });
     }
 
