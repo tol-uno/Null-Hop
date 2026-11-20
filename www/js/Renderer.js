@@ -35,6 +35,11 @@ class Renderer {
         zoom: 300,
     };
 
+    #halfX = 0;
+    #halfZ = 0;
+    #shadowNormalOffset = 0;
+    #shadowDepthBias = 0;
+
     #lightView = new Float32Array(16);
     #lightProjection = new Float32Array(16);
     #projection = new Float32Array(16);
@@ -45,7 +50,8 @@ class Renderer {
     #regl = null;
 
     #SHADOW_RES = 1024;
-    #fbo = null;
+    #shadowMap = null;
+    #shadowFrameBufferObject = null;
 
     #positionBuffer = null;
     #normalBuffer = null;
@@ -141,7 +147,7 @@ class Renderer {
 
         this.#regl = createREGL({
             canvas: this.#canvas,
-            extensions: ["ANGLE_instanced_arrays", "oes_texture_float", "WEBGL_color_buffer_float"], // "WEBGL_depth_texture"
+            extensions: ["ANGLE_instanced_arrays", "WEBGL_depth_texture"],
             attributes: { antialias: true, alpha: false, premultipliedAlpha: false, powerPreference: "high-performance" },
 
             // powerPreference:
@@ -161,14 +167,23 @@ class Renderer {
             type: "float32", // maybe not float?
         });
 
-        this.#fbo = this.#regl.framebuffer({
-            color: this.#regl.texture({
+        this.#shadowMap = this.#regl.texture({
+            width: this.#SHADOW_RES,
+            height: this.#SHADOW_RES,
+            format: "depth",
+            type: "uint32",
+            min: "nearest",
+            mag: "nearest", // minification and magnification algorithms
+        });
+
+        this.#shadowFrameBufferObject = this.#regl.framebuffer({
+            color: this.#regl.renderbuffer({
+                // Unused, but required to create a complete framebuffer
                 width: this.#SHADOW_RES,
                 height: this.#SHADOW_RES,
-                wrap: "clamp",
-                type: "float",
+                format: "rgb565", // 2 bytes/pixel
             }),
-            depth: true,
+            depth: this.#shadowMap,
         });
 
         this.#initialized = true;
@@ -190,8 +205,8 @@ class Renderer {
         this.#mapData = null; // gets rid of all color properties and lightvector
     }
 
-    #writePlatformInstance(index, platform, style) {
-        // Update a single platform within the CPU side instance data
+    #updatePlatformInstanceArrays(index, platform, style) {
+        // Add/Update a single platform within the 4 CPU side instance data arrays
         // Returns "true" if something actually changed
         const mapData = this.#mapData;
         const indexTimes3 = index * 3;
@@ -262,8 +277,8 @@ class Renderer {
         return changed;
     }
 
-    #writeGroundInstance(style) {
-        // Add ground cube
+    #updateGroundInstanceArrays(style) {
+        // Add/Update ground cube to the 4 CPU side instance buffers
         // style.platform height is needed to determine how far down below 0 the ground needs to be placed on Y axis
         const mapData = this.#mapData;
         const index = mapData.groundIndex;
@@ -321,16 +336,16 @@ class Renderer {
         return changed;
     }
 
-    // combine writePlatformInstance and writeGroundInstance
-    #writeAllInstances(mapDataObject) {
+    // Used to seed initial CPU-side instance arrays. Combines updatePlatformInstanceArrays and updateGroundInstanceArrays
+    #populateCpuInstanceArrays(mapDataObject) {
         const style = mapDataObject.style;
         const platforms = mapDataObject.platforms;
 
         for (let i = 0; i < platforms.length; i++) {
-            this.#writePlatformInstance(i, platforms[i], style);
+            this.#updatePlatformInstanceArrays(i, platforms[i], style);
         }
 
-        this.#writeGroundInstance(style);
+        this.#updateGroundInstanceArrays(style);
 
         // Add static player data (scale and instance type)
         const playerIndex = this.#mapData.playerIndex;
@@ -342,25 +357,25 @@ class Renderer {
     }
 
     #updateInstanceBuffersWithinRange(start, end) {
-        // update data in all buffers but only in the specified range
+        // update specified sub-section of data within the 4 GPU buffers
         // end param is "exclusive"
         // Offsets passed to subdata are in bytes (4 bytes per float).
 
-        // Translate and scale store 3 floats per instance (x, y, z),
+        // The translateBuffer and scaleBuffer store 3 floats per instance (x, y, z),
         // so convert instance indices to float indices.
         const mapData = this.#mapData;
         const start3 = start * 3;
         const end3 = end * 3;
 
         // Each float is 4 bytes, so the byte offset is the float index * 4.
-        // .subdata(data, byteOffset) copies `data` into the buffer starting at `byteOffset`.
+        // .subdata(data, byteOffset) copies data from the CPU arrays into the GPU buffer starting at byteOffset.
         mapData.translateBuffer.subdata(mapData.translateData.subarray(start3, end3), start3 * 4);
         mapData.scaleBuffer.subdata(mapData.scaleData.subarray(start3, end3), start3 * 4);
         mapData.rotationBuffer.subdata(mapData.rotationData.subarray(start, end), start * 4);
         mapData.instanceTypeBuffer.subdata(mapData.instanceTypeData.subarray(start, end), start * 4);
     }
 
-    #updateAndUploadPlayerInstance(player) {
+    #updatePlayerInstanceArraysAndBuffers(player) {
         const playerIndex = this.#mapData.playerIndex;
         const playerIndexTimes3 = playerIndex * 3;
 
@@ -371,6 +386,7 @@ class Renderer {
         this.#mapData.rotationData[playerIndex] = -player.angleRad;
 
         // Upload to GPU
+        // .subdata(data, byteOffset) copies data from the CPU arrays into the GPU buffer starting at byteOffset.
         this.#mapData.translateBuffer.subdata(this.#mapData.translateData.subarray(playerIndexTimes3, playerIndexTimes3 + 3), playerIndexTimes3 * 4); // 4 because each float is 4 bytes
         this.#mapData.rotationBuffer.subdata(this.#mapData.rotationData.subarray(playerIndex, playerIndex + 1), playerIndex * 4);
     }
@@ -407,6 +423,89 @@ class Renderer {
         return heightsChanged;
     }
 
+    #updateHalfGroundExtents() {
+        // update the half-extents (in world units) of the visible ground rectangle that is visible in the camera
+        const half = this.#camera.zoom * 0.5;
+
+        if (this.#aspectRatio < 1) {
+            this.#halfX = half * this.#aspectRatio;
+            this.#halfZ = half;
+        } else {
+            this.#halfX = half;
+            this.#halfZ = half / this.#aspectRatio;
+        }
+    }
+
+    #updateLightMatrices(yMin, yMax) {
+        // UPDATE LIGHT VIEW
+        // Light view from a FIXED origin so the shadow map can be texel-snapped
+        mat4_lookAt(
+            this.#lightView, // Output Matrix
+            new Vector2D3D(0, 0, 0), // light POSITION
+            new Vector2D3D(this.#mapData.lightVector[0], this.#mapData.lightVector[1], this.#mapData.lightVector[2]), // light Direction Vector (where to look)
+            Math.abs(this.#mapData.lightVector[1]) > 0.999 ? new Vector2D3D(0, 0, -1) : new Vector2D3D(0, 1, 0), // Up Vector. Swap with alternative up vector when light vector comes close to vertical
+        );
+
+        // Project the 8 corners of the visible world box into light space (column-major) idk what column major means...
+        let minX = Infinity,
+            maxX = -Infinity;
+        let minY = Infinity,
+            maxY = -Infinity;
+        let minZ = Infinity,
+            maxZ = -Infinity;
+
+        // Visit all 8 corners of the box.
+        // Each bit of cornerIndex selects one of the two sides on an axis:
+        // bit 0: low/high Y, bit 1: left/right X, bit 2: near/far Z.
+        for (let cornerIndex = 0; cornerIndex < 8; cornerIndex++) {
+            const isUpperY = (cornerIndex & 1) !== 0;
+            const isPositiveX = (cornerIndex & 2) !== 0;
+            const isPositiveZ = (cornerIndex & 4) !== 0;
+
+            const worldY = isUpperY ? yMax : yMin;
+            const worldX = this.#camera.x + (isPositiveX ? this.#halfX : -this.#halfX);
+
+            // With the 45° camera, height also shifts the corner along Z.
+            const worldZ = this.#camera.z + worldY + (isPositiveZ ? this.#halfZ : -this.#halfZ);
+
+            // Transform this corner into view space.
+            const viewX = this.#lightView[0] * worldX + this.#lightView[4] * worldY + this.#lightView[8] * worldZ + this.#lightView[12];
+
+            const viewY = this.#lightView[1] * worldX + this.#lightView[5] * worldY + this.#lightView[9] * worldZ + this.#lightView[13];
+
+            const viewZ = this.#lightView[2] * worldX + this.#lightView[6] * worldY + this.#lightView[10] * worldZ + this.#lightView[14];
+
+            // Expand the view-space bounds to include this corner.
+            minX = Math.min(minX, viewX);
+            maxX = Math.max(maxX, viewX);
+            minY = Math.min(minY, viewY);
+            maxY = Math.max(maxY, viewY);
+            minZ = Math.min(minZ, viewZ);
+            maxZ = Math.max(maxZ, viewZ);
+        }
+
+        // Square bounds (for uniform texels) + 2 texels of padding per side for 3x3 Percentage-closer filtering (PCF)
+        const size = Math.max(maxX - minX, maxY - minY) * (1 + 4 / this.#SHADOW_RES); // choose the largest bound (either x or y) and multiply it larger for padding
+        const texel = size / this.#SHADOW_RES;
+
+        // Snap the center to whole texels so shadows don't swim while panning (unnessasary really... i dont mind a little swim)
+        const centerX = Math.round(((minX + maxX) * 0.5) / texel) * texel;
+        const centerY = Math.round(((minY + maxY) * 0.5) / texel) * texel;
+        const half = size * 0.5;
+
+        // Shadow casters between the sun and the visible area: anything in the [yMin, yMax]
+        // slab can cast a shadow, so extend the near plane toward the light by that reach of the shadows.
+        const reach = (yMax - yMin) / Math.max(Math.abs(this.#mapData.lightVector[1]), 0.1);
+        const near = -(maxZ + reach); // view space looks down -z
+        const far = -minZ + 1;
+
+        mat4_ortho(this.#lightProjection, centerX - half, centerX + half, centerY - half, centerY + half, near, far);
+
+        // Bias scales with texel size, so it behaves the same at every zoom
+        this.#shadowNormalOffset = texel * 1.5; // world units
+        this.#shadowDepthBias = (texel * 0.5) / (far - near); // depth is linear in ortho projection
+    }
+
     setEditorMode(enabled) {
         // In editor mode instance matrices are flagged as frequently updated, and instance buffers get spare capacity.
         // Takes effect for instance meshes created from now on, so call it before setMapData.
@@ -415,18 +514,19 @@ class Renderer {
 
     setMapData(mapDataObject) {
         // parses platform and style data from mapDataObject in this.#mapData
-        //
 
         this.#destroyMapDataBuffers();
 
         const style = mapDataObject.style;
         const platformCount = mapDataObject.platforms.length;
-        const groundIndex = platformCount; // index starts at 0. That's why there's no +1 here
-        const playerIndex = platformCount + 1;
+        const playerIndex = platformCount; // index starts at 0. That's why there's no +1 here
+        const groundIndex = platformCount + 1;
         const instanceCount = platformCount + 2; // platforms + ground + player
+        const shadowCasterCount = platformCount + 1; // platforms + player but NO GROUND
 
         this.#mapData = {
             instanceCount,
+            shadowCasterCount,
             platformCount,
             groundIndex,
             playerIndex,
@@ -461,7 +561,7 @@ class Renderer {
         };
 
         // write all CPU-side arrays of instanced data
-        this.#writeAllInstances(mapDataObject);
+        this.#populateCpuInstanceArrays(mapDataObject);
 
         // assign GPU buffers
         this.#mapData.translateBuffer = this.#regl.buffer({ data: this.#mapData.translateData, usage: "dynamic" });
@@ -503,28 +603,25 @@ class Renderer {
                 },
             },
 
-            uniforms: {
-                // all uniforms covered by globalScope
-            },
-
             elements: this.#boxElements,
 
-            instances: this.#mapData.instanceCount,
+            framebuffer: this.#shadowFrameBufferObject,
+
+            instances: this.#mapData.shadowCasterCount, // this excludes the ground from shadow pass
+            colorMask: [false, false, false, false], // depth only
 
             cull: { enable: true },
 
             vert: `
-            precision mediump float;
+            precision highp float;
 
             attribute vec3 position;
             attribute vec3 translate;
             attribute vec3 scale;
             attribute float rotation;
 
-            uniform mat4 lightProjection;
+            uniform mat4 lightProjection; // no need to import both of these. multiply them OUTSIDE the shader FIX
             uniform mat4 lightView;
-
-            varying vec3 vPosition;
 
             mat4 getModelMatrix(vec3 t, float r, vec3 s) {
                 mat4 model = mat4(1.0);
@@ -553,14 +650,12 @@ class Renderer {
                 mat4 model = getModelMatrix(translate, rotation, scale);
                 vec4 worldPosition = model * vec4(position, 1.0);
                 gl_Position = lightProjection * lightView * worldPosition;
-                vPosition = gl_Position.xyz;
             }
             `,
             frag: `
             precision mediump float;
-            varying vec3 vPosition;
             void main () {
-                gl_FragColor = vec4(vPosition.z, 0.0, 0.0, 1.0);
+                gl_FragColor = vec4(1.0);
             }
             `,
         });
@@ -598,10 +693,9 @@ class Renderer {
             },
 
             uniforms: {
-                shadowMap: this.#fbo,
-
-                minBias: 0.001,
-                maxBias: 0.01,
+                shadowMap: this.#shadowMap,
+                shadowNormalOffset: () => this.#shadowNormalOffset,
+                shadowDepthBias: () => this.#shadowDepthBias,
 
                 ambientLight: () => this.#mapData.ambientLight,
                 backgroundColor: () => this.#mapData.backgroundColor,
@@ -622,7 +716,7 @@ class Renderer {
             cull: { enable: true },
 
             vert: `
-            precision mediump float;
+            precision highp float;
 
             attribute vec3 position;
             attribute vec3 normal;
@@ -636,9 +730,10 @@ class Renderer {
             uniform mat4 view;
             uniform mat4 lightProjection;
             uniform mat4 lightView;
+            uniform float shadowNormalOffset;
 
             varying vec3 vNormal;
-            varying vec3 vShadowCoord;
+            varying vec4 vLightPos;
             varying float vInstanceType;
 
             mat4 getModelMatrix(vec3 t, float r, vec3 s) {
@@ -671,30 +766,24 @@ class Renderer {
                 gl_Position = projection * view * worldPosition;
 
                 vNormal = mat3(model) * normal;
-                vShadowCoord = (lightProjection * lightView * worldPosition).xyz; // just get the vec3 not vec4
+                vec3 offsetPos = worldPosition.xyz + normalize(vNormal) * shadowNormalOffset;
+                vLightPos = lightProjection * lightView * vec4(offsetPos, 1.0); // position as seen by the sun
                 vInstanceType = instanceType; // pass to fragment shader
             }
             `,
 
-            // The shadow coordinate transform is incomplete. In the vertex shader, vShadowCoord is computed but not divided by w.
-            // For orthographic projection this doesn't matter (w=1), but the coordinate is in NDC range [-1, 1] on Z,
-            // yet you compare it directly against the shadow map depth which was stored as vPosition.z (also NDC range).
-            // This works, but the depth pass stores vPosition.z which ranges from -1 to 1 while typical shadow maps store 0 to 1.
-            // The bias values (0.001/0.01) may be tuned to compensate but this is fragile.
-
             frag: `
-            precision mediump float;
+            precision highp float;
 
             // Varying inputs from the vertex shader
             varying vec3 vNormal;         // Interpolated surface normal (world space or view space)
-            varying vec3 vShadowCoord;    // Fragment position in light's projection space (for shadow lookup)
+            varying vec4 vLightPos;       // Fragment position in light's projection space (for shadow lookup)
             varying float vInstanceType;  // Per-instance type data
 
             // Uniforms (global shader inputs)
             uniform sampler2D shadowMap;       // Shadow map texture (depth values from light's POV)
             uniform vec3 lightVector;          // Direction of the light (not normalized)
-            uniform float minBias;             // Minimum depth bias to avoid shadow artifacts
-            uniform float maxBias;             // Maximum depth bias, used at glancing angles
+            uniform float shadowDepthBias;     // [add comment about what this is]
 
             uniform vec3 ambientLight;
             uniform vec3 backgroundColor;
@@ -707,15 +796,7 @@ class Renderer {
             uniform vec3 wallSideColor;
             uniform vec3 wallTopColor;
 
-            // Constant: size of one texel in the shadow map
-            #define texelSize (1.0 / float(${this.#SHADOW_RES})) // SHADOW_RES replaced by actual resolution at compile time
-
-
-            // Compare depth map point to projected point
-            float shadowSample(vec2 uv, float fragDepth, float bias) {
-                float shadowMapDepth = texture2D(shadowMap, uv).r;  // Depth from the shadow map
-                return step(fragDepth - bias, shadowMapDepth);      // Returns 1.0 if not in shadow, 0.0 if in shadow
-            }
+            const float SHADOW_TEXEL = 1.0 / float(${this.#SHADOW_RES});
 
             void main() {
 
@@ -752,35 +833,37 @@ class Renderer {
                 float cosTheta = dot(normalize(vNormal), -normalize(lightVector));
                 float diffuseStrength = clamp(cosTheta, 0.0, 1.0);
                 vec3 diffuse = directLight * baseColor * diffuseStrength;
+                float bias = shadowDepthBias * (1.0 + 2.0 * (1.0 - diffuseStrength)); // slope-scaled bias
 
-                // Shadow Bias Calculation
-                // Avoids shadow acne by offsetting the fragment's depth
-                float bias = max(maxBias * (1.0 - cosTheta), minBias);
+                // Shadow mapping: perspective divide, then NDC (Normalized Device Space) (-1..1) --> texture space (0..1)
+                vec3 shadowCoord = vLightPos.xyz / vLightPos.w * 0.5 + 0.5;
 
-                // Shadow Map Coordinates
-                // Transform shadow coord from NDC space (-1..1) to UV space (0..1)
-                vec2 uv = vShadowCoord.xy * 0.5 + 0.5;
+                // 3x3 Percentage-closer filtering (PCF) with a fixed bias. Blurs shadows
+                float lit = 0.0;
+                
+                const bool USE_PCF = false; // temp KILL eventually
+                if (USE_PCF) {           
+                    for (int x = -1; x <= 1; x++) {
+                        for (int y = -1; y <= 1; y++) {
+                            vec2 offset = vec2(float(x), float(y)) * SHADOW_TEXEL;
+                            float closest = texture2D(shadowMap, shadowCoord.xy + offset).r;
+                            lit += (shadowCoord.z - bias > closest) ? 0.0 : 1.0;
+                        }
+                    }
+                    lit /= 9.0;  // 3 x 3 = 9
+                } else {
+                    // SKIP PCF FILTERING
+                    float closest = texture2D(shadowMap, shadowCoord.xy).r;
+                    lit = (shadowCoord.z - bias > closest) ? 0.0 : 1.0;
+                }
 
-
-                // Shadow Sampling with PCF (2x2 filter)
-                float shadowFactor = 1.0; // Default: fully lit
-
-                // Sample depth at 4 neighboring texels and average
-                float s0 = shadowSample(uv + texelSize * vec2(0.0, 0.0), vShadowCoord.z, bias);
-                float s1 = shadowSample(uv + texelSize * vec2(1.0, 0.0), vShadowCoord.z, bias);
-                float s2 = shadowSample(uv + texelSize * vec2(0.0, 1.0), vShadowCoord.z, bias);
-                float s3 = shadowSample(uv + texelSize * vec2(1.0, 1.0), vShadowCoord.z, bias);
-                shadowFactor = (s0 + s1 + s2 + s3) * 0.25;
-
-
-                // Edge Case: Outside of Shadow Map
-                // If the projected shadow coordinate is outside the light's frustum, assume fully lit
-                if (uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0) {
-                    shadowFactor = 1.0;
+                // If the projected shadow coordinate is outside the light's frustum, assume it's fully lit
+                if (shadowCoord.x < 0.0 || shadowCoord.x > 1.0 || shadowCoord.y < 0.0 || shadowCoord.y > 1.0 || shadowCoord.z > 1.0) {
+                    lit = 1.0;
                 }
 
                 // Final Color Output: Combine ambient and shadowed diffuse lighting
-                vec3 finalColor = ambient + diffuse * shadowFactor;
+                vec3 finalColor = ambient + diffuse * lit;
 
                 // Output the final color with full opacity
                 gl_FragColor = vec4(finalColor, 1.0);
@@ -818,8 +901,8 @@ class Renderer {
         // have MapEditor pass the info which ones have changed. It should already know
 
         for (let i = 0; i < platforms.length; i++) {
-            if (this.#writePlatformInstance(i, platforms[i], mapDataObject.style)) {
-                // if this platform DOES need to get changed then writePlatformInstance returns true the following runs vvv
+            if (this.#updatePlatformInstanceArrays(i, platforms[i], mapDataObject.style)) {
+                // if this platform DOES need to get changed then updatePlatformInstanceArrays returns true the following runs vvv
                 if (i < firstChanged) firstChanged = i;
                 lastChanged = i;
             }
@@ -827,9 +910,9 @@ class Renderer {
 
         if (heightsChanged) {
             // Changing platform height also moves the ground cubes y position
-            if (this.#writeGroundInstance(mapDataObject.style)) {
-                firstChanged = Math.min(firstChanged, this.#mapData.platformCount);
-                lastChanged = this.#mapData.platformCount;
+            if (this.#updateGroundInstanceArrays(mapDataObject.style)) {
+                firstChanged = Math.min(firstChanged, this.#mapData.groundIndex);
+                lastChanged = this.#mapData.groundIndex;
             }
         }
 
@@ -858,55 +941,34 @@ class Renderer {
     }
 
     drawFrame(player) {
-        // UPDATE LIGHT VIEW
-        mat4_lookAt(
-            // giving the camera the "sun's" position and angle
-            // this light-view-camera follows the cameras position
-            this.#lightView, // Output Matrix
-            new Vector2D3D(this.#camera.x, 0, this.#camera.z), // light POSITION
-            new Vector2D3D(
-                this.#mapData.lightVector[0] + this.#camera.x,
-                this.#mapData.lightVector[1],
-                this.#mapData.lightVector[2] + this.#camera.z,
-            ), // light Direction Vector
-            Math.abs(this.#mapData.lightVector[1]) > 0.999 ? new Vector2D3D(0, 0, -1) : new Vector2D3D(0, 1, 0), // Up Vector. Swap with alternative up vector when light vector comes close to vertical
-        );
+        this.#updateHalfGroundExtents();
 
-        // UPDATE LIGHT PROJECTION
-        mat4_ortho(this.#lightProjection, -this.#camera.zoom / 2, this.#camera.zoom / 2, -this.#camera.zoom / 2, this.#camera.zoom / 2, -600, 800);
-        // near plane is negative because light position is (0,0,0)
-        // near and far plane distance is small if light is stright down. needs to be larger distance if light is as dramatic angle.
-        // bounds of this light change based on camera's zoom level. FIX
+        // Update lightView and lightProjection
+        const yMin = -this.#mapData.style.platformHeight; // top of the ground
+        const yMax = Math.max(this.#mapData.style.wallHeight, player.y + 32, 0); // top of walls or top of player, whichever is higher on y axis
+        this.#updateLightMatrices(yMin, yMax);
 
-        // UPDATE PROJECTION
+        // UPDATE CAMERA PROJECTION
+        // Military Orthographic projection for a 45° top-down camera.
+
+        // The longer screen side always shows exactly `zoom` world units.
+        // The shorter side shows zoom * (shorterSide / longerSide) world units.
+
+        // X bounds are always in world units, so no extra scaling is needed.
+        // Y bounds are in view space. The camera is pitched 45°, so a ground
+        // distance along z appears shortened by 1/√2. Dividing the bounds by √2
+        // converts world-z units to view units, so the ground is not stretched.
         mat4_ortho(
             this.#projection, // array to write to / update
-
-            // Military projection
-            // Horizontal bounds are stretched by √2
-            // This "squashes" the view horizontally when it tries to fit into a viewport that is NOT scaled by √2
-            // the larger dimension of the screen (either width or height) will always be used as the dimension
-            // that is equal to camera.zoom. The smaller dimmension will vary and be squished for military projection
-
-            // when in portrait (height is GREATER than width) width needs to HAVE squashing
-            // in portrait mode: height should be sqashed down to account for the 45deg angle of the camera showing more than we want
-
             // WIDTH
-            -this.#camera.zoom * 0.5 * (screenHeight > screenWidth ? this.#aspectRatio : 1),
-            this.#camera.zoom * 0.5 * (screenHeight > screenWidth ? this.#aspectRatio : 1),
-
-            // when in landcape (height is LESS than width) height needs to HAVE squashing
+            -this.#halfX,
+            this.#halfX,
             // HEIGHT
-            (-this.#camera.zoom * 0.5) / (screenHeight < screenWidth ? this.#aspectRatio * Math.SQRT2 : 1 * Math.SQRT2),
-            (this.#camera.zoom * 0.5) / (screenHeight < screenWidth ? this.#aspectRatio * Math.SQRT2 : 1 * Math.SQRT2),
-
-            // Because the camera isnt looking straight down at the map (despite what military projection might look like)
-            // The VERTICAL bounds of -camera.zoom to +camera.zoom will not map directly to world coodinates. Horizontal will though.
-            // So having zoom be equal to how much of the world is visible only works on the horizontal axis unless
-            // you took into account the 45deg angle of the camera by multipling zoom by sqrt of 2
-
-            -2000,
-            2000,
+            -this.#halfZ / Math.SQRT2,
+            this.#halfZ / Math.SQRT2,
+            // these near and far planes should be calculated intentionaly. Fix
+            -500,
+            500,
         );
 
         // UPDATE VIEW
@@ -918,18 +980,15 @@ class Renderer {
             new Vector2D3D(0, 1, 0), // Up
         );
 
-        this.#updateAndUploadPlayerInstance(player);
+        this.#updatePlayerInstanceArraysAndBuffers(player);
 
         this.#globalScope(() => {
             // Shadow pass (to shadow map)
-            this.#fbo.use(() => {
-                this.#regl.clear({ color: [1, 1, 1, 1], depth: 1 });
-                this.#drawInstancedBoxesDepth();
-            });
+            this.#regl.clear({ framebuffer: this.#shadowFrameBufferObject, depth: 1 });
+            this.#drawInstancedBoxesDepth();
 
             // Color pass (main scene with shadows)
-            this.#regl.clear({ color: [1, 0, 0, 1], depth: 1 }); // use bg color here. this allocates every frame. fix
-
+            this.#regl.clear({ color: this.#mapData.backgroundColor, depth: 1 }); // use this.#mapData.backgroundColor color here. this allocates every frame. fix
             this.#drawInstancedBoxes();
         });
     }
@@ -944,6 +1003,15 @@ class Renderer {
             this.#mapData.rotationBuffer.destroy();
             this.#mapData.instanceTypeBuffer.destroy();
             this.#mapData = null;
+
+            this.#shadowFrameBufferObject.destroy();
+            this.#shadowFrameBufferObject = null;
+            this.#shadowMap.destroy();
+            this.#shadowMap = null;
+            this.#positionBuffer.destroy();
+            this.#positionBuffer = null;
+            this.#normalBuffer.destroy();
+            this.#normalBuffer = null;
         }
 
         this.#initialized = false;
