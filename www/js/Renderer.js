@@ -25,6 +25,12 @@ function getLightVector(lightDirectionDeg, lightAngleDeg) {
     return [x, y, z];
 }
 
+// Fixed 45deg military orthographic camera
+const CAMERA_EYE_HEIGHT = 10;
+const CAMERA_EYE_Z_OFFSET = 10;
+const GROUND_VIEW_SAFETY_MARGIN = 2; // world units
+const PLAYER_SIZE = 32;
+
 class Renderer {
     #canvas = null;
     #aspectRatio = null;
@@ -56,85 +62,11 @@ class Renderer {
     #positionBuffer = null;
     #normalBuffer = null;
 
-    #boxVertexPosition = [
-        // side faces
-        [-0.5, +0.5, +0.5],
-        [+0.5, +0.5, +0.5],
-        [+0.5, -0.5, +0.5],
-        [-0.5, -0.5, +0.5], // positive z face.
-        [+0.5, +0.5, +0.5],
-        [+0.5, +0.5, -0.5],
-        [+0.5, -0.5, -0.5],
-        [+0.5, -0.5, +0.5], // positive x face
-        [+0.5, +0.5, -0.5],
-        [-0.5, +0.5, -0.5],
-        [-0.5, -0.5, -0.5],
-        [+0.5, -0.5, -0.5], // negative z face
-        [-0.5, +0.5, -0.5],
-        [-0.5, +0.5, +0.5],
-        [-0.5, -0.5, +0.5],
-        [-0.5, -0.5, -0.5], // negative x face.
-        [-0.5, +0.5, -0.5],
-        [+0.5, +0.5, -0.5],
-        [+0.5, +0.5, +0.5],
-        [-0.5, +0.5, +0.5], // top face
-        [-0.5, -0.5, -0.5],
-        [+0.5, -0.5, -0.5],
-        [+0.5, -0.5, +0.5],
-        [-0.5, -0.5, +0.5], // bottom face
-    ];
-
-    #boxElements = [
-        [2, 1, 0],
-        [2, 0, 3],
-        [6, 5, 4],
-        [6, 4, 7],
-        [10, 9, 8],
-        [10, 8, 11],
-        [14, 13, 12],
-        [14, 12, 15],
-        [18, 17, 16],
-        [18, 16, 19],
-        [20, 21, 22],
-        [23, 20, 22],
-    ];
-
-    #boxVertexNormal = [
-        // side faces
-        [0.0, 0.0, +1.0],
-        [0.0, 0.0, +1.0],
-        [0.0, 0.0, +1.0],
-        [0.0, 0.0, +1.0],
-        [+1.0, 0.0, 0.0],
-        [+1.0, 0.0, 0.0],
-        [+1.0, 0.0, 0.0],
-        [+1.0, 0.0, 0.0],
-        [0.0, 0.0, -1.0],
-        [0.0, 0.0, -1.0],
-        [0.0, 0.0, -1.0],
-        [0.0, 0.0, -1.0],
-        [-1.0, 0.0, 0.0],
-        [-1.0, 0.0, 0.0],
-        [-1.0, 0.0, 0.0],
-        [-1.0, 0.0, 0.0],
-        // top
-        [0.0, +1.0, 0.0],
-        [0.0, +1.0, 0.0],
-        [0.0, +1.0, 0.0],
-        [0.0, +1.0, 0.0],
-        // bottom
-        [0.0, -1.0, 0.0],
-        [0.0, -1.0, 0.0],
-        [0.0, -1.0, 0.0],
-        [0.0, -1.0, 0.0],
-    ];
-
     #mapData = null;
 
-    // This call encapsulates the common state between `drawNormal` and `drawDepth`
-    #globalScope = null;
-    #drawInstancedBoxesDepth = null;
-    #drawInstancedBoxes = null;
+    #globalScope = null; // This command encapsulates the common state between drawNormal and drawDepth
+    #drawInstancedCubesDepth = null;
+    #drawInstancedCubes = null;
 
     constructor(targetCanvas) {
         this.#canvas = targetCanvas;
@@ -158,12 +90,12 @@ class Renderer {
 
         // set up geometry buffers
         this.#positionBuffer = this.#regl.buffer({
-            data: this.#boxVertexPosition,
+            data: cubeVertexPosition,
             type: "float32",
         });
 
         this.#normalBuffer = this.#regl.buffer({
-            data: this.#boxVertexNormal,
+            data: cubeVertexNormal,
             type: "float32", // maybe not float?
         });
 
@@ -189,18 +121,17 @@ class Renderer {
         this.#initialized = true;
     }
 
-    #destroyMapDataBuffers() {
+    #destroyMapDataResources() {
         if (!this.#mapData) return;
 
-        console.log("[Renderer] Destroying existing mapData buffers and keys");
-        try {
-            this.#mapData.translateBuffer.destroy();
-            this.#mapData.scaleBuffer.destroy();
-            this.#mapData.rotationBuffer.destroy();
-            this.#mapData.instanceTypeBuffer.destroy();
-        } catch {
-            console.log("error deleting mapData buffers");
-        }
+        this.#globalScope?.destroy();
+
+        this.#mapData.translateBuffer.destroy();
+        this.#mapData.scaleBuffer.destroy();
+        this.#mapData.rotationBuffer.destroy();
+        this.#mapData.instanceTypeBuffer.destroy();
+
+        // There are more buffers to destroy here I think FIX
 
         this.#mapData = null; // gets rid of all color properties and lightvector
     }
@@ -350,9 +281,9 @@ class Renderer {
         // Add static player data (scale and instance type)
         const playerIndex = this.#mapData.playerIndex;
         const playerIndexTimes3 = playerIndex * 3;
-        this.#mapData.scaleData[playerIndexTimes3] = 32;
-        this.#mapData.scaleData[playerIndexTimes3 + 1] = 32;
-        this.#mapData.scaleData[playerIndexTimes3 + 2] = 32;
+        this.#mapData.scaleData[playerIndexTimes3] = PLAYER_SIZE;
+        this.#mapData.scaleData[playerIndexTimes3 + 1] = PLAYER_SIZE;
+        this.#mapData.scaleData[playerIndexTimes3 + 2] = PLAYER_SIZE;
         this.#mapData.instanceTypeData[playerIndex] = 4;
     }
 
@@ -381,7 +312,7 @@ class Renderer {
 
         // Update CPU Side Data
         this.#mapData.translateData[playerIndexTimes3] = player.x;
-        this.#mapData.translateData[playerIndexTimes3 + 1] = player.y + 16; // 16 is half of player
+        this.#mapData.translateData[playerIndexTimes3 + 1] = player.y + PLAYER_SIZE / 2;
         this.#mapData.translateData[playerIndexTimes3 + 2] = player.z;
         this.#mapData.rotationData[playerIndex] = -player.angleRad;
 
@@ -389,6 +320,34 @@ class Renderer {
         // .subdata(data, byteOffset) copies data from the CPU arrays into the GPU buffer starting at byteOffset.
         this.#mapData.translateBuffer.subdata(this.#mapData.translateData.subarray(playerIndexTimes3, playerIndexTimes3 + 3), playerIndexTimes3 * 4); // 4 because each float is 4 bytes
         this.#mapData.rotationBuffer.subdata(this.#mapData.rotationData.subarray(playerIndex, playerIndex + 1), playerIndex * 4);
+    }
+
+    // called to keep ground in camera's view
+    #syncGroundInstanceArraysAndBuffersWithCamera(style) {
+        const mapData = this.#mapData;
+        const index = mapData.groundIndex;
+        const indexTimes3 = index * 3;
+
+        const groundTopY = -style.platformHeight;
+
+        // Small extra margin around camera's view for safety.
+        const scaleX = 2 * (this.#halfX + GROUND_VIEW_SAFETY_MARGIN);
+        const scaleZ = 2 * (this.#halfZ + GROUND_VIEW_SAFETY_MARGIN);
+
+        // Update CPU Side Data Arrays
+        // Ground cube's top should sit at groundTopY
+        mapData.translateData[indexTimes3] = this.#camera.x;
+        mapData.translateData[indexTimes3 + 1] = groundTopY - 0.5; // 0.5 to get top of the cube at groundTopY
+        mapData.translateData[indexTimes3 + 2] = this.#camera.z + groundTopY; // 45deg view means ground needs to be shifted
+
+        mapData.scaleData[indexTimes3] = scaleX;
+        // skip y scale -- it doesnt change
+        mapData.scaleData[indexTimes3 + 2] = scaleZ;
+
+        // Upload to GPU buffers
+        // .subdata(data, byteOffset) copies data from the CPU arrays into the GPU buffer starting at byteOffset.
+        mapData.translateBuffer.subdata(mapData.translateData.subarray(indexTimes3, indexTimes3 + 3), indexTimes3 * 4); // 4 because each float is 4 bytes
+        mapData.scaleBuffer.subdata(mapData.scaleData.subarray(indexTimes3, indexTimes3 + 3), indexTimes3 * 4);
     }
 
     #updateMapStyle(style) {
@@ -506,6 +465,41 @@ class Renderer {
         this.#shadowDepthBias = (texel * 0.5) / (far - near); // depth is linear in ortho projection
     }
 
+    #updateCameraProjection(yBottom, yTop) {
+        // UPDATE CAMERA PROJECTION
+        // Make sure this.#updateHalfGroundExtents has already been called this frame
+
+        const marginHalfZ = this.#halfZ + GROUND_VIEW_SAFETY_MARGIN;
+        const depthOffset = CAMERA_EYE_HEIGHT + CAMERA_EYE_Z_OFFSET; // 20
+
+        // View-space depth extremes over the visible world slab
+        const minViewZ = (2 * yBottom - marginHalfZ - depthOffset) * Math.SQRT1_2;
+        const maxViewZ = (2 * yTop + marginHalfZ - depthOffset) * Math.SQRT1_2;
+
+        const near = -maxViewZ - GROUND_VIEW_SAFETY_MARGIN;
+        const far = -minViewZ - GROUND_VIEW_SAFETY_MARGIN;
+
+        // Military Orthographic projection for a 45° top-down camera.
+        // The longer screen side always shows exactly `zoom` world units.
+        // The shorter side shows zoom * (shorterSide / longerSide) world units.
+        // X bounds are always in world units, so no extra scaling is needed.
+        // Y bounds are in view space. The camera is pitched 45°, so a ground
+        // distance along z appears shortened by 1/√2. Dividing the bounds by √2
+        // converts world-z units to view units, so the ground is not stretched.
+        mat4_ortho(
+            this.#projection, // array to write to / update
+            // WIDTH
+            -this.#halfX,
+            this.#halfX,
+            // HEIGHT
+            -this.#halfZ / Math.SQRT2,
+            this.#halfZ / Math.SQRT2,
+            // these near and far planes should be calculated intentionaly. Fix
+            near,
+            far,
+        );
+    }
+
     setEditorMode(enabled) {
         // In editor mode instance matrices are flagged as frequently updated, and instance buffers get spare capacity.
         // Takes effect for instance meshes created from now on, so call it before setMapData.
@@ -515,7 +509,7 @@ class Renderer {
     setMapData(mapDataObject) {
         // parses platform and style data from mapDataObject in this.#mapData
 
-        this.#destroyMapDataBuffers();
+        this.#destroyMapDataResources();
 
         const style = mapDataObject.style;
         const platformCount = mapDataObject.platforms.length;
@@ -579,7 +573,7 @@ class Renderer {
             },
         });
 
-        this.#drawInstancedBoxesDepth = this.#regl({
+        this.#drawInstancedCubesDepth = this.#regl({
             attributes: {
                 position: {
                     buffer: this.#positionBuffer,
@@ -603,7 +597,7 @@ class Renderer {
                 },
             },
 
-            elements: this.#boxElements,
+            elements: cubeElements,
 
             framebuffer: this.#shadowFrameBufferObject,
 
@@ -660,7 +654,7 @@ class Renderer {
             `,
         });
 
-        this.#drawInstancedBoxes = this.#regl({
+        this.#drawInstancedCubes = this.#regl({
             attributes: {
                 position: {
                     buffer: this.#positionBuffer,
@@ -709,7 +703,7 @@ class Renderer {
                 wallTopColor: () => this.#mapData.wallTopColor,
             },
 
-            elements: this.#boxElements,
+            elements: cubeElements,
 
             instances: this.#mapData.instanceCount,
 
@@ -908,14 +902,6 @@ class Renderer {
             }
         }
 
-        if (heightsChanged) {
-            // Changing platform height also moves the ground cubes y position
-            if (this.#updateGroundInstanceArrays(mapDataObject.style)) {
-                firstChanged = Math.min(firstChanged, this.#mapData.groundIndex);
-                lastChanged = this.#mapData.groundIndex;
-            }
-        }
-
         if (lastChanged >= firstChanged) {
             // only update a specific range within the GPU buffers, no need to rewrite them all
             this.#updateInstanceBuffersWithinRange(firstChanged, lastChanged + 1);
@@ -943,39 +929,19 @@ class Renderer {
     drawFrame(player) {
         this.#updateHalfGroundExtents();
 
+        this.#syncGroundInstanceArraysAndBuffersWithCamera(this.#mapData.style);
+
         // Update lightView and lightProjection
         const yMin = -this.#mapData.style.platformHeight; // top of the ground
-        const yMax = Math.max(this.#mapData.style.wallHeight, player.y + 32, 0); // top of walls or top of player, whichever is higher on y axis
+        const yMax = Math.max(this.#mapData.style.wallHeight, player.y + PLAYER_SIZE, 0); // top of walls or top of player, whichever is higher on y axis
         this.#updateLightMatrices(yMin, yMax);
-
-        // UPDATE CAMERA PROJECTION
-        // Military Orthographic projection for a 45° top-down camera.
-
-        // The longer screen side always shows exactly `zoom` world units.
-        // The shorter side shows zoom * (shorterSide / longerSide) world units.
-
-        // X bounds are always in world units, so no extra scaling is needed.
-        // Y bounds are in view space. The camera is pitched 45°, so a ground
-        // distance along z appears shortened by 1/√2. Dividing the bounds by √2
-        // converts world-z units to view units, so the ground is not stretched.
-        mat4_ortho(
-            this.#projection, // array to write to / update
-            // WIDTH
-            -this.#halfX,
-            this.#halfX,
-            // HEIGHT
-            -this.#halfZ / Math.SQRT2,
-            this.#halfZ / Math.SQRT2,
-            // these near and far planes should be calculated intentionaly. Fix
-            -500,
-            500,
-        );
+        this.#updateCameraProjection(yMin, yMax); // could do yMin - 1 to include ground cubes bottom
 
         // UPDATE VIEW
         mat4_lookAt(
             this.#view,
             // Camera looks down at 45deg angle
-            new Vector2D3D(this.#camera.x, 10, this.#camera.z + 10), // eye (camera position)
+            new Vector2D3D(this.#camera.x, CAMERA_EYE_HEIGHT, this.#camera.z + CAMERA_EYE_Z_OFFSET), // eye (camera position)
             new Vector2D3D(this.#camera.x, 0, this.#camera.z), // center (look at)
             new Vector2D3D(0, 1, 0), // Up
         );
@@ -985,11 +951,11 @@ class Renderer {
         this.#globalScope(() => {
             // Shadow pass (to shadow map)
             this.#regl.clear({ framebuffer: this.#shadowFrameBufferObject, depth: 1 });
-            this.#drawInstancedBoxesDepth();
+            this.#drawInstancedCubesDepth();
 
             // Color pass (main scene with shadows)
             this.#regl.clear({ color: this.#mapData.backgroundColor, depth: 1 }); // use this.#mapData.backgroundColor color here. this allocates every frame. fix
-            this.#drawInstancedBoxes();
+            this.#drawInstancedCubes();
         });
     }
 
