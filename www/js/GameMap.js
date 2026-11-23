@@ -236,7 +236,7 @@ const GameMap = {
                     }
 
                     // toSorted() isnt supported by old safari
-                    let playerCornersSorted = [...Player.playerPoligon];
+                    let playerCornersSorted = [...Player.playerPolygon];
                     playerCornersSorted.sort(sortCornersX);
 
                     // NEW TEST FOR WHETHER OR NOT TO ADD WALL PLATFORM TO CLIP
@@ -302,7 +302,7 @@ const GameMap = {
         let litPercentTop; // init here so that background and others can use
 
         // LOOPING THROUGH EACH PLATFORM
-        // SETTING : Shaded colors and shadow poligon
+        // SETTING : Shaded colors and shadow polygon
         for (const platform of mapData.platforms) {
             let colorToUse1 = mapData.style.platformTopColor;
             let colorToUse2 = mapData.style.platformSideColor;
@@ -410,17 +410,9 @@ const GameMap = {
         // THESE ALL NEED TO USE 3D Normal Vectors for calculations
         mapData.style.shaded_backgroundColor = getShadedColor(mapData.style.backgroundColor, litPercentTop, mapData.style);
 
-        mapData.style.shadow_platformColor = getShadedColor(
-            mapData.style.platformTopColor,
-            Math.max(0, litPercentTop - 0.7),
-            mapData.style,
-        ); // shadow brightness can be between 0 and 0.3
+        mapData.style.shadow_platformColor = getShadedColor(mapData.style.platformTopColor, Math.max(0, litPercentTop - 0.7), mapData.style); // shadow brightness can be between 0 and 0.3
         mapData.style.shadow_endzoneColor = getShadedColor(mapData.style.endZoneTopColor, Math.max(0, litPercentTop - 0.7), mapData.style);
-        mapData.style.shadow_backgroundColor = getShadedColor(
-            mapData.style.backgroundColor,
-            Math.max(0, litPercentTop - 0.7),
-            mapData.style,
-        );
+        mapData.style.shadow_backgroundColor = getShadedColor(mapData.style.backgroundColor, Math.max(0, litPercentTop - 0.7), mapData.style);
     },
 
     renderPlatform: function (ctx, mapData, platform) {

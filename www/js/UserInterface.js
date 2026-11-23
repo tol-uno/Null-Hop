@@ -596,7 +596,7 @@ const UserInterface = {
 
     touchStarted: function (x, y, id) {
         // Called By TouchHandler
-        // items that dont need interaction should have pointerevents:none in css so they dont block touches.
+        // items that dont need interaction should have pointer-events:none in css so they dont block touches.
 
         const hit = document.elementFromPoint(x, y);
         if (!hit) return;

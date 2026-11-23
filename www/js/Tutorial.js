@@ -12,6 +12,9 @@ const Tutorial = {
     ], // 1st number is target angle, 2nd is targets health
     pausePlayer: false,
 
+    pendingTouchListener: null, // keeps track of listeners for cleanup
+    pendingTouchTimeout: null, // keeps track of the delay timer for cleanup
+
     reset: function () {
         // called on restart and when leaving level
         this.state = 0;
@@ -26,14 +29,45 @@ const Tutorial = {
         this.pausePlayer = false;
 
         ui_tutorialTextWrapper.domReference?.style.removeProperty("top");
+
+        this.cancelPendingTouchListener();
+    },
+
+    cancelPendingTouchListener: function () {
+        if (this.pendingTouchTimeout) {
+            clearTimeout(this.pendingTouchTimeout);
+            this.pendingTouchTimeout = null;
+        }
+
+        if (this.pendingTouchListener) {
+            document.removeEventListener("touchstart", this.pendingTouchListener);
+            this.pendingTouchListener = null;
+        }
+    },
+
+    waitForTouchThenSetState: function (nextState) {
+        this.cancelPendingTouchListener();
+
+        // There is a 200ms delay before user can start a new swipe to progress
+        this.pendingTouchTimeout = setTimeout(() => {
+            this.pendingTouchTimeout = null;
+
+            const handler = () => this.setState(nextState); // function to run when the event is detected
+            this.pendingTouchListener = handler;
+            document.addEventListener("touchstart", handler, { once: true });
+        }, 250);
     },
 
     setState: function (newState) {
+        this.cancelPendingTouchListener();
+
         this.state = newState;
 
         switch (newState) {
             case 1: {
-                UserInterface.switchToUiGroup(new Set([btn_mainMenu, ui_tutorialTextWrapper, ui_swipeHorizontal, ui_strafeHelper, ui_warningContainer]));
+                UserInterface.switchToUiGroup(
+                    new Set([btn_mainMenu, ui_tutorialTextWrapper, ui_swipeHorizontal, ui_strafeHelper, ui_warningContainer]),
+                );
                 // ui_tutorialTextWrapper adds btn_next and ui_tutorialText
                 ui_tutorialText.domReference.textContent = "Slide horizontally to turn the player";
                 break;
@@ -112,13 +146,8 @@ const Tutorial = {
                 UserInterface.addUiElement(ui_swipeHorizontal);
                 ui_swipeHorizontal.domReference.classList.add("zero-opacity");
 
-                document.addEventListener(
-                    "touchstart",
-                    () => {
-                        this.setState(9);
-                    },
-                    { once: true },
-                );
+                this.waitForTouchThenSetState(9);
+
                 break;
             }
 
@@ -146,13 +175,7 @@ const Tutorial = {
 
                 UserInterface.removeUiElement(ui_speedometer);
 
-                document.addEventListener(
-                    "touchstart",
-                    () => {
-                        this.setState(11);
-                    },
-                    { once: true },
-                );
+                this.waitForTouchThenSetState(11);
 
                 break;
             }
@@ -170,13 +193,8 @@ const Tutorial = {
 
                 UserInterface.removeUiElement(ui_speedometer);
 
-                document.addEventListener(
-                    "touchstart",
-                    () => {
-                        this.setState(13);
-                    },
-                    { once: true },
-                );
+                this.waitForTouchThenSetState(13);
+
                 break;
             }
 
@@ -193,13 +211,8 @@ const Tutorial = {
 
                 UserInterface.removeUiElement(ui_speedometer);
 
-                document.addEventListener(
-                    "touchstart",
-                    () => {
-                        this.setState(15);
-                    },
-                    { once: true },
-                );
+                this.waitForTouchThenSetState(15);
+
                 break;
             }
 
@@ -216,13 +229,8 @@ const Tutorial = {
 
                 UserInterface.removeUiElement(ui_speedometer);
 
-                document.addEventListener(
-                    "touchstart",
-                    () => {
-                        this.setState(17);
-                    },
-                    { once: true },
-                );
+                this.waitForTouchThenSetState(17);
+
                 break;
             }
 
@@ -309,7 +317,7 @@ const Tutorial = {
                 this.targets.shift();
 
                 if (this.targets.length == 0) {
-                // if (this.targets.length < 6) { // uncomment this to bypass target practice
+                    // if (this.targets.length < 6) { // uncomment this to bypass target practice
                     this.setState(5); // skips state 4 (it was removed)
                     return;
                 }

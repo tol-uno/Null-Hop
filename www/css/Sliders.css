@@ -20,6 +20,7 @@
 }
 
 .handle {
+    pointer-events: auto;
     position: absolute;
     height: 3.1vw;
     width: 3.1vw;

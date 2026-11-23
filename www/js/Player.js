@@ -23,7 +23,7 @@ const Player = {
     loopedAngle: null,
     angleRad: null,
 
-    playerPoligon: null, // similar to shadow corners but used for collision checks with platforms and walls (32x32)
+    playerPolygon: null, // similar to shadow corners but used for collision checks with platforms and walls (32x32)
 
     shadowCorners: null, // need to expose here so that this.drawPlayerShadow() can use. (30x30)
     // set in Player.update because GameMap needs it before Player in the rendering pipeline.
@@ -41,8 +41,8 @@ const Player = {
         this.angleRad = (angle * Math.PI) / 180;
 
         // set here so that PreviewWindow can render player without calling Player.update()
-        this.playerPoligon = createPoligon(this.x, this.y, 32, 32, this.angleRad);
-        this.shadowCorners = createPoligon(this.x, this.y, 30, 30, this.angleRad); // 30x30 instead of 32x32
+        this.playerPolygon = createPolygon(this.x, this.y, 32, 32, this.angleRad);
+        this.shadowCorners = createPolygon(this.x, this.y, 30, 30, this.angleRad); // 30x30 instead of 32x32
 
         this.topNormal = new Vector2D3D(0, 0, -1);
         this.botSideNormal = new Vector2D3D(0, 1, 0).rotate(angle);
@@ -95,11 +95,11 @@ const Player = {
             }
         };
 
-        const updatePlayerPoligon = () => {
+        const updatePlayerPolygon = () => {
             // arrow function so that "this" can be used to refer to Player
             // needs to be called at different times depending on levelState
             // FIX this should use a single shadowPolygon instance of Polygon and just update it every frame as opposed to creating new ones
-            this.playerPoligon = createPoligon(this.x, this.y, 32, 32, this.angleRad);
+            this.playerPolygon = createPolygon(this.x, this.y, 32, 32, this.angleRad);
         };
 
         const updatePlayerVelocity = () => {
@@ -246,16 +246,18 @@ const Player = {
                 UserInterface.levelState = 1;
                 Player.checkpointIndex = -1;
                 Player.restart();
-                if (Tutorial.isActive) {Tutorial.handleNoCpRestart()} // tutorial needs buttons added back
+                if (Tutorial.isActive) {
+                    Tutorial.handleNoCpRestart();
+                } // tutorial needs buttons added back
             }
-            updatePlayerPoligon();
+            updatePlayerPolygon();
         };
 
         // 1 = pre-start, 2 = playing level, 3 = in endzone
 
         if (UserInterface.levelState == 1) {
             updatePlayerRotationFromTouch();
-            updatePlayerPoligon();
+            updatePlayerPolygon();
         } else if (UserInterface.levelState == 2) {
             updatePlayerRotationFromTouch();
             updatePlayerVelocity(); // doesnt apply velocity to position yet
@@ -376,7 +378,7 @@ const Player = {
             }
 
             updatePlayerPosition();
-            updatePlayerPoligon(); // update here so that checkCollisions can use it for platforms and endzone.
+            updatePlayerPolygon(); // update here so that checkCollisions can use it for platforms and endzone.
             // for use in wall z-depth testing by GameMap and this.checkCollisions
             // updated again if player is hitting water and teleports
 
@@ -389,7 +391,7 @@ const Player = {
                     // Hit water
                     AudioHandler.playAudio(AudioHandler.splashBuffer, { volume: 0.4 });
                     this.speedCameraOffset.zoomAverager.clear();
-                    teleportPlayer(); // takes care of changing player angle and updating playerPoligon
+                    teleportPlayer(); // takes care of changing player angle and updating playerPolygon
                 } else {
                     // Landed on platform
                     this.jumpVelocity = 200;
@@ -490,7 +492,7 @@ const Player = {
             this.x += this.velocity.x * dt * this.endSlow; // MOVE FORWARD AT ANGLE BASED ON VELOCITY
             this.y += this.velocity.y * dt * this.endSlow;
 
-            updatePlayerPoligon();
+            updatePlayerPolygon();
 
             if (this.jumpValue < 0) {
                 // JUMPING without checking collision
@@ -519,7 +521,7 @@ const Player = {
 
         // Update shadowCorners here for use by GameMap to render Player lower shadow
         // FIX this should use a single shadowPolygon instance of Polygon and just update it every frame as opposed to creating new ones
-        this.shadowCorners = createPoligon(this.x, this.y, 30, 30, this.angleRad); // 30x30 instead of 32x32
+        this.shadowCorners = createPolygon(this.x, this.y, 30, 30, this.angleRad); // 30x30 instead of 32x32
     },
 
     startLevel: function () {
@@ -530,12 +532,12 @@ const Player = {
     checkCollision: function (arrayOfPlatformsToCheck) {
         for (const platform of arrayOfPlatformsToCheck) {
             // once parsemap gives these corners in global coordinates this will no longer be needed
-            const platformPoligon = platform.corners.map(([x, y]) => ({
+            const platformPolygon = platform.corners.map(([x, y]) => ({
                 x: platform.x + x,
                 y: platform.y + y,
             }));
 
-            if (doPolygonsIntersect(this.playerPoligon, platformPoligon)) {
+            if (doPolygonsIntersect(this.playerPolygon, platformPolygon)) {
                 return true; // breaks out of loop once at least one collision is detected
             }
         }
@@ -631,7 +633,7 @@ const Player = {
         // creates array of point objects: [ {x:1,y:1}, {x:2,y:2} ]
         // topLeft, topRight, bottomRight, bottomLeft -- when Player.angle == 0 (looking right)
         // shadowCorners is set in Player.update because GameMap needs it to render player lower shadow before Player is rendered
-        const lowerCorners = this.playerPoligon.map((point) => ({ x: point.x, y: point.y - this.jumpValue }));
+        const lowerCorners = this.playerPolygon.map((point) => ({ x: point.x, y: point.y - this.jumpValue }));
         const upperCorners = lowerCorners.map((point) => ({ x: point.x, y: point.y - 32 }));
 
         if (this.mapData == PreviewWindow) {

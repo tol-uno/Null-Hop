@@ -382,7 +382,7 @@ const MapEditor = {
                 );
 
                 // takes a rectangle defined by center coordinates (x, y), width, height, and angle in radians
-                const marqueePolygon = createPoligon(
+                const marqueePolygon = createPolygon(
                     (globalMarqueeCornerTL.x + globalMarqueeCornerBR.x) / 2,
                     (globalMarqueeCornerTL.y + globalMarqueeCornerBR.y) / 2,
                     globalMarqueeCornerBR.x - globalMarqueeCornerTL.x,
@@ -394,9 +394,9 @@ const MapEditor = {
 
                 // Looping PLAFORMS to check if in marquee
                 this.renderedPlatforms.forEach((platform) => {
-                    const platformPoligon = createPoligon(platform.x, platform.y, platform.width, platform.height, platform.angleRad);
+                    const platformPolygon = createPolygon(platform.x, platform.y, platform.width, platform.height, platform.angleRad);
 
-                    if (doPolygonsIntersect(marqueePolygon, platformPoligon)) {
+                    if (doPolygonsIntersect(marqueePolygon, platformPolygon)) {
                         // add platform to marqueeSelectedElements. concat is used for selectedElements array -- i dont remember why
                         this.marqueeSelectedElements = this.marqueeSelectedElements.concat(MapEditor.loadedMap.platforms.indexOf(platform));
                     }
@@ -422,9 +422,9 @@ const MapEditor = {
                         y: checkpoint.y,
                     };
 
-                    const checkpointPoligon = [trigger1, trigger2, respawn];
+                    const checkpointPolygon = [trigger1, trigger2, respawn];
 
-                    if (doPolygonsIntersect(marqueePolygon, checkpointPoligon)) {
+                    if (doPolygonsIntersect(marqueePolygon, checkpointPolygon)) {
                         // add each part of checkpoint to marqueeSelectedElements
                         this.marqueeSelectedElements = this.marqueeSelectedElements.concat([new Array(checkpointIndex, 1)]);
                         this.marqueeSelectedElements = this.marqueeSelectedElements.concat([new Array(checkpointIndex, 2)]);
@@ -434,9 +434,9 @@ const MapEditor = {
 
                 // Check if playerStart is in marquee
                 const playerStart = this.loadedMap.playerStart;
-                const playerStartPoligon = createPoligon(playerStart.x, playerStart.y, 32, 32, (playerStart.angle * Math.PI) / 180);
+                const playerStartPolygon = createPolygon(playerStart.x, playerStart.y, 32, 32, (playerStart.angle * Math.PI) / 180);
 
-                if (doPolygonsIntersect(marqueePolygon, playerStartPoligon)) {
+                if (doPolygonsIntersect(marqueePolygon, playerStartPolygon)) {
                     // add playerStart to marqueeSelectedElements
                     this.marqueeSelectedElements = this.marqueeSelectedElements.concat("playerStart");
                 }

@@ -110,6 +110,7 @@
     width: 38vw;
     height: 7vw;
     transform: translateX(-50%);
+    pointer-events: auto;
     touch-action: manipulation; /* allow native touch events */
 }
 

@@ -20,6 +20,9 @@
     touch-action-delay: none;
     user-select: none;
     box-sizing: border-box;
+    pointer-events: none;
+    /* pointer-events sets whether an element can become the target of pointer events. 
+    All buttons, slider handles, and toggles have pointer events RE-ENABLED */
 }
 
 @font-face {

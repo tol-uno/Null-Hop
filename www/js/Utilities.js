@@ -201,7 +201,7 @@ function parseComponentIntoDomElement(strings, ...values) {
 // takes a rectangle defined by center coordinates (x, y), width, height, and angle in radians
 // returns an array of global corner points in clockwise order, starting from the top-left corner
 // [{x:1,y:1}, {x:3,y:1}, {x:3,y:3}, {x:1,y:3}]
-function createPoligon(x, y, width, height, angle) {
+function createPolygon(x, y, width, height, angle) {
     // Calculate half width and half height
     var hw = width / 2;
     var hh = height / 2;
