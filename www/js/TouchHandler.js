@@ -159,7 +159,7 @@ const TouchHandler = {
         // document.body.addEventListener("touchstart", createDoubleTapPreventer(700), { passive: false });
 
         // this prevents all default touch events on everything except elements with the class "allow-native-touch"
-        document.body.addEventListener(
+        window.addEventListener(
             "touchstart",
             (e) => {
                 if (e.target.closest(".allow-native-touch")) return;

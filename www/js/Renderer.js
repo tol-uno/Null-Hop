@@ -124,8 +124,6 @@ class Renderer {
     #destroyMapDataResources() {
         if (!this.#mapData) return;
 
-        this.#globalScope?.destroy();
-
         this.#mapData.translateBuffer.destroy();
         this.#mapData.scaleBuffer.destroy();
         this.#mapData.rotationBuffer.destroy();
